@@ -1,0 +1,11 @@
+{
+  "name": "testCreateStreamExistingTopicNoConfig",
+  "spec": {
+    "kafka": {
+      "bootstrap.servers": "localhost:9092",
+      "topic": {
+      }
+    },
+    "kind": "KAFKA"
+  }
+}

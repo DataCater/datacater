@@ -1,0 +1,83 @@
+.datacater-pipeline-designer-pipeline-steps-list {
+  padding-left: 50px !important;
+
+  li {
+    border-radius: 50% !important;
+  }
+
+  .datacater-pipeline-designer-pipeline-steps-list-delete-zone {
+    background-color: #e8625e;
+    color: #fff;
+    height: calc(4rem + 2px);
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
+
+  .datacater-pipeline-designer-pipeline-steps-list-delete-zone.hovering {
+    background-color: #cc3a38;
+  }
+
+  ul.list-group {
+    height: 100%;
+    margin-right: 12px;
+  }
+
+  .list-group-item:not(:last-child) {
+    &:after {
+      content: "";
+      border-bottom: 1px solid #eaf6ec;
+      left: 2.5rem;
+      position: absolute;
+      top: 1.25rem;
+      width: 1rem;
+    }
+  }
+
+  .avatar {
+    width: 2.5rem;
+    height: 2.5rem;
+    font-size: 0.83333rem;
+    position: relative;
+    display: inline-block;
+
+    &:after {
+      content: "";
+      position: absolute;
+      width: 0;
+      height: 0;
+    }
+  }
+
+  .list-group-item {
+    background-color: #eaf6ec !important;
+
+    .avatar-title {
+      background-color: #eaf6ec !important;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-content: center;
+      justify-content: center;
+      text-align: center;
+      align-items: center;
+    }
+  }
+
+  .list-group-item.active-step {
+    background-color: #4fb35d !important;
+
+    .avatar-title {
+      background-color: #4fb35d !important;
+      color: #fff !important;
+    }
+  }
+
+  .list-group-item.dragged-step {
+    .avatar-title {
+      border: 1px dashed #4fb35d;
+      opacity: 0.7;
+    }
+  }
+}

@@ -1,0 +1,10 @@
+---
+name       : Equals value
+key        : duplicate
+description: Returns whether the attribute equals a specific value.
+license    : BSL
+website    : https://github.com/DataCater/datacater/filters/equal
+author     :
+  email: info@datacater.io
+  name: DataCater GmbH
+version    : 1.0.0

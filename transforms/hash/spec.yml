@@ -1,0 +1,20 @@
+---
+name       : Hash
+key        : hash
+config     :
+-   name: algorithm
+    label: Hash algorithm
+    options:
+    -   sha1
+    -   sha256
+    -   sha512
+    type: text
+description: Hash the attribute
+license    : Apache2
+website    : https://github.com/DataCater/datacater/transforms/hash
+author     :
+  email: info@datacater.io
+  name: DataCater GmbH
+labels     :
+  input-types: string
+version    : 1.0.0

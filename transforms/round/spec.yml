@@ -1,0 +1,16 @@
+---
+name       : Round with precision
+key        : round
+config     :
+-   name: precision
+    label: Precision
+    type: text
+description: Rounds the attribute with the given precision
+license    : Apache2
+website    : https://github.com/DataCater/datacater/transforms/round
+author     :
+  email: info@datacater.io
+  name: DataCater GmbH
+labels     :
+  input-types: [double, float]
+version    : 1.0.0

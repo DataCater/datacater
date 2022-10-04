@@ -1,0 +1,11 @@
+---
+name       : no-key
+description: Returns whether the attribute contains a provided substring.
+license    : BSL
+website    : https://github.com/DataCater/datacater/filters/contain
+author     :
+  email: info@datacater.io
+  name: DataCater GmbH
+labels     :
+  input-types: string
+version    : 1.0.0

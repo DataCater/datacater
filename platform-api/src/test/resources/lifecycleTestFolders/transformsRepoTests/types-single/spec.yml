@@ -1,0 +1,12 @@
+---
+name       : Divide by attribute
+key        : types-single
+description: Divides the attribute by another attribute
+license    : BSL
+website    : https://github.com/DataCater/datacater/transforms/divide-attribute
+author     :
+  email: info@datacater.io
+  name: DataCater GmbH
+labels     :
+  input-types: double
+version    : 1.0.0

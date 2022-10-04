@@ -1,0 +1,19 @@
+---
+name       : Truncate words
+key        : truncate-words
+config     :
+-   name: token
+    label: Token
+    type: text
+-   name: words
+    label: Words
+    type: text
+description: Truncate the attribute after the given number of words
+license    : Apache2
+website    : https://github.com/DataCater/datacater/transforms/truncate-words
+author     :
+  email: info@datacater.io
+  name: DataCater GmbH
+labels     :
+  input-types: string
+version    : 1.0.0

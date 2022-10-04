@@ -1,0 +1,16 @@
+{
+  "name": "streamTestWithRegistry",
+  "spec": {
+    "kafka": {
+      "bootstrap.servers": "localhost:9092",
+      "schema.registry.url": "http://localhost:8082/apis/ccompat/v6",
+      "value.deserializer": "io.datacater.core.serde.AvroDeserializer",
+      "key.deserializer": "io.datacater.core.serde.AvroDeserializer",
+      "topic": {
+        "config": {
+        }
+      }
+    },
+    "kind": "KAFKA"
+  }
+}

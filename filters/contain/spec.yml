@@ -1,0 +1,16 @@
+---
+name       : Contains substring
+key        : contain
+config     :
+-   name: value
+    label: Value
+    type: text
+description: Returns whether the attribute contains a provided substring.
+license    : Apache2
+website    : https://github.com/DataCater/datacater/filters/contain
+author     :
+  email: info@datacater.io
+  name: DataCater GmbH
+labels     :
+  input-types: string
+version    : 1.0.0

@@ -1,0 +1,5 @@
+# Enable auto-env through the sdkman_auto_env config
+# Add key=value pairs of SDKs to use below
+# @see https://sdkman.io/usage#env
+java=17.0.3-zulu
+quarkus=2.7.2.Final

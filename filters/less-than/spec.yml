@@ -1,0 +1,16 @@
+---
+name       : Less than value
+key        : less-than
+config     :
+-   name: value
+    label: Value
+    type: text
+description: Returns whether the attribute is less than a specific value.
+license    : Apache2
+website    : https://github.com/DataCater/datacater/filters/less-than
+author     :
+  email: info@datacater.io
+  name: DataCater GmbH
+labels     :
+  input-types: [int, long, float, double, date, time, timestamp]
+version    : 1.0.0

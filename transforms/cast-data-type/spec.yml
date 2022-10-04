@@ -1,0 +1,21 @@
+---
+name       : Cast data type
+key        : cast-data-type
+config     :
+-   name: toDataType
+    label: Data type
+    options:
+    -   boolean
+    -   double
+    -   float
+    -   int
+    -   long
+    -   string
+    type: text
+description: Casts the type of the column
+license    : Apache2
+website    : https://github.com/DataCater/datacater/transforms/cast-data-type
+author     :
+  email: info@datacater.io
+  name: DataCater GmbH
+version    : 1.0.0

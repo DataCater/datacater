@@ -1,0 +1,30 @@
+.datacater-code-editor {
+  border-color: #ccc !important;
+
+  .row {
+    border-color: #ccc !important;
+  }
+
+  .ace_editor {
+    font-family: "Roboto Mono", monospace;
+
+    .ace_active-line {
+      background-color: #fff !important;
+    }
+
+    .ace_fold-widget {
+      display: none;
+    }
+
+    .ace_gutter {
+      background-color: #fff;
+
+      .ace_gutter-layer {
+        .ace_gutter-cell {
+          background-color: #fff;
+          text-align: center;
+        }
+      }
+    }
+  }
+}

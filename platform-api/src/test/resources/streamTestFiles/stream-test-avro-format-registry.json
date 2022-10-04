@@ -1,0 +1,16 @@
+{
+  "name": "testAvroRegistry",
+  "spec": {
+    "kafka": {
+      "bootstrap.servers": "localhost:9092",
+      "value.deserializer": "io.datacater.core.serde.AvroDeserializer",
+      "key.deserializer": "io.datacater.core.serde.AvroDeserializer",
+      "schema.registry.url": "http://localhost:8081",
+      "topic": {
+        "config": {
+        }
+      }
+    },
+    "kind": "KAFKA"
+  }
+}

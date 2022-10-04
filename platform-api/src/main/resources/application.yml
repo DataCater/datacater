@@ -1,0 +1,200 @@
+---
+quarkus  :
+  application:
+    name: datacater
+    version: '2022.06'
+  datasource:
+    db-kind: postgresql
+    jdbc: false
+  log:
+    level: INFO
+  container-image:
+    group: datacater
+    name: ${quarkus.application.name}
+    tag: ${quarkus.application.version}
+    labels:
+      org.opencontainers.image.source: https://github.com/datacater/cloud-platform
+      org.opencontainers.image.description: DataCater - Modern, real-time ETL pipelines for data and dev teams
+  security:
+    users:
+      embedded:
+        enabled: true
+        plain-text: true
+        users:
+          admin: admin
+        roles:
+          admin: admin,dev,user
+  http:
+    cors: true
+    auth:
+      basic: true
+      proactive: false
+  native:
+    additional-build-args: --initialize-at-run-time=org.apache.kafka.common.security.authenticator.SaslClientAuthenticator
+  smallrye-openapi:
+    store-schema-directory: build/openapi
+    info-description:
+    info-terms-of-service:
+    info-contact-email: info@datacater.io
+    info-contact-name: DataCater API Support
+    info-contact-url: https://datacater.io/contact
+    info-license-name:
+    info-license-url: https://www.apache.org/licenses/LICENSE-2.0.html
+  hibernate-orm:
+    database:
+      generation: update
+  oidc:
+    enabled: false
+smallrye :
+  jwt:
+    sign:
+      key:
+        location: privateKey.pem
+    new-token:
+      lifespan: 7200
+mp       :
+  jwt:
+    verify:
+      issuer: https://datacater.io
+      publickey:
+        location: publicKey.pem
+datacater:
+  pythonrunner:
+    image:
+      name: datacater/python-runner
+      version: alpha.6
+  authorization: true
+  api:
+    version: alpha
+  kafka:
+    api:
+      timeout:
+        ms: 5000
+
+'%dev'   :
+  datacater:
+    authorization: true
+    transforms:
+      path: /home/runner/work/cloud-platform/cloud-platform/transforms
+    filters:
+      path: /home/runner/work/cloud-platform/cloud-platform/filters
+  quarkus:
+    http:
+      auth:
+        basic: true
+        proactive: false
+    security:
+      users:
+        embedded:
+          enabled: true
+          plain-text: true
+          users:
+            admin: admin
+          roles:
+            admin: admin,dev,user
+    log:
+      level: INFO
+      console:
+        json: false
+    datasource:
+      jdbc: false
+      db-kind: postgresql
+      devservices:
+        port: 5444
+        enabled: true
+      reactive:
+        url: postgresql://localhost:5444/postgres
+    kafka:
+      devservices:
+        port: 9092
+    smallrye-openapi:
+      auto-add-security-requirement: false
+  mp:
+    jwt:
+      verify:
+        issuer: https://cloud.datacater.io
+        publickey:
+          location: publicKey.pem
+    messaging:
+      connector:
+        smallrye-kafka:
+          schema:
+            registry:
+              url: http://localhost:8081
+  smallrye:
+    jwt:
+      sign:
+        key:
+          location: privateKey.pem
+      new-token:
+        lifespan: 7200
+
+'%test'  :
+  datacater:
+    transforms:
+      path: /home/runner/work/cloud-platform/cloud-platform/transforms
+    filters:
+      path: /home/runner/work/cloud-platform/cloud-platform/filters
+    authorization: true
+    pythonrunner:
+      image:
+        name: datacater/python-runner
+        version: alpha
+  quarkus:
+    log:
+      level: INFO
+      console:
+        json: false
+    datasource:
+      jdbc: false
+      db-kind: postgresql
+      devservices:
+        port: 5448
+        enabled: true
+      reactive:
+        url: postgresql://localhost:5448/postgres
+    security:
+      users:
+        file:
+          enabled: true
+          plain-text: true
+          users: test-users.properties
+          roles: test-roles.properties
+          realm-name: DataCater
+    http:
+      auth:
+        basic: true
+    kafka:
+      devservices:
+        port: 9092
+    apicurio-registry:
+      devservices:
+        port: 8082
+  mp:
+    jwt:
+      verify:
+        issuer: https://cloud.datacater.io
+        publickey:
+          location: publicKey.pem
+    messaging:
+      outgoing:
+        testStreamTopicOutAvro:
+          connector: smallrye-kafka
+          topic: streamTestWithRegistry
+          key:
+            serializer: io.datacater.core.serde.AvroSerializer
+          value:
+            serializer: io.datacater.core.serde.AvroSerializer
+          apicurio:
+            registry:
+              auto-register: true
+        testStreamTopicOutJson:
+          connector: smallrye-kafka
+          topic: testJsonDeserializer
+  smallrye:
+    jwt:
+      sign:
+        key:
+          location: privateKey.pem
+      new-token:
+        lifespan: 7200

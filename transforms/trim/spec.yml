@@ -1,0 +1,12 @@
+---
+name       : Trim
+key        : trim
+description: Remove leading and trailing whitespaces
+license    : Apache2
+website    : https://github.com/DataCater/datacater/transforms/trim
+author     :
+  email: info@datacater.io
+  name: DataCater GmbH
+labels     :
+  input-types: string
+version    : 1.0.0

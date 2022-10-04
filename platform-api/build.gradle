@@ -1,0 +1,112 @@
+plugins {
+    id 'java'
+    id 'io.quarkus'
+    id 'org.sonarqube'         version '3.4.0.2513'
+    id 'com.diffplug.spotless' version '6.11.0'
+}
+
+repositories {
+    mavenCentral()
+    mavenLocal()
+    maven {
+        url 'https://packages.confluent.io/maven/'
+        content {
+            includeGroup 'io.confluent'
+        }
+    }
+}
+
+dependencies {
+    implementation enforcedPlatform("${quarkusPlatformGroupId}:${quarkusPlatformArtifactId}:${quarkusPlatformVersion}")
+    // Core libs for quarkus
+    implementation 'io.quarkus:quarkus-config-yaml'
+    implementation 'io.quarkus:quarkus-logging-json'
+    implementation 'io.quarkus:quarkus-kubernetes'
+    implementation 'io.quarkus:quarkus-kubernetes-client'
+    implementation 'io.quarkus:quarkus-vertx'
+    implementation 'io.quarkus:quarkus-arc'
+    implementation 'io.smallrye.reactive:smallrye-mutiny-vertx-web-client'
+    //Authentication
+    implementation 'io.quarkus:quarkus-security'
+    implementation 'io.quarkus:quarkus-smallrye-jwt'
+    implementation 'io.quarkus:quarkus-smallrye-jwt-build'
+    implementation 'io.quarkus:quarkus-elytron-security-properties-file'
+    implementation 'io.quarkus:quarkus-oidc'
+
+    // REST related stuff
+    implementation 'io.quarkus:quarkus-resteasy-reactive'
+    implementation 'io.quarkus:quarkus-resteasy-reactive-jackson'
+
+    // SmallRye for Rest and messaging, micrometer for monitoring
+    implementation 'io.quarkus:quarkus-smallrye-openapi'
+    implementation 'io.quarkus:quarkus-smallrye-health'
+    implementation 'io.quarkus:quarkus-micrometer-registry-prometheus'
+
+    // Kafka Native Client
+    implementation 'org.apache.kafka:kafka-clients:3.2.0'
+
+    //reactive messaging for kafka devservice
+    quarkusDev 'io.quarkus:quarkus-smallrye-reactive-messaging-kafka'
+    testImplementation 'io.quarkus:quarkus-smallrye-reactive-messaging-kafka'
+
+    //datacater SerDe
+    implementation project(':serde')
+
+    //Dev-Services Schema registry
+    quarkusDev 'io.quarkus:quarkus-confluent-registry-avro'
+    testImplementation 'io.quarkus:quarkus-confluent-registry-avro'
+
+    // Database dependencies -> Stick with reactive dependencies
+    implementation 'io.quarkus:quarkus-hibernate-reactive'
+    implementation 'io.quarkus:quarkus-reactive-pg-client'
+
+    implementation 'io.quarkiverse.hibernatetypes:quarkus-hibernate-types:0.2.0'
+
+    // Build images at compile and runtime
+    implementation 'io.quarkus:quarkus-container-image-jib'
+
+    // Testing
+    testImplementation 'io.quarkus:quarkus-jacoco'
+    testImplementation 'io.quarkus:quarkus-junit5'
+    testImplementation 'io.rest-assured:rest-assured:5.2.0'
+    testImplementation 'io.quarkus:quarkus-test-kubernetes-client'
+}
+
+group 'io.datacater'
+version 'alpha'
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
+compileJava {
+    options.encoding = 'UTF-8'
+    options.compilerArgs << '-parameters'
+}
+
+compileTestJava {
+    options.encoding = 'UTF-8'
+}
+
+spotless {
+    java {
+        googleJavaFormat()
+        targetExclude('platform-api/build/**/*')
+    }
+}
+
+compileJava.dependsOn 'spotlessApply'
+
+test {
+    maxHeapSize="2048m"
+}
+
+sonarqube {
+    properties {
+        property 'sonar.projectKey', 'DataCater_cloud-platform'
+        property 'sonar.organization', 'datacater'
+        property 'sonar.host.url', 'https://sonarcloud.io'
+        property 'sonar.coverage.jacoco.xmlReportPaths', '**/build/jacoco-report/jacoco.xml'
+    }
+}

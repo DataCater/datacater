@@ -1,0 +1,14 @@
+---
+name       : Does not equal value
+key        : not-equal
+config     :
+-   name: value
+    label: Value
+    type: text
+description: Returns whether the attribute does not equal a specific value.
+license    : Apache2
+website    : https://github.com/DataCater/datacater/filters/not-equal
+author     :
+  name: DataCater GmbH
+  email: info@datacater.io
+version    : 1.0.0

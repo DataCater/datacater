@@ -1,0 +1,53 @@
+tmp/
+
+# Gradle
+.gradle/
+build/
+
+# Eclipse
+.project
+.classpath
+.settings/
+bin/
+
+# IntelliJ
+.idea
+*.ipr
+*.iml
+*.iws
+
+# NetBeans
+nb-configuration.xml
+
+# Visual Studio Code
+.vscode
+.factorypath
+
+# OSX
+.DS_Store
+
+# Vim
+*.swp
+*.swo
+
+# patch
+*.orig
+*.rej
+
+# Local environment
+.env
+platform-api/src/main/jib/*
+platform-api/src/main/resources/*.pem
+platform-api/src/main/resources/*roles.properties
+platform-api/src/main/resources/jib
+DONOTCOMMIT*
+
+python-runner/filters/
+python-runner/transforms/
+
+# do not commit security related files
+*.pem
+
+# python
+__pycache__
+.venv

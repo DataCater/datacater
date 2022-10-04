@@ -1,0 +1,16 @@
+---
+name       : Append constant value
+key        : append-value
+config     :
+-   name: value
+    label: Value
+    type: text
+description: Append a constant value to the attribute
+license    : Apache2
+website    : https://github.com/DataCater/datacater/transforms/append-value
+author     :
+  email: info@datacater.io
+  name: DataCater GmbH
+labels     :
+  input-types: string
+version    : 1.0.0

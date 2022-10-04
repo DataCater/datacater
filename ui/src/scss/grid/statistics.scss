@@ -1,0 +1,59 @@
+.datacater-stats-content {
+  background-color: #ffffff;
+
+  height: 158px;
+
+  padding-bottom: 1px;
+  padding-left: 3px;
+  padding-right: 3px;
+  padding-top: 3px;
+
+  ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  li {
+    align-items: center;
+    display: flex;
+    margin-bottom: 2px;
+    height: 20px;
+    padding: 1px 3px;
+  }
+
+  .stat-percentage {
+    height: 20px;
+  }
+
+  @for $i from 0 through 100 {
+    .stat-percentage-#{$i} {
+      background: linear-gradient(to right, #dff1e1 $i + 0%, #fff 0%);
+    }
+  }
+
+  .label,
+  .value {
+    overflow: hidden;
+  }
+
+  .label {
+    flex: 1;
+    white-space: nowrap;
+  }
+
+  .value {
+    padding-left: 10px;
+    text-align: right;
+    white-space: nowrap;
+    width: auto;
+  }
+}
+
+.datacater-most-frequent-values-content {
+  height: 115px;
+
+  .label {
+    font-style: italic;
+  }
+}

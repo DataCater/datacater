@@ -1,0 +1,16 @@
+---
+name       : Subtract constant value
+key        : subtract
+config     :
+-   name: value
+    label: Value
+    type: text
+description: Subtract a constant value from the attribute
+license    : Apache2
+website    : https://github.com/DataCater/datacater/transforms/subtract
+author     :
+  email: info@datacater.io
+  name: DataCater GmbH
+labels     :
+  input-types: [double, float, int, long]
+version    : 1.0.0

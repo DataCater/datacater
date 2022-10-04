@@ -1,0 +1,12 @@
+---
+name       : Floor to nearest integer
+key        : floor
+description: Floor the attribute to the nearest integer
+license    : Apache2
+website    : https://github.com/DataCater/datacater/transforms/floor
+author     :
+  email: info@datacater.io
+  name: DataCater GmbH
+labels     :
+  input-types: [double, float]
+version    : 1.0.0

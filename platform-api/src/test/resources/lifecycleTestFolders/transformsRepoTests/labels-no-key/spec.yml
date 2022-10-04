@@ -1,0 +1,12 @@
+---
+name       : Append attribute
+key        : labels-no-key
+description: Append another attribute to the attribute
+license    : BSL
+website    : https://github.com/DataCater/datacater/transforms/append-attribute
+author     :
+  email: info@datacater.io
+  name: DataCater GmbH
+labels     : test
+  input-types: string
+version    : 1.0.0

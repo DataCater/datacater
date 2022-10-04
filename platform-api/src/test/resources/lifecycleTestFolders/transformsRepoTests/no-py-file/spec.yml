@@ -1,0 +1,12 @@
+---
+name       : Capitalize
+key        : capitalize
+description: Capitalize the attribute
+license    : BSL
+website    : https://github.com/DataCater/datacater/transforms/capitalize
+author     :
+  email: info@datacater.io
+  name: DataCater GmbH
+labels     :
+  input-types: string
+version    : 1.0.0

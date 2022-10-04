@@ -1,0 +1,19 @@
+---
+name       : Rename key in JSON structure
+key        : rename-key-json-structure
+description: Renames a given key in a JSON structure
+license    : Apache2
+website    : https://github.com/DataCater/datacater/transforms/rename-key-json-structure
+author     :
+  email: info@datacater.io
+  name: DataCater GmbH
+labels     :
+  input-types: string
+version    : 1.0.0
+config     :
+-   name: oldKeyName
+    label: Old key name
+    type: text
+-   name: newKeyName
+    label: New key name
+    type: text

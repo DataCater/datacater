@@ -1,0 +1,14 @@
+---
+name       : Add attribute
+key        : add-column
+config     :
+-   name: defaultValue
+    label: Default value
+    type: text
+description: Adds a new attribute
+license    : Apache2
+website    : https://github.com/DataCater/datacater/transforms/add-column
+author     :
+  email: info@datacater.io
+  name: DataCater GmbH
+version    : 1.0.0

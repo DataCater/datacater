@@ -1,0 +1,16 @@
+---
+name       : Tokenize
+key        : tokenize
+config     :
+-   name: token
+    label: Token
+    type: text
+description: Tokenize attribute using given token
+license    : Apache2
+website    : https://github.com/DataCater/datacater/transforms/tokenize
+author     :
+  email: info@datacater.io
+  name: DataCater GmbH
+labels     :
+  input-types: string
+version    : 1.0.0

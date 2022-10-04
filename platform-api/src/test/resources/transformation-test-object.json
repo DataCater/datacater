@@ -1,0 +1,9 @@
+{
+  "spec": {
+    "key": "newTransformation",
+    "params": [
+      2
+    ],
+    "value": "x + params[0]"
+  }
+}

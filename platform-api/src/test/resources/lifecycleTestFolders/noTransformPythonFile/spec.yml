@@ -1,0 +1,12 @@
+---
+name       : Add constant value
+key        : add
+description: Add the attribute to a constant value
+license    : BSL
+website    : https://github.com/DataCater/datacater/transforms/add
+author     :
+  email: info@datacater.io
+  name: DataCater GmbH
+labels     :
+  input-types: [double, float, int, long]
+version    : 1.0.0

@@ -1,0 +1,100 @@
+{{- if .Values.postgres.enabled }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres
+  labels:
+    app.kubernetes.io/name: datacater-pg
+spec:
+  type: ClusterIP
+  ports:
+    - name: postgres
+      port: 5432
+      targetPort: 5432
+  selector:
+    app.kubernetes.io/name: datacater-pg
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: datacater-pg
+  labels:
+    app.kubernetes.io/name: datacater-pg
+spec:
+  serviceName: datacater-pg
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: datacater-pg
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: datacater-pg
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:14-alpine
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: postgres
+              containerPort: 5432
+              protocol: TCP
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 200m
+              memory: 512Mi
+          env:
+            - name: POSTGRES_USER
+              value: {{ .Values.postgres.username | default "postgres"}}
+            - name: POSTGRES_DB
+              value: postgres
+            - name: PG_USER
+              value: postgres
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
+            - name: POSTGRES_PASSWORD
+              value: {{ .Values.postgres.password | default "datacater"}}
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: status.podIP
+          livenessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - exec pg_isready --host $POD_IP -U $POSTGRES_USER
+            failureThreshold: 6
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 5
+          readinessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - exec pg_isready --host $POD_IP -U $POSTGRES_USER
+            failureThreshold: 3
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            successThreshold: 1
+            timeoutSeconds: 3
+          volumeMounts:
+            - mountPath: /var/lib/postgresql/data/pgdata
+              name: {{ .Values.postgres.pvc.volumeMountsName | default "postgres"}}
+  volumeClaimTemplates:
+    - metadata:
+        name: {{ .Values.postgres.pvc.volumeMountsName | default "postgres"}}
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        storageClassName: {{ .Values.postgres.pvc.storageClassName | default "default"}}
+        resources:
+          requests:
+            storage: 1Gi
+{{- end }}

@@ -1,0 +1,12 @@
+---
+name       : Add attribute
+key        : duplicate
+description: Add the attribute to another attribute
+license    : BSL
+website    : https://github.com/DataCater/datacater/transforms/add-attribute
+author     :
+  email: info@datacater.io
+  name: DataCater GmbH
+labels     :
+  input-types: [double, float, int, long]
+version    : 1.0.0

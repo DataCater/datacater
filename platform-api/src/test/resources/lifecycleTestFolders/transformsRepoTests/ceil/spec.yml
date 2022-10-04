@@ -1,0 +1,12 @@
+---
+name       : Ceil to nearest integer
+key        : ceil
+description: Ceil the attribute to the nearest integer
+license    : BSL
+website    : https://github.com/DataCater/datacater/transforms/ceil
+author     :
+  email: info@datacater.io
+  name: DataCater GmbH
+labels     :
+  input-types: [double, float]
+version    : 1.0.0

@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ include "datacater.fullname" . }}-test-connection"
+  labels:
+    {{- include "datacater.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": test
+spec:
+  containers:
+    - name: wget
+      image: busybox
+      command: ['wget']
+      args: ['-q', '{{ include "datacater.fullname" . }}:{{ .Values.service.port }}/q/health/live']
+  restartPolicy: Never

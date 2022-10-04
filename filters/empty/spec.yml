@@ -1,0 +1,10 @@
+---
+name       : Is empty
+key        : empty
+description: Returns whether the attribute is empty.
+license    : Apache2
+website    : https://github.com/DataCater/datacater/filters/empty
+author     :
+  email: info@datacater.io
+  name: DataCater GmbH
+version    : 1.0.0

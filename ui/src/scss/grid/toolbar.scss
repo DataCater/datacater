@@ -1,0 +1,19 @@
+.datacater-grid-toolbar {
+  background-color: #fff;
+  height: 3.5rem;
+  padding-left: 50px;
+
+  .name-textfield {
+    width: 300px;
+    margin-left: 2px;
+  }
+
+  &-pipeline-name {
+    border: 1px solid #fff;
+    padding: 3px;
+
+    &:hover {
+      border: 1px solid #ccc;
+    }
+  }
+}

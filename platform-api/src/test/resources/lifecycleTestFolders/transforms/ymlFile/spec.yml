@@ -1,0 +1,10 @@
+---
+name       : Add attribute
+key        : add-column
+description: Adds a new attribute
+license    : BSL
+website    : https://github.com/DataCater/datacater/transforms/add-column
+author     :
+  email: info@datacater.io
+  name: DataCater GmbH
+version    : 1.0.0

@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    run: ui
+  name: ui
+  namespace: default
+spec:
+  containers:
+    - image: datacater/ui:alpha
+      imagePullPolicy: IfNotPresent
+      name: ui
+      ports:
+        - containerPort: 8080
+          protocol: TCP
+          name: http

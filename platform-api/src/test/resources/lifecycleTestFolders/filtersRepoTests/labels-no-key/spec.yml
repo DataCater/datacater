@@ -1,0 +1,11 @@
+---
+name       : Matches regular expression
+key        : labels-no-key
+description: Returns whether the attribute matches a provided regular expression.
+license    : BSL
+website    : https://github.com/DataCater/datacater/filters/reg-exp
+author     :
+  email: info@datacater.io
+  name: DataCater GmbH
+labels     : test
+version    : 1.0.0

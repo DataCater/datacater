@@ -1,0 +1,10 @@
+{
+  "spec": {
+    "key": "newFilter",
+    "params": [
+      8
+    ],
+    "evaluation": true,
+    "value": "x + params[0]"
+  }
+}

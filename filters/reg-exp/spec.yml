@@ -1,0 +1,16 @@
+---
+name       : Matches regular expression
+key        : reg-exp
+config     :
+-   name: value
+    label: Value
+    type: text
+description: Returns whether the attribute matches a provided regular expression.
+license    : Apache2
+website    : https://github.com/DataCater/datacater/filters/reg-exp
+author     :
+  email: info@datacater.io
+  name: DataCater GmbH
+labels     :
+  input-types: string
+version    : 1.0.0

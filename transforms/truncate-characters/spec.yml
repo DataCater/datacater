@@ -1,0 +1,16 @@
+---
+name       : Truncate characters
+key        : truncate-characters
+config     :
+-   name: characters
+    label: Characters
+    type: text
+description: Truncate the attribute after the given number of characters
+license    : Apache2
+website    : https://github.com/DataCater/datacater/transforms/truncate-characters
+author     :
+  email: info@datacater.io
+  name: DataCater GmbH
+labels     :
+  input-types: string
+version    : 1.0.0

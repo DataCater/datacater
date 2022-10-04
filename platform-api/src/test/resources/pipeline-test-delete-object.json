@@ -1,0 +1,37 @@
+{
+  "name": "pipeline-test",
+  "metadata": {
+    "metaProp1": "1",
+    "metaProp2": "2"
+  },
+  "spec": {
+    "filters": [
+      {
+        "attributeName": "age",
+        "filter": "less-than",
+        "filterConfig": {
+          "value": 50
+        }
+      }
+    ],
+    "transformationSteps": [
+      {
+        "name": "First Step",
+        "transformations": [
+          {
+            "attributeName": "email",
+            "transformation": "hash",
+            "transformationConfig": {
+              "algorithm": "sha1"
+            }
+          },
+          {
+            "attributeName": "name",
+            "transformation": "trim",
+            "filter": "not-empty"
+          }
+        ]
+      }
+    ]
+  }
+}

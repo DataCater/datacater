@@ -1,0 +1,17 @@
+{
+  "name": "testAvroSchema",
+  "spec": {
+    "kafka": {
+      "bootstrap.servers": "localhost:9092",
+      "value.deserializer": "io.datacater.core.serde.AvroDeserializer",
+      "key.deserializer": "io.datacater.core.serde.AvroDeserializer",
+      "value.deserializer.schema": "{\"connect.name\": \"ksql.pageviews\", \"fields\": [{\"name\": \"viewtime\",\"type\": \"long\"},{\"name\": \"userid\",\"type\": \"string\"},{\"name\": \"pageid\",\"type\": \"string\"}],\"name\": \"pageviews\",\"namespace\": \"ksql\",\"type\": \"record\"}",
+      "key.deserializer.schema": "{\"connect.name\": \"ksql.pageviews\", \"fields\": [{\"name\": \"viewtime\",\"type\": \"long\"},{\"name\": \"userid\",\"type\": \"string\"},{\"name\": \"pageid\",\"type\": \"string\"}],\"name\": \"pageviews\",\"namespace\": \"ksql\",\"type\": \"record\"}",
+      "topic": {
+        "config": {
+        }
+      }
+    },
+    "kind": "KAFKA"
+  }
+}

@@ -1,0 +1,16 @@
+---
+name       : Ends with substring
+key        : end-with
+config     :
+-   name: value
+    label: Value
+    type: text
+description: Returns whether the attribute has a provided suffix.
+license    : Apache2
+website    : https://github.com/DataCater/datacater/filters/end-with
+author     :
+  email: info@datacater.io
+  name: DataCater GmbH
+labels     :
+  input-types: string
+version    : 1.0.0

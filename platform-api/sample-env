@@ -1,0 +1,11 @@
+QUARKUS_DATASOURCE_USERNAME=postgres
+QUARKUS_DATASOURCE_PASSWORD=postgres
+TEST_QUARKUS_DATASOURCE_REACTIVE_URL=postgresql://localhost:5448/postgres
+DEV_QUARKUS_DATASOURCE_REACTIVE_URL=postgresql://localhost:5444/postgres
+QUARKUS_CONTAINER-
+DATACATER_FILTERS_PATH=/home/runner/work/cloud-platform/cloud-platform/filters
+DATACATER_TRANSFORMS_PATH=/Users/chris/Documents/Repo/cloud-platform/transforms
+DATACATER_AUTHORIZATION=false
+mp.jwt.verify.issuer=https://cloud.datacater.io
+mp.jwt.verify.publickey.location=/path/to/publicKey.pem
+smallrye.jwt.sign.key.location:/path/to/privateKey.pem

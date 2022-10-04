@@ -1,0 +1,19 @@
+---
+exclude: helm-charts|k8s-manifests|platform-api/src/test/resources/lifecycleTestFolders
+repos  :
+-   repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v2.3.0
+    hooks:
+    -   id: check-yaml
+    -   id: end-of-file-fixer
+    -   id: trailing-whitespace
+-   repo: https://github.com/jguttman94/pre-commit-gradle
+    rev: v0.2.1
+    hooks:
+    -   id: gradle-spotless
+        args: [--wrapper]
+-   repo: https://github.com/jumanjihouse/pre-commit-hook-yamlfmt
+    rev: 0.2.1
+    hooks:
+    -   id: yamlfmt
+        args: [--mapping, '2', --sequence, '4', --offset, '0', --colons, --width, '150']

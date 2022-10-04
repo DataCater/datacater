@@ -1,0 +1,16 @@
+---
+name       : Modulo attribute
+key        : modulo-attribute
+config     :
+-   name: attributeName
+    label: Attribute
+    type: attribute
+description: Divides the attribute by another attribute and returns the remainder
+license    : Apache2
+website    : https://github.com/DataCater/datacater/transforms/modulo-attribute
+author     :
+  email: info@datacater.io
+  name: DataCater GmbH
+labels     :
+  input-types: [double, float, int, long]
+version    : 1.0.0

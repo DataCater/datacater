@@ -1,0 +1,16 @@
+---
+name       : Prepend constant value
+key        : prepend-value
+config     :
+-   name: value
+    label: Value
+    type: text
+description: Prepend the attribute with a constant value
+license    : Apache2
+website    : https://github.com/DataCater/datacater/transforms/prepend-value
+author     :
+  email: info@datacater.io
+  name: DataCater GmbH
+labels     :
+  input-types: string
+version    : 1.0.0

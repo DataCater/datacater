@@ -1,0 +1,15 @@
+{
+  "name": "testJsonWithExplicitDeserializer",
+  "spec": {
+    "kafka": {
+      "bootstrap.servers": "localhost:9092",
+      "value.deserializer": "org.apache.kafka.common.serialization.StringDeserializer",
+      "key.deserializer": "org.apache.kafka.common.serialization.StringDeserializer",
+      "topic": {
+        "config": {
+        }
+      }
+    },
+    "kind": "KAFKA"
+  }
+}
