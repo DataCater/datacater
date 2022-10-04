@@ -78,14 +78,9 @@ kubectl get all --all-namespaces
 ```
 4. Port-forward to service
 ```
-kubectl port-forward svc/datacater 9090:80
+kubectl port-forward ui 8080:8080
 ```
-5. Open another shell and call the API locally with `curl`
-```
-curl localhost:9090/pipelines
-[]%
-```
-6. Now you can use the DataCater API
+5. Browse to `localhost:8080` in your browser.
 
 ## Uninstalling DataCater
 
