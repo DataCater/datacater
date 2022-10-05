@@ -19,15 +19,6 @@ class Home extends Component {
   componentDidMount() {
     this.props.fetchStreams();
     this.props.fetchPipelines();
-    /*
-    TODO: Make this work
-    this.props.fetchActivePipelines();
-    this.props.fetchPipelines().then(() =>
-      this.setState({
-        loadedPipelines: true
-      })
-    );
-    */
   }
 
   hideWelcomeWidget(event) {
@@ -38,16 +29,13 @@ class Home extends Component {
   }
 
   render() {
-    // TODO: Will determine these by calling deployments endpoint
-    const activePipelines = [];
-
     const streamsAreMissing = this.props.streams.streams.length === 0;
     const pipelinesAreMissing = this.props.pipelines.pipelines.length === 0;
 
     return (
       <div className="container-fluid">
         <div className="row">
-          <main role="main" className="col-md-9 ms-sm-auto col-lg-10 pt-3 px-4">
+          <main role="main" className="col-10 mx-auto pt-3 px-4">
             <div className="row">
               <div className="col-12">
                 <div
@@ -112,25 +100,6 @@ class Home extends Component {
               </div>
             </div>
           </main>
-          <nav className="col-md-2 d-none d-md-block bg-white sidebar">
-            <div className="sidebar-sticky">
-              <h6 className="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-3">
-                <span className="border-bottom pb-2">Active pipelines</span>
-              </h6>
-              <ul className="nav flex-column">
-                <li className="nav-item overflow-hidden text-nowrap">
-                  <a className="nav-link active text-black" href="#">
-                    First active pipeline
-                  </a>
-                </li>
-                <li className="nav-item overflow-hidden text-nowrap">
-                  <a className="nav-link text-black" href="#">
-                    Second active pipeline
-                  </a>
-                </li>
-              </ul>
-            </div>
-          </nav>
         </div>
       </div>
     );
