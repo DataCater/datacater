@@ -80,7 +80,7 @@ kubectl get all --all-namespaces
 ```
 kubectl port-forward ui 8080:8080
 ```
-5. Browse to `localhost:8080` in your browser.
+5. Browse to `localhost:8080` in your browser. The default login credentials are `admin:admin`.
 
 ## Uninstalling DataCater
 
