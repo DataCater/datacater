@@ -234,11 +234,15 @@ class Grid extends Component {
     let classNames = this.getClassNames(columns);
     const data = this.getData();
 
+    const gridTransformClassName = (this.props.currentPage === "transform")
+      ? " datacater-grid-container-transform"
+      : "";
+
     return (
       <div className="container-fluid">
         <div className="row mt-2">
           <div
-            className="col-12 w-100 px-0 datacater-grid-container"
+            className={`col-12 w-100 px-0 datacater-grid-container${gridTransformClassName}`}
             style={{ position: "relative" }}
           >
             <AutoResizer>
