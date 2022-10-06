@@ -12,5 +12,5 @@ author     :
   email: info@datacater.io
   name: DataCater GmbH
 labels     :
-  input-types: [double, float]
+  input-types: number
 version    : 1.0.0
