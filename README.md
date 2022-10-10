@@ -127,7 +127,7 @@ Please see [our documentation](https://docs.datacater.io) for further informatio
 
 ### How can I contribute code changes?
 
-Please have a look at our [guide for contributors](https://github.com/DataCater/cloud-platform/blob/main/CONTIRBUTING.md).
+Please have a look at our [guide for contributors](https://github.com/DataCater/datacater/blob/main/CONTRIBUTING.md).
 
 ### How can I submit feature requests?
 
