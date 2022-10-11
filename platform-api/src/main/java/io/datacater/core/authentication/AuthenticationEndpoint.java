@@ -13,6 +13,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.jwt.JsonWebToken;
+import org.eclipse.microprofile.openapi.annotations.security.SecurityRequirement;
 
 @UnlessBuildProperty(name = "datacater.authorization", stringValue = "false")
 @Path("/api/alpha/authentication")
@@ -32,6 +33,7 @@ public class AuthenticationEndpoint {
   @POST()
   @Authenticated
   @Produces(MediaType.APPLICATION_JSON)
+  @SecurityRequirement(name = "basicAuth")
   public Uni<Token> getToken() {
     return Uni.createFrom().item(new Token(BEARER, generateToken(), lifespan));
   }

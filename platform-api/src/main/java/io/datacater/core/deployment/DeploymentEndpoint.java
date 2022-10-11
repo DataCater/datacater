@@ -11,11 +11,13 @@ import javax.persistence.criteria.Root;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
+import org.eclipse.microprofile.openapi.annotations.security.SecurityRequirement;
 import org.hibernate.reactive.mutiny.Mutiny;
 
 @Path("/api/alpha/deployments")
 @RolesAllowed("dev")
 @Produces(MediaType.APPLICATION_JSON)
+@SecurityRequirement(name = "apiToken")
 public class DeploymentEndpoint {
   @Inject Mutiny.SessionFactory sf;
 

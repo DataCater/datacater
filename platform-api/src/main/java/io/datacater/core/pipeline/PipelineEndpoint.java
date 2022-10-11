@@ -33,12 +33,14 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
+import org.eclipse.microprofile.openapi.annotations.security.SecurityRequirement;
 import org.hibernate.reactive.mutiny.Mutiny;
 import org.jboss.logging.Logger;
 
 @Path("/api/alpha/pipelines")
 @RolesAllowed("dev")
 @Produces(MediaType.APPLICATION_JSON)
+@SecurityRequirement(name = "apiToken")
 public class PipelineEndpoint {
 
   static final Logger LOGGER = Logger.getLogger(PipelineEndpoint.class);
