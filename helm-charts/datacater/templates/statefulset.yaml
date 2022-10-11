@@ -82,13 +82,3 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-  {{- if .Values.postgres.enabled }}
-  volumeClaimTemplates:
-    - metadata:
-        name: postgres
-      spec:
-        accessModes: [ "ReadWriteOnce" ]
-        resources:
-          requests:
-            storage: 1Gi
-  {{- end }}
