@@ -22,7 +22,7 @@ import org.eclipse.microprofile.openapi.annotations.security.SecuritySchemes;
                 type = SecuritySchemeType.HTTP,
                 in = SecuritySchemeIn.HEADER,
                 scheme = "bearer",
-                bearerFormat = " JWT"
+                bearerFormat = "JWT"
         )
     }
 )
