@@ -173,7 +173,6 @@ spec:
         name: postgres
       spec:
         accessModes: [ "ReadWriteOnce" ]
-        storageClassName: default
         resources:
           requests:
             storage: 1Gi
@@ -262,11 +261,3 @@ spec:
             requests:
               cpu: 500m
               memory: 1Gi
-  volumeClaimTemplates:
-    - metadata:
-        name: postgres
-      spec:
-        accessModes: [ "ReadWriteOnce" ]
-        resources:
-          requests:
-            storage: 1Gi

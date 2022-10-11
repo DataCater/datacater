@@ -93,7 +93,6 @@ spec:
         name: {{ .Values.postgres.pvc.volumeMountsName | default "postgres"}}
       spec:
         accessModes: [ "ReadWriteOnce" ]
-        storageClassName: {{ .Values.postgres.pvc.storageClassName | default "default"}}
         resources:
           requests:
             storage: 1Gi
