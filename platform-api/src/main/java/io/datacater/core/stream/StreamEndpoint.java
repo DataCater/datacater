@@ -14,12 +14,14 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import org.eclipse.microprofile.config.ConfigProvider;
 import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
+import org.eclipse.microprofile.openapi.annotations.security.SecurityRequirement;
 import org.hibernate.reactive.mutiny.Mutiny;
 import org.jboss.logging.Logger;
 
 @Path("/api/alpha/streams")
 @RolesAllowed("dev")
 @Produces(MediaType.APPLICATION_JSON)
+@SecurityRequirement(name = "apiToken")
 public class StreamEndpoint {
   private static final Logger LOGGER = Logger.getLogger(StreamEndpoint.class);
   private static final Integer KAFKA_API_TIMEOUT_MS =

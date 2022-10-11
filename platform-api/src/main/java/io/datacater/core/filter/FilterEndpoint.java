@@ -6,9 +6,11 @@ import java.util.Optional;
 import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
+import org.eclipse.microprofile.openapi.annotations.security.SecurityRequirement;
 
 @RolesAllowed("dev")
 @Path("/api/alpha/filters")
+@SecurityRequirement(name = "apiToken")
 public class FilterEndpoint {
   @GET
   @Produces(MediaType.APPLICATION_JSON)
