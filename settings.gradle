@@ -9,6 +9,6 @@ pluginManagement {
     }
 }
 
-rootProject.name = 'cloud-platform'
+rootProject.name = 'datacater'
 
 include 'platform-api', 'serde'
