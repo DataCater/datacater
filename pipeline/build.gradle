@@ -1,0 +1,66 @@
+plugins {
+    id 'java'
+    id 'io.quarkus'
+    id 'com.diffplug.spotless' version '6.8.0'
+}
+
+repositories {
+    mavenCentral()
+    mavenLocal()
+    maven {
+        url 'https://packages.confluent.io/maven/'
+        content {
+            includeGroup 'io.confluent'
+        }
+    }
+}
+
+dependencies {
+    implementation enforcedPlatform("${quarkusPlatformGroupId}:${quarkusPlatformArtifactId}:${quarkusPlatformVersion}")
+    // quarkus core
+    implementation 'io.quarkus:quarkus-config-yaml'
+    implementation 'io.quarkus:quarkus-logging-json'
+    implementation 'io.quarkus:quarkus-arc'
+
+    implementation 'io.quarkus:quarkus-smallrye-openapi'
+
+    // smallrye reactive messaging
+    implementation 'io.quarkus:quarkus-smallrye-reactive-messaging'
+    implementation 'io.quarkus:quarkus-smallrye-reactive-messaging-kafka'
+
+    implementation 'io.quarkus:quarkus-resteasy-reactive-jackson'
+    implementation 'io.quarkus:quarkus-vertx'
+    implementation 'io.smallrye.reactive:smallrye-mutiny-vertx-web-client'
+    implementation 'io.quarkus:quarkus-resteasy-reactive'
+
+    //datacater SerDe
+    implementation project(':serde')
+
+    //devservice dependency for customer serde
+    implementation 'io.quarkus:quarkus-confluent-registry-avro'
+
+    // Build images at compile and runtime
+    implementation 'io.quarkus:quarkus-container-image-jib'
+
+    testImplementation 'io.quarkus:quarkus-junit5'
+    testImplementation 'io.quarkus:quarkus-test-kafka-companion'
+
+    implementation 'org.testcontainers:testcontainers:1.17.3'
+}
+
+group 'io.datacater'
+version 'alpha'
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
+compileJava {
+    options.encoding = 'UTF-8'
+    options.compilerArgs << '-parameters'
+}
+
+compileTestJava {
+    options.encoding = 'UTF-8'
+}

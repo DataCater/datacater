@@ -11,4 +11,4 @@ pluginManagement {
 
 rootProject.name = 'datacater'
 
-include 'platform-api', 'serde'
+include 'platform-api', 'serde', 'pipeline'
