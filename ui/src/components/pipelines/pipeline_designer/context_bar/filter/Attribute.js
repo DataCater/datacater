@@ -1,11 +1,16 @@
 import React, { Component } from "react";
 import { Filter as FilterIcon, HelpCircle } from "react-feather";
 import { Button, OverlayTrigger, Tooltip } from "react-bootstrap";
+import DataTypeIcon from "../../grid/DataTypeIcon";
 import AttributeFilterList from "./AttributeFilterList";
 
 class Attribute extends Component {
   render() {
-    const { attribute, filter, filters, handleChangeFunc } = this.props;
+    const { attribute, filter, filters, handleChangeFunc, profile } =
+      this.props;
+
+    const attributeProfile = profile[attribute];
+    const attributeDataType = attributeProfile.dataType;
 
     const currentFilter =
       filter.filter === ""
@@ -19,18 +24,29 @@ class Attribute extends Component {
         ? filter.filterConfig
         : {};
 
+    const filterExpectsDataType =
+      currentFilter !== undefined &&
+      currentFilter.labels !== undefined &&
+      currentFilter.labels["input-types"] !== undefined
+        ? currentFilter.labels["input-types"].includes(attributeDataType)
+        : true;
+
     return (
       <React.Fragment>
         <div className="row border-bottom py-4">
           <div className="col ps-0">
-            <h3 className="fw-bold mb-0 text-nowrap">{attribute}</h3>
+            <h3 className="mb-0 overflow-hidden text-nowrap d-flex align-items-center">
+              <DataTypeIcon dataType={attributeProfile.dataType} />{" "}
+              <span className="ms-1">{attribute}</span>
+            </h3>
           </div>
         </div>
 
         {!filterIsDefined && (
           <AttributeFilterList
-            filter={filter}
             attribute={attribute}
+            attributeDataType={attributeProfile.dataType}
+            filter={filter}
             filters={filters}
             handleChangeFunc={handleChangeFunc}
           />
@@ -67,6 +83,12 @@ class Attribute extends Component {
               </div>
             </div>
             <div className="form-group mb-0 py-4 datacater-context-bar-function-config">
+              {!filterExpectsDataType && (
+                <div className="alert alert-warning">
+                  The filter <i>{filter.key}</i> does not support the input type{" "}
+                  <i>{attributeDataType}</i>.
+                </div>
+              )}
               {currentFilter &&
                 currentFilter.config &&
                 currentFilter.config.map((configOption, idx) => (

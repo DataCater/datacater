@@ -14,6 +14,7 @@ class Edit extends Component {
           filters={this.props.filters}
           handleChangeFunc={this.props.handleChangeFunc}
           previewState={this.props.previewState}
+          profile={this.props.profile}
           transformStep={this.props.transformStep}
           transforms={this.props.transforms}
         />

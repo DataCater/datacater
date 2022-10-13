@@ -234,9 +234,10 @@ class Grid extends Component {
     let classNames = this.getClassNames(columns);
     const data = this.getData();
 
-    const gridTransformClassName = (this.props.currentPage === "transform")
-      ? " datacater-grid-container-transform"
-      : "";
+    const gridTransformClassName =
+      this.props.currentPage === "transform"
+        ? " datacater-grid-container-transform"
+        : "";
 
     return (
       <div className="container-fluid">
