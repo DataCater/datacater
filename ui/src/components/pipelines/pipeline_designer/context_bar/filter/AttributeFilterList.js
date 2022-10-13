@@ -21,17 +21,12 @@ class AttributeFilterList extends Component {
   }
 
   render() {
-    const { filter, attribute } = this.props;
+    const { filter, attribute, attributeDataType } = this.props;
 
     const searchTokens = this.state.searchQuery.toLowerCase().trim().split(" ");
     const filtersItems = deepCopy(this.props.filters);
 
     const filters = filtersItems
-      .filter(
-        (filter) =>
-          filter.restrictToDataType === undefined ||
-          filter.restrictToDataType.includes(attribute.dataType)
-      )
       .filter(
         (filter) =>
           searchTokens
@@ -61,7 +56,7 @@ class AttributeFilterList extends Component {
           <div className="datacater-popover-pipeline-filter-list pt-2 list-group-flush list mx-n4 datacater-context-bar-flex-list">
             {filters.map((f, index) => (
               <ListGroup.Item
-                className="px-3 pt-3 pb-0 border-0 font-size-sm"
+                className="px-4 pt-3 pb-0 border-0 font-size-sm"
                 key={index}
                 action
                 onClick={(event) => {

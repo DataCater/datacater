@@ -20,6 +20,7 @@ class AttributeTransformationList extends Component {
   render() {
     const {
       attribute,
+      attributeDataType,
       currentStep,
       handleChangeFunc,
       transformStep,
@@ -31,12 +32,12 @@ class AttributeTransformationList extends Component {
       // Do not allow to apply the "Add column" transform to another attribute
       .filter((transform) => transform.key !== "add-column")
       .filter(
-        (transformer) =>
+        (transform) =>
           searchTokens
             .map(
               (token) =>
-                transformer.name.toLowerCase().includes(token) ||
-                transformer.description.toLowerCase().includes(token)
+                transform.name.toLowerCase().includes(token) ||
+                transform.description.toLowerCase().includes(token)
             )
             .filter((_) => _).length === searchTokens.length
       )
@@ -59,7 +60,7 @@ class AttributeTransformationList extends Component {
           <div className="datacater-popover-pipeline-filter-list pt-2 list-group-flush list mx-n4 datacater-context-bar-flex-list">
             {transformers.map((transform, index) => (
               <ListGroup.Item
-                className="px-3 pt-3 pb-0 border-0 font-size-sm"
+                className="px-4 pt-3 pb-0 border-0 font-size-sm"
                 key={index}
                 action
                 onClick={(event) => {

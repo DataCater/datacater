@@ -12,6 +12,7 @@ class Edit extends Component {
           attribute={this.props.attribute}
           editColumn={this.props.editColumn}
           handleChangeFunc={this.props.handleChangeFunc}
+          profile={this.props.profile}
         />
 
         <div className="datacater-context-bar-button-group border-top d-flex align-items-center bg-white mx-n4 px-4 datacater-context-bar-fixed-element">

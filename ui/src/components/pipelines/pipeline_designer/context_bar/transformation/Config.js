@@ -9,6 +9,7 @@ class Config extends Component {
     const {
       attribute,
       attributes,
+      attributeDataType,
       currentStep,
       editColumn,
       filter,
@@ -28,10 +29,24 @@ class Config extends Component {
         ? pipelineAttribute.transformationConfig
         : {};
 
+    const transformExpectsDataType =
+      transform !== undefined &&
+      transform.labels !== undefined &&
+      transform.labels["input-types"] !== undefined
+        ? transform.labels["input-types"].includes(attributeDataType)
+        : true;
+
     const filterConfig =
       pipelineAttribute !== undefined && pipelineAttribute.filterConfig != null
         ? pipelineAttribute.filterConfig
         : {};
+
+    const filterExpectsDataType =
+      filter !== undefined &&
+      filter.labels !== undefined &&
+      filter.labels["input-types"] !== undefined
+        ? filter.labels["input-types"].includes(attributeDataType)
+        : true;
 
     /*
     if (transform !== undefined && transformer.key === "add-column") {
@@ -80,6 +95,12 @@ class Config extends Component {
           </div>
         </div>
         <div className="form-group mb-0 py-4 datacater-context-bar-function-config">
+          {!transformExpectsDataType && (
+            <div className="alert alert-warning">
+              The transform <i>{transform.key}</i> does not support the input
+              type <i>{attributeDataType}</i>.
+            </div>
+          )}
           {transform.config !== undefined &&
             transform.config.map((configOption, idx) => (
               <div key={idx}>
@@ -152,6 +173,12 @@ class Config extends Component {
                 ))}
               </React.Fragment>
             </select>
+            {!filterExpectsDataType && (
+              <div className="alert alert-warning mt-4 mb-0">
+                The filter <i>{filter.key}</i> does not support the input type{" "}
+                <i>{attributeDataType}</i>.
+              </div>
+            )}
             {filter &&
               filter.config &&
               filter.config.map((configOption, idx) => (

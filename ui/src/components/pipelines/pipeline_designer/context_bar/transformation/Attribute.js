@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import { humanizeDataType } from "../../../../../helpers/humanizeDataType";
 import AttributeTransformationList from "./AttributeTransformationList";
+import DataTypeIcon from "../../grid/DataTypeIcon";
 import Config from "./Config";
 
 class Attribute extends Component {
@@ -11,6 +12,7 @@ class Attribute extends Component {
       editColumn,
       filters,
       handleChangeFunc,
+      profile,
       sortPosition,
       transformStep,
       transforms,
@@ -19,6 +21,8 @@ class Attribute extends Component {
     const attribute = attributes.find(
       (attr) => attr === editColumn.attributeName
     );
+
+    const attributeProfile = profile[attribute];
 
     const pipelineAttribute = transformStep.transformations.find(
       (transform) => transform.attributeName === attribute
@@ -39,12 +43,16 @@ class Attribute extends Component {
       <React.Fragment>
         <div className="row border-bottom py-4">
           <div className="col ps-0">
-            <h3 className="mb-0 text-nowrap">{attribute}</h3>
+            <h3 className="mb-0 overflow-hidden text-nowrap d-flex align-items-center">
+              <DataTypeIcon dataType={attributeProfile.dataType} />{" "}
+              <span className="ms-1">{attribute}</span>
+            </h3>
           </div>
         </div>
         {transform == null && (
           <AttributeTransformationList
             attribute={attribute}
+            attributeDataType={attributeProfile.dataType}
             currentStep={currentStep}
             handleChangeFunc={handleChangeFunc}
             transformStep={transformStep}
@@ -55,6 +63,7 @@ class Attribute extends Component {
           <Config
             attribute={attribute}
             attributes={attributes}
+            attributeDataType={attributeProfile.dataType}
             currentStep={currentStep}
             editColumn={editColumn}
             filter={filter}

@@ -1,18 +1,7 @@
 import React, { Component } from "react";
 import { Button, Modal } from "react-bootstrap";
-import {
-  ArrowRight,
-  Check,
-  Code,
-  Filter,
-  Hash,
-  HelpCircle,
-  Key,
-  List,
-  Package,
-  Trash,
-  Type,
-} from "react-feather";
+import { ArrowRight, Code, Filter, Key, Package, Trash } from "react-feather";
+import DataTypeIcon from "./DataTypeIcon";
 import FrequentValues from "../../../data_profiler/FrequentValues";
 import AttributeStats from "../../../data_profiler/AttributeStats";
 import "../../../../scss/grid/statistics.scss";
@@ -26,59 +15,17 @@ class TableHeaderCell extends Component {
   }
 
   renderAttributeName(attribute) {
-    let dataTypeIcon = <HelpCircle className="feather-icon" />;
-
-    switch (attribute.dataType) {
-      case "array":
-        dataTypeIcon = (
-          <span title="Array">
-            <List className="feather-icon" />
-          </span>
-        );
-        break;
-      case "object":
-        dataTypeIcon = (
-          <span title="Object">
-            <Code className="feather-icon" />
-          </span>
-        );
-        break;
-      case "boolean":
-        dataTypeIcon = (
-          <span title="Boolean">
-            <Check className="feather-icon" />
-          </span>
-        );
-        break;
-      case "number":
-        dataTypeIcon = (
-          <span title="Number">
-            <Hash className="feather-icon" />
-          </span>
-        );
-        break;
-      case "string":
-        dataTypeIcon = (
-          <span title="String">
-            <Type className="feather-icon" />
-          </span>
-        );
-        break;
-      default:
-        break;
-    }
-
     if (attribute.oldName === undefined) {
       return (
         <div className="d-flex align-items-center">
           {[undefined, ""].includes(attribute.name) && (
             <span className="font-italic">
-              {dataTypeIcon} Untitled attribute
+              <DataTypeIcon dataType={attribute.dataType} /> Untitled attribute
             </span>
           )}
           {![undefined, ""].includes(attribute.name) && (
             <span>
-              {dataTypeIcon} {attribute.name}
+              <DataTypeIcon dataType={attribute.dataType} /> {attribute.name}
             </span>
           )}
         </div>

@@ -173,6 +173,7 @@ class PipelineDesigner extends Component {
                     handleChangeFunc={this.props.handleTransformStepChangeFunc}
                     hideContextBarFunc={this.props.hideContextBarFunc}
                     previewState={this.props.previewState}
+                    profile={this.props.profile}
                     transformStep={transformStep}
                     transforms={this.props.transforms}
                   />
@@ -185,6 +186,7 @@ class PipelineDesigner extends Component {
                     editColumn={this.props.editColumn}
                     filter={this.props.editColumn.filter}
                     filters={this.props.filters}
+                    profile={this.props.profile}
                     handleChangeFunc={this.props.handleFilterChangeFunc}
                     hideContextBarFunc={this.props.hideContextBarFunc}
                   />
