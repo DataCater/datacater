@@ -79,8 +79,7 @@ public class PipelineEndpoint {
         PipelineEntity.from(
             pipeline.getName(),
             pipeline.getSerializedMetadata(),
-            PipelineSpec.serializePipelineSpec(
-                pipeline.getSpec().getFilters(), pipeline.getSpec().getTransformationSteps()));
+            PipelineSpec.serializePipelineSpec(pipeline.getSpec().getSteps()));
     return sf.withTransaction((session, transaction) -> session.persist(pe)).replaceWith(pe);
   }
 
@@ -114,8 +113,6 @@ public class PipelineEndpoint {
   @Consumes(MediaType.APPLICATION_JSON)
   @Produces(MediaType.APPLICATION_JSON)
   public Uni<String> inspectStatic(String payload) {
-    LOGGER.debug("Preview preload incoming ...hknlof");
-    LOGGER.debug(payload);
     HttpClient httpClient = HttpClient.newHttpClient();
     Uni<NamedPod> namedPod = runnerPool.getStaticPod();
 

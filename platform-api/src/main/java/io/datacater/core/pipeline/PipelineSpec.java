@@ -14,29 +14,23 @@ import javax.persistence.Embeddable;
 
 @Embeddable
 public class PipelineSpec {
-  List<Filter> filters;
-  List<TransformationStep> transformationSteps;
+  List<Step> steps;
 
   @ExcludeFromGeneratedCoverageReport
   protected PipelineSpec() {}
 
-  private PipelineSpec(List<Filter> filters, List<TransformationStep> transformationSteps) {
-    this.transformationSteps = transformationSteps;
-    this.filters = filters;
+  private PipelineSpec(List<Step> steps) {
+    this.steps = steps;
   }
 
   @JsonCreator
-  static PipelineSpec from(
-      @JsonProperty("filters") List<Filter> filters,
-      @JsonProperty("transformationSteps") List<TransformationStep> transformationSteps) {
-    return new PipelineSpec(filters, transformationSteps);
+  static PipelineSpec from(@JsonProperty("steps") List<Step> steps) {
+    return new PipelineSpec(steps);
   }
 
-  public static JsonNode serializePipelineSpec(
-      List<Filter> filters, List<TransformationStep> transformationSteps)
-      throws JsonProcessingException {
+  public static JsonNode serializePipelineSpec(List<Step> steps) throws JsonProcessingException {
     ObjectMapper objectMapper = new ObjectMapper();
-    PipelineSpec ps = new PipelineSpec(filters, transformationSteps);
+    PipelineSpec ps = new PipelineSpec(steps);
     return objectMapper.readTree(objectMapper.writeValueAsString(ps));
   }
 
@@ -50,11 +44,7 @@ public class PipelineSpec {
     return objectMapper.writeValueAsString(this);
   }
 
-  public List<Filter> getFilters() {
-    return Optional.ofNullable(filters).orElse(Collections.emptyList());
-  }
-
-  public List<TransformationStep> getTransformationSteps() {
-    return Optional.ofNullable(transformationSteps).orElse(Collections.emptyList());
+  public List<Step> getSteps() {
+    return Optional.ofNullable(steps).orElse(Collections.emptyList());
   }
 }
