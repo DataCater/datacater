@@ -8,18 +8,18 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Map;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public record Filter(String key, Map<String, Object> config) {
+public record Transform(String key, Map<String, Object> config) {
   @JsonCreator
-  static Filter from(
+  static Transform from(
       @JsonProperty(value = "key", required = true) String key,
       @JsonProperty(value = "config") Map<String, Object> config) {
-    return new Filter(key, config);
+    return new Transform(key, config);
   }
 
-  static String serializeFilter(String key, Map<String, Object> config)
+  static String serializeTransform(String key, Map<String, Object> config)
       throws JsonProcessingException {
     ObjectMapper objectMapper = new ObjectMapper();
-    Filter serializedFilter = new Filter(key, config);
-    return objectMapper.writeValueAsString(serializedFilter);
+    Transform serializedTransform = new Transform(key, config);
+    return objectMapper.writeValueAsString(serializedTransform);
   }
 }

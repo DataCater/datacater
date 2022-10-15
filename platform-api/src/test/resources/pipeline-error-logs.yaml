@@ -4,16 +4,11 @@ metadata:
   id: '1'
   name: DoK Demo Pipeline
 spec    :
-  filters:
-  -   attributeName: age
-      filter: less-than
-      filterConfig:
-        value: 50
-  transformationSteps:
-  -   name: First Step
-      transformations:
-      -   attributeName: age
-          transformation: hash
-          transformationConfig:
-          filter:
-          filterConfig:
+  steps:
+  - kind: Field
+    fields:
+        age:
+            filter:
+                key: less-than
+                config:
+                    value: 50

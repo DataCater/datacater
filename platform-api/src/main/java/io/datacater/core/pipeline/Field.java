@@ -5,21 +5,19 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.Map;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public record Filter(String key, Map<String, Object> config) {
+public record Field(Filter filter, Transform transform) {
   @JsonCreator
-  static Filter from(
-      @JsonProperty(value = "key", required = true) String key,
-      @JsonProperty(value = "config") Map<String, Object> config) {
-    return new Filter(key, config);
+  public static Field from(
+      @JsonProperty("filter") Filter filter, @JsonProperty("transform") Transform transform) {
+    return new Field(filter, transform);
   }
 
-  static String serializeFilter(String key, Map<String, Object> config)
+  public static String serializeField(Filter filter, Transform transform)
       throws JsonProcessingException {
     ObjectMapper objectMapper = new ObjectMapper();
-    Filter serializedFilter = new Filter(key, config);
-    return objectMapper.writeValueAsString(serializedFilter);
+    Field serializedField = new Field(filter, transform);
+    return objectMapper.writeValueAsString(serializedField);
   }
 }
