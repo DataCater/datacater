@@ -33,14 +33,11 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 @QuarkusTest
 @QuarkusTestResource(KafkaCompanionResource.class)
 class PipelineTest {
-    private static final Logger LOGGER = Logger.getLogger(PipelineTest.class);
-
     private static final String PIPELINE_IN = "pipeline-in-test";
     private static final String PIPELINE_OUT = "pipeline-out";
     @Inject
@@ -95,6 +92,7 @@ class PipelineTest {
         messageToWaitOn.toCompletableFuture().get(1000, TimeUnit.MILLISECONDS);
 
         ConsumerTask<Object, Object> messages = companion.consumeWithDeserializers(org.apache.kafka.common.serialization.UUIDDeserializer.class, io.datacater.core.serde.JsonDeserializer.class).fromTopics(PIPELINE_OUT,1).awaitCompletion();
+        assertTrue(messages.getFirstRecord().value().toString().contains("max-mustermann@datacater.io"));
         assertEquals(1, messages.count());
     }
 }
