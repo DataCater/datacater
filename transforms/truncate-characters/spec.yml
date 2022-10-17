@@ -1,4 +1,5 @@
 ---
+kind       : Field
 name       : Truncate characters
 key        : truncate-characters
 config     :

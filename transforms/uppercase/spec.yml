@@ -1,4 +1,5 @@
 ---
+kind       : Field
 name       : Uppercase
 key        : uppercase
 description: Transform the attribute to uppercase notation

@@ -1,4 +1,5 @@
 ---
+kind       : Field
 name       : Less than value
 key        : types-array
 description: Returns whether the attribute is less than a specific value.

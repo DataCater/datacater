@@ -1,4 +1,5 @@
 ---
+kind       : Field
 name       : Tokenize
 key        : tokenize
 config     :

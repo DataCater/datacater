@@ -1,4 +1,5 @@
 ---
+kind       : Field
 name       : Rename key in JSON structure
 key        : rename-key-json-structure
 description: Renames a given key in a JSON structure

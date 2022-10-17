@@ -1,4 +1,5 @@
 ---
+kind       : Field
 name       : Multiply by attribute
 key        : multiply-attribute
 config     :

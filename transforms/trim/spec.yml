@@ -1,4 +1,5 @@
 ---
+kind       : Field
 name       : Trim
 key        : trim
 description: Remove leading and trailing whitespaces

@@ -1,4 +1,5 @@
 ---
+kind       : Field
 name       : Does not equal value
 key        : not-equal
 config     :

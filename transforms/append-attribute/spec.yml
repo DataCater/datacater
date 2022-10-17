@@ -1,4 +1,5 @@
 ---
+kind       : Field
 name       : Append attribute
 key        : append-attribute
 config     :

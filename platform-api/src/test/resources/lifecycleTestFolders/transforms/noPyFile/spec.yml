@@ -1,4 +1,5 @@
 ---
+kind       : Field
 name       : Add attribute
 key        : add-attribute
 description: Add the attribute to another attribute

@@ -1,4 +1,5 @@
 ---
+kind       : Field
 name       : Matches regular expression
 key        : labels-no-key
 description: Returns whether the attribute matches a provided regular expression.
