@@ -1,14 +1,27 @@
 package io.datacater;
 
+import io.datacater.exceptions.TransformationException;
+import io.quarkus.test.common.QuarkusTestResource;
 import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.kafka.InjectKafkaCompanion;
+import io.quarkus.test.kafka.KafkaCompanionResource;
+import io.smallrye.common.annotation.Blocking;
+import io.smallrye.mutiny.Multi;
+import io.smallrye.mutiny.Uni;
+import io.smallrye.reactive.messaging.kafka.Record;
+import io.smallrye.reactive.messaging.kafka.companion.ConsumerTask;
+import io.smallrye.reactive.messaging.kafka.companion.KafkaCompanion;
+import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
 import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.common.serialization.UUIDDeserializer;
 import org.eclipse.microprofile.config.ConfigProvider;
-import org.eclipse.microprofile.reactive.messaging.Channel;
-import org.eclipse.microprofile.reactive.messaging.Emitter;
+import org.eclipse.microprofile.reactive.messaging.*;
 import org.jboss.logging.Logger;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.reactivestreams.Publisher;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.utility.DockerImageName;
@@ -20,17 +33,25 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 @QuarkusTest
+@QuarkusTestResource(KafkaCompanionResource.class)
 class PipelineTest {
     private static final Logger LOGGER = Logger.getLogger(PipelineTest.class);
 
     private static final String PIPELINE_IN = "pipeline-in-test";
+    private static final String PIPELINE_OUT = "pipeline-out";
     @Inject
     Pipeline application;
 
     @Inject
     @Channel(PIPELINE_IN)
     Emitter<ProducerRecord<UUID, JsonObject>> producer;
+
+    @InjectKafkaCompanion
+    KafkaCompanion companion;
 
 
     private static final Integer DATACATER_PYTHONRUNNER_PORT =
@@ -58,7 +79,7 @@ class PipelineTest {
     }
 
     @Test
-    void vertxResource() throws ExecutionException, InterruptedException, TimeoutException {
+    void testStandardPipeline() throws ExecutionException, InterruptedException, TimeoutException {
         application.setNetwork(pythonRunner.getMappedPort(DATACATER_PYTHONRUNNER_PORT), pythonRunner.getHost());
 
          JsonObject message = new JsonObject();
@@ -73,11 +94,7 @@ class PipelineTest {
 
         messageToWaitOn.toCompletableFuture().get(1000, TimeUnit.MILLISECONDS);
 
-
-
-
-        //TODO (ChrisRousey): consume message from "pipeline-out" and check if a standard transform worked
-        //TODO (ChrisRousey): need a working example of python runner message, right now python runner always has error
+        ConsumerTask<Object, Object> messages = companion.consumeWithDeserializers(org.apache.kafka.common.serialization.UUIDDeserializer.class, io.datacater.core.serde.JsonDeserializer.class).fromTopics(PIPELINE_OUT,1).awaitCompletion();
+        assertEquals(1, messages.count());
     }
-
 }

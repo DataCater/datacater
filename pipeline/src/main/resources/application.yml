@@ -48,3 +48,11 @@ mp     :
         pipeline-in-test:
           connector: smallrye-kafka
           topic: pipeline-in
+      incoming:
+        pipeline-out-test:
+          connector: smallrye-kafka
+          topic: pipeline-out
+          key:
+            deserializer: org.apache.kafka.common.serialization.UUIDDeserializer
+          value:
+            deserializer: io.datacater.core.serde.JsonDeserializer

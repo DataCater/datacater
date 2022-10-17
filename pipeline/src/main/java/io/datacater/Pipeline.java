@@ -63,7 +63,6 @@ public class Pipeline {
   private JsonObject handleMessage(Record<UUID, JsonObject> message) {
     HttpRequest<Buffer> request = client.post(getPort(), getHost(), "/batch")
             .putHeader("Content-Type", "application/json");
-    LOGGER.info(new JsonArray().add(getMessage(message)));
     HttpResponse<Buffer> response = request.sendJson(new JsonArray().add(getMessage(message))).await().indefinitely();
 
     LOGGER.info(response.statusCode());
