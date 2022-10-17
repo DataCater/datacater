@@ -1,4 +1,5 @@
 ---
+kind       : Field
 name       : Divide by constant value
 key        : divide
 config     :

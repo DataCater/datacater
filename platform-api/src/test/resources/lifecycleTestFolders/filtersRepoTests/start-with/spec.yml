@@ -1,4 +1,5 @@
 ---
+kind       : Field
 name       : Starts with substring
 key        : start-with
 description: Returns whether the attribute has a provided prefix.

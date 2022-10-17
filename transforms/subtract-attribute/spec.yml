@@ -1,4 +1,5 @@
 ---
+kind       : Field
 name       : Subtract attribute
 key        : subtract-attribute
 config     :

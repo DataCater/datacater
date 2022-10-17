@@ -1,4 +1,5 @@
 ---
+kind       : Field
 name       : Cast data type
 key        : cast-data-type
 config     :

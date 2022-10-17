@@ -1,4 +1,5 @@
 ---
+kind       : Field
 name       : Append constant value
 key        : append-value
 config     :

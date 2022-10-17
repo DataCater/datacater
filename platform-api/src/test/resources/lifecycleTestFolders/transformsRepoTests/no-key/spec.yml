@@ -1,4 +1,5 @@
 ---
+kind       : Field
 name       : no-key
 description: Append a constant value to the attribute
 license    : BSL
