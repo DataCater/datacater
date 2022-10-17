@@ -65,14 +65,13 @@ public class Pipeline {
             .putHeader("Content-Type", "application/json");
     HttpResponse<Buffer> response = request.sendJson(new JsonArray().add(getMessage(message))).await().indefinitely();
 
-    LOGGER.info(response.statusCode());
     if(response.statusCode() != RestResponse.StatusCode.OK){
-      String errorMsg = String.format(PIPELINE_ERROR_MSG, message.key(), response.bodyAsJsonObject().encodePrettily());
+      String errorMsg = String.format(PIPELINE_ERROR_MSG, message.key(), response.bodyAsJsonArray().encodePrettily());
       LOGGER.error(errorMsg);
       throw new TransformationException(errorMsg);
     }
 
-    return response.bodyAsJsonObject().getJsonObject("value");
+    return response.bodyAsJsonArray().getJsonObject(0).getJsonObject("value");
   }
 
   protected void setNetwork(int port, String host){
