@@ -28,7 +28,7 @@ Send a request:
 ```
 $ curl http://localhost:8000/batch \
   -XPOST \
-  -H'Content-Type:application/json'
+  -H'Content-Type:application/json' \
   -d'
   [{
     "key": null,
