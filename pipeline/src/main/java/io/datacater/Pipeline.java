@@ -2,6 +2,7 @@ package io.datacater;
 
 import io.datacater.exceptions.TransformationException;
 import io.smallrye.common.annotation.Blocking;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.smallrye.reactive.messaging.kafka.Record;
 
@@ -60,9 +61,12 @@ public class Pipeline {
   }
 
   private JsonObject handleMessage(Record<UUID, JsonObject> message) {
-    HttpRequest<Buffer> request = client.post(getPort(), getHost(), "");
-    HttpResponse<Buffer> response = request.sendJson(message.value().encode()).await().indefinitely();
+    HttpRequest<Buffer> request = client.post(getPort(), getHost(), "/batch")
+            .putHeader("Content-Type", "application/json");
+    LOGGER.info(new JsonArray().add(getMessage(message)));
+    HttpResponse<Buffer> response = request.sendJson(new JsonArray().add(getMessage(message))).await().indefinitely();
 
+    LOGGER.info(response.statusCode());
     if(response.statusCode() != RestResponse.StatusCode.OK){
       String errorMsg = String.format(PIPELINE_ERROR_MSG, message.key(), response.bodyAsJsonObject().encodePrettily());
       LOGGER.error(errorMsg);
@@ -75,6 +79,10 @@ public class Pipeline {
   protected void setNetwork(int port, String host){
     this.host = host;
     this.port = port;
+  }
+
+  private JsonObject getMessage(Record<UUID, JsonObject> message){
+    return new JsonObject().put("key", null).put("value", message.value()).put("metadata", new JsonObject());
   }
 
   private String getHost(){
