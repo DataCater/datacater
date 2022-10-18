@@ -26,14 +26,14 @@ class Attribute extends Component {
   }
 
   render() {
-    const attribute = this.props.attribute;
+    const field = this.props.field;
     const dataSourceProfile = this.props.dataSourceProfile;
 
     return (
       <li>
         <div className="card mb-4 shadow-sm data-source-profile-attribute">
           <div className="card-header">
-            <h5 className="my-0">{attribute.name}</h5>
+            <h5 className="my-0">{field.name}</h5>
           </div>
           <div className="card-body">
             <table>
@@ -41,15 +41,15 @@ class Attribute extends Component {
                 <tr>
                   <td className="attribute-name">Data Type:</td>
                   <td className="attribute-value">
-                    {this.capitalizeString(attribute.dataType)}
+                    {this.capitalizeString(field.dataType)}
                   </td>
                 </tr>
-                {attribute.nonNullValues !== undefined && (
+                {field.nonNullValues !== undefined && (
                   <React.Fragment>
                     <tr>
                       <td className="attribute-name">Null Values?:</td>
                       <td className="attribute-value">
-                        {attribute.nonNullValues < dataSourceProfile.records
+                        {field.nonNullValues < dataSourceProfile.records
                           ? "Yes"
                           : "No"}
                       </td>
@@ -57,63 +57,63 @@ class Attribute extends Component {
                     <tr>
                       <td className="attribute-name">Non-Null Values:</td>
                       <td className="attribute-value">
-                        {this.formatStat(attribute.nonNullValues)}
+                        {this.formatStat(field.nonNullValues)}
                       </td>
                     </tr>
                     <tr>
                       <td className="attribute-name">Null Values:</td>
                       <td className="attribute-value">
                         {this.formatStat(
-                          dataSourceProfile.records - attribute.nonNullValues
+                          dataSourceProfile.records - field.nonNullValues
                         )}
                       </td>
                     </tr>
                   </React.Fragment>
                 )}
-                {attribute.distinctValues !== undefined && (
+                {field.distinctValues !== undefined && (
                   <tr>
                     <td className="attribute-name">Distinct Values:</td>
                     <td className="attribute-value">
-                      {this.formatStat(attribute.distinctValues)}
+                      {this.formatStat(field.distinctValues)}
                     </td>
                   </tr>
                 )}
               </tbody>
             </table>
             {!["bytes", "bytes array", "null", "string"].includes(
-              attribute.dataType
+              field.dataType
             ) && (
               <table>
                 <tbody>
-                  {attribute.minValue !== undefined && (
+                  {field.minValue !== undefined && (
                     <tr>
                       <td className="attribute-name">Minimum:</td>
                       <td className="attribute-value">
-                        {this.formatStat(attribute.minValue)}
+                        {this.formatStat(field.minValue)}
                       </td>
                     </tr>
                   )}
-                  {attribute.maxValue !== undefined && (
+                  {field.maxValue !== undefined && (
                     <tr>
                       <td className="attribute-name">Maximum:</td>
                       <td className="attribute-value">
-                        {this.formatStat(attribute.maxValue)}
+                        {this.formatStat(field.maxValue)}
                       </td>
                     </tr>
                   )}
-                  {attribute.medianValue !== undefined && (
+                  {field.medianValue !== undefined && (
                     <tr>
                       <td className="attribute-name">Median:</td>
                       <td className="attribute-value">
-                        {this.formatStat(attribute.medianValue)}
+                        {this.formatStat(field.medianValue)}
                       </td>
                     </tr>
                   )}
-                  {attribute.averageValue !== undefined && (
+                  {field.averageValue !== undefined && (
                     <tr>
                       <td className="attribute-name">Average:</td>
                       <td className="attribute-value">
-                        {this.formatStat(attribute.averageValue)}
+                        {this.formatStat(field.averageValue)}
                       </td>
                     </tr>
                   )}

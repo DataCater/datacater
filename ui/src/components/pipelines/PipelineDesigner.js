@@ -106,7 +106,7 @@ class PipelineDesigner extends Component {
       return <React.Fragment></React.Fragment>;
     }
 
-    let editColumnAttribute;
+    let editColumnField;
     const transformSteps = pipeline.spec.transformationSteps;
 
     const transformStep =
@@ -115,8 +115,8 @@ class PipelineDesigner extends Component {
         : undefined;
 
     if (this.props.editColumn !== undefined) {
-      editColumnAttribute = this.props.attributes.find(
-        (attribute) => attribute === this.props.editColumn.attributeName
+      editColumnField = this.props.fields.find(
+        (fields) => field === this.props.editColumn.fieldName
       );
     }
 
@@ -137,18 +137,18 @@ class PipelineDesigner extends Component {
           addedColumn={this.props.addedColumn}
           addTransformStepFunc={this.props.addTransformStepFunc}
           filters={this.props.pipeline.spec.filters}
-          attributes={this.props.attributes}
-          attributeProfiles={this.props.attributeProfiles}
+          fields={this.props.fields}
+          fieldProfiles={this.props.fieldProfiles}
           currentPage={this.props.currentPage}
           currentStep={this.props.currentStep}
-          editColumnAttribute={editColumnAttribute}
+          editColumnField={editColumnField}
           editColumnFunc={this.props.editColumnFunc}
           filters={this.props.filters}
           handleFilterChangeFunc={this.props.handleFilterChangeFunc}
           handleTransformStepChangeFunc={
             this.props.handleTransformStepChangeFunc
           }
-          introducedAttributes={[]}
+          introducedFields={[]}
           moveTransformStepFunc={this.props.moveTransformStepFunc}
           moveToStepFunc={this.props.moveToStepFunc}
           originalRecordsSize={this.props.originalRecordsSize}
@@ -165,24 +165,24 @@ class PipelineDesigner extends Component {
               {this.props.editColumn !== undefined &&
                 this.props.editColumn.type === "transform" && (
                   <EditTransformation
-                    attribute={this.props.editColumn.attribute}
-                    attributes={this.props.attributes}
+                    field={this.props.editColumn.field}
+                    fields={this.props.fields}
                     currentStep={this.props.currentStep}
                     editColumn={this.props.editColumn}
                     filters={this.props.filters}
                     handleChangeFunc={this.props.handleTransformStepChangeFunc}
                     hideContextBarFunc={this.props.hideContextBarFunc}
                     previewState={this.props.previewState}
-                    profile={this.props.profile}
                     transformStep={transformStep}
+                    profile={this.props.profile}
                     transforms={this.props.transforms}
                   />
                 )}
               {this.props.editColumn !== undefined &&
                 this.props.editColumn.type === "filter" && (
                   <EditFilter
-                    attribute={editColumnAttribute}
-                    attributes={this.props.attributes}
+                    field={editColumnField}
+                    fields={this.props.fields}
                     editColumn={this.props.editColumn}
                     filter={this.props.editColumn.filter}
                     filters={this.props.filters}

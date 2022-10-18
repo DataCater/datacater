@@ -160,22 +160,22 @@ class EditPipeline extends Component {
     });
   }
 
-  handleFilterChange(event, attributeName, property, value) {
+  handleFilterChange(event, fieldName, property, value) {
     let pipeline = deepCopy(this.state.pipeline);
     let editColumn = this.state.editColumn;
     let contextBarActive = true;
     let type = event.target.type;
 
-    if (attributeName === undefined && property === undefined) {
-      attributeName = event.target.dataset.attributename;
+    if (fieldName === undefined && property === undefined) {
+      fieldName = event.target.dataset.fieldname;
       property = event.target.name;
       value = event.target.value;
       type = "text";
     }
 
-    // Delete existing filter on given attribute, if it exists
+    // Delete existing filter on given field, if it exists
     const filterIdx = pipeline.spec.filters.findIndex(
-      (filter) => filter.attributeName === attributeName
+      (filter) => filter.fieldName === fieldName
     );
     if (filterIdx > -1) {
       if (property === "filter") {
@@ -194,7 +194,7 @@ class EditPipeline extends Component {
       }
     } else {
       const newFilter = {
-        attributeName: attributeName,
+        fieldName: fieldName,
         filter: value,
         filterConfig: {},
       };
@@ -213,30 +213,30 @@ class EditPipeline extends Component {
     });
   }
 
-  createEditColumnFilterObject(attributeName) {
+  createEditColumnFilterObject(fieldName) {
     const pipeline = deepCopy(this.state.pipeline);
     const filter = pipeline.spec.filters.find(
-      (filter) => filter.attributeName === attributeName
+      (filter) => filter.fieldName === fieldName
     );
 
     return {
       type: "filter",
-      attributeName: attributeName,
+      fieldName: fieldName,
       filter: Object.assign({}, filter),
     };
   }
 
-  createEditColumnTransformationObject(attributeName, stepIndex) {
+  createEditColumnTransformationObject(fieldName, stepIndex) {
     const pipeline = deepCopy(this.state.pipeline);
 
-    const attribute = pipeline.spec.transformationSteps[
+    const field = pipeline.spec.transformationSteps[
       stepIndex
     ].transformations.find(
-      (transform) => transform.attributeName === attributeName
+      (transform) => transform.fieldName === fieldName
     );
 
     return {
-      attributeName: attributeName,
+      fieldName: fieldName,
       stepIndex: stepIndex,
       type: "transform",
     };
@@ -245,7 +245,7 @@ class EditPipeline extends Component {
   handleTransformStepChange(
     event,
     currentStep,
-    attributeName,
+    fieldName,
     property,
     value,
     prefix
@@ -256,10 +256,10 @@ class EditPipeline extends Component {
 
     if (
       currentStep === undefined &&
-      attributeName === undefined &&
+      fieldName === undefined &&
       property === undefined
     ) {
-      attributeName = event.target.dataset.attributename;
+      fieldName = event.target.dataset.fieldname;
       currentStep = event.target.dataset.currentstep;
       prefix = event.target.dataset.prefix;
       property = event.target.name;
@@ -269,7 +269,7 @@ class EditPipeline extends Component {
     const transformIdx = pipeline.spec.transformationSteps[
       currentStep
     ].transformations.findIndex(
-      (transform) => transform.attributeName === attributeName
+      (transform) => transform.fieldName === fieldName
     );
 
     if (transformIdx > -1) {
@@ -310,7 +310,7 @@ class EditPipeline extends Component {
       }
     } else {
       const newTransform = {
-        attributeName: attributeName,
+        fieldName: fieldName,
         transformation: value,
         transformationConfig: {},
         filter: null,
@@ -511,18 +511,18 @@ class EditPipeline extends Component {
       (_) => _.sortPosition === this.state.currentStep
     );
     if (stepIndex >= 0) {
-      // add new virtual attribute to data source profile
+      // add new virtual field to data source profile
       const that = this;
       this.props
-        .addDataSourceProfileAttribute(
+        .addDataSourceProfileField(
           this.props.dataSourceProfiles.dataSourceProfile.id
         )
         .then(function () {
-          const virtualAttribute =
-            that.props.dataSourceProfiles.dataSourceProfileAttribute;
-          if (virtualAttribute != null) {
-            pipeline.pipelineSteps[stepIndex].attributes.push({
-              transformAttributeId: virtualAttribute.id,
+          const virtualField =
+            that.props.dataSourceProfiles.dataSourceProfileField;
+          if (virtualField != null) {
+            pipeline.pipelineSteps[stepIndex].fields.push({
+              transformFieldId: virtualField.id,
               transformationAction: "add-column",
               transformationFilter: "",
               actionValue: "",
@@ -534,8 +534,8 @@ class EditPipeline extends Component {
               pipelineStep
             ) {
               if (pipelineStep.sortPosition > that.state.currentStep) {
-                pipelineStep.attributes.push({
-                  transformAttributeId: virtualAttribute.id,
+                pipelineStep.fields.push({
+                  transformFieldId: virtualField.id,
                   transformationAction: "",
                   transformationFilter: "",
                   actionValue: "",
@@ -564,15 +564,15 @@ class EditPipeline extends Component {
     }
   }
 
-  editColumn(attributeName, sortPosition, type) {
+  editColumn(fieldName, sortPosition, type) {
     const pipeline = deepCopy(this.state.pipeline);
     let editColumn = undefined;
 
     if (
       this.state.editColumn !== undefined &&
-      attributeName === this.state.editColumn.attributeName
+      fieldName === this.state.editColumn.fieldName
     ) {
-      // hide context bar if we click the edit button of an active attribute again
+      // hide context bar if we click the edit button of an active field again
       this.hideContextBar();
     } else {
       // show context bar when editing a transformation or filter
@@ -580,15 +580,15 @@ class EditPipeline extends Component {
 
       if (
         type === "transform" &&
-        attributeName !== undefined &&
+        fieldName !== undefined &&
         sortPosition !== undefined
       ) {
         editColumn = this.createEditColumnTransformationObject(
-          attributeName,
+          fieldName,
           sortPosition
         );
-      } else if (type === "filter" && attributeName !== undefined) {
-        editColumn = this.createEditColumnFilterObject(attributeName);
+      } else if (type === "filter" && fieldName !== undefined) {
+        editColumn = this.createEditColumnFilterObject(fieldName);
       }
     }
 
@@ -613,13 +613,13 @@ class EditPipeline extends Component {
   removeColumn(event) {
     event.preventDefault();
 
-    const attributeId = parseInt(event.target.dataset.attributeId);
+    const fieldId = parseInt(event.target.dataset.fieldId);
 
     // remove column from all pipeline steps
     let pipeline = deepCopy(this.state.pipeline);
     pipeline.pipelineSteps = pipeline.pipelineSteps.map(function (step) {
-      step.attributes = step.attributes.filter(
-        (_) => _.transformAttributeId !== attributeId
+      step.fields = step.fields.filter(
+        (_) => _.transformFieldId !== fieldId
       );
       return step;
     });
@@ -791,7 +791,7 @@ class EditPipeline extends Component {
         {sampleRecords.length > 0 && (
           <PipelineDesigner
             addTransformStepFunc={this.addTransformStep}
-            attributes={Object.keys(profile)}
+            fields={Object.keys(profile)}
             contextBarActive={this.state.contextBarActive}
             currentPage={this.state.currentPage}
             currentStep={this.state.currentStep}

@@ -6,11 +6,11 @@ import AttributeFilterList from "./AttributeFilterList";
 
 class Attribute extends Component {
   render() {
-    const { attribute, filter, filters, handleChangeFunc, profile } =
+    const { field, filter, filters, handleChangeFunc, profile } =
       this.props;
 
-    const attributeProfile = profile[attribute];
-    const attributeDataType = attributeProfile.dataType;
+    const fieldProfile = profile[field];
+    const fieldDataType = fieldProfile.dataType;
 
     const currentFilter =
       filter.filter === ""
@@ -28,7 +28,7 @@ class Attribute extends Component {
       currentFilter !== undefined &&
       currentFilter.labels !== undefined &&
       currentFilter.labels["input-types"] !== undefined
-        ? currentFilter.labels["input-types"].includes(attributeDataType)
+        ? currentFilter.labels["input-types"].includes(fieldDataType)
         : true;
 
     return (
@@ -36,16 +36,16 @@ class Attribute extends Component {
         <div className="row border-bottom py-4">
           <div className="col ps-0">
             <h3 className="mb-0 overflow-hidden text-nowrap d-flex align-items-center">
-              <DataTypeIcon dataType={attributeProfile.dataType} />{" "}
-              <span className="ms-1">{attribute}</span>
+              <DataTypeIcon dataType={fieldProfile.dataType} />{" "}
+              <span className="ms-1">{field}</span>
             </h3>
           </div>
         </div>
 
         {!filterIsDefined && (
           <AttributeFilterList
-            attribute={attribute}
-            attributeDataType={attributeProfile.dataType}
+            field={field}
+            fieldDataType={fieldProfile.dataType}
             filter={filter}
             filters={filters}
             handleChangeFunc={handleChangeFunc}
@@ -70,7 +70,7 @@ class Attribute extends Component {
                   onClick={(event) => {
                     this.props.handleChangeFunc(
                       event,
-                      attribute,
+                      field,
                       "filter",
                       undefined
                     );
@@ -86,7 +86,7 @@ class Attribute extends Component {
               {!filterExpectsDataType && (
                 <div className="alert alert-warning">
                   The filter <i>{filter.key}</i> does not support the input type{" "}
-                  <i>{attributeDataType}</i>.
+                  <i>{fieldDataType}</i>.
                 </div>
               )}
               {currentFilter &&
@@ -97,7 +97,7 @@ class Attribute extends Component {
                     <input
                       type="text"
                       className="form-control mb-2"
-                      data-attributename={this.props.attribute}
+                      data-fieldname={this.props.field}
                       name={configOption.name}
                       onChange={this.props.handleChangeFunc}
                       value={filterConfig[configOption.name] || ""}

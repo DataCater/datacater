@@ -1,22 +1,22 @@
 import React, { Component } from "react";
 import { Button, OverlayTrigger, Tooltip } from "react-bootstrap";
 import { HelpCircle, Package } from "react-feather";
-import NewAttributeForm from "./NewAttributeForm";
+import NewFieldForm from "./NewFieldForm";
 import CodeEditor from "./CodeEditor";
 
 class Config extends Component {
   render() {
     const {
-      attribute,
-      attributes,
-      attributeDataType,
+      field,
+      fields,
+      fieldDataType,
       currentStep,
       editColumn,
       filter,
       filters,
       flattenedDataType,
       handleChangeFunc,
-      pipelineAttribute,
+      pipelineField,
       pipelineStep,
       sortPosition,
       transform,
@@ -24,36 +24,36 @@ class Config extends Component {
     } = this.props;
 
     const transformConfig =
-      pipelineAttribute !== undefined &&
-      pipelineAttribute.transformationConfig != null
-        ? pipelineAttribute.transformationConfig
+      pipelineField !== undefined &&
+      pipelineField.transformationConfig != null
+        ? pipelineField.transformationConfig
         : {};
 
     const transformExpectsDataType =
       transform !== undefined &&
       transform.labels !== undefined &&
       transform.labels["input-types"] !== undefined
-        ? transform.labels["input-types"].includes(attributeDataType)
+        ? transform.labels["input-types"].includes(fieldDataType)
         : true;
 
     const filterConfig =
-      pipelineAttribute !== undefined && pipelineAttribute.filterConfig != null
-        ? pipelineAttribute.filterConfig
+      pipelineField !== undefined && pipelineField.filterConfig != null
+        ? pipelineField.filterConfig
         : {};
 
     const filterExpectsDataType =
       filter !== undefined &&
       filter.labels !== undefined &&
       filter.labels["input-types"] !== undefined
-        ? filter.labels["input-types"].includes(attributeDataType)
+        ? filter.labels["input-types"].includes(fieldDataType)
         : true;
 
     /*
     if (transform !== undefined && transformer.key === "add-column") {
       return (
-        <NewAttributeForm
-          attribute={pipelineAttribute}
-          attributes={attributes}
+        <NewFieldForm
+          field={pipelineField}
+          fields={fields}
           handleChangeFunc={handleChangeFunc}
           pipelineStep={pipelineStep}
           sortPosition={sortPosition}
@@ -83,7 +83,7 @@ class Config extends Component {
                 this.props.handleChangeFunc(
                   event,
                   currentStep,
-                  pipelineAttribute.attributeName,
+                  pipelineField.fieldName,
                   "transform",
                   undefined
                 );
@@ -98,7 +98,7 @@ class Config extends Component {
           {!transformExpectsDataType && (
             <div className="alert alert-warning">
               The transform <i>{transform.key}</i> does not support the input
-              type <i>{attributeDataType}</i>.
+              type <i>{fieldDataType}</i>.
             </div>
           )}
           {transform.config !== undefined &&
@@ -106,7 +106,7 @@ class Config extends Component {
               <div key={idx}>
                 {transform.key === "user-defined-transformation" && (
                   <CodeEditor
-                    attributeName={pipelineAttribute.attributeName}
+                    fieldName={pipelineField.fieldName}
                     currentStep={currentStep}
                     handleChangeFunc={handleChangeFunc}
                     previewState={this.props.previewState}
@@ -122,7 +122,7 @@ class Config extends Component {
                       <input
                         type="text"
                         className="form-control mb-2"
-                        data-attributename={pipelineAttribute.attributeName}
+                        data-fieldname={pipelineField.fieldName}
                         data-currentstep={currentStep}
                         data-prefix="transformationConfig"
                         name={configOption.name}
@@ -134,12 +134,12 @@ class Config extends Component {
                       configOption.options.length > 0 && (
                         <select
                           className="form-select"
-                          data-attributename={pipelineAttribute.attributeName}
+                          data-fieldname={pipelineField.fieldName}
                           data-currentstep={currentStep}
                           data-prefix="transformationConfig"
                           name={configOption.name}
                           onChange={handleChangeFunc}
-                          value={attribute.filterValue}
+                          value={field.filterValue}
                           value={transformConfig[configOption.name] || ""}
                         >
                           {configOption.options.map((option, index) => (
@@ -158,11 +158,11 @@ class Config extends Component {
             <label>Restrict transformation:</label>
             <select
               className="form-select mt-2"
-              data-attributename={pipelineAttribute.attributeName}
+              data-fieldname={pipelineField.fieldName}
               data-currentstep={currentStep}
               name="filter"
               onChange={handleChangeFunc}
-              value={pipelineAttribute.filter || ""}
+              value={pipelineField.filter || ""}
             >
               <React.Fragment>
                 <option value="">Apply transformation to all values</option>
@@ -176,7 +176,7 @@ class Config extends Component {
             {!filterExpectsDataType && (
               <div className="alert alert-warning mt-4 mb-0">
                 The filter <i>{filter.key}</i> does not support the input type{" "}
-                <i>{attributeDataType}</i>.
+                <i>{fieldDataType}</i>.
               </div>
             )}
             {filter &&
@@ -187,7 +187,7 @@ class Config extends Component {
                   <input
                     type="text"
                     className="form-control mb-2"
-                    data-attributename={pipelineAttribute.attributeName}
+                    data-fieldname={pipelineField.fieldName}
                     data-currentstep={currentStep}
                     data-prefix="filterConfig"
                     name={configOption.name}

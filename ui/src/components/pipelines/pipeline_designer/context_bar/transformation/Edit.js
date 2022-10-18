@@ -7,8 +7,8 @@ class Edit extends Component {
     return (
       <React.Fragment>
         <Attribute
-          attribute={this.props.attribute}
-          attributes={this.props.attributes}
+          field={this.props.field}
+          fields={this.props.fields}
           currentStep={this.props.currentStep}
           editColumn={this.props.editColumn}
           filters={this.props.filters}

@@ -7,7 +7,7 @@ import Config from "./Config";
 class Attribute extends Component {
   render() {
     const {
-      attributes,
+      fields,
       currentStep,
       editColumn,
       filters,
@@ -18,24 +18,24 @@ class Attribute extends Component {
       transforms,
     } = this.props;
 
-    const attribute = attributes.find(
-      (attr) => attr === editColumn.attributeName
+    const field = fields.find(
+      (attr) => attr === editColumn.fieldName
     );
 
-    const attributeProfile = profile[attribute];
+    const fieldProfile = profile[field];
 
-    const pipelineAttribute = transformStep.transformations.find(
-      (transform) => transform.attributeName === attribute
+    const pipelineField = transformStep.transformations.find(
+      (transform) => transform.fieldName === field
     );
 
     let transform = undefined;
     let filter = undefined;
-    if (pipelineAttribute !== undefined) {
+    if (pipelineField !== undefined) {
       transform = transforms.find(
-        (transform) => transform.key === pipelineAttribute.transformation
+        (transform) => transform.key === pipelineField.transformation
       );
       filter = filters.find(
-        (filter) => filter.key === pipelineAttribute.filter
+        (filter) => filter.key === pipelineField.filter
       );
     }
 
@@ -44,32 +44,32 @@ class Attribute extends Component {
         <div className="row border-bottom py-4">
           <div className="col ps-0">
             <h3 className="mb-0 overflow-hidden text-nowrap d-flex align-items-center">
-              <DataTypeIcon dataType={attributeProfile.dataType} />{" "}
-              <span className="ms-1">{attribute}</span>
+              <DataTypeIcon dataType={fieldProfile.dataType} />{" "}
+              <span className="ms-1">{field}</span>
             </h3>
           </div>
         </div>
         {transform == null && (
           <AttributeTransformationList
-            attribute={attribute}
-            attributeDataType={attributeProfile.dataType}
+            field={field}
+            fieldDataType={fieldProfile.dataType}
             currentStep={currentStep}
             handleChangeFunc={handleChangeFunc}
             transformStep={transformStep}
-            transformersForAttribute={transforms}
+            transformersForField={transforms}
           />
         )}
         {transform != null && (
           <Config
-            attribute={attribute}
-            attributes={attributes}
-            attributeDataType={attributeProfile.dataType}
+            field={field}
+            fields={fields}
+            fieldDataType={fieldProfile.dataType}
             currentStep={currentStep}
             editColumn={editColumn}
             filter={filter}
             filters={filters}
             handleChangeFunc={handleChangeFunc}
-            pipelineAttribute={pipelineAttribute}
+            pipelineField={pipelineField}
             previewState={this.props.previewState}
             sortPosition={sortPosition}
             transform={transform}
