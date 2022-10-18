@@ -1,0 +1,8 @@
+{
+  "name": "newdeployment",
+  "spec": {
+    "pipeline-in": "streamin",
+    "pipeline-out": "streamout",
+    "pipelineID": "pipelineUUIDPlaceholder"
+  }
+}

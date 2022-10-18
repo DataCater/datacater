@@ -1,0 +1,39 @@
+{
+  "name": "pipeline-test",
+  "apiVersion": "datacater.io/v1",
+  "kind": "Pipeline",
+  "metadata": {
+    "stream-in": "streaminUUIDPlaceholder",
+    "stream-out": "streamoutUUIDPlaceholder"
+  },
+  "spec": {
+    "filters": [
+      {
+        "attributeName": "age",
+        "filter": "less-than",
+        "filterConfig": {
+          "value": 50
+        }
+      }
+    ],
+    "transformationSteps": [
+      {
+        "name": "First Step",
+        "transformations": [
+          {
+            "attributeName": "email",
+            "transformation": "hash",
+            "transformationConfig": {
+              "algorithm": "sha1"
+            }
+          },
+          {
+            "attributeName": "name",
+            "transformation": "trim",
+            "filter": "not-empty"
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -166,6 +166,7 @@ datacater:
           roles: test-roles.properties
           realm-name: DataCater
     http:
+      port: 8081
       auth:
         basic: true
     kafka:
