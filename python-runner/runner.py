@@ -50,10 +50,10 @@ print("✅ Loaded " + str(len(TRANSFORMS.keys())) + " transforms")
 # Apply the following transforms, which change the schema of a record,
 # at the end of a transformation step
 INTERNAL_POST_TRANSFORMS = [
-    "add-column",
     "cast-data-type",
-    "drop-column",
-    "rename-column"
+    "drop-field",
+    "new-field",
+    "rename-field"
 ]
 
 class Record(BaseModel):

@@ -10,7 +10,7 @@ config     :
     -   sha256
     -   sha512
     type: text
-description: Hash the attribute
+description: Hash the field
 license    : Apache2
 website    : https://github.com/DataCater/datacater/transforms/hash
 author     :
