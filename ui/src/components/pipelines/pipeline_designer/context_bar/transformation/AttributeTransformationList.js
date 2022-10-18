@@ -19,18 +19,18 @@ class AttributeTransformationList extends Component {
 
   render() {
     const {
-      attribute,
-      attributeDataType,
+      field,
+      fieldDataType,
       currentStep,
       handleChangeFunc,
       transformStep,
-      transformersForAttribute,
+      transformersForField,
     } = this.props;
 
     const searchTokens = this.state.searchQuery.toLowerCase().trim().split(" ");
-    const transformers = transformersForAttribute
-      // Do not allow to apply the "Add column" transform to another attribute
-      .filter((transform) => transform.key !== "add-column")
+    const transformers = transformersForField
+      // Do not allow to apply the "New field" transform to another field
+      .filter((transform) => transform.key !== "new-field")
       .filter(
         (transform) =>
           searchTokens
@@ -67,7 +67,7 @@ class AttributeTransformationList extends Component {
                   this.props.handleChangeFunc(
                     event,
                     currentStep,
-                    attribute,
+                    field,
                     "transform",
                     transform.key
                   );

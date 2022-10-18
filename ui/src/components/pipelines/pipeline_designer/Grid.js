@@ -18,13 +18,13 @@ class Grid extends Component {
     this.saveScrollPosition = this.saveScrollPosition.bind(this);
   }
 
-  getCell(sample, attribute) {
+  getCell(sample, field) {
     let classNames = "sample-cell w-100 text-nowrap";
     if (
       sample.lastChange !== undefined &&
-      sample.lastChange[attribute] !== undefined
+      sample.lastChange[field] !== undefined
     ) {
-      if (sample.lastChange[attribute] === this.props.currentStep) {
+      if (sample.lastChange[field] === this.props.currentStep) {
         classNames += " changed-in-current-step";
       } else {
         classNames += " changed-in-previous-step";
@@ -32,16 +32,16 @@ class Grid extends Component {
     }
 
     if (
-      this.props.editColumnAttribute !== undefined &&
-      this.props.editColumnAttribute.name === attribute
+      this.props.editColumnField !== undefined &&
+      this.props.editColumnField.name === field
     ) {
       classNames += " sample-cell-editing";
     }
 
-    const rawValue = sample[attribute.name];
+    const rawValue = sample[field.name];
 
     return (
-      <div className={classNames} key={attribute.name} title={"" + rawValue}>
+      <div className={classNames} key={field.name} title={"" + rawValue}>
         {renderTableCellContent(rawValue)}
       </div>
     );
@@ -53,11 +53,11 @@ class Grid extends Component {
     };
   }
 
-  getColumn(attribute, idx, filters, defaultColumnWidth) {
+  getColumn(field, idx, filters, defaultColumnWidth) {
     const me = this;
 
     const filterOfCurrentStep = this.props.pipeline.spec.filters.find(
-      (filter) => filter.attributeName === attribute.name
+      (filter) => filter.fieldName === field.name
     );
 
     const pipelineStep =
@@ -65,19 +65,19 @@ class Grid extends Component {
     let transformationOfCurrentStep = undefined;
     if (pipelineStep !== undefined) {
       transformationOfCurrentStep = pipelineStep.transformations.find(
-        (transformation) => transformation.attributeName === attribute.name
+        (transformation) => transformation.fieldName === field.name
       );
     }
 
     return {
       // column properties
-      title: attribute.name,
-      width: attribute.id === 0 ? 50 : defaultColumnWidth,
-      key: parseInt(attribute.id),
-      frozen: attribute.id === 0 ? "left" : false,
+      title: field.name,
+      width: field.id === 0 ? 50 : defaultColumnWidth,
+      key: parseInt(field.id),
+      frozen: field.id === 0 ? "left" : false,
       resizable: true,
       dataGetter: ({ rowData, rowIndex }) => {
-        return attribute.id !== 0 ? rowData[attribute.name] : rowIndex + 1;
+        return field.id !== 0 ? rowData[field.name] : rowIndex + 1;
       },
       cellRenderer: function ({
         cellData,
@@ -89,24 +89,24 @@ class Grid extends Component {
         container,
         isScrolling,
       }) {
-        if (!column.isRowNumber && column.attribute !== undefined) {
-          return me.getCell(rowData, column.attribute);
+        if (!column.isRowNumber && column.field !== undefined) {
+          return me.getCell(rowData, column.field);
         } else {
           return cellData;
         }
       },
       // custom properties used for header sub components
-      isRowNumber: attribute.id === 0,
-      attribute: attribute,
+      isRowNumber: field.id === 0,
+      field: field,
       filters: this.props.filters,
-      attributes: this.props.attributes,
-      attributeProfiles: this.props.profile,
+      fields: this.props.fields,
+      fieldProfiles: this.props.profile,
       filterOfCurrentStep: filterOfCurrentStep,
       pipelineStep: this.props.pipelineStep,
       currentStep: this.props.currentStep,
       currentPage: this.props.currentPage,
-      introducedAttributes: this.props.introducedAttributes,
-      editColumnAttribute: this.props.editColumnAttribute,
+      introducedFields: this.props.introducedFields,
+      editColumnField: this.props.editColumnField,
       editColumnFunc: this.props.editColumnFunc,
       removeColumnFunc: this.props.removeColumnFunc,
       handlePipelineStepChangeFunc: this.props.handlePipelineStepChangeFunc,
@@ -119,7 +119,7 @@ class Grid extends Component {
 
   getColumns() {
     const filters = []; // TODO: Filter.getFilters();
-    let columnsConfig = [...this.props.attributes];
+    let columnsConfig = [...this.props.fields];
     let columns = [];
 
     const firstColumnWidth = 50;
@@ -128,20 +128,20 @@ class Grid extends Component {
     // check whether columns fill width of screen
     // If not, increase the default column width
     const availableWidth = window.screen.width - firstColumnWidth - 3;
-    if (defaultColumnWidth * this.props.attributes.length < availableWidth) {
-      defaultColumnWidth = availableWidth / this.props.attributes.length;
+    if (defaultColumnWidth * this.props.fields.length < availableWidth) {
+      defaultColumnWidth = availableWidth / this.props.fields.length;
     }
 
     // add # row number column
-    columnsConfig = columnsConfig.map((attributeName, idx) =>
-      Object.assign({}, this.props.profile[attributeName], {
+    columnsConfig = columnsConfig.map((fieldName, idx) =>
+      Object.assign({}, this.props.profile[fieldName], {
         id: idx + 1,
-        name: attributeName,
+        name: fieldName,
       })
     );
     columnsConfig.unshift({ id: 0, name: "#" });
-    columnsConfig.map((attribute, idx) =>
-      columns.push(this.getColumn(attribute, idx, filters, defaultColumnWidth))
+    columnsConfig.map((field, idx) =>
+      columns.push(this.getColumn(field, idx, filters, defaultColumnWidth))
     );
 
     return columns;
@@ -174,16 +174,16 @@ class Grid extends Component {
   }
 
   getClassNames(columns) {
-    const { currentStep, editColumnAttribute } = this.props;
+    const { currentStep, editColumnField } = this.props;
     let classNames;
     let activeColumnIndex;
 
     // highlight active column
-    if (editColumnAttribute !== undefined) {
+    if (editColumnField !== undefined) {
       activeColumnIndex = columns.findIndex(function (column) {
         return (
-          column.attribute !== undefined &&
-          parseInt(column.attribute.id) === parseInt(editColumnAttribute.id)
+          column.field !== undefined &&
+          parseInt(column.field.id) === parseInt(editColumnField.id)
         );
       });
 

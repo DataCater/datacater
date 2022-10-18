@@ -9,7 +9,7 @@ class Edit extends Component {
         <Attribute
           filter={this.props.filter}
           filters={this.props.filters}
-          attribute={this.props.attribute}
+          field={this.props.field}
           editColumn={this.props.editColumn}
           handleChangeFunc={this.props.handleChangeFunc}
           profile={this.props.profile}

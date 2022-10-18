@@ -21,7 +21,7 @@ class AttributeFilterList extends Component {
   }
 
   render() {
-    const { filter, attribute, attributeDataType } = this.props;
+    const { filter, field, fieldDataType } = this.props;
 
     const searchTokens = this.state.searchQuery.toLowerCase().trim().split(" ");
     const filtersItems = deepCopy(this.props.filters);
@@ -62,7 +62,7 @@ class AttributeFilterList extends Component {
                 onClick={(event) => {
                   this.props.handleChangeFunc(
                     event,
-                    attribute,
+                    field,
                     "filter",
                     f.key
                   );

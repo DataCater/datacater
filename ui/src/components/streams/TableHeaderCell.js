@@ -6,11 +6,11 @@ class TableHeaderCell extends Component {
   render() {
     const { className, column } = this.props;
 
-    const { attribute, attributeName, idx } = column;
+    const { field, fieldName, idx } = column;
 
     let dataTypeIcon = <HelpCircle className="feather-icon" />;
 
-    switch (attribute.dataType) {
+    switch (field.dataType) {
       case "array":
         dataTypeIcon = (
           <span title="Array">
@@ -56,7 +56,7 @@ class TableHeaderCell extends Component {
       return (
         <div className={className}>
           <div className="d-flex align-items-center justify-content-center">
-            {numberOfColumns} attributes
+            {numberOfColumns} fields
           </div>
         </div>
       );
@@ -65,14 +65,14 @@ class TableHeaderCell extends Component {
         <div className={className + " px-2"}>
           <div className="sample-cell py-2 px-1" key={idx}>
             <div className="d-flex align-items-center w-100 h-100 text-break overflow-hidden">
-              {dataTypeIcon} {attributeName}
+              {dataTypeIcon} {fieldName}
             </div>
           </div>
           <div className="datacater-stats-content datacater-most-frequent-values-content">
-            {!["array", "object"].includes(attribute.dataType) && (
-              <FrequentValues attributeProfile={attribute} />
+            {!["array", "object"].includes(field.dataType) && (
+              <FrequentValues fieldProfile={field} />
             )}
-            {["array", "object"].includes(attribute.dataType) && (
+            {["array", "object"].includes(field.dataType) && (
               <span className="text-black-50">
                 Most frequent values are not available
               </span>

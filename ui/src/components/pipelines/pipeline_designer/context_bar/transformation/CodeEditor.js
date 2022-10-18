@@ -41,7 +41,7 @@ class CodeEditor extends Component {
     this.props.handleChangeFunc(
       undefined,
       this.props.currentStep,
-      this.props.attributeName,
+      this.props.fieldName,
       "code",
       this.state.code,
       "transformationConfig"
