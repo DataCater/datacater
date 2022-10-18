@@ -1,14 +1,14 @@
 ---
 kind       : Field
-name       : Add attribute
-key        : add-column
+name       : Add field
+key        : new-field
 config     :
 -   name: defaultValue
     label: Default value
     type: text
-description: Adds a new attribute
+description: Adds a new field to the record
 license    : Apache2
-website    : https://github.com/DataCater/datacater/transforms/add-column
+website    : https://github.com/DataCater/datacater/transforms/new-field
 author     :
   email: info@datacater.io
   name: DataCater GmbH

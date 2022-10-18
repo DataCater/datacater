@@ -2,7 +2,7 @@
 kind       : Field
 name       : Ceil to nearest integer
 key        : ceil
-description: Ceil the attribute to the nearest integer
+description: Ceil the field to the nearest integer
 license    : Apache2
 website    : https://github.com/DataCater/datacater/transforms/ceil
 author     :

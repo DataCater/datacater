@@ -1,0 +1,17 @@
+---
+kind       : Field
+name       : Modulo field
+key        : modulo-field
+config     :
+-   name: fieldName
+    label: Field name
+    type: text
+description: Divides this field by another field and returns the remainder
+license    : Apache2
+website    : https://github.com/DataCater/datacater/transforms/modulo-field
+author     :
+  email: info@datacater.io
+  name: DataCater GmbH
+labels     :
+  input-types: number
+version    : 1.0.0

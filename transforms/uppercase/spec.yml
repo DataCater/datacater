@@ -2,7 +2,7 @@
 kind       : Field
 name       : Uppercase
 key        : uppercase
-description: Transform the attribute to uppercase notation
+description: Transform the field to uppercase notation
 license    : Apache2
 website    : https://github.com/DataCater/datacater/transforms/uppercase
 author     :
