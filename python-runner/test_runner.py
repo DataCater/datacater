@@ -236,3 +236,54 @@ def test_preview_apply_user_defined_filter():
     }]
 
     assert response.status_code == 200
+
+def test_preview_apply_user_defined_record_filter():
+    response = client.post("/preview", json = {
+        "pipeline": {
+            "spec": {
+                "steps": [
+                    {
+                        "kind": "Field",
+                        "fields": {
+                            "company": {
+                                "transform": {
+                                    "key": "user-defined-transformation",
+                                    "config": {
+                                        "code": "def transform(value, record):\n  return value.replace('GmbH', 'AG')"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "kind": "Record",
+                        "filter": {
+                            "key": "user-defined-record-filter",
+                            "config": {
+                                "code": "def filter(record):\n  return record['value']['company'].endswith('AG')"
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        "records": [
+            {
+                "key": {},
+                "value": {
+                    "company": "DataCater GmbH"
+                },
+                "metadata": {}
+            }
+        ]
+    })
+
+    assert response.json() == [{
+        "key": {},
+        "value": {
+            "company": "DataCater AG"
+        },
+        "metadata": {}
+    }]
+
+    assert response.status_code == 200
