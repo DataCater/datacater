@@ -287,3 +287,67 @@ def test_preview_apply_user_defined_record_filter():
     }]
 
     assert response.status_code == 200
+
+def test_preview_filter_transform_combination():
+    response = client.post("/preview", json = {
+        "pipeline": {
+            "spec": {
+                "steps": [
+                    {
+                        "kind": "Field",
+                        "fields": {
+                            "company": {
+                                "transform": {
+                                    "key": "user-defined-transformation",
+                                    "config": {
+                                        "code": "def transform(value, record):\n  return value.replace('GmbH', 'AG')"
+                                    }
+                                },
+                                "filter": {
+                                    "key": "user-defined-filter",
+                                    "config": {
+                                        "code": "def filter(value, record):\n  return 'Cat' in value"
+                                    }
+                                },
+                            }
+                        }
+                    },
+                ]
+            }
+        },
+        "records": [
+            {
+                "key": {},
+                "value": {
+                    "company": "DataCater GmbH"
+                },
+                "metadata": {}
+            },
+            {
+                "key": {},
+                "value": {
+                    "company": "DataKater GmbH"
+                },
+                "metadata": {}
+            }
+        ]
+    })
+
+    assert response.json() == [
+        {
+            "key": {},
+            "value": {
+                "company": "DataCater AG"
+            },
+            "metadata": {}
+        },
+        {
+            "key": {},
+            "value": {
+                "company": "DataKater GmbH"
+            },
+            "metadata": {}
+        }
+    ]
+
+    assert response.status_code == 200
