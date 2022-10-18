@@ -45,6 +45,100 @@ def test_preview_apply_transform():
 
     assert response.status_code == 200
 
+def test_preview_apply_user_defined_transform():
+    response = client.post("/preview", json = {
+        "pipeline": {
+            "spec": {
+                "steps": [
+                    {
+                        "kind": "Field",
+                        "fields": {
+                            "company": {
+                                "transform": {
+                                    "key": "user-defined-transformation",
+                                    "config": {
+                                        "code": "def transform(value, record):\n  return value.replace('GmbH', 'AG')"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        "records": [
+            {
+                "key": {},
+                "value": {
+                    "company": "DataCater GmbH"
+                },
+                "metadata": {}
+            }
+        ]
+    })
+
+    assert response.json() == [{
+        "key": {},
+        "value": {
+            "company": "DataCater AG"
+        },
+        "metadata": {}
+    }]
+
+    assert response.status_code == 200
+
+def test_preview_apply_user_defined_record_transform():
+    response = client.post("/preview", json = {
+        "pipeline": {
+            "spec": {
+                "steps": [
+                    {
+                        "kind": "Record",
+                        "transform": {
+                            "key": "user-defined-record-transformation",
+                            "config": {
+                                "code": "def transform(record):\n  record['value']['website'] = 'https://datacater.io'\n  return record"
+                            }
+                        }
+                    },
+                    {
+                        "kind": "Field",
+                        "fields": {
+                            "company": {
+                                "transform": {
+                                    "key": "user-defined-transformation",
+                                    "config": {
+                                        "code": "def transform(value, record):\n  return value.replace('GmbH', 'AG')"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        "records": [
+            {
+                "key": {},
+                "value": {
+                    "company": "DataCater GmbH"
+                },
+                "metadata": {}
+            }
+        ]
+    })
+
+    assert response.json() == [{
+        "key": {},
+        "value": {
+            "company": "DataCater AG",
+            "website": "https://datacater.io"
+        },
+        "metadata": {}
+    }]
+
+    assert response.status_code == 200
+
 def test_preview_apply_filter():
     response = client.post("/preview", json = {
         "pipeline": {

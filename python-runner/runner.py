@@ -101,17 +101,17 @@ def apply_pipeline(record: Record, pipeline: dict, preview_step = None):
                 if record_filter is not None and record_filter.get("key") is not None:
                     record_matches_filter = FILTERS[
                         record_filter["key"]](
-                        record,
+                        dict(record),
                         record_filter.get("config", {}))
                     if record_matches_filter is False and (record_transform is None or record_transform.get("key") is None):
                         return None
 
                 # Apply transform only if no filter is defined or record matches filter
-                if record_matches_filter:
-                    record = TRANSFORMS[
+                if record_matches_filter and record_transform is not None and record_transform.get("key") is not None:
+                    record = Record.parse_obj(TRANSFORMS[
                         record_transform["key"]](
-                        record,
-                        record_transform.get("config", {}))
+                        dict(record),
+                        record_transform.get("config", {})))
             else: # step["kind"] == "Field"
                 value = record.value
                 for field_name, field_config in step["fields"].items():
