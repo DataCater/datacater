@@ -15,14 +15,14 @@ quarkus:
 mp     :
   messaging:
     outgoing:
-      pipeline-out:
+      stream-out:
         merge: true
         connector: smallrye-kafka
-        topic: pipeline-out
+        topic: stream-out
     incoming:
-      pipeline-in:
+      stream-in:
         connector: smallrye-kafka
-        topic: pipeline-in
+        topic: stream-in
 
 
 '%dev' :
@@ -45,13 +45,13 @@ mp     :
   mp:
     messaging:
       outgoing:
-        pipeline-in-test:
+        stream-in-test:
           connector: smallrye-kafka
-          topic: pipeline-in
+          topic: stream-in
       incoming:
-        pipeline-out-test:
+        stream-out-test:
           connector: smallrye-kafka
-          topic: pipeline-out
+          topic: stream-out
           key:
             deserializer: org.apache.kafka.common.serialization.UUIDDeserializer
           value:

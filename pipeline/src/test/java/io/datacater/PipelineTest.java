@@ -38,13 +38,13 @@ import static org.junit.jupiter.api.Assertions.*;
 @QuarkusTest
 @QuarkusTestResource(KafkaCompanionResource.class)
 class PipelineTest {
-    private static final String PIPELINE_IN = "pipeline-in-test";
-    private static final String PIPELINE_OUT = "pipeline-out";
+    private static final String STREAM_IN = "stream-in-test";
+    private static final String STREAM_OUT = "stream-out";
     @Inject
     Pipeline application;
 
     @Inject
-    @Channel(PIPELINE_IN)
+    @Channel(STREAM_IN)
     Emitter<ProducerRecord<UUID, JsonObject>> producer;
 
     @InjectKafkaCompanion
@@ -85,13 +85,13 @@ class PipelineTest {
          message.put("is_admin", "true");
 
         CompletionStage<Void> messageToWaitOn = producer.send( new ProducerRecord<>(
-                "pipeline-in",
+                "stream-in",
                 UUID.randomUUID(),
                 message));
 
         messageToWaitOn.toCompletableFuture().get(1000, TimeUnit.MILLISECONDS);
 
-        ConsumerTask<Object, Object> messages = companion.consumeWithDeserializers(org.apache.kafka.common.serialization.UUIDDeserializer.class, io.datacater.core.serde.JsonDeserializer.class).fromTopics(PIPELINE_OUT,1).awaitCompletion();
+        ConsumerTask<Object, Object> messages = companion.consumeWithDeserializers(org.apache.kafka.common.serialization.UUIDDeserializer.class, io.datacater.core.serde.JsonDeserializer.class).fromTopics(STREAM_OUT,1).awaitCompletion();
         assertTrue(messages.getFirstRecord().value().toString().contains("max-mustermann@datacater.io"));
         assertEquals(1, messages.count());
     }

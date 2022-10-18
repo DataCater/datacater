@@ -39,8 +39,8 @@ public class Pipeline {
   private String host;
   private Integer port;
 
-  private static final String PIPELINE_IN = "pipeline-in";
-  private static final String PIPELINE_OUT = "pipeline-out";
+  private static final String STREAM_IN = "stream-in";
+  private static final String STREAM_OUT = "stream-out";
   private static final String PIPELINE_ERROR_MSG = "Pipeline could not process message.\n Key: %s\n Value: %s";
 
   WebClient client;
@@ -50,8 +50,8 @@ public class Pipeline {
     this.client = WebClient.create(vertx);
   }
 
-  @Incoming(PIPELINE_IN)
-  @Outgoing(PIPELINE_OUT)
+  @Incoming(STREAM_IN)
+  @Outgoing(STREAM_OUT)
   @Blocking
   @Acknowledgment(Acknowledgment.Strategy.POST_PROCESSING)
   public Record<UUID, JsonObject> processUUID(Record<UUID, JsonObject> message) {
