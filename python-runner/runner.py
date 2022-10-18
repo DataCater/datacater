@@ -132,7 +132,7 @@ def apply_pipeline(record: Record, pipeline: dict, preview_step = None):
                                 return None
 
                         # Apply transform only if no filter is defined or field matches filter
-                        if field_matches_filter:
+                        if field_matches_filter and field_transform is not None and field_transform.get("key") is not None:
                             value[field_name] = TRANSFORMS[
                                 field_transform["key"]](
                                 value.get(field_name, None),
@@ -156,7 +156,7 @@ def apply_pipeline(record: Record, pipeline: dict, preview_step = None):
                                 field_filter.get("config", {}))
 
                         # Apply transform only if no filter is defined or field matches filter
-                        if field_matches_filter:
+                        if field_matches_filter and field_transform is not None and field_transform.get("key") is not None:
                             value[field_name] = TRANSFORMS[
                                 field_transform["key"]](
                                 value.get(field_name, None),
