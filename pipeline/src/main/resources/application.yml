@@ -1,5 +1,5 @@
 ---
-quarkus:
+quarkus  :
   application:
     name: datacater-pipeline
     version: '1'
@@ -12,20 +12,36 @@ quarkus:
     group: datacater
     name: ${quarkus.application.name}
     tag: ${quarkus.application.version}
-mp     :
+mp       :
   messaging:
     outgoing:
       stream-out:
         merge: true
         connector: smallrye-kafka
         topic: stream-out
+        key:
+          serializer: org.apache.kafka.common.serialization.UUIDSerializer
+        value:
+          serializer: io.datacater.core.serde.JsonSerializer
     incoming:
       stream-in:
+        batch: true
         connector: smallrye-kafka
         topic: stream-in
+        max:
+          poll:
+            records: ${datacater.message.batch.size}
+        key:
+          deserializer: org.apache.kafka.common.serialization.UUIDDeserializer
+        value:
+          deserializer: io.datacater.core.serde.JsonDeserializer
+datacater:
+  message:
+    batch:
+      size: 100
 
 
-'%dev' :
+'%dev'   :
   quarkus:
     log:
       level: INFO
@@ -36,7 +52,7 @@ mp     :
       port: 50000
       host: localhost
 
-'%test':
+'%test'  :
   quarkus:
     log:
       level: INFO

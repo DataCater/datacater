@@ -1,27 +1,18 @@
 package io.datacater;
 
-import io.datacater.exceptions.TransformationException;
 import io.quarkus.test.common.QuarkusTestResource;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.kafka.InjectKafkaCompanion;
 import io.quarkus.test.kafka.KafkaCompanionResource;
-import io.smallrye.common.annotation.Blocking;
-import io.smallrye.mutiny.Multi;
-import io.smallrye.mutiny.Uni;
-import io.smallrye.reactive.messaging.kafka.Record;
 import io.smallrye.reactive.messaging.kafka.companion.ConsumerTask;
 import io.smallrye.reactive.messaging.kafka.companion.KafkaCompanion;
-import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
 import org.apache.kafka.clients.producer.ProducerRecord;
-import org.apache.kafka.common.serialization.UUIDDeserializer;
 import org.eclipse.microprofile.config.ConfigProvider;
 import org.eclipse.microprofile.reactive.messaging.*;
 import org.jboss.logging.Logger;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.reactivestreams.Publisher;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.utility.DockerImageName;
@@ -38,6 +29,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @QuarkusTest
 @QuarkusTestResource(KafkaCompanionResource.class)
 class PipelineTest {
+    private static final Logger LOGGER = Logger.getLogger(PipelineTest.class);
     private static final String STREAM_IN = "stream-in-test";
     private static final String STREAM_OUT = "stream-out";
     @Inject
@@ -84,6 +76,12 @@ class PipelineTest {
          message.put("email", "max-mustermann@datacater.io");
          message.put("is_admin", "true");
 
+        for(int i = 1; i < 300; i++){
+            producer.send( new ProducerRecord<>(
+                    "stream-in",
+                    UUID.randomUUID(),
+                    message.put("number", i)));
+        }
         CompletionStage<Void> messageToWaitOn = producer.send( new ProducerRecord<>(
                 "stream-in",
                 UUID.randomUUID(),

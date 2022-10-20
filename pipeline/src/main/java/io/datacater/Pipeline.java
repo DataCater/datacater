@@ -1,6 +1,5 @@
 package io.datacater;
 
-import io.datacater.exceptions.TransformationException;
 import io.smallrye.common.annotation.Blocking;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -15,33 +14,17 @@ import io.vertx.mutiny.core.buffer.Buffer;
 import io.vertx.mutiny.ext.web.client.HttpRequest;
 import io.vertx.mutiny.ext.web.client.HttpResponse;
 import io.vertx.mutiny.ext.web.client.WebClient;
-import org.eclipse.microprofile.config.ConfigProvider;
-import org.eclipse.microprofile.reactive.messaging.Acknowledgment;
-import org.eclipse.microprofile.reactive.messaging.Incoming;
-import org.eclipse.microprofile.reactive.messaging.Outgoing;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.apache.kafka.clients.consumer.ConsumerRecords;
+import org.eclipse.microprofile.reactive.messaging.*;
 import org.jboss.logging.Logger;
 import org.jboss.resteasy.reactive.RestResponse;
 
 @ApplicationScoped
 public class Pipeline {
   private static final Logger LOGGER = Logger.getLogger(Pipeline.class);
-
-  private final Integer DATACATER_PYTHONRUNNER_PORT =
-          ConfigProvider.getConfig()
-                  .getOptionalValue("datacater.python-runner.port", Integer.class)
-                  .orElse(50000);
-
-  private final String DATACATER_PYTHONRUNNER_HOST =
-          ConfigProvider.getConfig()
-                  .getOptionalValue("datacater.python-runner.host", String.class)
-                  .orElse("localhost");
-
   private String host;
   private Integer port;
-
-  private static final String STREAM_IN = "stream-in";
-  private static final String STREAM_OUT = "stream-out";
-  private static final String PIPELINE_ERROR_MSG = "Pipeline could not process message.\n Key: %s\n Value: %s";
 
   WebClient client;
 
@@ -50,28 +33,63 @@ public class Pipeline {
     this.client = WebClient.create(vertx);
   }
 
-  @Incoming(STREAM_IN)
-  @Outgoing(STREAM_OUT)
+  @Inject
+  @Channel(PipelineConfig.STREAM_OUT)
+  Emitter<Record<UUID, JsonObject>> producer;
+
+  @Incoming(PipelineConfig.STREAM_IN)
   @Blocking
   @Acknowledgment(Acknowledgment.Strategy.POST_PROCESSING)
-  public Record<UUID, JsonObject> processUUID(Record<UUID, JsonObject> message) {
+  public void processUUID(ConsumerRecords<UUID, JsonObject> messages) {
     // This is deliberately blocking
-    JsonObject transformedMessage = handleMessage(message);
-    return Record.of(message.key(), transformedMessage);
+    handleMessages(messages);
   }
 
-  private JsonObject handleMessage(Record<UUID, JsonObject> message) {
-    HttpRequest<Buffer> request = client.post(getPort(), getHost(), "/batch")
-            .putHeader("Content-Type", "application/json");
-    HttpResponse<Buffer> response = request.sendJson(new JsonArray().add(getMessage(message))).await().indefinitely();
+  private void handleMessages(ConsumerRecords<UUID, JsonObject> messages) {
+    HttpRequest<Buffer> request = client.post(getPort(), getHost(), PipelineConfig.ENDPOINT)
+            .putHeader(PipelineConfig.HEADER, PipelineConfig.HEADER_TYPE);
+    HttpResponse<Buffer> response = request.sendJson(getMessages(messages)).await().indefinitely();
 
     if(response.statusCode() != RestResponse.StatusCode.OK){
-      String errorMsg = String.format(PIPELINE_ERROR_MSG, message.key(), response.bodyAsJsonArray().encodePrettily());
-      LOGGER.error(errorMsg);
-      throw new TransformationException(errorMsg);
+      logMessage(response.bodyAsJsonArray().encodePrettily());
     }
 
-    return response.bodyAsJsonArray().getJsonObject(0).getJsonObject("value");
+    sendMessages(response.bodyAsJsonArray());
+  }
+
+  private void sendMessages(JsonArray messages){
+    messages.stream().forEach(x -> {
+      if(x instanceof JsonObject json){
+        if(json.getJsonObject(PipelineConfig.METADATA).containsKey(PipelineConfig.ERROR)){
+          logMessage(json.encodePrettily());
+        }
+        sendRecord(Record.of(getKey(json), json.getJsonObject(PipelineConfig.VALUE)));
+      }
+    });
+  }
+
+  private void sendRecord(Record<UUID, JsonObject> record){
+    producer.send(record);
+  }
+
+  private void logMessage(String message){
+    String errorMsg = String.format(PipelineConfig.PIPELINE_ERROR_MSG, message);
+    LOGGER.error(errorMsg);
+  }
+
+  private UUID getKey(JsonObject message){
+    if(message.getJsonObject(PipelineConfig.KEY) == null){
+      return null;
+    }
+    return UUID.fromString(message.getJsonObject(PipelineConfig.KEY).encode());
+  }
+
+  private JsonArray getMessages(ConsumerRecords<UUID, JsonObject> messages){
+    JsonArray jsonMessages = new JsonArray();
+    for (ConsumerRecord<UUID, JsonObject> message:messages) {
+      jsonMessages.add(new JsonObject().put(PipelineConfig.KEY, null).put(PipelineConfig.VALUE, message.value()).put(PipelineConfig.METADATA, new JsonObject().put(PipelineConfig.OFFSET, message.offset()).put(PipelineConfig.PARTITION, message.partition())));
+    }
+    return jsonMessages;
   }
 
   protected void setNetwork(int port, String host){
@@ -79,21 +97,17 @@ public class Pipeline {
     this.port = port;
   }
 
-  private JsonObject getMessage(Record<UUID, JsonObject> message){
-    return new JsonObject().put("key", null).put("value", message.value()).put("metadata", new JsonObject());
-  }
-
   private String getHost(){
     if(host != null){
       return host;
     }
-    return DATACATER_PYTHONRUNNER_HOST;
+    return PipelineConfig.DATACATER_PYTHONRUNNER_HOST;
   }
 
   private int getPort(){
     if (port != null){
       return port;
     }
-    return DATACATER_PYTHONRUNNER_PORT;
+    return PipelineConfig.DATACATER_PYTHONRUNNER_PORT;
   }
 }
