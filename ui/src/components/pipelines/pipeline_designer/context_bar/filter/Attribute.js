@@ -6,8 +6,7 @@ import AttributeFilterList from "./AttributeFilterList";
 
 class Attribute extends Component {
   render() {
-    const { field, filter, filters, handleChangeFunc, profile } =
-      this.props;
+    const { field, filter, filters, handleChangeFunc, profile } = this.props;
 
     const fieldProfile = profile[field];
     const fieldDataType = fieldProfile.dataType;

@@ -60,12 +60,7 @@ class AttributeFilterList extends Component {
                 key={index}
                 action
                 onClick={(event) => {
-                  this.props.handleChangeFunc(
-                    event,
-                    field,
-                    "filter",
-                    f.key
-                  );
+                  this.props.handleChangeFunc(event, field, "filter", f.key);
                 }}
               >
                 <div className="row align-items-center justify-content-center border-bottom pb-3">

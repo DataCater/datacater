@@ -18,7 +18,6 @@ import {
 import { Modal } from "react-bootstrap";
 import BaseTable, { AutoResizer } from "react-base-table";
 import PipelineDesigner from "../../components/pipelines/PipelineDesigner";
-import Nav from "../../components/pipelines/pipeline_designer/Nav";
 import Breadcrumb from "../../components/layout/Breadcrumb";
 import { getApiPathPrefix } from "../../helpers/getApiPathPrefix";
 import { deepCopy } from "../../helpers/deepCopy";
@@ -43,7 +42,6 @@ class EditPipeline extends Component {
       addedColumn: false,
       editColumn: undefined,
       contextBarActive: false,
-      currentPage: "explore",
       currentStep: undefined,
       errorMessage: "",
       pipeline: {},
@@ -57,14 +55,13 @@ class EditPipeline extends Component {
     this.handleChange = this.handleChange.bind(this);
     this.editColumn = this.editColumn.bind(this);
     this.handleFilterChange = this.handleFilterChange.bind(this);
-    this.handleTransformStepChange = this.handleTransformStepChange.bind(this);
+    this.handleStepChange = this.handleStepChange.bind(this);
     this.delayedReloadSampleRecords =
       this.delayedReloadSampleRecords.bind(this);
-    this.addTransformStep = this.addTransformStep.bind(this);
-    this.removeTransformStep = this.removeTransformStep.bind(this);
-    this.moveTransformStep = this.moveTransformStep.bind(this);
+    this.addStep = this.addStep.bind(this);
+    this.removeStep = this.removeStep.bind(this);
+    this.moveStep = this.moveStep.bind(this);
     this.moveToStep = this.moveToStep.bind(this);
-    this.moveToPage = this.moveToPage.bind(this);
     this.addColumn = this.addColumn.bind(this);
     this.showContextBar = this.showContextBar.bind(this);
     this.hideContextBar = this.hideContextBar.bind(this);
@@ -119,7 +116,7 @@ class EditPipeline extends Component {
     }
   }
 
-  updateSampleRecords(pipeline, previewStage, previewStep) {
+  updateSampleRecords(pipeline, previewStep) {
     const domElement = document.querySelector(".datacater-grid-container");
     if (domElement != null) {
       domElement.style.opacity = 0.2;
@@ -132,7 +129,6 @@ class EditPipeline extends Component {
         .inspectPipeline(
           this.state.pipeline,
           this.props.streams.inspectionResult,
-          previewStage,
           previewStep
         )
         .then(() => {
@@ -231,9 +227,7 @@ class EditPipeline extends Component {
 
     const field = pipeline.spec.transformationSteps[
       stepIndex
-    ].transformations.find(
-      (transform) => transform.fieldName === fieldName
-    );
+    ].transformations.find((transform) => transform.fieldName === fieldName);
 
     return {
       fieldName: fieldName,
@@ -242,14 +236,7 @@ class EditPipeline extends Component {
     };
   }
 
-  handleTransformStepChange(
-    event,
-    currentStep,
-    fieldName,
-    property,
-    value,
-    prefix
-  ) {
+  handleStepChange(event, currentStep, fieldName, property, value, prefix) {
     let pipeline = deepCopy(this.state.pipeline);
     let editColumn = this.state.editColumn;
     let contextBarActive = true;
@@ -324,7 +311,7 @@ class EditPipeline extends Component {
 
     const type = event !== undefined ? event.target.type : "text";
 
-    this.delayedReloadSampleRecords(pipeline, type, "transform", currentStep);
+    this.delayedReloadSampleRecords(pipeline, type, currentStep);
 
     this.setState({
       addedColumn: false,
@@ -335,7 +322,7 @@ class EditPipeline extends Component {
     });
   }
 
-  delayedReloadSampleRecords(pipeline, eventType, previewStage, previewStep) {
+  delayedReloadSampleRecords(pipeline, eventType, previewStep) {
     if (eventType === "text") {
       let domElements = [
         document.querySelector(".datacater-grid-container"),
@@ -346,31 +333,37 @@ class EditPipeline extends Component {
       clearTimeout(this.bounceTimeout);
       this.bounceTimeout = setTimeout(() => {
         // opacity will be reset by the following function call
-        this.updateSampleRecords(pipeline, previewStage, previewStep);
+        this.updateSampleRecords(pipeline, previewStep);
       }, 500);
     } else {
-      this.updateSampleRecords(pipeline, previewStage, previewStep);
+      this.updateSampleRecords(pipeline, previewStep);
     }
   }
 
-  addTransformStep(event, useCache) {
+  addStep(event) {
     event.preventDefault();
 
     let pipeline = deepCopy(this.state.pipeline);
+    const kind = event.target.dataset.stepKind;
 
-    pipeline.spec.transformationSteps.push({
-      name: "",
-      transformations: [],
-    });
+    if (kind === "Record") {
+      pipeline.spec.steps.push({
+        kind: "Record",
+      });
+    } else {
+      pipeline.spec.steps.push({
+        kind: "Field",
+        fields: {},
+      });
+    }
 
-    const currentStep = pipeline.spec.transformationSteps.length - 1;
+    const currentStep = pipeline.spec.steps.length;
 
-    this.updateSampleRecords(pipeline, "transform", currentStep);
+    this.updateSampleRecords(pipeline, currentStep);
 
     this.setState({
       addedColumn: false,
       contextBarActive: false,
-      currentPage: "transform",
       currentStep: currentStep,
       editColumn: undefined,
       pipeline: pipeline,
@@ -378,27 +371,25 @@ class EditPipeline extends Component {
     });
   }
 
-  removeTransformStep(stepIdx) {
+  removeStep(stepIdx) {
     let pipeline = deepCopy(this.state.pipeline);
-    let currentPage = this.state.currentPage;
     let currentStep = this.state.currentStep;
 
-    // Remove stepIdx from pipeline.spec.transformationSteps
-    pipeline.spec.transformationSteps.splice(stepIdx, 1);
+    // Remove stepIdx from pipeline.spec.steps
+    pipeline.spec.steps.splice(stepIdx, 1);
 
-    if (currentStep > pipeline.spec.transformationSteps.length - 1) {
-      if (pipeline.spec.transformationSteps.length === 0) {
-        currentPage = "explore";
+    if (currentStep > pipeline.spec.steps.length - 1) {
+      if (pipeline.spec.steps.length === 0) {
+        currentStep = undefined;
       } else {
-        currentStep = pipeline.spec.transformationSteps.length - 1;
+        currentStep = pipeline.spec.steps.length - 1;
       }
     }
 
-    this.updateSampleRecords(pipeline, "transform", currentStep);
+    this.updateSampleRecords(pipeline, currentStep);
 
     this.setState({
       addedColumn: false,
-      currentPage: currentPage,
       currentStep: currentStep,
       contextBarActive: false,
       editColumn: undefined,
@@ -407,103 +398,56 @@ class EditPipeline extends Component {
     });
   }
 
-  moveTransformStep(fromPosition, toPosition) {
-    let pipeline = deepCopy(this.state.pipeline);
-    let transformSteps = pipeline.step.transformationSteps;
-    const movingStepIndex = transformSteps.findIndex(function (el) {
-      return el.sortPosition === fromPosition;
-    });
+  moveStep(fromPosition, toPosition) {
+    if (!isNaN(toPosition)) {
+      let pipeline = deepCopy(this.state.pipeline);
+      let steps = pipeline.spec.steps;
 
-    // TODO
-    if (fromPosition > toPosition) {
-      pipelineSteps = pipelineSteps.map(function (step) {
-        if (
-          step.sortPosition >= toPosition &&
-          step.sortPosition < fromPosition
-        ) {
-          step.sortPosition++;
+      const movingStep = deepCopy(steps[fromPosition - 1]);
+
+      if (fromPosition > toPosition) {
+        for (let i = fromPosition - 1; i >= toPosition; i--) {
+          steps[i] = steps[i - 1];
         }
-        return step;
-      });
-      pipelineSteps[movingStepIndex].sortPosition = toPosition;
-    } else if (fromPosition < toPosition) {
-      pipelineSteps = pipelineSteps.map(function (step) {
-        if (
-          step.sortPosition > fromPosition &&
-          step.sortPosition < toPosition
-        ) {
-          step.sortPosition--;
+        steps[toPosition - 1] = movingStep;
+      } else if (fromPosition < toPosition) {
+        toPosition = toPosition - 1;
+        for (let i = fromPosition - 1; i < toPosition - 1; i++) {
+          steps[i] = steps[i + 1];
         }
-        return step;
+        steps[toPosition - 1] = movingStep;
+      }
+
+      pipeline.spec.steps = steps;
+
+      const newCurrentStep = toPosition;
+
+      this.updateSampleRecords(pipeline, newCurrentStep);
+
+      this.setState({
+        addedColumn: false,
+        currentStep: newCurrentStep,
+        contextBarActive: false,
+        editColumn: undefined,
+        pipeline: pipeline,
+        unpersistedChanges: true,
       });
-      pipelineSteps[movingStepIndex].sortPosition = toPosition - 1;
     }
-
-    pipeline.spec.transformationSteps = transformSteps;
-
-    const newCurrentStep = toPosition;
-
-    this.updateSampleRecords(pipeline, "transform", newCurrentStep);
-
-    this.setState({
-      addedColumn: false,
-      currentStep: newCurrentStep,
-      contextBarActive: false,
-      editColumn: undefined,
-      pipeline: pipeline,
-      unpersistedChanges: true,
-    });
   }
 
   moveToStep(event, newStep) {
     event.preventDefault();
-    this.updateSampleRecords(this.state.pipeline, "transform", newStep);
+    this.updateSampleRecords(this.state.pipeline, newStep);
     this.setState({
       addedColumn: false,
       codeView: false,
-      currentPage: "transform",
       currentStep: newStep,
       contextBarActive: false,
       editColumn: undefined,
     });
   }
 
-  moveToPage(newPage, newStep) {
-    window.scrollTo(0, 0);
-
-    const pipelineId = this.getPipelineId();
-
-    this.updateSampleRecords(this.state.pipeline, newPage, newStep);
-
-    if (
-      newPage === "transform" &&
-      this.state.pipeline.spec.transformationSteps.length === 0
-    ) {
-      const pipeline = this.state.pipeline;
-      pipeline.spec.transformationSteps.push({
-        name: "",
-        transformations: [],
-      });
-      this.setState({
-        addedColumn: false,
-        currentPage: newPage,
-        currentStep: 0,
-        contextBarActive: false,
-        editColumn: undefined,
-        pipeline: pipeline,
-        unpersistedChanges: true,
-      });
-    } else {
-      this.setState({
-        addedColumn: false,
-        currentPage: newPage,
-        currentStep: newStep,
-        contextBarActive: false,
-        editColumn: undefined,
-      });
-    }
-  }
-
+  // TODO
   addColumn(event) {
     event.preventDefault();
     let pipeline = deepCopy(this.state.pipeline);
@@ -610,6 +554,7 @@ class EditPipeline extends Component {
     });
   }
 
+  // TODO
   removeColumn(event) {
     event.preventDefault();
 
@@ -618,9 +563,7 @@ class EditPipeline extends Component {
     // remove column from all pipeline steps
     let pipeline = deepCopy(this.state.pipeline);
     pipeline.pipelineSteps = pipeline.pipelineSteps.map(function (step) {
-      step.fields = step.fields.filter(
-        (_) => _.transformFieldId !== fieldId
-      );
+      step.fields = step.fields.filter((_) => _.transformFieldId !== fieldId);
       return step;
     });
 
@@ -734,7 +677,7 @@ class EditPipeline extends Component {
     }
 
     const sampleRecords =
-      this.state.currentPage === "explore" ||
+      this.state.currentStep === undefined ||
       this.props.pipelines.inspectionResult === undefined
         ? deepCopy(this.props.streams.inspectionResult).map(
             (record) => record.value
@@ -763,50 +706,35 @@ class EditPipeline extends Component {
 
     let classNames = "create-pipeline-form pipeline-designer";
 
-    if (this.state.currentPage !== "steps") {
-      classNames += " pipeline-designer-page";
-    }
-
     if (this.state.contextBarActive && this.state.currentStep !== undefined) {
       classNames += " datacater-context-bar-active";
     }
 
-    if (this.state.currentPage === "steps" && this.state.currentStep > 0) {
+    if (this.state.currentStep !== undefined) {
       classNames += " pipeline-designer-transformations";
     }
 
     return (
       <>
-        <div className="container">
-          {header}
-          <div className="row g-3 align-items-center mt-0">
-            <div className="col-6 mb-2">
-              <Nav
-                currentPage={this.state.currentPage}
-                moveToPageFunc={this.moveToPage}
-              />
-            </div>
-          </div>
-        </div>
+        <div className="container">{header}</div>
         {sampleRecords.length > 0 && (
           <PipelineDesigner
-            addTransformStepFunc={this.addTransformStep}
+            addStepFunc={this.addStep}
             fields={Object.keys(profile)}
             contextBarActive={this.state.contextBarActive}
-            currentPage={this.state.currentPage}
             currentStep={this.state.currentStep}
             editColumn={this.state.editColumn}
             editColumnFunc={this.editColumn}
             filters={this.props.filters.filters}
             handleFilterChangeFunc={this.handleFilterChange}
-            handleTransformStepChangeFunc={this.handleTransformStepChange}
+            handleStepChangeFunc={this.handleStepChange}
             hideContextBarFunc={this.hideContextBar}
             moveToStepFunc={this.moveToStep}
-            moveTransformStepFunc={this.moveTransformStep}
+            moveStepFunc={this.moveStep}
             pipeline={pipeline}
             previewState={{}}
             profile={profile}
-            removeTransformStepFunc={this.removeTransformStep}
+            removeStepFunc={this.removeStep}
             sampleRecords={sampleRecords}
             transforms={this.props.transforms.transforms}
           />

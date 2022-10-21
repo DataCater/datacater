@@ -162,12 +162,7 @@ export function deletePipeline(id) {
   };
 }
 
-export function inspectPipeline(
-  pipeline,
-  sampleRecords,
-  previewStage,
-  previewStep
-) {
+export function inspectPipeline(pipeline, sampleRecords, previewStep) {
   const requestPipelineInspect = () => ({
     type: "REQUEST_PIPELINE_INSPECT",
   });
@@ -190,7 +185,6 @@ export function inspectPipeline(
       data: {
         pipeline: pipeline,
         records: sampleRecords,
-        previewStage: previewStage,
         previewStep: previewStep,
       },
     }).then(
