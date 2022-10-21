@@ -121,17 +121,17 @@ class Grid extends Component {
   }
 
   getColumns() {
-    const filters = []; // TODO: Filter.getFilters();
+    const filters = [];
     let columnsConfig = [...this.props.fields];
     let columns = [];
 
     const firstColumnWidth = 50;
     let defaultColumnWidth = 300;
 
-    // check whether columns fill width of screen
+    // check whether columns fill width of browser
     // If not, increase the default column width
-    const availableWidth = window.screen.width - firstColumnWidth - 3;
-    if (defaultColumnWidth * this.props.fields.length < availableWidth) {
+    const availableWidth = window.innerWidth - firstColumnWidth - 3;
+    if ((defaultColumnWidth * this.props.fields.length) < availableWidth) {
       defaultColumnWidth = availableWidth / this.props.fields.length;
     }
 
