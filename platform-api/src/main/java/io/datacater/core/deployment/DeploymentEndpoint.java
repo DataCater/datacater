@@ -36,6 +36,7 @@ public class DeploymentEndpoint {
 
   @GET
   @Path("{uuid}/logs")
+  // TODO really return string and plaintext? might be a better way, look it up
   @Produces(MediaType.TEXT_PLAIN)
   public Uni<String> getLogs(@PathParam("uuid") UUID uuid) {
     return sf.withTransaction(
@@ -44,11 +45,7 @@ public class DeploymentEndpoint {
                 .find(DeploymentEntity.class, uuid)
                 .onItem()
                 .ifNotNull()
-                .transform(
-                    de -> {
-                      KubernetesDeployment k8Deploy = new KubernetesDeployment(client);
-                      return k8Deploy.getDeploymentLogs(de.getName());
-                    })));
+                .transform(this::getLogs)));
   }
 
   @GET
@@ -71,35 +68,29 @@ public class DeploymentEndpoint {
                     .onItem()
                     .ifNotNull()
                     .call(
-                        x ->
+                        pe ->
                             session
                                 .find(
-                                    StreamEntity.class,
-                                    UUID.fromString(x.getMetadata().get("stream-in").asText()))
+                                    StreamEntity.class, getUUIDFromNode(pe, StaticConfig.STREAM_IN))
                                 .onItem()
                                 .ifNotNull()
                                 .call(
-                                    streamin ->
+                                    streamIn ->
                                         session
                                             .find(
                                                 StreamEntity.class,
-                                                UUID.fromString(
-                                                    x.getMetadata().get("stream-out").asText()))
+                                                getUUIDFromNode(pe, StaticConfig.STREAM_OUT))
                                             .onItem()
                                             .ifNotNull()
                                             .call(
-                                                streamout -> {
-                                                  KubernetesDeployment k8Deploy =
-                                                      new KubernetesDeployment(client);
-                                                  String name =
-                                                      k8Deploy.createDeployment(
-                                                          datacaterDeployment,
-                                                          x,
-                                                          streamin,
-                                                          streamout);
-                                                  de.setName(name);
-                                                  return session.persist(de);
-                                                }))))
+                                                streamOut ->
+                                                    session.persist(
+                                                        createDeployment(
+                                                            datacaterDeployment,
+                                                            pe,
+                                                            streamOut,
+                                                            streamIn,
+                                                            de))))))
         .replaceWith(Response.ok(de).build());
   }
 
@@ -112,12 +103,7 @@ public class DeploymentEndpoint {
                 .find(DeploymentEntity.class, uuid)
                 .onItem()
                 .ifNotNull()
-                .call(
-                    de -> {
-                      KubernetesDeployment k8Deploy = new KubernetesDeployment(client);
-                      k8Deploy.deleteDeployment(de.getName());
-                      return session.remove(de);
-                    })
+                .call(de -> session.remove(deleteDeployment(de)))
                 .replaceWith(Response.ok().build())));
   }
 
@@ -141,38 +127,58 @@ public class DeploymentEndpoint {
                             .ifNull()
                             .continueWith(new PipelineEntity())
                             .call(
-                                x -> // find serializers and bootstrap.servers from config
-                                session
+                                pe ->
+                                    session
                                         .find(
                                             StreamEntity.class,
-                                            UUID.fromString(
-                                                x.getMetadata().get("stream-in").asText()))
+                                            getUUIDFromNode(pe, StaticConfig.STREAM_IN))
                                         .onItem()
                                         .ifNotNull()
                                         .call(
-                                            streamin ->
+                                            streamIn ->
                                                 session
                                                     .find(
                                                         StreamEntity.class,
-                                                        UUID.fromString(
-                                                            x.getMetadata()
-                                                                .get("stream-out")
-                                                                .asText()))
+                                                        getUUIDFromNode(
+                                                            pe, StaticConfig.STREAM_OUT))
                                                     .onItem()
                                                     .ifNotNull()
                                                     .call(
-                                                        streamout -> {
-                                                          KubernetesDeployment k8Deploy =
-                                                              new KubernetesDeployment(client);
-                                                          String name =
-                                                              k8Deploy.createDeployment(
-                                                                  datacaterDeployment,
-                                                                  x,
-                                                                  streamin,
-                                                                  streamout);
-                                                          de.setName(name);
-                                                          de.setSpec(datacaterDeployment.spec());
-                                                          return session.persist(de);
-                                                        })))));
+                                                        streamOut ->
+                                                            session.persist(
+                                                                createDeployment(
+                                                                    datacaterDeployment,
+                                                                    pe,
+                                                                    streamOut,
+                                                                    streamIn,
+                                                                    de)))))));
+  }
+
+  private String getLogs(DeploymentEntity de) {
+    K8Deployment k8Deployment = new K8Deployment(client);
+    return k8Deployment.getLogs(de.getName());
+  }
+
+  private DeploymentEntity deleteDeployment(DeploymentEntity de) {
+    K8Deployment k8Deployment = new K8Deployment(client);
+    k8Deployment.delete(de.getName());
+    return de;
+  }
+
+  private DeploymentEntity createDeployment(
+      DatacaterDeployment datacaterDeployment,
+      PipelineEntity pe,
+      StreamEntity streamOut,
+      StreamEntity streamIn,
+      DeploymentEntity de) {
+    K8Deployment k8Deployment = new K8Deployment(client);
+    String name = k8Deployment.create(datacaterDeployment, pe, streamIn, streamOut);
+    de.setName(name);
+    de.setSpec(datacaterDeployment.spec());
+    return de;
+  }
+
+  private UUID getUUIDFromNode(PipelineEntity pe, String node) {
+    return UUID.fromString(pe.getMetadata().get(node).asText());
   }
 }

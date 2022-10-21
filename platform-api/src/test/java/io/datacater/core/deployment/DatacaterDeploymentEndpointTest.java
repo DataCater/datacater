@@ -23,6 +23,8 @@ import org.junit.jupiter.api.TestInstance;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class DatacaterDeploymentEndpointTest {
 
+  // TODO tests are fine, could add more though. Add tests for K8 resources, need to mock class and
+  // rev up k8 cluster (can mock it too i think) prolly
   UUID deploymentUUID;
   String baseURI = "http://localhost:8081/api/alpha";
   String deploymentsPath = "/deployments";

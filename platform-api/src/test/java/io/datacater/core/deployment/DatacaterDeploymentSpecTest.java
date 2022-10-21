@@ -3,6 +3,7 @@ package io.datacater.core.deployment;
 import io.quarkus.test.junit.QuarkusTest;
 import org.junit.jupiter.api.TestInstance;
 
+// TODO can probably safely remove this trash
 @QuarkusTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class DatacaterDeploymentSpecTest {
