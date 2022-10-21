@@ -56,18 +56,21 @@ class Grid extends Component {
   getColumn(field, idx, filters, defaultColumnWidth) {
     const me = this;
 
+    let filterOfCurrentStep = undefined;
+    let transformationOfCurrentStep = undefined;
+    /* TODO
     const filterOfCurrentStep = this.props.pipeline.spec.filters.find(
       (filter) => filter.fieldName === field.name
     );
 
     const pipelineStep =
       this.props.pipeline.spec.transformationSteps[this.props.currentStep];
-    let transformationOfCurrentStep = undefined;
     if (pipelineStep !== undefined) {
       transformationOfCurrentStep = pipelineStep.transformations.find(
         (transformation) => transformation.fieldName === field.name
       );
     }
+    */
 
     return {
       // column properties
@@ -241,7 +244,7 @@ class Grid extends Component {
 
     return (
       <div className="container-fluid">
-        <div className="row mt-2">
+        <div className="row">
           <div
             className={`col-12 w-100 px-0 datacater-grid-container${gridTransformClassName}`}
             style={{ position: "relative" }}

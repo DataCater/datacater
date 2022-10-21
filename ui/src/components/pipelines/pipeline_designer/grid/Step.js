@@ -1,14 +1,14 @@
 import React, { Component } from "react";
 
-class TransformationStep extends Component {
-  getTransformationStepShortName(transformationStep, sortPosition) {
+class Step extends Component {
+  getStepShortName(step, sortPosition) {
     let shortName = sortPosition;
 
-    if ([undefined, ""].includes(transformationStep.name)) {
+    if ([undefined, ""].includes(step.name)) {
       return shortName;
     }
 
-    const words = transformationStep.name.split(" ");
+    const words = step.name.split(" ");
 
     if (words[0] !== undefined && words[0].length > 0) {
       shortName = words[0][0].toUpperCase()[0];
@@ -21,19 +21,16 @@ class TransformationStep extends Component {
     return shortName;
   }
 
-  getTransformationStepName(transformationStep) {
-    if (
-      transformationStep.name === undefined ||
-      transformationStep.name.length === 0
-    ) {
+  getStepName(step) {
+    if (step.name === undefined || step.name.length === 0) {
       return "Untitled Step";
     } else {
-      return transformationStep.name;
+      return step.name;
     }
   }
 
   render() {
-    const { sortPosition, transformationStep } = this.props;
+    const { sortPosition, step } = this.props;
 
     let classNames = "list-group-item border-0 p-0 me-3";
     if (
@@ -47,30 +44,24 @@ class TransformationStep extends Component {
       ![this.props.draggingItem, this.props.draggingOverItem].includes(
         undefined
       ) &&
-      this.props.draggingOverItem === transformationStep.sortPosition &&
-      ![
-        transformationStep.sortPosition,
-        transformationStep.sortPosition + 1,
-      ].includes(this.props.draggingItem);
+      this.props.draggingOverItem === sortPosition &&
+      ![sortPosition, sortPosition + 1].includes(this.props.draggingItem);
 
     return (
       <React.Fragment>
         <li
           className={classNames}
-          data-sort-position={transformationStep.sortPosition}
+          data-sort-position={sortPosition}
           onDragLeave={this.props.onDragLeaveFunc}
           onDragOver={(event) => {
-            this.props.onDragOverFunc(event, transformationStep.sortPosition);
+            this.props.onDragOverFunc(event, sortPosition);
           }}
           onDrop={this.props.onDropFunc}
         >
           <div
             className="avatar avatar-sm clickable d-flex align-items-center justify-content-center"
-            data-name={this.getTransformationStepName(transformationStep)}
-            data-short-name={this.getTransformationStepShortName(
-              transformationStep,
-              sortPosition
-            )}
+            data-name={this.getStepName(step)}
+            data-short-name={this.getStepShortName(step, sortPosition)}
             data-sort-position={sortPosition}
             draggable={true}
             onDragEnd={this.props.onDragEndFunc}
@@ -83,10 +74,7 @@ class TransformationStep extends Component {
               className="avatar-title bg-primary-soft rounded-circle text-primary"
               data-sort-position={sortPosition}
             >
-              {this.getTransformationStepShortName(
-                transformationStep,
-                sortPosition
-              )}
+              {this.getStepShortName(step, sortPosition)}
             </div>
           </div>
         </li>
@@ -104,4 +92,4 @@ class TransformationStep extends Component {
   }
 }
 
-export default TransformationStep;
+export default Step;

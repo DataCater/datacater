@@ -18,9 +18,7 @@ class Attribute extends Component {
       transforms,
     } = this.props;
 
-    const field = fields.find(
-      (attr) => attr === editColumn.fieldName
-    );
+    const field = fields.find((attr) => attr === editColumn.fieldName);
 
     const fieldProfile = profile[field];
 
@@ -34,9 +32,7 @@ class Attribute extends Component {
       transform = transforms.find(
         (transform) => transform.key === pipelineField.transformation
       );
-      filter = filters.find(
-        (filter) => filter.key === pipelineField.filter
-      );
+      filter = filters.find((filter) => filter.key === pipelineField.filter);
     }
 
     return (

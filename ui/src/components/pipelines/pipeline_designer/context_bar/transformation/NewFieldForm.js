@@ -4,17 +4,14 @@ import { Package } from "react-feather";
 
 class NewFieldForm extends Component {
   render() {
-    const { field, fields, pipelineStep, transforms } =
-      this.props;
+    const { field, fields, pipelineStep, transforms } = this.props;
 
     const typeCastTransformer = transforms.find(
       (_) => _.key === "cast-data-type"
     );
 
     const isDuplicateName = fields
-      .filter(
-        (attr) => parseInt(attr.id) !== parseInt(field.transformFieldId)
-      )
+      .filter((attr) => parseInt(attr.id) !== parseInt(field.transformFieldId))
       .map((attr) => attr.name)
       .includes(field.actionValue);
 

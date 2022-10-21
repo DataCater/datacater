@@ -1,6 +1,4 @@
 .datacater-pipeline-designer-pipeline-steps-list {
-  padding-left: 50px !important;
-
   li {
     border-radius: 50% !important;
   }
@@ -8,7 +6,7 @@
   .datacater-pipeline-designer-pipeline-steps-list-delete-zone {
     background-color: #e8625e;
     color: #fff;
-    height: calc(4rem + 2px);
+    height: calc(3.5rem + 2px);
     position: absolute;
     left: 0;
     top: 0;
@@ -21,7 +19,6 @@
 
   ul.list-group {
     height: 100%;
-    margin-right: 12px;
   }
 
   .list-group-item:not(:last-child) {

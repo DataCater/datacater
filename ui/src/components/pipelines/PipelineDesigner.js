@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import ContextSidebar from "./pipeline_designer/ContextSidebar";
 import EditFilter from "./pipeline_designer/context_bar/filter/Edit";
 import EditTransformation from "./pipeline_designer/context_bar/transformation/Edit";
-import TransformationStepsList from "./pipeline_designer/grid/TransformationStepsList";
+import StepsList from "./pipeline_designer/grid/StepsList";
 import Grid from "./pipeline_designer/Grid";
 
 class PipelineDesigner extends Component {
@@ -65,7 +65,7 @@ class PipelineDesigner extends Component {
       this.state.draggingItem !== this.state.draggingOverItem &&
       this.state.draggingItem !== this.state.draggingOverItem + 1
     ) {
-      this.props.moveTransformStepFunc(
+      this.props.moveStepFunc(
         this.state.draggingItem,
         this.state.draggingOverItem + 1
       );
@@ -107,12 +107,10 @@ class PipelineDesigner extends Component {
     }
 
     let editColumnField;
-    const transformSteps = pipeline.spec.transformationSteps;
+    const steps = pipeline.spec.steps;
 
-    const transformStep =
-      this.props.currentStep >= 0
-        ? transformSteps[this.props.currentStep]
-        : undefined;
+    const step =
+      this.props.currentStep >= 0 ? steps[this.props.currentStep] : undefined;
 
     if (this.props.editColumn !== undefined) {
       editColumnField = this.props.fields.find(
@@ -122,77 +120,71 @@ class PipelineDesigner extends Component {
 
     return (
       <React.Fragment>
-        {this.props.currentPage === "transform" && (
-          <TransformationStepsList
-            addTransformStepFunc={this.props.addTransformStepFunc}
-            currentStep={this.props.currentStep}
-            moveTransformStepFunc={this.props.moveTransformStepFunc}
-            moveToStepFunc={this.props.moveToStepFunc}
-            transformationSteps={transformSteps}
-            removeTransformStepFunc={this.props.removeTransformStepFunc}
-          />
-        )}
+        <StepsList
+          addStepFunc={this.props.addStepFunc}
+          currentStep={this.props.currentStep}
+          moveStepFunc={this.props.moveStepFunc}
+          moveToStepFunc={this.props.moveToStepFunc}
+          steps={steps}
+          removeStepFunc={this.props.removeStepFunc}
+        />
         <Grid
           addColumnFunc={this.props.addColumnFunc}
           addedColumn={this.props.addedColumn}
-          addTransformStepFunc={this.props.addTransformStepFunc}
+          addStepFunc={this.props.addStepFunc}
           filters={this.props.pipeline.spec.filters}
           fields={this.props.fields}
           fieldProfiles={this.props.fieldProfiles}
-          currentPage={this.props.currentPage}
           currentStep={this.props.currentStep}
           editColumnField={editColumnField}
           editColumnFunc={this.props.editColumnFunc}
           filters={this.props.filters}
           handleFilterChangeFunc={this.props.handleFilterChangeFunc}
-          handleTransformStepChangeFunc={
-            this.props.handleTransformStepChangeFunc
-          }
+          handleStepChangeFunc={this.props.handleStepChangeFunc}
           introducedFields={[]}
-          moveTransformStepFunc={this.props.moveTransformStepFunc}
+          moveStepFunc={this.props.moveStepFunc}
           moveToStepFunc={this.props.moveToStepFunc}
           originalRecordsSize={this.props.originalRecordsSize}
           pipeline={this.props.pipeline}
           profile={this.props.profile}
           removeColumnFunc={this.props.removeColumnFunc}
-          removeTransformStepFunc={this.props.removeTransformStepFunc}
+          removeStepFunc={this.props.removeStepFunc}
           sampleRecords={this.props.sampleRecords}
           transforms={this.props.transforms}
         />
-        {this.props.contextBarActive &&
-          ["filter", "transform"].includes(this.props.currentPage) && (
-            <ContextSidebar>
-              {this.props.editColumn !== undefined &&
-                this.props.editColumn.type === "transform" && (
-                  <EditTransformation
-                    field={this.props.editColumn.field}
-                    fields={this.props.fields}
-                    currentStep={this.props.currentStep}
-                    editColumn={this.props.editColumn}
-                    filters={this.props.filters}
-                    handleChangeFunc={this.props.handleTransformStepChangeFunc}
-                    hideContextBarFunc={this.props.hideContextBarFunc}
-                    previewState={this.props.previewState}
-                    transformStep={transformStep}
-                    profile={this.props.profile}
-                    transforms={this.props.transforms}
-                  />
-                )}
-              {this.props.editColumn !== undefined &&
-                this.props.editColumn.type === "filter" && (
-                  <EditFilter
-                    field={editColumnField}
-                    fields={this.props.fields}
-                    editColumn={this.props.editColumn}
-                    filter={this.props.editColumn.filter}
-                    filters={this.props.filters}
-                    profile={this.props.profile}
-                    handleChangeFunc={this.props.handleFilterChangeFunc}
-                    hideContextBarFunc={this.props.hideContextBarFunc}
-                  />
-                )}
-            </ContextSidebar>
-          )}
+        {this.props.contextBarActive && this.props.currentStep !== undefined && (
+          <ContextSidebar>
+            {this.props.editColumn !== undefined &&
+              this.props.editColumn.type === "transform" && (
+                <EditTransformation
+                  field={this.props.editColumn.field}
+                  fields={this.props.fields}
+                  currentStep={this.props.currentStep}
+                  editColumn={this.props.editColumn}
+                  filters={this.props.filters}
+                  handleChangeFunc={this.props.handleStepChangeFunc}
+                  hideContextBarFunc={this.props.hideContextBarFunc}
+                  previewState={this.props.previewState}
+                  transformStep={step}
+                  profile={this.props.profile}
+                  transforms={this.props.transforms}
+                />
+              )}
+            {this.props.editColumn !== undefined &&
+              this.props.editColumn.type === "filter" && (
+                <EditFilter
+                  field={editColumnField}
+                  fields={this.props.fields}
+                  editColumn={this.props.editColumn}
+                  filter={this.props.editColumn.filter}
+                  filters={this.props.filters}
+                  profile={this.props.profile}
+                  handleChangeFunc={this.props.handleFilterChangeFunc}
+                  hideContextBarFunc={this.props.hideContextBarFunc}
+                />
+              )}
+          </ContextSidebar>
+        )}
       </React.Fragment>
     );
   }

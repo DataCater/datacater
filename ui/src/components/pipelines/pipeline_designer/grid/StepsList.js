@@ -1,10 +1,10 @@
 import React, { Component } from "react";
 import { Button, Modal } from "react-bootstrap";
 import { Plus, Trash2 } from "react-feather";
-import TransformationStep from "./TransformationStep";
+import Step from "./Step";
 import "../../../../scss/designer/pipeline-steps.scss";
 
-class TransformationStepsList extends Component {
+class StepsList extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -26,7 +26,7 @@ class TransformationStepsList extends Component {
     this.enterDeleteZone = this.enterDeleteZone.bind(this);
     this.leaveDeleteZone = this.leaveDeleteZone.bind(this);
     this.toggleDeleteModal = this.toggleDeleteModal.bind(this);
-    this.deleteTransformationStep = this.deleteTransformationStep.bind(this);
+    this.deleteStep = this.deleteStep.bind(this);
   }
 
   onDragStart(event) {
@@ -73,7 +73,7 @@ class TransformationStepsList extends Component {
       this.state.draggingItem !== this.state.draggingOverItem &&
       this.state.draggingItem !== this.state.draggingOverItem + 1
     ) {
-      this.props.moveTransformStepFunc(
+      this.props.moveStepFunc(
         this.state.draggingItem,
         this.state.draggingOverItem + 1
       );
@@ -95,7 +95,7 @@ class TransformationStepsList extends Component {
           "Are you sure that you want to delete the transform step?"
         )
       ) {
-        this.props.removeTransformStepFunc(draggingItem);
+        this.props.removeStepFunc(draggingItem);
         this.setState({
           draggingItem: undefined,
           draggingOverItem: undefined,
@@ -126,7 +126,7 @@ class TransformationStepsList extends Component {
     // scroll to the right end of the steps list
     if (
       document.getElementById(listClassName) != null &&
-      this.props.currentStep === this.props.transformationSteps.length &&
+      this.props.currentStep === this.props.steps.length &&
       this.state.draggingItem === undefined
     ) {
       document.getElementById(listClassName).scrollLeft =
@@ -140,8 +140,8 @@ class TransformationStepsList extends Component {
     });
   }
 
-  deleteTransformationStep() {
-    this.props.removeTransformStepFunc(this.state.toBeDeletedStep);
+  deleteStep() {
+    this.props.removeStepFunc(this.state.toBeDeletedStep);
   }
 
   render() {
@@ -152,7 +152,7 @@ class TransformationStepsList extends Component {
     }
 
     return (
-      <div className="container px-3 datacater-pipeline-designer-third-row datacater-pipeline-designer-pipeline-steps-list d-flex align-items-center overflow-hidden text-nowrap">
+      <div className="my-2 container pe-3 datacater-pipeline-designer-third-row datacater-pipeline-designer-pipeline-steps-list d-flex align-items-center text-nowrap">
         {this.state.draggingItem !== undefined && (
           <div
             className={deleteZoneClassNames}
@@ -166,6 +166,24 @@ class TransformationStepsList extends Component {
             </h6>
           </div>
         )}
+        <div className="h-75 d-flex align-items-center me-4">
+          {this.props.currentStep === undefined && (
+            <button className="btn btn-primary font-size-lg text-white">
+              Inspect source
+            </button>
+          )}
+          {this.props.currentStep !== undefined && (
+            <button
+              onClick={(event) => {
+                this.props.moveToStepFunc(event, undefined);
+              }}
+              className="btn font-size-lg bg-primary-soft text-primary"
+              style={{ backgroundColor: "#eaf6ec" }}
+            >
+              Inspect source
+            </button>
+          )}
+        </div>
         <div
           className="h-75 d-flex align-items-center pe-4"
           onDragLeave={this.onDragLeave}
@@ -174,8 +192,13 @@ class TransformationStepsList extends Component {
           }}
           onDrop={this.onDrop}
         >
-          <h6 className="mb-0">Transformation steps</h6>
+          <h6 className="mb-0">Steps:</h6>
         </div>
+        {(this.props.steps === undefined || this.props.steps.length === 0) && (
+          <div className="h-75 d-flex align-items-center pe-4">
+            <i>No steps defined.</i>
+          </div>
+        )}
         <ul
           id="datacater-pipeline-designer-pipeline-steps-list-items"
           className="list-group list-group-horizontal d-flex align-items-center ps-0"
@@ -189,8 +212,8 @@ class TransformationStepsList extends Component {
               </div>
             </li>
           )}
-          {this.props.transformationSteps.map((transformationStep, idx) => (
-            <TransformationStep
+          {this.props.steps.map((step, idx) => (
+            <Step
               currentStep={this.props.currentStep}
               draggingItem={this.state.draggingItem}
               draggingName={this.state.draggingName}
@@ -203,25 +226,52 @@ class TransformationStepsList extends Component {
               onDragLeaveFunc={this.onDragLeave}
               onDragOverFunc={this.onDragOver}
               onDropFunc={this.onDrop}
-              sortPosition={idx}
-              transformationStep={transformationStep}
-              removeTransformationStepFunc={this.props.removeTransformStepFunc}
+              sortPosition={idx + 1}
+              step={step}
+              removeStepFunc={this.props.removeStepFunc}
             />
           ))}
-          <li className="list-group-item border-0 p-0">
-            <div className="avatar avatar-sm d-flex align-items-center justify-content-center">
-              <div className="avatar-title font-size-lg bg-primary-soft rounded-circle text-primary">
-                <Plus
-                  className="feather-icon clickable"
-                  onClick={this.props.addTransformStepFunc}
-                />
-              </div>
-            </div>
-          </li>
         </ul>
+        <div className="dropdown ms-2">
+          <button
+            className="btn btn-outline-primary dropdown-toggle"
+            type="button"
+            data-bs-toggle="dropdown"
+            aria-expanded="false"
+          >
+            <Plus className="feather-icon clickable" />
+            {(this.props.steps === undefined ||
+              this.props.steps.length === 0) && <>Add first step</>}
+            {this.props.steps !== undefined && this.props.steps.length > 0 && (
+              <>Add step</>
+            )}
+          </button>
+          <ul className="dropdown-menu">
+            <li>
+              <a
+                className="dropdown-item"
+                data-step-kind="Field"
+                href="#"
+                onClick={this.props.addStepFunc}
+              >
+                Transform single fields
+              </a>
+            </li>
+            <li>
+              <a
+                className="dropdown-item"
+                data-step-kind="Record"
+                href="#"
+                onClick={this.props.addStepFunc}
+              >
+                Transform record
+              </a>
+            </li>
+          </ul>
+        </div>
       </div>
     );
   }
 }
 
-export default TransformationStepsList;
+export default StepsList;

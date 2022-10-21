@@ -47,11 +47,7 @@ class TableHeaderCell extends Component {
     if (currentPage === "filter") {
       editColumnFunc(field.name, undefined, "filter");
     } else if (currentPage === "transform") {
-      editColumnFunc(
-        field.name,
-        this.props.column.currentStep,
-        "transform"
-      );
+      editColumnFunc(field.name, this.props.column.currentStep, "transform");
     }
   }
 

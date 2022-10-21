@@ -61,19 +61,6 @@ class Nav extends Component {
         </li>
         <li className="nav-item">
           <a
-            className={filterClassNames}
-            href={window.location.href}
-            onClick={(e) => {
-              e.preventDefault();
-              this.moveToPage("filter");
-            }}
-          >
-            <Filter className="feather-icon me-1" />
-            Filter
-          </a>
-        </li>
-        <li className="nav-item">
-          <a
             className={transformClassNames}
             href={window.location.href}
             onClick={(e) => {

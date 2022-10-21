@@ -24,8 +24,7 @@ class Config extends Component {
     } = this.props;
 
     const transformConfig =
-      pipelineField !== undefined &&
-      pipelineField.transformationConfig != null
+      pipelineField !== undefined && pipelineField.transformationConfig != null
         ? pipelineField.transformationConfig
         : {};
 

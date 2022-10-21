@@ -87,9 +87,7 @@ export function profileRecords(records) {
   const fieldNames = Object.keys(profile);
   fieldNames.forEach((fieldName) => {
     const sortedFrequencies = new Map(
-      [...profile[fieldName].frequencies.entries()].sort(
-        (a, b) => b[1] - a[1]
-      )
+      [...profile[fieldName].frequencies.entries()].sort((a, b) => b[1] - a[1])
     );
     const sortedFrequenciesKeys = sortedFrequencies.keys();
     for (let i = 0; i < 5; i++) {
