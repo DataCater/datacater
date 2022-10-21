@@ -35,17 +35,17 @@ public class Pipeline {
 
   @Inject
   @Channel(PipelineConfig.STREAM_OUT)
-  Emitter<Record<UUID, JsonObject>> producer;
+  Emitter<Record<Object, JsonObject>> producer;
 
   @Incoming(PipelineConfig.STREAM_IN)
   @Blocking
   @Acknowledgment(Acknowledgment.Strategy.POST_PROCESSING)
-  public void processUUID(ConsumerRecords<UUID, JsonObject> messages) {
+  public void processUUID(ConsumerRecords<Object, JsonObject> messages) {
     // This is deliberately blocking
     handleMessages(messages);
   }
 
-  private void handleMessages(ConsumerRecords<UUID, JsonObject> messages) {
+  private void handleMessages(ConsumerRecords<Object, JsonObject> messages) {
     HttpRequest<Buffer> request = client.post(getPort(), getHost(), PipelineConfig.ENDPOINT)
             .putHeader(PipelineConfig.HEADER, PipelineConfig.HEADER_TYPE);
     HttpResponse<Buffer> response = request.sendJson(getMessages(messages)).await().indefinitely();
@@ -68,7 +68,7 @@ public class Pipeline {
     });
   }
 
-  private void sendRecord(Record<UUID, JsonObject> record){
+  private void sendRecord(Record<Object, JsonObject> record){
     producer.send(record);
   }
 
@@ -77,17 +77,17 @@ public class Pipeline {
     LOGGER.error(errorMsg);
   }
 
-  private UUID getKey(JsonObject message){
+  private Object getKey(JsonObject message){
     if(message.getJsonObject(PipelineConfig.KEY) == null){
       return null;
     }
-    return UUID.fromString(message.getJsonObject(PipelineConfig.KEY).encode());
+    return message.getJsonObject(PipelineConfig.KEY).encode();
   }
 
-  private JsonArray getMessages(ConsumerRecords<UUID, JsonObject> messages){
+  private JsonArray getMessages(ConsumerRecords<Object, JsonObject> messages){
     JsonArray jsonMessages = new JsonArray();
-    for (ConsumerRecord<UUID, JsonObject> message:messages) {
-      jsonMessages.add(new JsonObject().put(PipelineConfig.KEY, null).put(PipelineConfig.VALUE, message.value()).put(PipelineConfig.METADATA, new JsonObject().put(PipelineConfig.OFFSET, message.offset()).put(PipelineConfig.PARTITION, message.partition())));
+    for (ConsumerRecord<Object, JsonObject> message:messages) {
+      jsonMessages.add(new JsonObject().put(PipelineConfig.KEY, message.key()).put(PipelineConfig.VALUE, message.value()).put(PipelineConfig.METADATA, new JsonObject().put(PipelineConfig.OFFSET, message.offset()).put(PipelineConfig.PARTITION, message.partition())));
     }
     return jsonMessages;
   }
