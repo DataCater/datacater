@@ -3,6 +3,7 @@ import ContextSidebar from "./pipeline_designer/ContextSidebar";
 import EditFilter from "./pipeline_designer/context_bar/filter/Edit";
 import EditTransformation from "./pipeline_designer/context_bar/transformation/Edit";
 import StepsList from "./pipeline_designer/grid/StepsList";
+import Toolbar from "./pipeline_designer/grid/Toolbar";
 import Grid from "./pipeline_designer/Grid";
 
 class PipelineDesigner extends Component {
@@ -13,14 +14,26 @@ class PipelineDesigner extends Component {
       draggingName: undefined,
       draggingShortName: undefined,
       draggingOverItem: undefined,
+      showGrid: true,
     };
     this.onDragStart = this.onDragStart.bind(this);
     this.onDragEnd = this.onDragEnd.bind(this);
     this.onDragOver = this.onDragOver.bind(this);
     this.onDragLeave = this.onDragLeave.bind(this);
     this.onDrop = this.onDrop.bind(this);
-    this.renderTransformationStepHeader =
-      this.renderTransformationStepHeader.bind(this);
+    this.toggleShowGrid = this.toggleShowGrid.bind(this);
+  }
+
+  componentDidUpdate() {
+    // scroll to the right end of the steps list
+    if (
+      document.getElementById("steps-list") != null &&
+      this.props.currentStep === this.props.pipeline.pipelineSteps.length &&
+      this.state.draggingItem === undefined
+    ) {
+      document.getElementById("steps-list").scrollLeft =
+        document.getElementById("steps-list").scrollWidth + 200;
+    }
   }
 
   onDragStart(event) {
@@ -76,27 +89,12 @@ class PipelineDesigner extends Component {
     }
   }
 
-  componentDidUpdate() {
-    // scroll to the right end of the steps list
-    if (
-      document.getElementById("steps-list") != null &&
-      this.props.currentStep === this.props.pipeline.pipelineSteps.length &&
-      this.state.draggingItem === undefined
-    ) {
-      document.getElementById("steps-list").scrollLeft =
-        document.getElementById("steps-list").scrollWidth + 200;
-    }
-  }
+  toggleShowGrid(event) {
+    event.preventDefault();
 
-  renderTransformationStepHeader() {
-    const pipelineSteps = this.props.pipeline.pipelineSteps.length;
-    if (pipelineSteps === 0) {
-      return "Transformation Steps";
-    } else if (pipelineSteps === 1) {
-      return "1 Transformation Step";
-    } else if (pipelineSteps > 1) {
-      return `${pipelineSteps} Transformation Steps`;
-    }
+    this.setState({
+      showGrid: !this.state.showGrid,
+    });
   }
 
   render() {
@@ -107,10 +105,12 @@ class PipelineDesigner extends Component {
     }
 
     let editColumnField;
-    const steps = pipeline.spec.steps;
 
+    const steps = pipeline.spec.steps;
     const step =
-      this.props.currentStep >= 0 ? steps[this.props.currentStep] : undefined;
+      this.props.currentStep >= 0
+        ? steps[this.props.currentStep - 1]
+        : undefined;
 
     if (this.props.editColumn !== undefined) {
       editColumnField = this.props.fields.find(
@@ -128,30 +128,58 @@ class PipelineDesigner extends Component {
           steps={steps}
           removeStepFunc={this.props.removeStepFunc}
         />
-        <Grid
-          addColumnFunc={this.props.addColumnFunc}
-          addedColumn={this.props.addedColumn}
-          addStepFunc={this.props.addStepFunc}
-          filters={this.props.pipeline.spec.filters}
-          fields={this.props.fields}
-          fieldProfiles={this.props.fieldProfiles}
-          currentStep={this.props.currentStep}
-          editColumnField={editColumnField}
-          editColumnFunc={this.props.editColumnFunc}
-          filters={this.props.filters}
-          handleFilterChangeFunc={this.props.handleFilterChangeFunc}
-          handleStepChangeFunc={this.props.handleStepChangeFunc}
-          introducedFields={[]}
-          moveStepFunc={this.props.moveStepFunc}
-          moveToStepFunc={this.props.moveToStepFunc}
-          originalRecordsSize={this.props.originalRecordsSize}
-          pipeline={this.props.pipeline}
-          profile={this.props.profile}
-          removeColumnFunc={this.props.removeColumnFunc}
-          removeStepFunc={this.props.removeStepFunc}
+        <Toolbar
+          hideStepNameFormFunc={this.props.hideStepNameFormFunc}
+          pipeline={pipeline}
           sampleRecords={this.props.sampleRecords}
-          transforms={this.props.transforms}
+          showGrid={this.state.showGrid}
+          showStepNameForm={this.props.showStepNameForm}
+          showStepNameFormFunc={this.props.showStepNameFormFunc}
+          step={step}
+          toggleShowGridFunc={this.toggleShowGrid}
+          updateStepNameFunc={this.props.updateStepNameFunc}
         />
+        {this.state.showGrid && (
+          <Grid
+            addColumnFunc={this.props.addColumnFunc}
+            addedColumn={this.props.addedColumn}
+            addStepFunc={this.props.addStepFunc}
+            filters={this.props.pipeline.spec.filters}
+            fields={this.props.fields}
+            fieldProfiles={this.props.fieldProfiles}
+            currentStep={this.props.currentStep}
+            editColumnField={editColumnField}
+            editColumnFunc={this.props.editColumnFunc}
+            filters={this.props.filters}
+            handleFilterChangeFunc={this.props.handleFilterChangeFunc}
+            handleStepChangeFunc={this.props.handleStepChangeFunc}
+            introducedFields={[]}
+            moveStepFunc={this.props.moveStepFunc}
+            moveToStepFunc={this.props.moveToStepFunc}
+            originalRecordsSize={this.props.originalRecordsSize}
+            pipeline={this.props.pipeline}
+            profile={this.props.profile}
+            removeColumnFunc={this.props.removeColumnFunc}
+            removeStepFunc={this.props.removeStepFunc}
+            sampleRecords={this.props.sampleRecords}
+            transforms={this.props.transforms}
+          />
+        )}
+        {!this.state.showGrid && (
+          <div className="container">
+            <div className="row my-2">
+              <div className="col-12">
+                <div className="card">
+                  <div className="card-body">
+                    <pre>
+                      {JSON.stringify(this.props.sampleRecords, null, 2)}
+                    </pre>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
         {this.props.contextBarActive && this.props.currentStep !== undefined && (
           <ContextSidebar>
             {this.props.editColumn !== undefined &&

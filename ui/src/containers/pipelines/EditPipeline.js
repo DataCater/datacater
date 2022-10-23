@@ -47,6 +47,7 @@ class EditPipeline extends Component {
       pipeline: {},
       pipelineUpdated: false,
       pipelineUpdatedAt: undefined,
+      showStepNameForm: false,
       unpersistedChanges: false,
     };
 
@@ -66,6 +67,9 @@ class EditPipeline extends Component {
     this.showContextBar = this.showContextBar.bind(this);
     this.hideContextBar = this.hideContextBar.bind(this);
     this.removeColumn = this.removeColumn.bind(this);
+    this.updateStepName = this.updateStepName.bind(this);
+    this.showStepNameForm = this.showStepNameForm.bind(this);
+    this.hideStepNameForm = this.hideStepNameForm.bind(this);
   }
 
   componentDidMount() {
@@ -367,6 +371,7 @@ class EditPipeline extends Component {
       currentStep: currentStep,
       editColumn: undefined,
       pipeline: pipeline,
+      showStepNameForm: false,
       unpersistedChanges: true,
     });
   }
@@ -394,6 +399,7 @@ class EditPipeline extends Component {
       contextBarActive: false,
       editColumn: undefined,
       pipeline: pipeline,
+      showStepNameForm: false,
       unpersistedChanges: true,
     });
   }
@@ -430,6 +436,7 @@ class EditPipeline extends Component {
         contextBarActive: false,
         editColumn: undefined,
         pipeline: pipeline,
+        showStepNameForm: false,
         unpersistedChanges: true,
       });
     }
@@ -444,6 +451,7 @@ class EditPipeline extends Component {
       currentStep: newStep,
       contextBarActive: false,
       editColumn: undefined,
+      showStepNameForm: false,
     });
   }
 
@@ -574,7 +582,32 @@ class EditPipeline extends Component {
       contextBarActive: false,
       editColumn: undefined,
       pipeline: pipeline,
+      showStepNameForm: false,
       unpersistedChanges: true,
+    });
+  }
+
+  updateStepName(event) {
+    let pipeline = this.state.pipeline;
+
+    pipeline.spec.steps[this.state.currentStep - 1]["name"] =
+      event.target.value;
+
+    this.setState({
+      pipeline: pipeline,
+      unpersistedChanges: true,
+    });
+  }
+
+  showStepNameForm() {
+    this.setState({
+      showStepNameForm: true,
+    });
+  }
+
+  hideStepNameForm() {
+    this.setState({
+      showStepNameForm: false,
     });
   }
 
@@ -729,6 +762,7 @@ class EditPipeline extends Component {
             handleFilterChangeFunc={this.handleFilterChange}
             handleStepChangeFunc={this.handleStepChange}
             hideContextBarFunc={this.hideContextBar}
+            hideStepNameFormFunc={this.hideStepNameForm}
             moveToStepFunc={this.moveToStep}
             moveStepFunc={this.moveStep}
             pipeline={pipeline}
@@ -736,7 +770,10 @@ class EditPipeline extends Component {
             profile={profile}
             removeStepFunc={this.removeStep}
             sampleRecords={sampleRecords}
+            showStepNameForm={this.state.showStepNameForm}
+            showStepNameFormFunc={this.showStepNameForm}
             transforms={this.props.transforms.transforms}
+            updateStepNameFunc={this.updateStepName}
           />
         )}
       </>
