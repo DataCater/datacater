@@ -131,7 +131,7 @@ class Grid extends Component {
     // check whether columns fill width of browser
     // If not, increase the default column width
     const availableWidth = window.innerWidth - firstColumnWidth - 3;
-    if ((defaultColumnWidth * this.props.fields.length) < availableWidth) {
+    if (defaultColumnWidth * this.props.fields.length < availableWidth) {
       defaultColumnWidth = availableWidth / this.props.fields.length;
     }
 

@@ -55,7 +55,7 @@ class InspectStream extends Component {
 
     // check whether columns fill width of screen
     // If not, increase the default column width
-    const availableWidth = window.screen.width - firstColumnWidth - 3;
+    const availableWidth = window.innerWidth - firstColumnWidth - 3;
     if (defaultColumnWidth * fieldNames.length < availableWidth) {
       defaultColumnWidth = availableWidth / fieldNames.length;
     }

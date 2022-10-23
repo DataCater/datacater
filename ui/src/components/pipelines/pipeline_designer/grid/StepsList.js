@@ -152,7 +152,7 @@ class StepsList extends Component {
     }
 
     return (
-      <div className="my-2 container pe-3 datacater-pipeline-designer-third-row datacater-pipeline-designer-pipeline-steps-list d-flex align-items-center text-nowrap">
+      <div className="mt-1 container pe-3 datacater-pipeline-designer-third-row datacater-pipeline-designer-pipeline-steps-list d-flex align-items-center text-nowrap">
         {this.state.draggingItem !== undefined && (
           <div
             className={deleteZoneClassNames}
