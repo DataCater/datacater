@@ -43,6 +43,7 @@ class Toolbar extends Component {
               )}
               {showStepNameForm && (
                 <input
+                  autoFocus
                   type="text"
                   className="form-control form-control-sm d-inline float-left"
                   onBlur={hideStepNameFormFunc}
@@ -60,9 +61,14 @@ class Toolbar extends Component {
             </div>
           )}
           <div className="col d-flex align-items-center justify-content-end">
-            {step !== undefined &&
-              <span class="badge text-primary fw-semibold me-4" style={{"backgroundColor": "#eaf6ec"}}>Kind: {step.kind}</span>
-            }
+            {step !== undefined && (
+              <span
+                className="badge text-primary fw-semibold me-4"
+                style={{ backgroundColor: "#eaf6ec" }}
+              >
+                Kind: {step.kind}
+              </span>
+            )}
             <div className="btn-group">
               <a
                 href={`/pipelines/${pipeline.uuid}/edit`}

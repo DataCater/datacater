@@ -381,7 +381,7 @@ class EditPipeline extends Component {
     let currentStep = this.state.currentStep;
 
     // Remove stepIdx from pipeline.spec.steps
-    pipeline.spec.steps.splice(stepIdx, 1);
+    pipeline.spec.steps.splice(stepIdx - 1, 1);
 
     if (currentStep > pipeline.spec.steps.length - 1) {
       if (pipeline.spec.steps.length === 0) {
