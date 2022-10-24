@@ -255,6 +255,12 @@ class StepsList extends Component {
                 onClick={this.props.addStepFunc}
               >
                 Transform single fields
+                <span
+                  className="badge text-primary fw-semibold ms-2"
+                  style={{ backgroundColor: "#eaf6ec" }}
+                >
+                  Kind: Field
+                </span>
               </a>
             </li>
             <li>
@@ -265,6 +271,12 @@ class StepsList extends Component {
                 onClick={this.props.addStepFunc}
               >
                 Transform record
+                <span
+                  className="badge text-primary fw-semibold ms-2 float-right"
+                  style={{ backgroundColor: "#eaf6ec" }}
+                >
+                  Kind: Record
+                </span>
               </a>
             </li>
           </ul>
