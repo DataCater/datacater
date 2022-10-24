@@ -37,7 +37,7 @@ class PipelineTest {
 
     @Inject
     @Channel(STREAM_IN)
-    Emitter<ProducerRecord<UUID, JsonObject>> producer;
+    Emitter<ProducerRecord<JsonObject, JsonObject>> producer;
 
     @InjectKafkaCompanion
     KafkaCompanion companion;
@@ -71,25 +71,30 @@ class PipelineTest {
     void testStandardPipeline() throws ExecutionException, InterruptedException, TimeoutException {
         application.setNetwork(pythonRunner.getMappedPort(DATACATER_PYTHONRUNNER_PORT), pythonRunner.getHost());
 
-         JsonObject message = new JsonObject();
-         message.put("name", "Max Mustermann");
-         message.put("email", "max-mustermann@datacater.io");
-         message.put("is_admin", "true");
+
 
         for(int i = 1; i < 300; i++){
+            JsonObject message = new JsonObject();
+            message.put("name", "Max Mustermann");
+            message.put("email", "max-mustermann@datacater.io");
+            message.put("is_admin", "true");
             producer.send( new ProducerRecord<>(
                     "stream-in",
-                    UUID.randomUUID(),
+                    new JsonObject().put("value", UUID.randomUUID()),
                     message.put("number", i)));
         }
+        JsonObject message = new JsonObject();
+        message.put("name", "Max Mustermann");
+        message.put("email", "max-mustermann@datacater.io");
+        message.put("is_admin", "true");
         CompletionStage<Void> messageToWaitOn = producer.send( new ProducerRecord<>(
                 "stream-in",
-                UUID.randomUUID(),
+                new JsonObject().put("value", UUID.randomUUID()),
                 message));
 
         messageToWaitOn.toCompletableFuture().get(1000, TimeUnit.MILLISECONDS);
 
-        ConsumerTask<Object, Object> messages = companion.consumeWithDeserializers(org.apache.kafka.common.serialization.UUIDDeserializer.class, io.datacater.core.serde.JsonDeserializer.class).fromTopics(STREAM_OUT,1).awaitCompletion();
+        ConsumerTask<Object, Object> messages = companion.consumeWithDeserializers(io.datacater.core.serde.JsonDeserializer.class, io.datacater.core.serde.JsonDeserializer.class).fromTopics(STREAM_OUT,1).awaitCompletion();
         assertTrue(messages.getFirstRecord().value().toString().contains("max-mustermann@datacater.io"));
         assertEquals(1, messages.count());
     }

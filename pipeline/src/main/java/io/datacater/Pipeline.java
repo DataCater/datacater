@@ -1,5 +1,6 @@
 package io.datacater;
 
+import io.datacater.exceptions.TransformationException;
 import io.smallrye.common.annotation.Blocking;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -35,26 +36,26 @@ public class Pipeline {
 
   @Inject
   @Channel(PipelineConfig.STREAM_OUT)
-  Emitter<Record<Object, JsonObject>> producer;
+  Emitter<Record<JsonObject, JsonObject>> producer;
 
   @Incoming(PipelineConfig.STREAM_IN)
   @Blocking
   @Acknowledgment(Acknowledgment.Strategy.POST_PROCESSING)
-  public void processUUID(ConsumerRecords<Object, JsonObject> messages) {
+  public void processUUID(ConsumerRecords<JsonObject, JsonObject> messages) {
     // This is deliberately blocking
     handleMessages(messages);
   }
 
-  private void handleMessages(ConsumerRecords<Object, JsonObject> messages) {
+  private void handleMessages(ConsumerRecords<JsonObject, JsonObject> messages) {
     HttpRequest<Buffer> request = client.post(getPort(), getHost(), PipelineConfig.ENDPOINT)
             .putHeader(PipelineConfig.HEADER, PipelineConfig.HEADER_TYPE);
     HttpResponse<Buffer> response = request.sendJson(getMessages(messages)).await().indefinitely();
 
     if(response.statusCode() != RestResponse.StatusCode.OK){
-      logMessage(response.bodyAsJsonArray().encodePrettily());
+      LOGGER.error(response.bodyAsJsonObject().encodePrettily());
+    } else {
+      sendMessages(response.bodyAsJsonArray());
     }
-
-    sendMessages(response.bodyAsJsonArray());
   }
 
   private void sendMessages(JsonArray messages){
@@ -68,7 +69,7 @@ public class Pipeline {
     });
   }
 
-  private void sendRecord(Record<Object, JsonObject> record){
+  private void sendRecord(Record<JsonObject, JsonObject> record){
     producer.send(record);
   }
 
@@ -77,16 +78,16 @@ public class Pipeline {
     LOGGER.error(errorMsg);
   }
 
-  private Object getKey(JsonObject message){
+  private JsonObject getKey(JsonObject message){
     if(message.getJsonObject(PipelineConfig.KEY) == null){
       return null;
     }
-    return message.getJsonObject(PipelineConfig.KEY).encode();
+    return message.getJsonObject(PipelineConfig.KEY);
   }
 
-  private JsonArray getMessages(ConsumerRecords<Object, JsonObject> messages){
+  private JsonArray getMessages(ConsumerRecords<JsonObject, JsonObject> messages){
     JsonArray jsonMessages = new JsonArray();
-    for (ConsumerRecord<Object, JsonObject> message:messages) {
+    for (ConsumerRecord<JsonObject, JsonObject> message:messages) {
       jsonMessages.add(new JsonObject().put(PipelineConfig.KEY, message.key()).put(PipelineConfig.VALUE, message.value()).put(PipelineConfig.METADATA, new JsonObject().put(PipelineConfig.OFFSET, message.offset()).put(PipelineConfig.PARTITION, message.partition())));
     }
     return jsonMessages;

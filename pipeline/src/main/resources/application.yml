@@ -20,7 +20,7 @@ mp       :
         connector: smallrye-kafka
         topic: stream-out
         key:
-          serializer: org.apache.kafka.common.serialization.UUIDSerializer
+          serializer: io.datacater.core.serde.JsonSerializer
         value:
           serializer: io.datacater.core.serde.JsonSerializer
     incoming:
@@ -32,7 +32,7 @@ mp       :
           poll:
             records: ${datacater.message.batch.size}
         key:
-          deserializer: org.apache.kafka.common.serialization.UUIDDeserializer
+          deserializer: io.datacater.core.serde.JsonDeserializer
         value:
           deserializer: io.datacater.core.serde.JsonDeserializer
 datacater:
@@ -69,6 +69,6 @@ datacater:
           connector: smallrye-kafka
           topic: stream-out
           key:
-            deserializer: org.apache.kafka.common.serialization.UUIDDeserializer
+            deserializer: io.datacater.core.serde.JsonDeserializer
           value:
             deserializer: io.datacater.core.serde.JsonDeserializer
