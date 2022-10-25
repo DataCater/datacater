@@ -108,7 +108,6 @@ public class K8Deployment {
             .endSpec()
             .build();
 
-    // TODO  need to attach stream in and stream out bootstrap.servers to env
     client
         .apps()
         .deployments()
