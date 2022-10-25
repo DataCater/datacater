@@ -1,11 +1,11 @@
 package io.datacater.core.deployment;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import io.datacater.core.pipeline.PipelineEntity;
 import io.datacater.core.stream.StreamEntity;
+import io.fabric8.kubernetes.api.model.ListMeta;
+import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.smallrye.mutiny.Uni;
-import java.util.List;
 import java.util.UUID;
 import javax.annotation.security.RolesAllowed;
 import javax.enterprise.context.ApplicationScoped;
@@ -28,154 +28,113 @@ public class DeploymentEndpoint {
   @Inject KubernetesClient client;
 
   @GET
-  @Path("{uuid}")
-  public Uni<DeploymentEntity> getStream(@PathParam("uuid") UUID uuid) {
-    return sf.withTransaction(
-        ((session, transaction) -> session.find(DeploymentEntity.class, uuid)));
+  @Path("{deploymentName}")
+  public Uni<ObjectMeta> getStream(@PathParam("deploymentName") String deploymentName) {
+    return Uni.createFrom().item(getK8Deployment(deploymentName));
   }
 
   @GET
-  @Path("{uuid}/logs")
-  // TODO really return string and plaintext? might be a better way, look it up
+  @Path("{deploymentName}/logs")
   @Produces(MediaType.TEXT_PLAIN)
-  public Uni<String> getLogs(@PathParam("uuid") UUID uuid) {
-    return sf.withTransaction(
-        ((session, transaction) ->
-            session
-                .find(DeploymentEntity.class, uuid)
-                .onItem()
-                .ifNotNull()
-                .transform(this::getLogs)));
+  public Uni<String> getLogs(@PathParam("deploymentName") String deploymentName) {
+    return Uni.createFrom().item(getDeploymentLogs(deploymentName));
   }
 
   @GET
-  public Uni<List<DeploymentEntity>> getDeployments() {
-    return sf.withSession(
-        session ->
-            session.createQuery("from DeploymentEntity", DeploymentEntity.class).getResultList());
+  public Uni<ListMeta> getDeployments() {
+    return Uni.createFrom().item(getK8Deployments());
   }
 
   @POST
   @RequestBody
   @Consumes(MediaType.APPLICATION_JSON)
-  public Uni<Response> createDeployment(DatacaterDeployment datacaterDeployment)
-      throws JsonProcessingException {
-    DeploymentEntity de = new DeploymentEntity(datacaterDeployment.spec());
-    return sf.withTransaction(
-            (session, transaction) ->
-                session
-                    .find(PipelineEntity.class, datacaterDeployment.spec().getPipelineId())
-                    .onItem()
-                    .ifNotNull()
-                    .call(
-                        pe ->
-                            session
-                                .find(
-                                    StreamEntity.class, getUUIDFromNode(pe, StaticConfig.STREAM_IN))
-                                .onItem()
-                                .ifNotNull()
-                                .call(
-                                    streamIn ->
-                                        session
-                                            .find(
-                                                StreamEntity.class,
-                                                getUUIDFromNode(pe, StaticConfig.STREAM_OUT))
-                                            .onItem()
-                                            .ifNotNull()
-                                            .call(
-                                                streamOut ->
-                                                    session.persist(
-                                                        createDeployment(
-                                                            datacaterDeployment,
-                                                            pe,
-                                                            streamOut,
-                                                            streamIn,
-                                                            de))))))
-        .replaceWith(Response.ok(de).build());
+  public Uni<String> createDeployment(DatacaterDeployment datacaterDeployment) {
+    return apply(datacaterDeployment);
   }
 
   @DELETE
-  @Path("{uuid}")
-  public Uni<Response> deleteDeployment(@PathParam("uuid") UUID uuid) {
-    return sf.withTransaction(
-        ((session, tx) ->
-            session
-                .find(DeploymentEntity.class, uuid)
-                .onItem()
-                .ifNotNull()
-                .call(de -> session.remove(deleteDeployment(de)))
-                .replaceWith(Response.ok().build())));
+  @Path("{deploymentName}")
+  public Uni<Response> deleteDeployment(@PathParam("deploymentName") String deploymentName) {
+    return Uni.createFrom().item(deleteK8Deployment(deploymentName));
   }
 
   @PUT
-  @Path("{uuid}")
+  @Path("{deploymentName}")
   @RequestBody
   @Consumes(MediaType.APPLICATION_JSON)
-  public Uni<DeploymentEntity> updateDeployment(
-      @PathParam("uuid") UUID uuid, DatacaterDeployment datacaterDeployment) {
+  public Uni<String> updateDeployment(
+      @PathParam("deploymentName") String deploymentName, DatacaterDeployment datacaterDeployment) {
+    return apply(datacaterDeployment);
+  }
+
+  private Uni<String> apply(DatacaterDeployment datacaterDeployment) {
     return sf.withTransaction(
         (session, transaction) ->
             session
-                .find(DeploymentEntity.class, uuid)
+                .find(PipelineEntity.class, datacaterDeployment.spec().getPipelineId())
                 .onItem()
                 .ifNotNull()
-                .call(
-                    de ->
-                        session
-                            .find(PipelineEntity.class, datacaterDeployment.spec().getPipelineId())
-                            .onItem()
-                            .ifNull()
-                            .continueWith(new PipelineEntity())
-                            .call(
-                                pe ->
-                                    session
-                                        .find(
-                                            StreamEntity.class,
-                                            getUUIDFromNode(pe, StaticConfig.STREAM_IN))
-                                        .onItem()
-                                        .ifNotNull()
-                                        .call(
-                                            streamIn ->
-                                                session
-                                                    .find(
-                                                        StreamEntity.class,
-                                                        getUUIDFromNode(
-                                                            pe, StaticConfig.STREAM_OUT))
-                                                    .onItem()
-                                                    .ifNotNull()
-                                                    .call(
-                                                        streamOut ->
-                                                            session.persist(
-                                                                createDeployment(
-                                                                    datacaterDeployment,
-                                                                    pe,
-                                                                    streamOut,
-                                                                    streamIn,
-                                                                    de)))))));
+                .transformToUni(pe -> transformPipelineEntity(session, datacaterDeployment, pe)));
   }
 
-  private String getLogs(DeploymentEntity de) {
-    K8Deployment k8Deployment = new K8Deployment(client);
-    return k8Deployment.getLogs(de.getName());
+  private Uni<String> transformPipelineEntity(
+      Mutiny.Session session, DatacaterDeployment datacaterDeployment, PipelineEntity pe) {
+    return session
+        .find(StreamEntity.class, getUUIDFromNode(pe, StaticConfig.STREAM_IN))
+        .onItem()
+        .ifNotNull()
+        .transformToUni(streamIn -> transformStreamIn(session, datacaterDeployment, pe, streamIn));
   }
 
-  private DeploymentEntity deleteDeployment(DeploymentEntity de) {
-    K8Deployment k8Deployment = new K8Deployment(client);
-    k8Deployment.delete(de.getName());
-    return de;
+  private Uni<String> transformStreamIn(
+      Mutiny.Session session,
+      DatacaterDeployment datacaterDeployment,
+      PipelineEntity pe,
+      StreamEntity streamIn) {
+    return session
+        .find(StreamEntity.class, getUUIDFromNode(pe, StaticConfig.STREAM_OUT))
+        .onItem()
+        .ifNotNull()
+        .transformToUni(
+            streamOut -> transformStreamOut(datacaterDeployment, pe, streamOut, streamIn));
   }
 
-  private DeploymentEntity createDeployment(
+  private Uni<String> transformStreamOut(
       DatacaterDeployment datacaterDeployment,
       PipelineEntity pe,
       StreamEntity streamOut,
-      StreamEntity streamIn,
-      DeploymentEntity de) {
+      StreamEntity streamIn) {
+    return Uni.createFrom().item(createDeployment(datacaterDeployment, pe, streamOut, streamIn));
+  }
+
+  private String getDeploymentLogs(String deploymentName) {
     K8Deployment k8Deployment = new K8Deployment(client);
-    String name = k8Deployment.create(datacaterDeployment, pe, streamIn, streamOut);
-    de.setName(name);
-    de.setSpec(datacaterDeployment.spec());
-    return de;
+    return k8Deployment.getLogs(deploymentName);
+  }
+
+  private ListMeta getK8Deployments() {
+    K8Deployment k8Deployment = new K8Deployment(client);
+    return k8Deployment.getDeployments();
+  }
+
+  private ObjectMeta getK8Deployment(String deploymentName) {
+    K8Deployment k8Deployment = new K8Deployment(client);
+    return k8Deployment.getDeployment(deploymentName);
+  }
+
+  private Response deleteK8Deployment(String deploymentName) {
+    K8Deployment k8Deployment = new K8Deployment(client);
+    k8Deployment.delete(deploymentName);
+    return Response.ok().build();
+  }
+
+  private String createDeployment(
+      DatacaterDeployment datacaterDeployment,
+      PipelineEntity pe,
+      StreamEntity streamOut,
+      StreamEntity streamIn) {
+    K8Deployment k8Deployment = new K8Deployment(client);
+    return k8Deployment.create(datacaterDeployment, pe, streamIn, streamOut);
   }
 
   private UUID getUUIDFromNode(PipelineEntity pe, String node) {

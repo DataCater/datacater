@@ -151,6 +151,25 @@ public class K8Deployment {
         .getStatus();
   }
 
+  public ListMeta getDeployments() {
+    return client
+        .apps()
+        .deployments()
+        .inNamespace(StaticConfig.EnvironmentVariables.NAMESPACE)
+        .list()
+        .getMetadata();
+  }
+
+  public ObjectMeta getDeployment(String deploymentName) {
+    return client
+        .apps()
+        .deployments()
+        .inNamespace(StaticConfig.EnvironmentVariables.NAMESPACE)
+        .withName(deploymentName)
+        .get()
+        .getMetadata();
+  }
+
   private boolean exists(String name) {
     return client
             .apps()

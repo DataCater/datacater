@@ -8,22 +8,27 @@ import com.fasterxml.jackson.databind.json.JsonMapper;
 import io.datacater.core.pipeline.PipelineEntity;
 import io.datacater.core.stream.StreamEntity;
 import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.kubernetes.client.WithKubernetesTestServer;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import java.io.IOException;
 import java.net.URL;
 import java.util.UUID;
+import org.jboss.logging.Logger;
 import org.junit.jupiter.api.*;
 
 @QuarkusTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@WithKubernetesTestServer
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class DatacaterDeploymentEndpointTest {
+  private static final Logger LOGGER = Logger.getLogger(DatacaterDeploymentEndpointTest.class);
 
-  UUID deploymentUUID;
   String baseURI = "http://localhost:8081/api/alpha";
   String deploymentsPath = "/deployments";
+
+  String deploymentName;
 
   @Test
   @Order(1)
@@ -97,13 +102,10 @@ class DatacaterDeploymentEndpointTest {
             .baseUri(baseURI)
             .post(deploymentsPath);
 
-    DeploymentEntity deployment =
-        mapper.readValue(responseDeployment.body().asString(), DeploymentEntity.class);
-
-    deploymentUUID = deployment.getId();
+    deploymentName = responseDeployment.body().asString();
 
     Assertions.assertEquals(200, responseDeployment.getStatusCode());
-    Assertions.assertEquals(expectedDeploymentName, deployment.getName());
+    Assertions.assertEquals(expectedDeploymentName, deploymentName);
   }
 
   @Test
@@ -119,8 +121,8 @@ class DatacaterDeploymentEndpointTest {
         RestAssured.given()
             .contentType(ContentType.JSON)
             .baseUri(baseURI)
-            .pathParam("uuid", deploymentUUID)
-            .delete(deploymentsPath + "/{uuid}");
+            .pathParam("deploymentName", deploymentName)
+            .delete(deploymentsPath + "/{deploymentName}");
 
     Assertions.assertEquals(200, response.getStatusCode());
   }
