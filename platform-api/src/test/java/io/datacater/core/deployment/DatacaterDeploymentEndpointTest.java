@@ -14,17 +14,13 @@ import io.restassured.response.Response;
 import java.io.IOException;
 import java.net.URL;
 import java.util.UUID;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Order;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.*;
 
 @QuarkusTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class DatacaterDeploymentEndpointTest {
 
-  // TODO tests are fine, could add more though. Add tests for K8 resources, need to mock class and
-  // rev up k8 cluster (can mock it too i think) prolly
   UUID deploymentUUID;
   String baseURI = "http://localhost:8081/api/alpha";
   String deploymentsPath = "/deployments";

@@ -3,7 +3,6 @@ package io.datacater.core.deployment;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-// TODO work on naming
 public record DatacaterDeployment(String name, DeploymentSpec spec) {
   @JsonCreator
   static DatacaterDeployment from(

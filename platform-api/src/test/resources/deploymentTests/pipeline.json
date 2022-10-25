@@ -1,7 +1,5 @@
 {
   "name": "pipeline-test",
-  "apiVersion": "datacater.io/v1",
-  "kind": "Pipeline",
   "metadata": {
     "stream-in": "streaminUUIDPlaceholder",
     "stream-out": "streamoutUUIDPlaceholder"
