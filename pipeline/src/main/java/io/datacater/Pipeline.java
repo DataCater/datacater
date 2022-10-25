@@ -6,6 +6,7 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.smallrye.reactive.messaging.kafka.Record;
 
+import java.time.Duration;
 import java.util.UUID;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -49,7 +50,7 @@ public class Pipeline {
   private void handleMessages(ConsumerRecords<JsonObject, JsonObject> messages) {
     HttpRequest<Buffer> request = client.post(getPort(), getHost(), PipelineConfig.ENDPOINT)
             .putHeader(PipelineConfig.HEADER, PipelineConfig.HEADER_TYPE);
-    HttpResponse<Buffer> response = request.sendJson(getMessages(messages)).await().indefinitely();
+    HttpResponse<Buffer> response = request.sendJson(getMessages(messages)).await().atMost(Duration.ofSeconds(PipelineConfig.DATACATER_PYTHONRUNNER_TIMEOUT));
 
     if(response.statusCode() != RestResponse.StatusCode.OK){
       LOGGER.error(response.bodyAsJsonObject().encodePrettily());

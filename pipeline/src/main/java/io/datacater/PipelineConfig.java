@@ -19,6 +19,11 @@ public class PipelineConfig {
                     .getOptionalValue("datacater.python-runner.host", String.class)
                     .orElse("localhost");
 
+    static final Integer DATACATER_PYTHONRUNNER_TIMEOUT =
+            ConfigProvider.getConfig()
+                    .getOptionalValue("datacater.python-runner.timeout", Integer.class)
+                    .orElse(60);
+
     static final String STREAM_IN = "stream-in";
     static final String STREAM_OUT = "stream-out";
     static final String ENDPOINT = "/batch";
