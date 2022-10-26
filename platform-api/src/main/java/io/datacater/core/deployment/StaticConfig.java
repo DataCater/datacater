@@ -9,8 +9,8 @@ public class StaticConfig {
   private StaticConfig() {}
 
   static final String PULL_POLICY = "IfNotPresent";
-  static final String PIPELINE_IN_CONFIG_NAME = "MP_MESSAGING_INCOMING_PIPELINE-IN_TOPIC";
-  static final String PIPELINE_OUT_CONFIG_NAME = "MP_MESSAGING_OUTGOING_PIPELINE-OUT_TOPIC";
+  static final String STREAM_IN_CONFIG_NAME = "MP_MESSAGING_INCOMING_STREAM-IN_TOPIC";
+  static final String STREAM_OUT_CONFIG_NAME = "MP_MESSAGING_OUTGOING_STREAM-OUT_TOPIC";
   static final int REPLICAS = 1;
   static final String DATACATER_PIPELINE = "datacater-pipeline";
   static final String APP = "datacater.io/app";

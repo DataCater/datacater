@@ -204,11 +204,9 @@ public class K8Deployment {
 
     List<EnvVar> variables = new ArrayList<>();
     variables.add(
-        createEnvVariable(
-            StaticConfig.PIPELINE_OUT_CONFIG_NAME, dcDeployment.spec().getPipelineOut()));
+        createEnvVariable(StaticConfig.STREAM_OUT_CONFIG_NAME, dcDeployment.spec().getStreamOut()));
     variables.add(
-        createEnvVariable(
-            StaticConfig.PIPELINE_IN_CONFIG_NAME, dcDeployment.spec().getPipelineIn()));
+        createEnvVariable(StaticConfig.STREAM_IN_CONFIG_NAME, dcDeployment.spec().getStreamIn()));
     variables.add(
         createEnvVariable(StaticConfig.STREAM_IN_BOOTSTRAP_SERVER, streamInBootstrapServers));
     variables.add(

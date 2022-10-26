@@ -8,42 +8,42 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.UUID;
 
 public class DeploymentSpec {
-  @JsonProperty("pipeline-in")
-  private final String pipelineIn;
+  @JsonProperty("stream-in")
+  private final String streamIn;
 
-  @JsonProperty("pipeline-out")
-  private final String pipelineOut;
+  @JsonProperty("stream-out")
+  private final String streamOut;
 
   @JsonProperty("pipelineID")
   private final UUID pipelineId;
 
-  private DeploymentSpec(String pipelineIn, String pipelineOut, UUID pipelineId) {
-    this.pipelineIn = pipelineIn;
-    this.pipelineOut = pipelineOut;
+  private DeploymentSpec(String streamIn, String streamOut, UUID pipelineId) {
+    this.streamIn = streamIn;
+    this.streamOut = streamOut;
     this.pipelineId = pipelineId;
   }
 
-  public static JsonNode serializeDeploymentSpec(
-      String pipelineIn, String pipelineOut, UUID pipelineId) throws JsonProcessingException {
+  public static JsonNode serializeDeploymentSpec(String streamIn, String streamOut, UUID pipelineId)
+      throws JsonProcessingException {
     ObjectMapper objectMapper = new ObjectMapper();
-    DeploymentSpec ds = new DeploymentSpec(pipelineIn, pipelineOut, pipelineId);
+    DeploymentSpec ds = new DeploymentSpec(streamIn, streamOut, pipelineId);
     return objectMapper.readTree(objectMapper.writeValueAsString(ds));
   }
 
   @JsonCreator
   static DeploymentSpec from(
-      @JsonProperty("pipeline-in") String pipelineIn,
-      @JsonProperty("pipeline-out") String pipelineOut,
+      @JsonProperty("stream-in") String streamIn,
+      @JsonProperty("stream-out") String streamOut,
       @JsonProperty("pipelineID") UUID pipelineId) {
-    return new DeploymentSpec(pipelineIn, pipelineOut, pipelineId);
+    return new DeploymentSpec(streamIn, streamOut, pipelineId);
   }
 
-  public String getPipelineIn() {
-    return pipelineIn;
+  public String getStreamIn() {
+    return streamIn;
   }
 
-  public String getPipelineOut() {
-    return pipelineOut;
+  public String getStreamOut() {
+    return streamOut;
   }
 
   public UUID getPipelineId() {
