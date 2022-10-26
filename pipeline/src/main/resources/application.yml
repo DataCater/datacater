@@ -1,0 +1,74 @@
+---
+quarkus  :
+  application:
+    name: datacater-pipeline
+    version: '1'
+  reactive-messaging:
+    metrics:
+      enabled: true
+    kafka:
+      enable-graceful-shutdown-in-dev-and-test-mode: true
+  container-image:
+    group: datacater
+    name: ${quarkus.application.name}
+    tag: ${quarkus.application.version}
+mp       :
+  messaging:
+    outgoing:
+      stream-out:
+        merge: true
+        connector: smallrye-kafka
+        topic: stream-out
+        key:
+          serializer: io.datacater.core.serde.JsonSerializer
+        value:
+          serializer: io.datacater.core.serde.JsonSerializer
+    incoming:
+      stream-in:
+        batch: true
+        connector: smallrye-kafka
+        topic: stream-in
+        max:
+          poll:
+            records: ${datacater.message.batch.size}
+        key:
+          deserializer: io.datacater.core.serde.JsonDeserializer
+        value:
+          deserializer: io.datacater.core.serde.JsonDeserializer
+datacater:
+  message:
+    batch:
+      size: 100
+
+
+'%dev'   :
+  quarkus:
+    log:
+      level: INFO
+      console:
+        json: false
+  datacater:
+    python-runner:
+      port: 50000
+      host: localhost
+
+'%test'  :
+  quarkus:
+    log:
+      level: INFO
+      console:
+        json: false
+  mp:
+    messaging:
+      outgoing:
+        stream-in-test:
+          connector: smallrye-kafka
+          topic: stream-in
+      incoming:
+        stream-out-test:
+          connector: smallrye-kafka
+          topic: stream-out
+          key:
+            deserializer: io.datacater.core.serde.JsonDeserializer
+          value:
+            deserializer: io.datacater.core.serde.JsonDeserializer
