@@ -13,7 +13,6 @@ import javax.inject.Inject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
 import org.hibernate.reactive.mutiny.Mutiny;
 import org.jboss.logging.Logger;
 
@@ -46,10 +45,9 @@ public class DeploymentEndpoint {
   }
 
   @POST
-  @RequestBody
-  @Consumes(MediaType.APPLICATION_JSON)
-  public Uni<String> createDeployment(DatacaterDeployment datacaterDeployment) {
-    return apply(datacaterDeployment);
+  @Path("{pipelineUuid}")
+  public Uni<String> createDeployment(@PathParam("pipelineUuid") UUID pipelineId) {
+    return apply(pipelineId);
   }
 
   @DELETE
@@ -59,52 +57,41 @@ public class DeploymentEndpoint {
   }
 
   @PUT
-  @Path("{deploymentName}")
-  @RequestBody
-  @Consumes(MediaType.APPLICATION_JSON)
-  public Uni<String> updateDeployment(
-      @PathParam("deploymentName") String deploymentName, DatacaterDeployment datacaterDeployment) {
-    return apply(datacaterDeployment);
+  @Path("{pipelineUuid}")
+  public Uni<String> updateDeployment(@PathParam("pipelineUuid") UUID pipelineId) {
+    return apply(pipelineId);
   }
 
-  private Uni<String> apply(DatacaterDeployment datacaterDeployment) {
+  private Uni<String> apply(UUID pipelineId) {
     return sf.withTransaction(
         (session, transaction) ->
             session
-                .find(PipelineEntity.class, datacaterDeployment.spec().getPipelineId())
+                .find(PipelineEntity.class, pipelineId)
                 .onItem()
                 .ifNotNull()
-                .transformToUni(pe -> transformPipelineEntity(session, datacaterDeployment, pe)));
+                .transformToUni(pe -> transformPipelineEntity(session, pe)));
   }
 
-  private Uni<String> transformPipelineEntity(
-      Mutiny.Session session, DatacaterDeployment datacaterDeployment, PipelineEntity pe) {
+  private Uni<String> transformPipelineEntity(Mutiny.Session session, PipelineEntity pe) {
     return session
         .find(StreamEntity.class, getUUIDFromNode(pe, StaticConfig.STREAM_IN))
         .onItem()
         .ifNotNull()
-        .transformToUni(streamIn -> transformStreamIn(session, datacaterDeployment, pe, streamIn));
+        .transformToUni(streamIn -> transformStreamIn(session, pe, streamIn));
   }
 
   private Uni<String> transformStreamIn(
-      Mutiny.Session session,
-      DatacaterDeployment datacaterDeployment,
-      PipelineEntity pe,
-      StreamEntity streamIn) {
+      Mutiny.Session session, PipelineEntity pe, StreamEntity streamIn) {
     return session
         .find(StreamEntity.class, getUUIDFromNode(pe, StaticConfig.STREAM_OUT))
         .onItem()
         .ifNotNull()
-        .transformToUni(
-            streamOut -> transformStreamOut(datacaterDeployment, pe, streamOut, streamIn));
+        .transformToUni(streamOut -> transformStreamOut(pe, streamOut, streamIn));
   }
 
   private Uni<String> transformStreamOut(
-      DatacaterDeployment datacaterDeployment,
-      PipelineEntity pe,
-      StreamEntity streamOut,
-      StreamEntity streamIn) {
-    return Uni.createFrom().item(createDeployment(datacaterDeployment, pe, streamOut, streamIn));
+      PipelineEntity pe, StreamEntity streamOut, StreamEntity streamIn) {
+    return Uni.createFrom().item(createDeployment(pe, streamOut, streamIn));
   }
 
   private String getDeploymentLogs(String deploymentName) {
@@ -129,12 +116,9 @@ public class DeploymentEndpoint {
   }
 
   private String createDeployment(
-      DatacaterDeployment datacaterDeployment,
-      PipelineEntity pe,
-      StreamEntity streamOut,
-      StreamEntity streamIn) {
+      PipelineEntity pe, StreamEntity streamOut, StreamEntity streamIn) {
     K8Deployment k8Deployment = new K8Deployment(client);
-    return k8Deployment.create(datacaterDeployment, pe, streamIn, streamOut);
+    return k8Deployment.create(pe, streamIn, streamOut);
   }
 
   private UUID getUUIDFromNode(PipelineEntity pe, String node) {

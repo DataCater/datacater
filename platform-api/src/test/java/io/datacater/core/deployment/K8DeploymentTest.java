@@ -34,7 +34,6 @@ public class K8DeploymentTest {
   @KubernetesTestServer KubernetesServer mockServer;
 
   K8Deployment k8Deployment;
-  DatacaterDeployment dcDeployment;
   PipelineEntity pipelineEntity;
   StreamEntity streamInEntity;
   StreamEntity streamOutEntity;
@@ -48,19 +47,15 @@ public class K8DeploymentTest {
 
     String streamInUUIDPlaceholder = "streaminUUIDPlaceholder";
     String streamOutUUIDPlaceholder = "streamoutUUIDPlaceholder";
-    String pipelineUUIDPlaceholder = "pipelineUUIDPlaceholder";
 
     String streamInPath = "deploymentTests/streamin.json";
     String streamOutPath = "deploymentTests/streamout.json";
     String pipelinePath = "deploymentTests/pipeline.json";
-    String deploymentPath = "deploymentTests/deployment-test-object.json";
     URL streamInUrl = ClassLoader.getSystemClassLoader().getResource(streamInPath);
     URL streamOutUrl = ClassLoader.getSystemClassLoader().getResource(streamOutPath);
     URL pipelineUrl = ClassLoader.getSystemClassLoader().getResource(pipelinePath);
-    URL deploymentUrl = ClassLoader.getSystemClassLoader().getResource(deploymentPath);
 
     JsonNode pipelineJson = mapper.readTree(pipelineUrl);
-    JsonNode deploymentJson = mapper.readTree(deploymentUrl);
 
     // create streams
     Stream streamIn = mapper.readValue(streamInUrl, Stream.class);
@@ -76,12 +71,7 @@ public class K8DeploymentTest {
     Pipeline pipeline = mapper.readValue(pipelineString, Pipeline.class);
     pipelineEntity = new PipelineEntity().updateEntity(pipeline);
 
-    // create deployment
-    String deploymentString =
-        deploymentJson.toString().replace(pipelineUUIDPlaceholder, UUID.randomUUID().toString());
-    dcDeployment = mapper.readValue(deploymentString, DatacaterDeployment.class);
-
-    deploymentName = dcDeployment.name();
+    deploymentName = pipelineEntity.getName();
   }
 
   @Test
@@ -109,7 +99,7 @@ public class K8DeploymentTest {
   @Order(2)
   public void testInteractionWithAPIServer()
       throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-    k8Deployment.create(dcDeployment, pipelineEntity, streamInEntity, streamOutEntity);
+    k8Deployment.create(pipelineEntity, streamInEntity, streamOutEntity);
     Assertions.assertEquals(
         true, getExistsMethod(K8Deployment.class).invoke(k8Deployment, deploymentName));
   }

@@ -38,14 +38,12 @@ class DatacaterDeploymentEndpointTest {
 
     String streamInUUIDPlaceholder = "streaminUUIDPlaceholder";
     String streamOutUUIDPlaceholder = "streamoutUUIDPlaceholder";
-    String pipelineUUIDPlaceholder = "pipelineUUIDPlaceholder";
 
     String streamInPath = "deploymentTests/streamin.json";
     String streamOutPath = "deploymentTests/streamout.json";
     String pipelinePath = "deploymentTests/pipeline.json";
-    String deploymentPath = "deploymentTests/deployment-test-object.json";
 
-    String expectedDeploymentName = "newdeployment";
+    String expectedDeploymentName = "pipeline-test";
 
     // add stream in
     URL JsonURL = ClassLoader.getSystemClassLoader().getResource(streamInPath);
@@ -91,16 +89,12 @@ class DatacaterDeploymentEndpointTest {
     UUID pipelineUUID = pipeline.getId();
 
     // add deployment
-    JsonURL = ClassLoader.getSystemClassLoader().getResource(deploymentPath);
-    json = mapper.readTree(JsonURL);
-    jsonString = json.toString();
-    jsonString = jsonString.replace(pipelineUUIDPlaceholder, pipelineUUID.toString());
     Response responseDeployment =
         given()
             .contentType(ContentType.JSON)
-            .body(jsonString)
             .baseUri(baseURI)
-            .post(deploymentsPath);
+            .pathParam("pipelineUuid", pipelineUUID)
+            .post(deploymentsPath + "/{pipelineUuid}");
 
     deploymentName = responseDeployment.body().asString();
 

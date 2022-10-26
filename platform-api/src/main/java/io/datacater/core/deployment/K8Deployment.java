@@ -26,12 +26,8 @@ public class K8Deployment {
     this.k8ConfigMap = new K8ConfigMap(client);
   }
 
-  public String create(
-      DatacaterDeployment dcDeployment,
-      PipelineEntity pe,
-      StreamEntity streamIn,
-      StreamEntity streamOut) {
-    final String name = getName(dcDeployment.name());
+  public String create(PipelineEntity pe, StreamEntity streamIn, StreamEntity streamOut) {
+    final String name = getName(pe.getName());
     final String volumeName = name + StaticConfig.VOLUME_NAME_SUFFIX;
     k8NameSpace.create();
 
@@ -43,7 +39,7 @@ public class K8Deployment {
       return name;
     }
 
-    List<EnvVar> variables = getEnvironmentVariables(dcDeployment, streamIn, streamOut);
+    List<EnvVar> variables = getEnvironmentVariables(streamIn, streamOut);
 
     var deployment =
         new DeploymentBuilder()
@@ -186,8 +182,7 @@ public class K8Deployment {
     return name;
   }
 
-  private List<EnvVar> getEnvironmentVariables(
-      DatacaterDeployment dcDeployment, StreamEntity streamIn, StreamEntity streamOut) {
+  private List<EnvVar> getEnvironmentVariables(StreamEntity streamIn, StreamEntity streamOut) {
 
     String streamInBootstrapServers =
         getEnvVariableFromNode(streamIn.getSpec(), StaticConfig.BOOTSTRAP_SERVERS);
@@ -203,10 +198,8 @@ public class K8Deployment {
         getEnvVariableFromNode(streamOut.getSpec(), StaticConfig.VALUE_SERIALIZER);
 
     List<EnvVar> variables = new ArrayList<>();
-    variables.add(
-        createEnvVariable(StaticConfig.STREAM_OUT_CONFIG_NAME, dcDeployment.spec().getStreamOut()));
-    variables.add(
-        createEnvVariable(StaticConfig.STREAM_IN_CONFIG_NAME, dcDeployment.spec().getStreamIn()));
+    variables.add(createEnvVariable(StaticConfig.STREAM_OUT_CONFIG_NAME, streamIn.getName()));
+    variables.add(createEnvVariable(StaticConfig.STREAM_IN_CONFIG_NAME, streamOut.getName()));
     variables.add(
         createEnvVariable(StaticConfig.STREAM_IN_BOOTSTRAP_SERVER, streamInBootstrapServers));
     variables.add(

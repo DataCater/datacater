@@ -1,9 +1,0 @@
-{
-  "spec": {
-    "deployment": {
-      "prop1": "prop1Value",
-      "prop2": "prop2Value",
-      "prop3": "prop3Value"
-    }
-  }
-}
