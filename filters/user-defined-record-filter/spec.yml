@@ -6,7 +6,7 @@ config     :
 -   name: code
     label: Code
     type: text
-description: Custom user-defined filter defined in Python
+description: Custom record-level filter defined in Python
 license    : Apache2
 website    : https://github.com/DataCater/datacater/filters/user-defined-record-filter
 author     :

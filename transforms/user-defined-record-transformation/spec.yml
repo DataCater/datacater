@@ -6,7 +6,7 @@ config     :
 -   name: code
     label: Code
     type: text
-description: Custom user-defined transform defined in Python
+description: Custom record-level transform defined in Python
 license    : Apache2
 website    : https://github.com/DataCater/datacater/transforms/user-defined-record-transformation
 author     :
