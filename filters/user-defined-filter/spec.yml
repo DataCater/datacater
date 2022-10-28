@@ -12,6 +12,4 @@ website    : https://github.com/DataCater/datacater/filters/user-defined-filter
 author     :
   email: info@datacater.io
   name: DataCater GmbH
-labels     :
-  input-types: string
 version    : 1.0.0
