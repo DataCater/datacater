@@ -1,4 +1,4 @@
-FROM python:3.10.6-slim@sha256:cf85cd32e60184a94d88a0103c289d09024abffaa77680d116d7cc837668ea15 AS build
+FROM python:3.11.0-slim@sha256:244c0b0e6e7608a16f87382fc8a5ef3c330d042113a9a7b6fc15a95360181651 AS build
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
@@ -11,8 +11,7 @@ COPY requirements.txt .
 
 RUN pip install --no-cache-dir -r requirements.txt
 
-
-FROM python:3.10.6-slim@sha256:cf85cd32e60184a94d88a0103c289d09024abffaa77680d116d7cc837668ea15
+FROM python:3.11.0-slim@sha256:244c0b0e6e7608a16f87382fc8a5ef3c330d042113a9a7b6fc15a95360181651
 
 RUN groupadd -g 1001 python && \
     useradd -r -u 1001 -g python python && \
