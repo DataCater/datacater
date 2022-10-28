@@ -213,6 +213,13 @@ class EditPipeline extends Component {
     });
   }
 
+  createEditRecordObject(stepIndex, step) {
+    return {
+      stepIndex: stepIndex,
+      step: step,
+    };
+  }
+
   createEditColumnObject(fieldName, stepIndex) {
     const pipeline = deepCopy(this.state.pipeline);
 
@@ -230,64 +237,99 @@ class EditPipeline extends Component {
     let editColumn = this.state.editColumn;
     let contextBarActive = true;
 
-    if (currentStep === undefined) {
+    if (currentStep === undefined && event !== undefined) {
       currentStep = event.target.dataset.currentstep;
     }
-    if (fieldName === undefined) {
+    if (fieldName === undefined && event !== undefined) {
       fieldName = event.target.dataset.fieldname;
     }
-    if (prefix === undefined) {
+    if (prefix === undefined && event !== undefined) {
       prefix = event.target.dataset.prefix;
     }
-    if (property === undefined) {
+    if (property === undefined && event !== undefined) {
       property = event.target.name;
     }
-    if (value === undefined) {
+    if (value === undefined && event !== undefined) {
       value = event.target.value;
     }
 
     const step = pipeline.spec.steps[currentStep - 1];
 
-    if (value !== undefined) {
-      pipeline.spec.steps[currentStep - 1].fields[fieldName] = Object.assign(
-        {},
-        pipeline.spec.steps[currentStep - 1].fields[fieldName]
-      );
-    }
-
-    if (property === "transform") {
-      if (value === undefined) {
-        // Remove transform
-        delete step.fields[fieldName].transform;
-        pipeline.spec.steps[currentStep - 1] = step;
-        editColumn = undefined;
+    if (step.kind === "Record") {
+      if (property === "transform") {
+        if (value === undefined) {
+          // Remove transform
+          delete step.transform;
+          pipeline.spec.steps[currentStep - 1] = step;
+          editColumn = undefined;
+        } else {
+          pipeline.spec.steps[currentStep - 1]["transform"] = {
+            key: value,
+          };
+        }
+      } else if (property === "filter") {
+        if (value === undefined) {
+          // Remove filter
+          delete step.filter;
+          pipeline.spec.steps[currentStep - 1] = step;
+          editColumn = undefined;
+        } else {
+          pipeline.spec.steps[currentStep - 1]["filter"] = {
+            key: value,
+          };
+        }
       } else {
-        pipeline.spec.steps[currentStep - 1].fields[fieldName]["transform"] = {
-          key: value,
-        };
-      }
-    } else if (property === "filter") {
-      if (value === undefined) {
-        // Remove filter
-        delete step.fields[fieldName].filter;
-        pipeline.spec.steps[currentStep - 1] = step;
-        editColumn = undefined;
-      } else {
-        pipeline.spec.steps[currentStep - 1].fields[fieldName]["filter"] = {
-          key: value,
-        };
+        const config = {};
+        config[property] = value;
+        pipeline.spec.steps[currentStep - 1][prefix]["config"] = Object.assign(
+          {},
+          pipeline.spec.steps[currentStep - 1][prefix]["config"],
+          config
+        );
       }
     } else {
-      const config = {};
-      config[property] = value;
-      pipeline.spec.steps[currentStep - 1].fields[fieldName][prefix]["config"] =
-        Object.assign(
+      if (value !== undefined) {
+        pipeline.spec.steps[currentStep - 1].fields[fieldName] = Object.assign(
+          {},
+          pipeline.spec.steps[currentStep - 1].fields[fieldName]
+        );
+      }
+      if (property === "transform") {
+        if (value === undefined) {
+          // Remove transform
+          delete step.fields[fieldName].transform;
+          pipeline.spec.steps[currentStep - 1] = step;
+          editColumn = undefined;
+        } else {
+          pipeline.spec.steps[currentStep - 1].fields[fieldName]["transform"] =
+            {
+              key: value,
+            };
+        }
+      } else if (property === "filter") {
+        if (value === undefined) {
+          // Remove filter
+          delete step.fields[fieldName].filter;
+          pipeline.spec.steps[currentStep - 1] = step;
+          editColumn = undefined;
+        } else {
+          pipeline.spec.steps[currentStep - 1].fields[fieldName]["filter"] = {
+            key: value,
+          };
+        }
+      } else {
+        const config = {};
+        config[property] = value;
+        pipeline.spec.steps[currentStep - 1].fields[fieldName][prefix][
+          "config"
+        ] = Object.assign(
           {},
           pipeline.spec.steps[currentStep - 1].fields[fieldName][prefix][
             "config"
           ],
           config
         );
+      }
     }
 
     const type = event !== undefined ? event.target.type : "text";
@@ -497,18 +539,32 @@ class EditPipeline extends Component {
     const pipeline = deepCopy(this.state.pipeline);
     let editColumn = undefined;
 
-    if (
-      this.state.editColumn !== undefined &&
-      fieldName === this.state.editColumn.fieldName
-    ) {
-      // hide context bar if we click the edit button of an active field again
-      this.hideContextBar();
-    } else {
-      // show context bar when editing a transformation or filter
-      this.showContextBar();
+    const currentStep = pipeline.spec.steps[this.state.currentStep - 1];
 
-      if (fieldName !== undefined && sortPosition !== undefined) {
-        editColumn = this.createEditColumnObject(fieldName, sortPosition);
+    if (currentStep.kind === "Record") {
+      if (this.state.editColumn !== undefined) {
+        this.hideContextBar();
+      } else {
+        this.showContextBar();
+        editColumn = this.createEditRecordObject(
+          this.state.currentStep - 1,
+          currentStep
+        );
+      }
+    } else {
+      if (
+        this.state.editColumn !== undefined &&
+        fieldName === this.state.editColumn.fieldName
+      ) {
+        // hide context bar if we click the edit button of an active field again
+        this.hideContextBar();
+      } else {
+        // show context bar when editing a transformation or filter
+        this.showContextBar();
+
+        if (fieldName !== undefined && sortPosition !== undefined) {
+          editColumn = this.createEditColumnObject(fieldName, sortPosition);
+        }
       }
     }
 

@@ -37,21 +37,40 @@ class FilterConfig extends Component {
       pipelineField,
       pipelineStep,
       sortPosition,
+      transformStep,
     } = this.props;
 
-    const filterConfig =
-      pipelineField !== undefined &&
-      pipelineField.filter != undefined &&
-      pipelineField.filter.config !== undefined
-        ? pipelineField.filter.config
-        : {};
+    let filterConfig = {};
+    let filterExpectsDataType = true;
 
-    const filterExpectsDataType =
-      filter !== undefined &&
-      filter.labels !== undefined &&
-      filter.labels["input-types"] !== undefined
-        ? filter.labels["input-types"].includes(fieldDataType)
-        : true;
+    if (transformStep.kind === "Record") {
+      // Load config of the record-level filter
+      if (
+        transformStep.filter !== undefined &&
+        transformStep.filter.config !== undefined
+      ) {
+        filterConfig = transformStep.filter.config;
+      }
+    } else {
+      // Load config of the field-level filter
+      if (
+        pipelineField !== undefined &&
+        pipelineField.filter !== undefined &&
+        pipelineField.filter.config !== undefined
+      ) {
+        filterConfig = pipelineField.filter.config;
+      }
+
+      // Does the field-level filter support the detected data type?
+      if (
+        filter !== undefined &&
+        filter.labels !== undefined &&
+        filter.labels["input-types"] !== undefined
+      ) {
+        filterExpectsDataType =
+          filter.labels["input-types"].includes(fieldDataType);
+      }
+    }
 
     return (
       <React.Fragment>
@@ -172,17 +191,24 @@ class FilterConfig extends Component {
               {filter.config !== undefined &&
                 filter.config.map((configOption, idx) => (
                   <div key={idx}>
-                    {filter.key === "user-defined-filter" && (
+                    {[
+                      "user-defined-filter",
+                      "user-defined-record-filter",
+                    ].includes(filter.key) && (
                       <CodeEditor
                         fieldName={field}
                         funcType="filter"
                         currentStep={currentStep}
                         handleChangeFunc={handleChangeFunc}
                         previewState={this.props.previewState}
+                        transformStep={transformStep}
                         value={filterConfig[configOption.name] || ""}
                       />
                     )}
-                    {filter.key !== "user-defined-filter" && (
+                    {![
+                      "user-defined-filter",
+                      "user-defined-record-filter",
+                    ].includes(filter.key) && (
                       <>
                         <label className="mb-2">{configOption.label}:</label>
                         {(configOption.options === undefined ||

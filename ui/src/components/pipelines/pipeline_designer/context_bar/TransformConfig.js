@@ -40,21 +40,40 @@ class TransformConfig extends Component {
       sortPosition,
       transform,
       transforms,
+      transformStep,
     } = this.props;
 
-    const transformConfig =
-      pipelineField !== undefined &&
-      pipelineField.transform != undefined &&
-      pipelineField.transform.config != undefined
-        ? pipelineField.transform.config
-        : {};
+    let transformConfig = {};
+    let transformExpectsDataType = true;
 
-    const transformExpectsDataType =
-      transform !== undefined &&
-      transform.labels !== undefined &&
-      transform.labels["input-types"] !== undefined
-        ? transform.labels["input-types"].includes(fieldDataType)
-        : true;
+    if (transformStep.kind === "Record") {
+      // Load config of the record-level transform
+      if (
+        transformStep.transform !== undefined &&
+        transformStep.transform.config !== undefined
+      ) {
+        transformConfig = transformStep.transform.config;
+      }
+    } else {
+      // Load config of the field-level transform
+      if (
+        pipelineField !== undefined &&
+        pipelineField.transform !== undefined &&
+        pipelineField.transform.config !== undefined
+      ) {
+        transformConfig = pipelineField.transform.config;
+      }
+
+      // Does the field-level transform support the detected data type?
+      if (
+        transform !== undefined &&
+        transform.labels !== undefined &&
+        transform.labels["input-types"] !== undefined
+      ) {
+        transformExpectsDataType =
+          transform.labels["input-types"].includes(fieldDataType);
+      }
+    }
 
     /*
     if (transform !== undefined && transformer.key === "add-column") {
@@ -190,17 +209,24 @@ class TransformConfig extends Component {
               {transform.config !== undefined &&
                 transform.config.map((configOption, idx) => (
                   <div key={idx}>
-                    {transform.key === "user-defined-transformation" && (
+                    {[
+                      "user-defined-transformation",
+                      "user-defined-record-transformation",
+                    ].includes(transform.key) && (
                       <CodeEditor
                         fieldName={field}
                         funcType="transform"
                         currentStep={currentStep}
                         handleChangeFunc={handleChangeFunc}
                         previewState={this.props.previewState}
+                        transformStep={transformStep}
                         value={transformConfig[configOption.name] || ""}
                       />
                     )}
-                    {transform.key !== "user-defined-transformation" && (
+                    {![
+                      "user-defined-transformation",
+                      "user-defined-record-transformation",
+                    ].includes(transform.key) && (
                       <>
                         <label className="mb-2">{configOption.label}:</label>
                         {(configOption.options === undefined ||

@@ -27,8 +27,6 @@ class AttributeTransformationList extends Component {
       transformersForField,
     } = this.props;
 
-    console.log("ts", transformStep);
-
     const searchTokens = this.state.searchQuery.toLowerCase().trim().split(" ");
     const transformers = transformersForField
       // Select only transforms that are built for the Kind of the current step
