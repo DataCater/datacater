@@ -156,6 +156,7 @@ class Attribute extends Component {
                 filter={filter}
                 filters={filters}
                 handleChangeFunc={handleChangeFunc}
+                transformStep={transformStep}
               />
             )}
             {filter != null && (
