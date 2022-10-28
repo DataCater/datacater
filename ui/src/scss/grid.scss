@@ -186,7 +186,7 @@ $row-hovered-background-color: #f5f5f5;
     cursor: pointer;
   }
 
-  @for $i from 0 through 100 {
+  @for $i from 0 through 500 {
     &.hovered-col-#{$i}.datacater-grid-filters [data-col-idx="#{$i}"],
     &.hovered-col-#{$i}.datacater-grid-pipeline-steps [data-col-idx="#{$i}"] {
       background-color: rgba(219, 239, 222, 0.49);

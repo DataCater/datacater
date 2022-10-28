@@ -56,22 +56,6 @@ class Grid extends Component {
   getColumn(field, idx, filters, defaultColumnWidth) {
     const me = this;
 
-    let filterOfCurrentStep = undefined;
-    let transformationOfCurrentStep = undefined;
-    /* TODO
-    const filterOfCurrentStep = this.props.pipeline.spec.filters.find(
-      (filter) => filter.fieldName === field.name
-    );
-
-    const pipelineStep =
-      this.props.pipeline.spec.transformationSteps[this.props.currentStep];
-    if (pipelineStep !== undefined) {
-      transformationOfCurrentStep = pipelineStep.transformations.find(
-        (transformation) => transformation.fieldName === field.name
-      );
-    }
-    */
-
     return {
       // column properties
       title: field.name,
@@ -104,7 +88,6 @@ class Grid extends Component {
       filters: this.props.filters,
       fields: this.props.fields,
       fieldProfiles: this.props.profile,
-      filterOfCurrentStep: filterOfCurrentStep,
       pipelineStep: this.props.pipelineStep,
       currentStep: this.props.currentStep,
       currentPage: this.props.currentPage,
@@ -115,7 +98,7 @@ class Grid extends Component {
       handlePipelineStepChangeFunc: this.props.handlePipelineStepChangeFunc,
       handleChangeFunc: this.props.handleFilterChangeFunc,
       showStatistics: this.props.showStatistics,
-      transformationOfCurrentStep: transformationOfCurrentStep,
+      step: this.props.step,
       transforms: this.props.transforms,
     };
   }
@@ -178,30 +161,22 @@ class Grid extends Component {
 
   getClassNames(columns) {
     const { currentStep, editColumnField } = this.props;
-    let classNames;
     let activeColumnIndex;
 
     // highlight active column
     if (editColumnField !== undefined) {
       activeColumnIndex = columns.findIndex(function (column) {
         return (
-          column.field !== undefined &&
-          parseInt(column.field.id) === parseInt(editColumnField.id)
+          column.field !== undefined && column.field.name === editColumnField
         );
       });
 
       if (activeColumnIndex) {
-        classNames = `active-col-${activeColumnIndex}`;
+        return `active-col-${activeColumnIndex}`;
       }
     }
 
-    if (currentStep === 0) {
-      classNames += " datacater-grid-filters";
-    } else if (currentStep > 0) {
-      classNames += " datacater-grid-pipeline-steps";
-    }
-
-    return classNames;
+    return "";
   }
 
   componentDidUpdate(prevProps, prevState, snapshot) {
@@ -253,6 +228,7 @@ class Grid extends Component {
               {({ width, height }) => (
                 <BaseTable
                   classPrefix="datacater-grid"
+                  className={classNames}
                   columns={this.getColumns(this.props.profile)}
                   components={{ TableHeaderCell }}
                   data={data}
