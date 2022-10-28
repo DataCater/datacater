@@ -22,10 +22,47 @@ class CodeEditor extends Component {
   }
 
   componentDidMount() {
-    const defaultTransform =
+    const defaultFieldTransform =
+      "# field: Value of the field that the transform is applied to.\n" +
+      "# record: The entire record as dict.\n" +
+      "def transform(field, record: dict):\n" +
+      "  # Return the processed field.\n" +
+      "  return field";
+    const defaultFieldFilter =
+      "# field: Value of the field that the transform is applied to.\n" +
+      "# record: The entire record as Python dict.\n" +
+      "def filter(field, record: dict) -> bool:\n" +
+      "  # Return whether the transform shall be applied/the record shall be processed or not.\n" +
+      "  return True";
+    const defaultRecordTransform =
+      '# record["key"]: The key of the Apache Kafka record. Can be overwritten.\n' +
+      '# record["value"]: The value of the Apache Kafka record. Can be overwritten.\n' +
+      '# record["metadata"]: The metadata of the Apache Kafka record, e.g., the offset or the timestamp. Cannot be overwritten.\n' +
+      "def transform(record: dict) -> dict:\n" +
+      "  # Return the processed record.\n" +
+      "  return record";
+    const defaultRecordFilter =
+      '# record["key"]: The key of the Apache Kafka record.\n' +
+      '# record["value"]: The value of the Apache Kafka record.\n' +
+      '# record["metadata"]: The metadata of the Apache Kafka record, e.g., the offset or the timestamp.\n' +
+      "def filter(record: dict) -> bool:\n" +
+      "  # Return whether the transform shall be applied/the record shall be processed or not.\n" +
+      "  return True";
+
+    let defaultTransform = defaultFieldTransform;
+    if (
+      this.props.transformStep.kind === "Record" &&
       this.props.funcType === "transform"
-        ? "def transform(value, row):\n  return value"
-        : "def filter(value, row):\n  return True";
+    ) {
+      defaultTransform = defaultRecordTransform;
+    } else if (
+      this.props.transformStep.kind === "Record" &&
+      this.props.funcType === "filter"
+    ) {
+      defaultTransform = defaultRecordFilter;
+    } else if (this.props.funcType === "filter") {
+      defaultTransform = defaultFieldFilter;
+    }
 
     if ([undefined, ""].includes(this.props.value)) {
       this.setState({ code: defaultTransform });
@@ -52,9 +89,6 @@ class CodeEditor extends Component {
   }
 
   render() {
-    const { executionError, isExecutingTransformation } =
-      this.props.previewState;
-
     return (
       <div className="datacater-code-editor border-start border-end border-top border-bottom border-grey">
         <div className="row py-2 px-3 border-bottom border-dark">
@@ -69,16 +103,10 @@ class CodeEditor extends Component {
               variant="primary"
             >
               <Play className="feather-icon" />
-              {!isExecutingTransformation && "Save & Run"}
-              {isExecutingTransformation && "Running..."}
+              Save &amp; Run
             </Button>
           </div>
         </div>
-        {executionError !== undefined && (
-          <div className="text-bg-danger font-size-sm p-3">
-            {executionError}
-          </div>
-        )}
         <AceEditor
           placeholder=""
           mode="python"

@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { Code, Table } from "react-feather";
+import { Code, Package, Table } from "react-feather";
 
 class Toolbar extends Component {
   render() {
@@ -22,6 +22,18 @@ class Toolbar extends Component {
     const rawButtonClassNames = !showGrid
       ? "btn btn-sm btn-primary text-white"
       : "btn btn-sm btn-outline-primary";
+
+    let transformation = undefined;
+    if (
+      step !== undefined &&
+      step.kind === "Record" &&
+      step.transform !== undefined
+    ) {
+      const transformationKey = step.transform.key;
+      transformation = this.props.transforms.find(
+        (transformation) => transformation.key === transformationKey
+      );
+    }
 
     return (
       <div className="container mb-2">
@@ -61,6 +73,32 @@ class Toolbar extends Component {
             </div>
           )}
           <div className="col d-flex align-items-center justify-content-end">
+            {step !== undefined &&
+              step.kind === "Record" &&
+              transformation === undefined && (
+                <button
+                  onClick={(e) => {
+                    this.props.editColumnFunc();
+                  }}
+                  className="btn btn-outline-primary btn-sm me-4"
+                >
+                  <Package className="feather-icon me-2" />
+                  Apply transform
+                </button>
+              )}
+            {step !== undefined &&
+              step.kind === "Record" &&
+              transformation !== undefined && (
+                <button
+                  onClick={(e) => {
+                    this.props.editColumnFunc();
+                  }}
+                  className="btn btn-primary text-white btn-sm me-4"
+                >
+                  <Package className="feather-icon me-2" />
+                  {transformation.name}
+                </button>
+              )}
             {step !== undefined && (
               <span
                 className="badge text-primary fw-semibold me-4"

@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import ContextSidebar from "./pipeline_designer/ContextSidebar";
-import EditTransformation from "./pipeline_designer/context_bar/Edit";
+import Edit from "./pipeline_designer/context_bar/Edit";
 import StepsList from "./pipeline_designer/grid/StepsList";
 import Toolbar from "./pipeline_designer/grid/Toolbar";
 import Grid from "./pipeline_designer/Grid";
@@ -130,12 +130,14 @@ class PipelineDesigner extends Component {
         <Toolbar
           hideStepNameFormFunc={this.props.hideStepNameFormFunc}
           pipeline={pipeline}
+          editColumnFunc={this.props.editColumnFunc}
           sampleRecords={this.props.sampleRecords}
           showGrid={this.state.showGrid}
           showStepNameForm={this.props.showStepNameForm}
           showStepNameFormFunc={this.props.showStepNameFormFunc}
           step={step}
           toggleShowGridFunc={this.toggleShowGrid}
+          transforms={this.props.transforms}
           updateStepNameFunc={this.props.updateStepNameFunc}
         />
         {this.state.showGrid && (
@@ -184,7 +186,7 @@ class PipelineDesigner extends Component {
           this.props.currentStep !== undefined &&
           this.props.editColumn !== undefined && (
             <ContextSidebar>
-              <EditTransformation
+              <Edit
                 field={this.props.editColumn.field}
                 fields={this.props.fields}
                 currentStep={this.props.currentStep}

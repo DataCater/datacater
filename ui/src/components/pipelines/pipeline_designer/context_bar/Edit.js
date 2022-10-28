@@ -1,23 +1,41 @@
 import React, { Component } from "react";
-import Attribute from "./Attribute";
+import Field from "./Field";
+import Record from "./Record";
 import { Button } from "react-bootstrap";
 
 class Edit extends Component {
   render() {
     return (
       <React.Fragment>
-        <Attribute
-          field={this.props.field}
-          fields={this.props.fields}
-          currentStep={this.props.currentStep}
-          editColumn={this.props.editColumn}
-          filters={this.props.filters}
-          handleChangeFunc={this.props.handleChangeFunc}
-          previewState={this.props.previewState}
-          profile={this.props.profile}
-          transformStep={this.props.transformStep}
-          transforms={this.props.transforms}
-        />
+        {this.props.transformStep.kind === "Field" && (
+          <Field
+            field={this.props.field}
+            fields={this.props.fields}
+            currentStep={this.props.currentStep}
+            editColumn={this.props.editColumn}
+            filters={this.props.filters}
+            handleChangeFunc={this.props.handleChangeFunc}
+            previewState={this.props.previewState}
+            profile={this.props.profile}
+            transformStep={this.props.transformStep}
+            transforms={this.props.transforms}
+          />
+        )}
+
+        {this.props.transformStep.kind === "Record" && (
+          <Record
+            field={this.props.field}
+            fields={this.props.fields}
+            currentStep={this.props.currentStep}
+            editColumn={this.props.editColumn}
+            filters={this.props.filters}
+            handleChangeFunc={this.props.handleChangeFunc}
+            previewState={this.props.previewState}
+            profile={this.props.profile}
+            transformStep={this.props.transformStep}
+            transforms={this.props.transforms}
+          />
+        )}
 
         <div className="datacater-context-bar-button-group border-top d-flex align-items-center bg-white mx-n4 px-4 datacater-context-bar-fixed-element">
           <Button
