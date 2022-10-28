@@ -13,7 +13,7 @@ class AttributeFilterList extends Component {
   }
 
   updateSearchQuery(event) {
-    event.peeventDefault();
+    event.preventDefault();
 
     this.setState({
       searchQuery: event.target.value,
