@@ -4,9 +4,11 @@ import com.fasterxml.jackson.databind.JsonNode;
 import io.datacater.core.pipeline.PipelineEntity;
 import io.datacater.core.stream.StreamEntity;
 import io.fabric8.kubernetes.api.model.*;
+import io.fabric8.kubernetes.api.model.apps.Deployment;
 import io.fabric8.kubernetes.api.model.apps.DeploymentBuilder;
 import io.fabric8.kubernetes.api.model.apps.DeploymentStatus;
 import io.fabric8.kubernetes.client.KubernetesClient;
+import io.fabric8.kubernetes.client.dsl.RollableScalableResource;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -119,6 +121,14 @@ public class K8Deployment {
         .inNamespace(StaticConfig.EnvironmentVariables.NAMESPACE)
         .withName(name)
         .getLog(true);
+  }
+
+  public RollableScalableResource<Deployment> watchLogs(String name) {
+    return client
+        .apps()
+        .deployments()
+        .inNamespace(StaticConfig.EnvironmentVariables.NAMESPACE)
+        .withName(name);
   }
 
   public void delete(String deploymentName) {

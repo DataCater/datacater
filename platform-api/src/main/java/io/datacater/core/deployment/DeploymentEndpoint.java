@@ -4,22 +4,30 @@ import io.datacater.core.pipeline.PipelineEntity;
 import io.datacater.core.stream.StreamEntity;
 import io.fabric8.kubernetes.api.model.ListMeta;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
+import io.fabric8.kubernetes.api.model.apps.Deployment;
 import io.fabric8.kubernetes.client.KubernetesClient;
+import io.fabric8.kubernetes.client.dsl.LogWatch;
+import io.fabric8.kubernetes.client.dsl.RollableScalableResource;
 import io.smallrye.mutiny.Uni;
+import java.io.*;
 import java.util.UUID;
 import javax.annotation.security.RolesAllowed;
-import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.sse.OutboundSseEvent;
+import javax.ws.rs.sse.Sse;
+import javax.ws.rs.sse.SseEventSink;
 import org.hibernate.reactive.mutiny.Mutiny;
 import org.jboss.logging.Logger;
 
 @Path("/api/alpha/deployments")
 @RolesAllowed("dev")
 @Produces(MediaType.APPLICATION_JSON)
-@ApplicationScoped
+@RequestScoped
 public class DeploymentEndpoint {
   private static final Logger LOGGER = Logger.getLogger(DeploymentEndpoint.class);
   @Inject Mutiny.SessionFactory sf;
@@ -37,6 +45,28 @@ public class DeploymentEndpoint {
   @Produces(MediaType.TEXT_PLAIN)
   public Uni<String> getLogs(@PathParam("deploymentName") String deploymentName) {
     return Uni.createFrom().item(getDeploymentLogs(deploymentName));
+  }
+
+  @GET
+  @Path("{deploymentName}/watchLogs")
+  @Produces(MediaType.SERVER_SENT_EVENTS)
+  public Response watchLogs(
+      @PathParam("deploymentName") String deploymentName,
+      @Context Sse sse,
+      @Context SseEventSink eventSink)
+      throws IOException {
+    LogWatch lw = watchDeploymentLogs(deploymentName).watchLog();
+    InputStream is = lw.getOutput();
+    BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(is));
+    String line;
+    while ((line = bufferedReader.readLine()) != null) {
+      final OutboundSseEvent sseEvent = sse.newEventBuilder().data(line).build();
+
+      eventSink.send(sseEvent);
+    }
+    is.close();
+    lw.close();
+    return Response.ok().build();
   }
 
   @GET
@@ -97,6 +127,11 @@ public class DeploymentEndpoint {
   private String getDeploymentLogs(String deploymentName) {
     K8Deployment k8Deployment = new K8Deployment(client);
     return k8Deployment.getLogs(deploymentName);
+  }
+
+  private RollableScalableResource<Deployment> watchDeploymentLogs(String deploymentName) {
+    K8Deployment k8Deployment = new K8Deployment(client);
+    return k8Deployment.watchLogs(deploymentName);
   }
 
   private ListMeta getK8Deployments() {
