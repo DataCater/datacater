@@ -175,11 +175,11 @@ class FilterConfig extends Component {
                     {filter.key === "user-defined-filter" && (
                       <CodeEditor
                         fieldName={field}
+                        funcType="filter"
                         currentStep={currentStep}
                         handleChangeFunc={handleChangeFunc}
                         previewState={this.props.previewState}
-                        transformationState={this.props.transformationState}
-                        value={transformConfig[configOption.name] || ""}
+                        value={filterConfig[configOption.name] || ""}
                       />
                     )}
                     {filter.key !== "user-defined-filter" && (

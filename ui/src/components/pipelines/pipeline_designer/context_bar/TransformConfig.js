@@ -193,10 +193,10 @@ class TransformConfig extends Component {
                     {transform.key === "user-defined-transformation" && (
                       <CodeEditor
                         fieldName={field}
+                        funcType="transform"
                         currentStep={currentStep}
                         handleChangeFunc={handleChangeFunc}
                         previewState={this.props.previewState}
-                        transformationState={this.props.transformationState}
                         value={transformConfig[configOption.name] || ""}
                       />
                     )}

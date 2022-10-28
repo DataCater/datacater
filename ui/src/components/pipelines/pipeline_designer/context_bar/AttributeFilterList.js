@@ -21,12 +21,15 @@ class AttributeFilterList extends Component {
   }
 
   render() {
-    const { currentStep, filter, field, fieldDataType } = this.props;
+    const { currentStep, filter, field, fieldDataType, transformStep } =
+      this.props;
 
     const searchTokens = this.state.searchQuery.toLowerCase().trim().split(" ");
     const filtersItems = deepCopy(this.props.filters);
 
     const filters = filtersItems
+      // Select only filters that are built for the Kind of the current step
+      .filter((filter) => filter.kind === transformStep.kind)
       .filter(
         (filter) =>
           searchTokens

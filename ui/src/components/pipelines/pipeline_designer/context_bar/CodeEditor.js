@@ -22,7 +22,10 @@ class CodeEditor extends Component {
   }
 
   componentDidMount() {
-    const defaultTransform = "def transform(value, row):\n  return value";
+    const defaultTransform =
+      this.props.funcType === "transform"
+        ? "def transform(value, row):\n  return value"
+        : "def filter(value, row):\n  return True";
 
     if ([undefined, ""].includes(this.props.value)) {
       this.setState({ code: defaultTransform });
@@ -44,7 +47,7 @@ class CodeEditor extends Component {
       this.props.fieldName,
       "code",
       this.state.code,
-      "transformationConfig"
+      this.props.funcType
     );
   }
 
@@ -56,14 +59,14 @@ class CodeEditor extends Component {
       <div className="datacater-code-editor border-start border-end border-top border-bottom border-grey">
         <div className="row py-2 px-3 border-bottom border-dark">
           <div className="col d-flex align-items-center font-weight-bold">
-            Python® 3.10.6
+            Python®
           </div>
           <div className="col-auto">
             <Button
-              className="d-flex align-items-center border-dark my-2"
+              className="d-flex align-items-center my-2 text-white"
               onClick={this.handleApply}
               size="sm"
-              variant="white"
+              variant="primary"
             >
               <Play className="feather-icon" />
               {!isExecutingTransformation && "Save & Run"}
