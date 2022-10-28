@@ -213,30 +213,15 @@ class EditPipeline extends Component {
     });
   }
 
-  createEditColumnFilterObject(fieldName) {
-    const pipeline = deepCopy(this.state.pipeline);
-    const filter = pipeline.spec.filters.find(
-      (filter) => filter.fieldName === fieldName
-    );
-
-    return {
-      type: "filter",
-      fieldName: fieldName,
-      filter: Object.assign({}, filter),
-    };
-  }
-
-  createEditColumnTransformationObject(fieldName, stepIndex) {
+  createEditColumnObject(fieldName, stepIndex) {
     const pipeline = deepCopy(this.state.pipeline);
 
-    const field = pipeline.spec.transformationSteps[
-      stepIndex
-    ].transformations.find((transform) => transform.fieldName === fieldName);
+    const step = pipeline.spec.steps[stepIndex];
 
     return {
       fieldName: fieldName,
       stepIndex: stepIndex,
-      type: "transform",
+      step: step,
     };
   }
 
@@ -245,72 +230,64 @@ class EditPipeline extends Component {
     let editColumn = this.state.editColumn;
     let contextBarActive = true;
 
-    if (
-      currentStep === undefined &&
-      fieldName === undefined &&
-      property === undefined
-    ) {
-      fieldName = event.target.dataset.fieldname;
+    if (currentStep === undefined) {
       currentStep = event.target.dataset.currentstep;
+    }
+    if (fieldName === undefined) {
+      fieldName = event.target.dataset.fieldname;
+    }
+    if (prefix === undefined) {
       prefix = event.target.dataset.prefix;
+    }
+    if (property === undefined) {
       property = event.target.name;
+    }
+    if (value === undefined) {
       value = event.target.value;
     }
 
-    const transformIdx = pipeline.spec.transformationSteps[
-      currentStep
-    ].transformations.findIndex(
-      (transform) => transform.fieldName === fieldName
-    );
+    const step = pipeline.spec.steps[currentStep - 1];
 
-    if (transformIdx > -1) {
-      if (property === "transform") {
-        if (value === undefined) {
-          // Remove transform
-          pipeline.spec.transformationSteps[currentStep].transformations.splice(
-            transformIdx,
-            1
-          );
-          editColumn = undefined;
-          contextBarActive = false;
-        } else {
-          pipeline.spec.transformationSteps[currentStep].transformations[
-            transformIdx
-          ].transformation = value;
-          editColumn.transform =
-            pipeline.spec.transformationSteps[currentStep].transformations[
-              transformIdx
-            ];
-        }
-      } else if (property === "filter") {
-        pipeline.spec.transformationSteps[currentStep].transformations[
-          transformIdx
-        ].filter = value;
-        editColumn.transform =
-          pipeline.spec.transformationSteps[currentStep].transformations[
-            transformIdx
-          ];
+    if (value !== undefined) {
+      pipeline.spec.steps[currentStep - 1].fields[fieldName] = Object.assign(
+        {},
+        pipeline.spec.steps[currentStep - 1].fields[fieldName]
+      );
+    }
+
+    if (property === "transform") {
+      if (value === undefined) {
+        // Remove transform
+        delete step.fields[fieldName].transform;
+        pipeline.spec.steps[currentStep - 1] = step;
+        editColumn = undefined;
       } else {
-        pipeline.spec.transformationSteps[currentStep].transformations[
-          transformIdx
-        ][prefix][property] = value;
-        editColumn.transform =
-          pipeline.spec.transformationSteps[currentStep].transformations[
-            transformIdx
-          ];
+        pipeline.spec.steps[currentStep - 1].fields[fieldName]["transform"] = {
+          key: value,
+        };
+      }
+    } else if (property === "filter") {
+      if (value === undefined) {
+        // Remove filter
+        delete step.fields[fieldName].filter;
+        pipeline.spec.steps[currentStep - 1] = step;
+        editColumn = undefined;
+      } else {
+        pipeline.spec.steps[currentStep - 1].fields[fieldName]["filter"] = {
+          key: value,
+        };
       }
     } else {
-      const newTransform = {
-        fieldName: fieldName,
-        transformation: value,
-        transformationConfig: {},
-        filter: null,
-        filterConfig: {},
-      };
-      pipeline.spec.transformationSteps[currentStep].transformations.push(
-        newTransform
-      );
-      editColumn.transform = newTransform;
+      const config = {};
+      config[property] = value;
+      pipeline.spec.steps[currentStep - 1].fields[fieldName][prefix]["config"] =
+        Object.assign(
+          {},
+          pipeline.spec.steps[currentStep - 1].fields[fieldName][prefix][
+            "config"
+          ],
+          config
+        );
     }
 
     const type = event !== undefined ? event.target.type : "text";
@@ -516,7 +493,7 @@ class EditPipeline extends Component {
     }
   }
 
-  editColumn(fieldName, sortPosition, type) {
+  editColumn(fieldName, sortPosition) {
     const pipeline = deepCopy(this.state.pipeline);
     let editColumn = undefined;
 
@@ -530,17 +507,8 @@ class EditPipeline extends Component {
       // show context bar when editing a transformation or filter
       this.showContextBar();
 
-      if (
-        type === "transform" &&
-        fieldName !== undefined &&
-        sortPosition !== undefined
-      ) {
-        editColumn = this.createEditColumnTransformationObject(
-          fieldName,
-          sortPosition
-        );
-      } else if (type === "filter" && fieldName !== undefined) {
-        editColumn = this.createEditColumnFilterObject(fieldName);
+      if (fieldName !== undefined && sortPosition !== undefined) {
+        editColumn = this.createEditColumnObject(fieldName, sortPosition);
       }
     }
 

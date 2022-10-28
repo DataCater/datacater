@@ -7,7 +7,7 @@ import "ace-builds/src-noconflict/mode-python";
 import "ace-builds/src-noconflict/snippets/python";
 import "ace-builds/src-noconflict/theme-xcode";
 
-import "../../../../../scss/code-editor.scss";
+import "../../../../scss/code-editor.scss";
 
 class CodeEditor extends Component {
   constructor(props) {

@@ -42,13 +42,7 @@ class TableHeaderCell extends Component {
   }
 
   openContextBar(field) {
-    const { currentPage, editColumnFunc } = this.props.column;
-
-    if (currentPage === "filter") {
-      editColumnFunc(field.name, undefined, "filter");
-    } else if (currentPage === "transform") {
-      editColumnFunc(field.name, this.props.column.currentStep, "transform");
-    }
+    this.props.column.editColumnFunc(field.name, this.props.column.currentStep);
   }
 
   renderField(field, idx) {
@@ -60,30 +54,20 @@ class TableHeaderCell extends Component {
       filters,
       introducedFields,
       removeColumnFunc,
+      step,
       transforms,
-      transformationOfCurrentStep,
     } = this.props.column;
 
     let sampleCellClassNames = "sample-cell py-2 ps-0";
-
-    let filter = undefined;
-
-    if (
-      currentPage === "filter" &&
-      filterOfCurrentStep !== undefined &&
-      ![undefined, ""].includes(filterOfCurrentStep.filter)
-    ) {
-      const filterKey = filterOfCurrentStep.filter;
-      filter = filters.find((filter) => filter.key === filterKey);
-    }
-
     let transformation = undefined;
+
     if (
       currentStep >= 0 &&
-      transformationOfCurrentStep !== undefined &&
-      ![undefined, ""].includes(transformationOfCurrentStep.transformation)
+      step.fields !== undefined &&
+      step.fields[field.name] !== undefined &&
+      step.fields[field.name].transform !== undefined
     ) {
-      const transformationKey = transformationOfCurrentStep.transformation;
+      const transformationKey = step.fields[field.name].transform.key;
       transformation = this.props.column.transforms.find(
         (transformation) => transformation.key === transformationKey
       );
@@ -107,50 +91,32 @@ class TableHeaderCell extends Component {
               )}
             </div>
           </div>
-          {currentPage === "filter" && filter == null && (
-            <Button
-              variant="white"
-              size="sm"
-              className="w-100 text-left mt-2 d-flex align-items-center text-nowrap btn-outline-primary"
-              onClick={(event) => this.openContextBar(field)}
-            >
-              <Filter className="feather-icon me-2" />
-              Apply filter
-            </Button>
-          )}
-          {currentPage === "filter" && filter != null && (
-            <Button
-              variant="primary"
-              size="sm"
-              className="w-100 text-left mt-2 d-flex align-items-center text-nowrap text-white"
-              onClick={(event) => this.openContextBar(field)}
-            >
-              <Filter className="feather-icon me-2" />
-              {filter.name}
-            </Button>
-          )}
-          {currentPage === "transform" && transformation == null && (
-            <Button
-              variant="white"
-              size="sm"
-              className="w-100 text-left mt-2 d-flex align-items-center text-nowrap btn-outline-primary"
-              onClick={(event) => this.openContextBar(field)}
-            >
-              <Package className="feather-icon me-2" />
-              Apply transformation
-            </Button>
-          )}
-          {currentPage === "transform" && transformation != null && (
-            <Button
-              variant="primary"
-              size="sm"
-              className="w-100 text-left mt-2 d-flex align-items-center text-nowrap text-white"
-              onClick={(event) => this.openContextBar(field)}
-            >
-              <Package className="feather-icon me-2" />
-              {transformation.name}
-            </Button>
-          )}
+          {step !== undefined &&
+            step.kind === "Field" &&
+            transformation == null && (
+              <Button
+                variant="white"
+                size="sm"
+                className="w-100 text-left mt-2 d-flex align-items-center text-nowrap btn-outline-primary"
+                onClick={(event) => this.openContextBar(field)}
+              >
+                <Package className="feather-icon me-2" />
+                Apply transform
+              </Button>
+            )}
+          {step !== undefined &&
+            step.kind === "Field" &&
+            transformation != null && (
+              <Button
+                variant="primary"
+                size="sm"
+                className="w-100 text-left mt-2 d-flex align-items-center text-nowrap text-white"
+                onClick={(event) => this.openContextBar(field)}
+              >
+                <Package className="feather-icon me-2" />
+                {transformation.name}
+              </Button>
+            )}
         </div>
         <div className="datacater-stats-content datacater-most-frequent-values-content">
           {!["array", "object"].includes(field.dataType) && (
