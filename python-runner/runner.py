@@ -6,7 +6,7 @@ import traceback
 from glob import iglob
 from importlib import import_module
 from os import path
-from typing import List, Optional
+from typing import List, Optional, Any
 
 import yaml
 from fastapi import FastAPI, Response, status
@@ -57,8 +57,8 @@ INTERNAL_POST_TRANSFORMS = [
 ]
 
 class Record(BaseModel):
-    key: Optional[dict]
-    value: dict
+    key: Optional[Any]
+    value: Any
     metadata: dict
 
 class PreviewRequest(BaseModel):
@@ -69,8 +69,6 @@ class PreviewRequest(BaseModel):
 class PipelineRequest(BaseModel):
     # payload describes the whole expected schema of
     # a pipeline including:
-    # apiVersion: str
-    # kind: str
     # metadata: dict
     # spec: dict
     payload: dict
@@ -146,7 +144,8 @@ def apply_pipeline(record: Record, pipeline: dict, preview_step = None):
                     field_filter = field_config.get("filter")
                     field_transform = field_config.get("transform")
 
-                    if field_transform is None or field_transform.get("key") in INTERNAL_POST_TRANSFORMS:  # noqa: E501
+                    if field_transform is not None and field_transform.get("key") in INTERNAL_POST_TRANSFORMS:  # noqa: E501
+                        transform_key = field_transform.get("key")
                         field_matches_filter = True
                         if field_filter is not None and field_filter.get("key") is not None:
                             field_matches_filter = FILTERS[
@@ -156,13 +155,18 @@ def apply_pipeline(record: Record, pipeline: dict, preview_step = None):
                                 field_filter.get("config", {}))
 
                         # Apply transform only if no filter is defined or field matches filter
-                        if field_matches_filter and field_transform is not None and field_transform.get("key") is not None:
-                            value[field_name] = TRANSFORMS[
-                                field_transform["key"]](
-                                value.get(field_name, None),
-                                value,
-                                field_transform.get("config", {}))
-
+                        if field_matches_filter:
+                            if transform_key == "drop-field":
+                                value.pop(field_name)
+                            elif transform_key == "rename-field":
+                                new_name = field_transform.get("config", {})["newFieldName"]
+                                value[new_name] = value.pop(field_name)
+                            else:
+                                value[field_name] = TRANSFORMS[
+                                    field_transform["key"]](
+                                    value.get(field_name, None),
+                                    value,
+                                    field_transform.get("config", {}))
                 record.value = value
 
             if preview_step == step_index:
