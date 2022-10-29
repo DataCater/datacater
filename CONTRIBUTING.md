@@ -144,5 +144,13 @@ ct lint --all --config helm-charts/ct.yaml
 # Install the chart and run tests if available
 ct install --namespace default --all --config helm-charts/ct.yaml
 ```
-
 See https://github.com/helm/chart-testing#usage for details
+
+### How do I update the self-signed certificates?
+
+For testing and development you can find self-signed certificates under
+`platform-api/src/main/resources/`. To update these run ...
+
+```bash
+ openssl req -nodes -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -sha256 -days 365 -subj '/CN=localhost'
+```
