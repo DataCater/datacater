@@ -21,12 +21,14 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.sse.OutboundSseEvent;
 import javax.ws.rs.sse.Sse;
 import javax.ws.rs.sse.SseEventSink;
+import org.eclipse.microprofile.openapi.annotations.security.SecurityRequirement;
 import org.hibernate.reactive.mutiny.Mutiny;
 import org.jboss.logging.Logger;
 
 @Path("/api/alpha/deployments")
 @RolesAllowed("dev")
 @Produces(MediaType.APPLICATION_JSON)
+@SecurityRequirement(name = "apiToken")
 @RequestScoped
 public class DeploymentEndpoint {
   private static final Logger LOGGER = Logger.getLogger(DeploymentEndpoint.class);
