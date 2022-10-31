@@ -38,7 +38,7 @@ public class K8DeploymentTest {
   StreamEntity streamInEntity;
   StreamEntity streamOutEntity;
 
-  String deploymentName;
+  UUID deploymentId;
 
   @BeforeAll
   void setUp() throws IOException {
@@ -70,17 +70,14 @@ public class K8DeploymentTest {
     pipelineString = pipelineString.replace(streamOutUUIDPlaceholder, UUID.randomUUID().toString());
     Pipeline pipeline = mapper.readValue(pipelineString, Pipeline.class);
     pipelineEntity = new PipelineEntity().updateEntity(pipeline);
-
-    deploymentName = pipelineEntity.getName();
   }
 
   @Test
   @Order(1)
   public void testDeploymentExistsMethod()
       throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-    final String nonExistentDeployment = "test" + UUID.randomUUID();
     Assertions.assertEquals(
-        false, getExistsMethod(K8Deployment.class).invoke(k8Deployment, nonExistentDeployment));
+        false, getDeploymentExistsMethod().invoke(k8Deployment, UUID.randomUUID()));
   }
 
   @Test
@@ -91,43 +88,35 @@ public class K8DeploymentTest {
     final String nonExistentConfigMap = "test" + UUID.randomUUID();
     Assertions.assertEquals(
         false,
-        getExistsMethod(K8ConfigMap.class)
+        getConfigMapExistsMethod()
             .invoke(getPrivateK8ConfigMap().get(k8Deployment), nonExistentConfigMap));
   }
 
   @Test
   @Order(2)
-  public void testInteractionWithAPIServer()
+  public void testCreateDeployment()
       throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-    k8Deployment.create(pipelineEntity, streamInEntity, streamOutEntity);
-    Assertions.assertEquals(
-        true, getExistsMethod(K8Deployment.class).invoke(k8Deployment, deploymentName));
+    deploymentId = k8Deployment.create(pipelineEntity, streamInEntity, streamOutEntity);
+    Assertions.assertEquals(true, getDeploymentExistsMethod().invoke(k8Deployment, deploymentId));
   }
 
   @Test
   @Order(3)
   public void testGetLogs() {
-    String logs = k8Deployment.getLogs(deploymentName);
+    String logs = k8Deployment.getLogs(deploymentId);
     Assertions.assertNotNull(logs);
   }
 
-  @Test
-  @Order(4)
-  public void testNameSpaceExists() {
-    String logs = k8Deployment.getLogs(deploymentName);
-    Assertions.assertNotNull(logs);
-  }
-
-  @Test
-  @Order(5)
-  public void testConfigMapExists() {
-    String logs = k8Deployment.getLogs(deploymentName);
-    Assertions.assertNotNull(logs);
-  }
-
-  private Method getExistsMethod(Class c) throws NoSuchMethodException {
+  private Method getConfigMapExistsMethod() throws NoSuchMethodException {
     final String methodName = "exists";
-    Method method = c.getDeclaredMethod(methodName, String.class);
+    Method method = K8ConfigMap.class.getDeclaredMethod(methodName, String.class);
+    method.setAccessible(true);
+    return method;
+  }
+
+  private Method getDeploymentExistsMethod() throws NoSuchMethodException {
+    final String methodName = "exists";
+    Method method = K8Deployment.class.getDeclaredMethod(methodName, UUID.class);
     method.setAccessible(true);
     return method;
   }

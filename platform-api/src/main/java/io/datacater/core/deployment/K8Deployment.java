@@ -12,6 +12,7 @@ import io.fabric8.kubernetes.client.dsl.RollableScalableResource;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import javax.inject.Singleton;
 import org.jboss.logging.Logger;
 
@@ -28,22 +29,19 @@ public class K8Deployment {
     this.k8ConfigMap = new K8ConfigMap(client);
   }
 
-  public String create(PipelineEntity pe, StreamEntity streamIn, StreamEntity streamOut) {
-    final String name = getName(pe.getName());
+  public UUID create(PipelineEntity pe, StreamEntity streamIn, StreamEntity streamOut) {
+    final String name = StaticConfig.DEPLOYMENT_NAME_PREFIX + UUID.randomUUID();
     final String volumeName = name + StaticConfig.VOLUME_NAME_SUFFIX;
     k8NameSpace.create();
 
     if (!pe.equals(new PipelineEntity())) {
       k8ConfigMap.getOrCreate(name, pe);
     }
-
-    if (exists(name)) {
-      return name;
-    }
+    UUID deploymentId = UUID.randomUUID();
 
     List<EnvVar> variables = getEnvironmentVariables(streamIn, streamOut);
 
-    var deployment =
+    Deployment deployment =
         new DeploymentBuilder()
             .withNewMetadata()
             .withName(name)
@@ -54,7 +52,9 @@ public class K8Deployment {
                     StaticConfig.PIPELINE,
                     StaticConfig.PIPELINE_NO,
                     StaticConfig.REVISION,
-                    StaticConfig.PIPELINE_REV))
+                    StaticConfig.PIPELINE_REV,
+                    StaticConfig.UUID_TEXT,
+                    deploymentId.toString()))
             .endMetadata()
             .withNewSpec()
             .withReplicas(StaticConfig.REPLICAS)
@@ -67,7 +67,9 @@ public class K8Deployment {
                     StaticConfig.PIPELINE,
                     StaticConfig.PIPELINE_NO,
                     StaticConfig.REVISION,
-                    StaticConfig.PIPELINE_REV))
+                    StaticConfig.PIPELINE_REV,
+                    StaticConfig.UUID_TEXT,
+                    deploymentId.toString()))
             .endSelector()
             .withNewTemplate()
             .withNewMetadata()
@@ -78,7 +80,9 @@ public class K8Deployment {
                     StaticConfig.PIPELINE,
                     StaticConfig.PIPELINE_NO,
                     StaticConfig.REVISION,
-                    StaticConfig.PIPELINE_REV))
+                    StaticConfig.PIPELINE_REV,
+                    StaticConfig.UUID_TEXT,
+                    deploymentId.toString()))
             .endMetadata()
             .withNewSpec()
             .addNewContainer()
@@ -111,38 +115,39 @@ public class K8Deployment {
         .deployments()
         .inNamespace(StaticConfig.EnvironmentVariables.NAMESPACE)
         .create(deployment);
-    return name;
+    return deploymentId;
   }
 
-  public String getLogs(String name) {
+  public String getLogs(UUID deploymentId) {
     return client
         .apps()
         .deployments()
         .inNamespace(StaticConfig.EnvironmentVariables.NAMESPACE)
-        .withName(name)
+        .withName(getDeploymentName(deploymentId))
         .getLog(true);
   }
 
-  public RollableScalableResource<Deployment> watchLogs(String name) {
+  public RollableScalableResource<Deployment> watchLogs(UUID deploymentId) {
     return client
         .apps()
         .deployments()
         .inNamespace(StaticConfig.EnvironmentVariables.NAMESPACE)
-        .withName(name);
+        .withName(getDeploymentName(deploymentId));
   }
 
-  public void delete(String deploymentName) {
+  public void delete(UUID deploymentId) {
+    String name = getDeploymentName(deploymentId);
     Boolean status =
         client
             .apps()
             .deployments()
             .inNamespace(StaticConfig.EnvironmentVariables.NAMESPACE)
-            .withName(deploymentName)
+            .withName(name)
             .delete();
     if (status) {
-      LOGGER.info(StaticConfig.LoggerMessages.DEPLOYMENT_DELETED + deploymentName);
+      LOGGER.info(StaticConfig.LoggerMessages.DEPLOYMENT_DELETED + name);
     } else {
-      LOGGER.info(StaticConfig.LoggerMessages.DEPLOYMENT_NOT_DELETED + deploymentName);
+      LOGGER.info(StaticConfig.LoggerMessages.DEPLOYMENT_NOT_DELETED + name);
     }
   }
 
@@ -165,31 +170,42 @@ public class K8Deployment {
         .getMetadata();
   }
 
-  public ObjectMeta getDeployment(String deploymentName) {
+  public ObjectMeta getDeployment(UUID deploymentId) {
+
     return client
         .apps()
         .deployments()
         .inNamespace(StaticConfig.EnvironmentVariables.NAMESPACE)
-        .withName(deploymentName)
+        .withName(getDeploymentName(deploymentId))
         .get()
         .getMetadata();
   }
 
-  private boolean exists(String name) {
-    return client
+  private boolean exists(UUID deploymentId) {
+    return !client
+        .apps()
+        .deployments()
+        .inNamespace(StaticConfig.EnvironmentVariables.NAMESPACE)
+        .withLabel(StaticConfig.UUID_TEXT, deploymentId.toString())
+        .list()
+        .getItems()
+        .isEmpty();
+  }
+
+  private String getDeploymentName(UUID deploymentId) {
+    List<Deployment> deployments =
+        client
             .apps()
             .deployments()
             .inNamespace(StaticConfig.EnvironmentVariables.NAMESPACE)
-            .withName(name)
-            .get()
-        != null;
-  }
+            .withLabel(StaticConfig.UUID_TEXT, deploymentId.toString())
+            .list()
+            .getItems();
 
-  private String getName(String name) {
-    if (name == null || name.isEmpty()) {
-      return StaticConfig.EnvironmentVariables.DEPLOYMENT_NAME;
+    if (deployments.isEmpty()) {
+      return null;
     }
-    return name;
+    return deployments.get(0).getMetadata().getName();
   }
 
   private List<EnvVar> getEnvironmentVariables(StreamEntity streamIn, StreamEntity streamOut) {

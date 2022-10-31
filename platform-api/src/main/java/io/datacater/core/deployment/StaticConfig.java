@@ -2,7 +2,6 @@ package io.datacater.core.deployment;
 
 import io.fabric8.kubernetes.api.model.Quantity;
 import java.util.Map;
-import java.util.UUID;
 import org.eclipse.microprofile.config.ConfigProvider;
 
 public class StaticConfig {
@@ -18,11 +17,13 @@ public class StaticConfig {
   static final String REVISION = "datacater.io/revision";
   static final String PIPELINE_NO = "1";
   static final String PIPELINE_REV = "1";
+  static final String UUID_TEXT = "uuid";
   static final String MOUNT_PATH = "/usr/app";
   static final Map<String, Quantity> RESOURCE_REQUESTS =
       Map.of("cpu", new Quantity("0.1"), "memory", new Quantity("1.5Gi"));
   static final Map<String, Quantity> RESOURCE_LIMITS = Map.of("memory", new Quantity("4Gi"));
   static final String VOLUME_NAME_SUFFIX = "-volume";
+  static final String DEPLOYMENT_NAME_PREFIX = "datacater-deployment-";
   static final String SPEC = "spec";
   static final String STREAM_OUT = "stream-out";
   static final String STREAM_IN = "stream-in";
@@ -53,10 +54,7 @@ public class StaticConfig {
             .getOptionalValue("datacater.deployment.namespace", String.class)
             .orElse("datacater")
             .toLowerCase();
-    static final String DEPLOYMENT_NAME =
-        ConfigProvider.getConfig()
-            .getOptionalValue("datacater.deployment.default-name", String.class)
-            .orElse("datacater-" + UUID.randomUUID());
+
     static final String FULL_IMAGE_NAME =
         ConfigProvider.getConfig()
             .getOptionalValue("datacater.deployment.image", String.class)

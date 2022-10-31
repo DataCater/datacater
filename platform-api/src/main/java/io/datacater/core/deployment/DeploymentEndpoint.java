@@ -37,27 +37,25 @@ public class DeploymentEndpoint {
   @Inject KubernetesClient client;
 
   @GET
-  @Path("{deploymentName}")
-  public Uni<ObjectMeta> getDeployment(@PathParam("deploymentName") String deploymentName) {
-    return Uni.createFrom().item(getK8Deployment(deploymentName));
+  @Path("{uuid}")
+  public Uni<ObjectMeta> getDeployment(@PathParam("uuid") UUID deploymentId) {
+    return Uni.createFrom().item(getK8Deployment(deploymentId));
   }
 
   @GET
-  @Path("{deploymentName}/logs")
+  @Path("{uuid}/logs")
   @Produces(MediaType.TEXT_PLAIN)
-  public Uni<String> getLogs(@PathParam("deploymentName") String deploymentName) {
-    return Uni.createFrom().item(getDeploymentLogs(deploymentName));
+  public Uni<String> getLogs(@PathParam("uuid") UUID deploymentId) {
+    return Uni.createFrom().item(getDeploymentLogs(deploymentId));
   }
 
   @GET
-  @Path("{deploymentName}/watch-logs")
+  @Path("{uuid}/watch-logs")
   @Produces(MediaType.SERVER_SENT_EVENTS)
   public Response watchLogs(
-      @PathParam("deploymentName") String deploymentName,
-      @Context Sse sse,
-      @Context SseEventSink eventSink)
+      @PathParam("uuid") UUID deploymentId, @Context Sse sse, @Context SseEventSink eventSink)
       throws IOException {
-    LogWatch lw = watchDeploymentLogs(deploymentName).watchLog();
+    LogWatch lw = watchDeploymentLogs(deploymentId).watchLog();
     InputStream is = lw.getOutput();
     BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(is));
     String line;
@@ -77,24 +75,24 @@ public class DeploymentEndpoint {
   }
 
   @POST
-  @Path("{pipelineUuid}")
-  public Uni<String> createDeployment(@PathParam("pipelineUuid") UUID pipelineId) {
+  public Uni<UUID> createDeployment(@QueryParam("pipelineUuid") UUID pipelineId) {
     return apply(pipelineId);
   }
 
   @DELETE
-  @Path("{deploymentName}")
-  public Uni<Response> deleteDeployment(@PathParam("deploymentName") String deploymentName) {
-    return Uni.createFrom().item(deleteK8Deployment(deploymentName));
+  @Path("{uuid}")
+  public Uni<Response> deleteDeployment(@PathParam("uuid") UUID deploymentId) {
+    return Uni.createFrom().item(deleteK8Deployment(deploymentId));
   }
 
   @PUT
-  @Path("{pipelineUuid}")
-  public Uni<String> updateDeployment(@PathParam("pipelineUuid") UUID pipelineId) {
+  @Path("{uuid}")
+  public Uni<UUID> updateDeployment(
+      @PathParam("uuid") UUID deploymentUuid, @QueryParam("pipelineUuid") UUID pipelineId) {
     return apply(pipelineId);
   }
 
-  private Uni<String> apply(UUID pipelineId) {
+  private Uni<UUID> apply(UUID pipelineId) {
     return sf.withTransaction(
         (session, transaction) ->
             session
@@ -104,7 +102,7 @@ public class DeploymentEndpoint {
                 .transformToUni(pe -> transformPipelineEntity(session, pe)));
   }
 
-  private Uni<String> transformPipelineEntity(Mutiny.Session session, PipelineEntity pe) {
+  private Uni<UUID> transformPipelineEntity(Mutiny.Session session, PipelineEntity pe) {
     return session
         .find(StreamEntity.class, getUUIDFromNode(pe, StaticConfig.STREAM_IN))
         .onItem()
@@ -112,7 +110,7 @@ public class DeploymentEndpoint {
         .transformToUni(streamIn -> transformStreamIn(session, pe, streamIn));
   }
 
-  private Uni<String> transformStreamIn(
+  private Uni<UUID> transformStreamIn(
       Mutiny.Session session, PipelineEntity pe, StreamEntity streamIn) {
     return session
         .find(StreamEntity.class, getUUIDFromNode(pe, StaticConfig.STREAM_OUT))
@@ -121,19 +119,19 @@ public class DeploymentEndpoint {
         .transformToUni(streamOut -> transformStreamOut(pe, streamOut, streamIn));
   }
 
-  private Uni<String> transformStreamOut(
+  private Uni<UUID> transformStreamOut(
       PipelineEntity pe, StreamEntity streamOut, StreamEntity streamIn) {
     return Uni.createFrom().item(createDeployment(pe, streamOut, streamIn));
   }
 
-  private String getDeploymentLogs(String deploymentName) {
+  private String getDeploymentLogs(UUID deploymentId) {
     K8Deployment k8Deployment = new K8Deployment(client);
-    return k8Deployment.getLogs(deploymentName);
+    return k8Deployment.getLogs(deploymentId);
   }
 
-  private RollableScalableResource<Deployment> watchDeploymentLogs(String deploymentName) {
+  private RollableScalableResource<Deployment> watchDeploymentLogs(UUID deploymentId) {
     K8Deployment k8Deployment = new K8Deployment(client);
-    return k8Deployment.watchLogs(deploymentName);
+    return k8Deployment.watchLogs(deploymentId);
   }
 
   private ListMeta getK8Deployments() {
@@ -141,19 +139,18 @@ public class DeploymentEndpoint {
     return k8Deployment.getDeployments();
   }
 
-  private ObjectMeta getK8Deployment(String deploymentName) {
+  private ObjectMeta getK8Deployment(UUID deploymentId) {
     K8Deployment k8Deployment = new K8Deployment(client);
-    return k8Deployment.getDeployment(deploymentName);
+    return k8Deployment.getDeployment(deploymentId);
   }
 
-  private Response deleteK8Deployment(String deploymentName) {
+  private Response deleteK8Deployment(UUID deploymentId) {
     K8Deployment k8Deployment = new K8Deployment(client);
-    k8Deployment.delete(deploymentName);
+    k8Deployment.delete(deploymentId);
     return Response.ok().build();
   }
 
-  private String createDeployment(
-      PipelineEntity pe, StreamEntity streamOut, StreamEntity streamIn) {
+  private UUID createDeployment(PipelineEntity pe, StreamEntity streamOut, StreamEntity streamIn) {
     K8Deployment k8Deployment = new K8Deployment(client);
     return k8Deployment.create(pe, streamIn, streamOut);
   }

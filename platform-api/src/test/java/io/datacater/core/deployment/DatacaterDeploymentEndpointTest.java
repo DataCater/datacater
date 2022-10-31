@@ -28,7 +28,7 @@ class DatacaterDeploymentEndpointTest {
   String baseURI = "http://localhost:8081/api/alpha";
   String deploymentsPath = "/deployments";
 
-  String deploymentName;
+  UUID deploymentId;
 
   @Test
   @Order(1)
@@ -42,8 +42,6 @@ class DatacaterDeploymentEndpointTest {
     String streamInPath = "deploymentTests/streamin.json";
     String streamOutPath = "deploymentTests/streamout.json";
     String pipelinePath = "deploymentTests/pipeline.json";
-
-    String expectedDeploymentName = "pipeline-test";
 
     // add stream in
     URL JsonURL = ClassLoader.getSystemClassLoader().getResource(streamInPath);
@@ -93,13 +91,12 @@ class DatacaterDeploymentEndpointTest {
         given()
             .contentType(ContentType.JSON)
             .baseUri(baseURI)
-            .pathParam("pipelineUuid", pipelineUUID)
-            .post(deploymentsPath + "/{pipelineUuid}");
+            .queryParam("pipelineUuid", pipelineUUID)
+            .post(deploymentsPath);
 
-    deploymentName = responseDeployment.body().asString();
+    deploymentId = responseDeployment.body().as(UUID.class);
 
     Assertions.assertEquals(200, responseDeployment.getStatusCode());
-    Assertions.assertEquals(expectedDeploymentName, deploymentName);
   }
 
   @Test
@@ -115,8 +112,8 @@ class DatacaterDeploymentEndpointTest {
         RestAssured.given()
             .contentType(ContentType.JSON)
             .baseUri(baseURI)
-            .pathParam("deploymentName", deploymentName)
-            .delete(deploymentsPath + "/{deploymentName}");
+            .pathParam("uuid", deploymentId)
+            .delete(deploymentsPath + "/{uuid}");
 
     Assertions.assertEquals(200, response.getStatusCode());
   }
