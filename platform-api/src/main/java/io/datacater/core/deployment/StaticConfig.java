@@ -22,8 +22,9 @@ public class StaticConfig {
   static final Map<String, Quantity> RESOURCE_REQUESTS =
       Map.of("cpu", new Quantity("0.1"), "memory", new Quantity("1.5Gi"));
   static final Map<String, Quantity> RESOURCE_LIMITS = Map.of("memory", new Quantity("4Gi"));
-  static final String VOLUME_NAME_SUFFIX = "-volume";
   static final String DEPLOYMENT_NAME_PREFIX = "datacater-deployment-";
+  static final String CONFIGMAP_NAME_PREFIX = "datacater-configmap-";
+  static final String VOLUME_NAME_PREFIX = "datacater-volume-";
   static final String SPEC = "spec";
   static final String STREAM_OUT = "stream-out";
   static final String STREAM_IN = "stream-in";

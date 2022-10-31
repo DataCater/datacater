@@ -30,14 +30,12 @@ public class K8Deployment {
   }
 
   public UUID create(PipelineEntity pe, StreamEntity streamIn, StreamEntity streamOut) {
-    final String name = StaticConfig.DEPLOYMENT_NAME_PREFIX + UUID.randomUUID();
-    final String volumeName = name + StaticConfig.VOLUME_NAME_SUFFIX;
-    k8NameSpace.create();
-
-    if (!pe.equals(new PipelineEntity())) {
-      k8ConfigMap.getOrCreate(name, pe);
-    }
     UUID deploymentId = UUID.randomUUID();
+    final String name = StaticConfig.DEPLOYMENT_NAME_PREFIX + deploymentId;
+    final String configmapName = StaticConfig.CONFIGMAP_NAME_PREFIX + deploymentId;
+    final String volumeName = StaticConfig.VOLUME_NAME_PREFIX + deploymentId;
+    k8NameSpace.create();
+    k8ConfigMap.getOrCreate(configmapName, pe);
 
     List<EnvVar> variables = getEnvironmentVariables(streamIn, streamOut);
 
