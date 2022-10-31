@@ -50,7 +50,7 @@ public class DeploymentEndpoint {
   }
 
   @GET
-  @Path("{deploymentName}/watchLogs")
+  @Path("{deploymentName}/watch-logs")
   @Produces(MediaType.SERVER_SENT_EVENTS)
   public Response watchLogs(
       @PathParam("deploymentName") String deploymentName,
