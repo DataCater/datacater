@@ -43,44 +43,17 @@ public class K8Deployment {
         new DeploymentBuilder()
             .withNewMetadata()
             .withName(name)
-            .addToLabels(
-                Map.of(
-                    StaticConfig.APP,
-                    StaticConfig.DATACATER_PIPELINE,
-                    StaticConfig.PIPELINE,
-                    StaticConfig.PIPELINE_NO,
-                    StaticConfig.REVISION,
-                    StaticConfig.PIPELINE_REV,
-                    StaticConfig.UUID_TEXT,
-                    deploymentId.toString()))
+            .addToLabels(getLabels(deploymentId))
             .endMetadata()
             .withNewSpec()
             .withReplicas(StaticConfig.REPLICAS)
             .withMinReadySeconds(2)
             .withNewSelector()
-            .addToMatchLabels(
-                Map.of(
-                    StaticConfig.APP,
-                    StaticConfig.DATACATER_PIPELINE,
-                    StaticConfig.PIPELINE,
-                    StaticConfig.PIPELINE_NO,
-                    StaticConfig.REVISION,
-                    StaticConfig.PIPELINE_REV,
-                    StaticConfig.UUID_TEXT,
-                    deploymentId.toString()))
+            .addToMatchLabels(getLabels(deploymentId))
             .endSelector()
             .withNewTemplate()
             .withNewMetadata()
-            .addToLabels(
-                Map.of(
-                    StaticConfig.APP,
-                    StaticConfig.DATACATER_PIPELINE,
-                    StaticConfig.PIPELINE,
-                    StaticConfig.PIPELINE_NO,
-                    StaticConfig.REVISION,
-                    StaticConfig.PIPELINE_REV,
-                    StaticConfig.UUID_TEXT,
-                    deploymentId.toString()))
+            .addToLabels(getLabels(deploymentId))
             .endMetadata()
             .withNewSpec()
             .addNewContainer()
@@ -92,17 +65,9 @@ public class K8Deployment {
             .withRequests(StaticConfig.RESOURCE_REQUESTS)
             .withLimits(StaticConfig.RESOURCE_LIMITS)
             .endResources()
-            .withVolumeMounts(
-                new VolumeMountBuilder()
-                    .withName(volumeName)
-                    .withMountPath(StaticConfig.MOUNT_PATH)
-                    .build())
+            .withVolumeMounts(getVolumeMount(volumeName))
             .endContainer()
-            .withVolumes(
-                new VolumeBuilder()
-                    .withName(volumeName)
-                    .withConfigMap(new ConfigMapVolumeSourceBuilder().withName(name).build())
-                    .build())
+            .withVolumes(getVolume(volumeName, name))
             .endSpec()
             .endTemplate()
             .endSpec()
@@ -114,6 +79,36 @@ public class K8Deployment {
         .inNamespace(StaticConfig.EnvironmentVariables.NAMESPACE)
         .create(deployment);
     return deploymentId;
+  }
+
+  private static Map<String, String> getLabels(UUID deploymentId){
+    return Map.of(
+            StaticConfig.APP,
+            StaticConfig.DATACATER_PIPELINE,
+            StaticConfig.PIPELINE,
+            StaticConfig.PIPELINE_NO,
+            StaticConfig.REVISION,
+            StaticConfig.PIPELINE_REV,
+            StaticConfig.UUID_TEXT,
+            deploymentId.toString());
+  }
+
+  private static VolumeMount getVolumeMount(String volumeName){
+    return new VolumeMountBuilder()
+            .withName(volumeName)
+            .withMountPath(StaticConfig.MOUNT_PATH)
+            .build();
+  }
+
+  private static Volume getVolume(String volumeName, String deploymentName){
+    return new VolumeBuilder()
+            .withName(volumeName)
+            .withConfigMap(configMapVolumeSource(deploymentName))
+            .build();
+  }
+
+  private static ConfigMapVolumeSource configMapVolumeSource(String deploymentName){
+    return new ConfigMapVolumeSourceBuilder().withName(deploymentName).build();
   }
 
   public String getLogs(UUID deploymentId) {
