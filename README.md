@@ -39,8 +39,11 @@ You find each component in this repository. See the [File Structure section](#fi
 │   ├── ct.yaml        - Chart Testing Configuration File (https://github.com/helm/chart-testing)
 │   └── datacater      - The official DataCater Helm Chart
 ├── k8s-manifests      - Kubernetes (K8) resources
+├── licenses           - Overview of the licenses of our dependencies
+├── pipeline           - Reference implementation of a pipeline
 ├── platform-api       - The main application for DataCater's API
 ├── python-runner      - Our runner for Python-based filters and transforms
+├── serde              - Our (de)serializers
 ├── transforms         - Pre-defined transforms
 ├── ui                 - A ReactJS application built on top of DataCater's API.
 ├── CONTRIBUTING.md    - Describes how you can contribute to the project
@@ -151,8 +154,6 @@ Yes, please reach out to [support@datacater.io](mailto:support@datacater.io) to 
 | Declarative pipeline definitions (YAML) | ✅         |             |
 | User authentication                     | ✅         |             |
 | CLI (coming soon)                       | ✅         |             |
-| Joins                                   |            | ✅          |
-| Aggregations                            |            | ✅          |
 | Collaboration and projects              |            | ✅          |
 | Plug & play connectors                  |            | ✅          |
 | Data masking                            |            | ✅          |
