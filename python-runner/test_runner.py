@@ -6,6 +6,245 @@ from runner import app
 
 client = TestClient(app)
 
+def test_batch_apply_transform():
+    # Upload pipeline
+    client.post("/pipeline", json = {
+        "spec": {
+            "steps": [
+                {
+                    "kind": "Field",
+                    "fields": {
+                        "company": {
+                            "transform": {
+                                "key": "trim"
+                            }
+                        }
+                    }
+                }
+            ]
+        }
+    })
+    # Apply pipeline to records
+    response = client.post("/batch", json = [
+        {
+            "key": {},
+            "value": {
+                "company": " DataCater GmbH     "
+            },
+            "metadata": {}
+        }
+    ])
+    assert response.json() == [{
+        "key": {},
+        "value": {
+            "company": "DataCater GmbH"
+        },
+        "metadata": {}
+    }]
+    assert response.status_code == 200
+
+def test_batch_apply_transform_new_field():
+    # Upload pipeline
+    client.post("/pipeline", json = {
+        "spec": {
+            "steps": [
+                {
+                    "kind": "Field",
+                    "fields": {
+                        "company": {
+                            "transform": {
+                                "key": "trim"
+                            }
+                        },
+                        "city": {
+                            "transform": {
+                                "key": "new-field",
+                                "config": {
+                                    "defaultValue": "Frankfurt"
+                                }
+                            }
+                        }
+                    }
+                }
+            ]
+        }
+    })
+    # Apply pipeline to records
+    response = client.post("/batch", json = [
+        {
+            "key": {},
+            "value": {
+                "company": " DataCater GmbH     "
+            },
+            "metadata": {}
+        }
+    ])
+    assert response.json() == [{
+        "key": {},
+        "value": {
+            "city": "Frankfurt",
+            "company": "DataCater GmbH"
+        },
+        "metadata": {}
+    }]
+    assert response.status_code == 200
+
+def test_batch_apply_transform_new_field_rename_field():
+    # Upload pipeline
+    client.post("/pipeline", json = {
+        "spec": {
+            "steps": [
+                {
+                    "kind": "Field",
+                    "fields": {
+                        "company": {
+                            "transform": {
+                                "key": "trim"
+                            }
+                        },
+                        "city": {
+                            "transform": {
+                                "key": "new-field",
+                                "config": {
+                                    "defaultValue": "Frankfurt"
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "kind": "Field",
+                    "fields": {
+                        "city": {
+                            "transform": {
+                                "key": "rename-field",
+                                "config": {
+                                    "newFieldName": "company_city"
+                                }
+                            }
+                        }
+                    }
+                }
+            ]
+        }
+    })
+    # Apply pipeline to records
+    response = client.post("/batch", json = [
+        {
+            "key": {},
+            "value": {
+                "company": " DataCater GmbH     "
+            },
+            "metadata": {}
+        }
+    ])
+    assert response.json() == [{
+        "key": {},
+        "value": {
+            "company_city": "Frankfurt",
+            "company": "DataCater GmbH"
+        },
+        "metadata": {}
+    }]
+    assert response.status_code == 200
+
+def test_batch_apply_record_transform_with_error():
+    # Upload pipeline
+    client.post("/pipeline", json = {
+        "spec": {
+            "steps": [
+                {
+                    "kind": "Record",
+                    "transform": {
+                        "key": "user-defined-record-transformation",
+                        "config": {
+                            "code": "def transform(record):\n  record[\"value\"] = { \"company\" : str(1 / 0) }\n  return record"
+                        }
+                    }
+                },
+            ]
+        }
+    })
+    # Apply pipeline to records
+    response = client.post("/batch", json = [
+        {
+            "key": {},
+            "value": {
+                "company": "DataCater GmbH"
+            },
+            "metadata": {}
+        }
+    ])
+    assert response.json()[0]["metadata"]["error"]["exceptionMessage"] == "ZeroDivisionError: division by zero"
+
+def test_batch_apply_transform_new_field_rename_field_drop_field():
+    # Upload pipeline
+    client.post("/pipeline", json = {
+        "spec": {
+            "steps": [
+                {
+                    "kind": "Field",
+                    "fields": {
+                        "company": {
+                            "transform": {
+                                "key": "trim"
+                            }
+                        },
+                        "city": {
+                            "transform": {
+                                "key": "new-field",
+                                "config": {
+                                    "defaultValue": "Frankfurt"
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "kind": "Field",
+                    "fields": {
+                        "city": {
+                            "transform": {
+                                "key": "rename-field",
+                                "config": {
+                                    "newFieldName": "company_city"
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "kind": "Field",
+                    "fields": {
+                        "company_city": {
+                            "transform": {
+                                "key": "drop-field"
+                            }
+                        }
+                    }
+                }
+            ]
+        }
+    })
+    # Apply pipeline to records
+    response = client.post("/batch", json = [
+        {
+            "key": {},
+            "value": {
+                "company": " DataCater GmbH     "
+            },
+            "metadata": {}
+        }
+    ])
+    assert response.json() == [{
+        "key": {},
+        "value": {
+            "company": "DataCater GmbH"
+        },
+        "metadata": {}
+    }]
+    assert response.status_code == 200
+
 def test_preview_apply_transform():
     response = client.post("/preview", json = {
         "pipeline": {

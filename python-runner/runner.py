@@ -67,13 +67,6 @@ class PreviewRequest(BaseModel):
     previewStep: Optional[int]
 
 class PipelineRequest(BaseModel):
-    # payload describes the whole expected schema of
-    # a pipeline including:
-    # metadata: dict
-    # spec: dict
-    payload: dict
-
-class PipelineRequest(BaseModel):
     spec: dict
 
 app = FastAPI()
@@ -243,4 +236,4 @@ async def health():
 async def store_pipeline(request: PipelineRequest,
                          response: Response):
     global pipeline
-    pipeline = request.payload
+    pipeline["spec"] = request.spec
