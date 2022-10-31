@@ -38,7 +38,7 @@ public class DeploymentEndpoint {
 
   @GET
   @Path("{deploymentName}")
-  public Uni<ObjectMeta> getStream(@PathParam("deploymentName") String deploymentName) {
+  public Uni<ObjectMeta> getDeployment(@PathParam("deploymentName") String deploymentName) {
     return Uni.createFrom().item(getK8Deployment(deploymentName));
   }
 
