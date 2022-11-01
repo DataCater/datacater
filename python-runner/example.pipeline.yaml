@@ -1,19 +1,19 @@
 ---
-spec      :
+spec:
   steps:
-  - kind: Field
-    fields:
-      name:
-        transform:
-          key: trim
-      email:
-        transform:
-          key: trim
-        filter:
-          key: not-empty
-      age:
-        transform:
-          key: add-column
-          config:
-            attributeName: age
-            defaultValue: age
+  -   kind: Field
+      fields:
+        name:
+          transform:
+            key: trim
+        email:
+          transform:
+            key: trim
+          filter:
+            key: not-empty
+        age:
+          transform:
+            key: add-column
+            config:
+              attributeName: age
+              defaultValue: age

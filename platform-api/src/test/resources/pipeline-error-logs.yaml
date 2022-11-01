@@ -5,10 +5,10 @@ metadata:
   name: DoK Demo Pipeline
 spec    :
   steps:
-  - kind: Field
-    fields:
+  -   kind: Field
+      fields:
         age:
-            filter:
-                key: less-than
-                config:
-                    value: 50
+          filter:
+            key: less-than
+            config:
+              value: 50
