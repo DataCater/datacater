@@ -126,4 +126,3 @@ jobs:
                 -Dquarkus.native.container-build=true \
                 -Dquarkus.package.type=native \
                 -Dquarkus.application.name=datacater-native
-
