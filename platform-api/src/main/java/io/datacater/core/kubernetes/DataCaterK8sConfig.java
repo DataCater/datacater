@@ -18,7 +18,7 @@ public class DataCaterK8sConfig {
   static final String IMAGE_TAG =
       ConfigProvider.getConfig()
           .getOptionalValue("datacater.pythonrunner.image.version", String.class)
-          .orElse("2022.06");
+          .orElse("alpha-20221101");
   static final Optional<String> IMAGE_PULL_SECRET =
       ConfigProvider.getConfig()
           .getOptionalValue("datacater.pythonrunner.images.imagePullSecret", String.class);
