@@ -1,4 +1,4 @@
-def transform(value, row, config):
+def transform(value: str, row: dict, config: dict) -> str:
     import json
 
     def rename_hook(obj):

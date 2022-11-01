@@ -1,4 +1,4 @@
-def transform(record, config):
+def transform(record: dict, config: dict) -> dict:
     default_transform = "def transform(record):\n  return record"
 
     scope = {}
