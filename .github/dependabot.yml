@@ -1,0 +1,44 @@
+---
+version: 2
+updates:
+  # Maintain dependencies for GitHub Actions
+  -   package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+-   package-ecosystem: gradle
+  directory: /platform-api
+  schedule:
+    interval: weekly
+    day: monday
+      # try and follow Conventional Commits pattern
+    commit-message:
+      prefix: fix
+      prefix-development: chore
+      include: scope
+    labels:
+      -   dependencies
+
+- package-ecosystem: "npm"
+  directory: "/ui"
+  schedule:
+    interval: "weekly"
+    day: monday
+    commit-message:
+      prefix: fix
+      prefix-development: chore
+      include: scope
+    labels:
+      -   dependencies
+  ignore:
+    # For all packages, ignore all major updates. Needs conscious human decision. Always.
+    # @see https://docs.github.com/en/code-security/supply-chain-security/keeping-your-dependencies-updated-automatically/enabling-and-disabling-dependabot-version-updates#example-disabling-version-updates-for-some-dependencies
+    - dependency-name: "*"
+      update-types: ["version-update:semver-major"]
+        # ignore all minor updates as well to reduce noise
+    - dependency-name: "*"
+      update-types: ["version-update:semver-minor"]
+        # This package is known to cause issues. Upgrade needs planning.
+    - dependency-name: "react-router-dom"
+      update-types: ["version-update:semver-major"]

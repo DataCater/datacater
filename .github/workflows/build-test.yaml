@@ -1,0 +1,129 @@
+---
+name: Build & Test
+on  :
+  push:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  release:
+    types:
+    -   prereleased
+    -   released
+
+jobs:
+  verify-files:
+    runs-on: ubuntu-latest
+    steps:
+    -   uses: actions/checkout@v3
+    -   name: Verify Dockerfiles
+        uses: hadolint/hadolint-action@v2.1.0
+        with:
+          dockerfile: Dockerfile*
+          recursive: true
+          verbose: true
+          failure-threshold: error
+    -   name: Verify scripts
+        run: bash .github/scripts/verify.sh
+
+  build:
+    needs: verify-files
+    name: Build & Analyze with Sonar
+    runs-on: ubuntu-latest
+    steps:
+    -   uses: actions/checkout@v3
+        with:
+          fetch-depth: 0         # Shallow clones should be disabled for a better relevancy of analysis
+    -   name: Set up JDK 17 and gradle cache
+        uses: actions/setup-java@v3
+        id: gradle-build
+        with:
+          java-version: '17'
+          distribution: zulu
+          cache: gradle
+    -   run: ./gradlew build --no-daemon --info
+    -   name: Cache SonarCloud packages
+        uses: actions/cache@v3
+        id: setup-sonar-cache
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
+    -   name: Build and Analyze on Sonar
+        id: sonar-check
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}         # Needed to get PR information, if any
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: ./gradlew :platform-api:build sonarqube --info
+    -   uses: actions/upload-artifact@v3
+        with:
+          name: platform-api
+          path: platform-api/build/openapi
+          retention-days: 14
+  push:
+    if: github.ref_name == 'main' || github.ref_type == 'tag'
+    name: Build and push container
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+    -   uses: actions/checkout@v3
+    -   name: Set up JDK 17 and gradle cache
+        uses: actions/setup-java@v3
+        id: gradle-build
+        with:
+          java-version: '17'
+          distribution: zulu
+          cache: gradle
+    -   run: |
+          FILTERS_SRC="${GITHUB_WORKSPACE}/filters"
+          TRANSFORM_SRC="${GITHUB_WORKSPACE}/transforms"
+          DEST="${GITHUB_WORKSPACE}/platform-api/src/main/jib/datacater"
+          mkdir -p $DEST
+          rm -fr $DEST/*
+          cp -R $FILTERS_SRC $DEST
+          cp -R $TRANSFORM_SRC $DEST
+    -   name: Push to Docker Hub
+        if: github.event.action == 'released'
+        run: |
+          ./gradlew build --info --no-daemon -x test \
+                -Dquarkus.jib.platforms=linux/amd64,linux/arm64 \
+                -Dquarkus.container-image.build=true \
+                -Dquarkus.container-image.push=true \
+                -Dquarkus.container-image.registry=docker.io \
+                -Dquarkus.container-image.username=datacater \
+                -Dquarkus.container-image.password=${{ secrets.DOCKERHUB_TOKEN }}
+
+  push-native:
+    if: github.ref_name == 'main' || github.ref_type == 'tag'
+    name: Build and push native container
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+    -   uses: actions/checkout@v3
+    -   name: Set up JDK 17 and gradle cache
+        uses: actions/setup-java@v3
+        id: gradle-build
+        with:
+          java-version: '17'
+          distribution: zulu
+          cache: gradle
+    -   run: |
+          FILTERS_SRC="${GITHUB_WORKSPACE}/filters"
+          TRANSFORM_SRC="${GITHUB_WORKSPACE}/transforms"
+          DEST="${GITHUB_WORKSPACE}/platform-api/src/main/jib/datacater"
+          mkdir -p $DEST
+          rm -fr $DEST/*
+          cp -R $FILTERS_SRC $DEST
+          cp -R $TRANSFORM_SRC $DEST
+    -   name: Push to Docker Hub
+        if: github.event.action == 'released'
+        run: |
+          ./gradlew build --info --no-daemon -x test \
+                -Dquarkus.jib.platforms=linux/amd64 \
+                -Dquarkus.container-image.build=true \
+                -Dquarkus.container-image.push=true \
+                -Dquarkus.container-image.registry=docker.io \
+                -Dquarkus.container-image.username=datacater \
+                -Dquarkus.container-image.password=${{ secrets.DOCKERHUB_TOKEN }} \
+                -Dquarkus.native.container-build=true \
+                -Dquarkus.package.type=native \
+                -Dquarkus.application.name=datacater-native
+
