@@ -177,9 +177,9 @@ datacater:
   mp:
     jwt:
       verify:
-        issuer: localhost
+        issuer: https://cloud.datacater.io
         publickey:
-          location: key.pem
+          location: publicKey.pem
     messaging:
       outgoing:
         testStreamTopicOutAvro:
@@ -199,6 +199,6 @@ datacater:
     jwt:
       sign:
         key:
-          location: key.pem
+          location: privateKey.pem
       new-token:
         lifespan: 7200
