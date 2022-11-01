@@ -1,4 +1,4 @@
-def filter(record, config):
+def filter(record: dict, config: dict) -> bool:
     default_filter = "def filter(record):\n  return True"
 
     scope = {}
