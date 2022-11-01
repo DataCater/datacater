@@ -53,6 +53,9 @@ datacater:
       host: localhost
 
 '%test'  :
+  datacater:
+    python-runner:
+      version: alpha-20221101
   quarkus:
     log:
       level: INFO

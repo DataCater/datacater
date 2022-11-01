@@ -139,7 +139,7 @@ datacater:
     pythonrunner:
       image:
         name: datacater/python-runner
-        version: alpha
+        version: alpha-20221101
   quarkus:
     log:
       level: INFO
