@@ -1,4 +1,4 @@
-def transform(value, row, config):
+def transform(value, row: dict, config: dict):
     default_transform = "def transform(value, row):\n  return value"
 
     scope = {}
