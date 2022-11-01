@@ -1,5 +1,6 @@
 package io.datacater.core.deployment;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import io.datacater.core.pipeline.PipelineEntity;
 import io.datacater.core.stream.StreamEntity;
 import io.fabric8.kubernetes.api.model.ListMeta;
@@ -75,8 +76,9 @@ public class DeploymentEndpoint {
   }
 
   @POST
-  public Uni<UUID> createDeployment(@QueryParam("pipelineUuid") UUID pipelineId) {
-    return apply(pipelineId);
+  @Consumes(MediaType.APPLICATION_JSON)
+  public Uni<UUID> createDeployment(DeploymentSpec spec) {
+    return apply(spec);
   }
 
   @DELETE
@@ -87,16 +89,17 @@ public class DeploymentEndpoint {
 
   @PUT
   @Path("{uuid}")
-  public Uni<UUID> updateDeployment(
-      @PathParam("uuid") UUID deploymentUuid, @QueryParam("pipelineUuid") UUID pipelineId) {
-    return apply(pipelineId);
+  public Uni<UUID> updateDeployment(@PathParam("uuid") UUID deploymentUuid, DeploymentSpec spec) {
+    return apply(spec);
   }
 
-  private Uni<UUID> apply(UUID pipelineId) {
+  private Uni<UUID> apply(DeploymentSpec spec) {
     return sf.withTransaction(
         (session, transaction) ->
             session
-                .find(PipelineEntity.class, pipelineId)
+                .find(
+                    PipelineEntity.class,
+                    UUID.fromString(spec.deployment().get(StaticConfig.PIPELINE_NODE_TEXT)))
                 .onItem()
                 .ifNotNull()
                 .transformToUni(pe -> transformPipelineEntity(session, pe)));
@@ -104,7 +107,7 @@ public class DeploymentEndpoint {
 
   private Uni<UUID> transformPipelineEntity(Mutiny.Session session, PipelineEntity pe) {
     return session
-        .find(StreamEntity.class, getUUIDFromNode(pe, StaticConfig.STREAM_IN))
+        .find(StreamEntity.class, getUUIDFromNode(pe.getMetadata(), StaticConfig.STREAM_IN))
         .onItem()
         .ifNotNull()
         .transformToUni(streamIn -> transformStreamIn(session, pe, streamIn));
@@ -113,7 +116,7 @@ public class DeploymentEndpoint {
   private Uni<UUID> transformStreamIn(
       Mutiny.Session session, PipelineEntity pe, StreamEntity streamIn) {
     return session
-        .find(StreamEntity.class, getUUIDFromNode(pe, StaticConfig.STREAM_OUT))
+        .find(StreamEntity.class, getUUIDFromNode(pe.getMetadata(), StaticConfig.STREAM_OUT))
         .onItem()
         .ifNotNull()
         .transformToUni(streamOut -> transformStreamOut(pe, streamOut, streamIn));
@@ -155,7 +158,7 @@ public class DeploymentEndpoint {
     return k8Deployment.create(pe, streamIn, streamOut);
   }
 
-  private UUID getUUIDFromNode(PipelineEntity pe, String node) {
-    return UUID.fromString(pe.getMetadata().get(node).asText());
+  private UUID getUUIDFromNode(JsonNode node, String key) {
+    return UUID.fromString(node.get(key).asText());
   }
 }

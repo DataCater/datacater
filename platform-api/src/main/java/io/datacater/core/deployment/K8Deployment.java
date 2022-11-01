@@ -81,33 +81,33 @@ public class K8Deployment {
     return deploymentId;
   }
 
-  private static Map<String, String> getLabels(UUID deploymentId){
+  private static Map<String, String> getLabels(UUID deploymentId) {
     return Map.of(
-            StaticConfig.APP,
-            StaticConfig.DATACATER_PIPELINE,
-            StaticConfig.PIPELINE,
-            StaticConfig.PIPELINE_NO,
-            StaticConfig.REVISION,
-            StaticConfig.PIPELINE_REV,
-            StaticConfig.UUID_TEXT,
-            deploymentId.toString());
+        StaticConfig.APP,
+        StaticConfig.DATACATER_PIPELINE,
+        StaticConfig.PIPELINE,
+        StaticConfig.PIPELINE_NO,
+        StaticConfig.REVISION,
+        StaticConfig.PIPELINE_REV,
+        StaticConfig.UUID_TEXT,
+        deploymentId.toString());
   }
 
-  private static VolumeMount getVolumeMount(String volumeName){
+  private static VolumeMount getVolumeMount(String volumeName) {
     return new VolumeMountBuilder()
-            .withName(volumeName)
-            .withMountPath(StaticConfig.MOUNT_PATH)
-            .build();
+        .withName(volumeName)
+        .withMountPath(StaticConfig.MOUNT_PATH)
+        .build();
   }
 
-  private static Volume getVolume(String volumeName, String deploymentName){
+  private static Volume getVolume(String volumeName, String deploymentName) {
     return new VolumeBuilder()
-            .withName(volumeName)
-            .withConfigMap(configMapVolumeSource(deploymentName))
-            .build();
+        .withName(volumeName)
+        .withConfigMap(configMapVolumeSource(deploymentName))
+        .build();
   }
 
-  private static ConfigMapVolumeSource configMapVolumeSource(String deploymentName){
+  private static ConfigMapVolumeSource configMapVolumeSource(String deploymentName) {
     return new ConfigMapVolumeSourceBuilder().withName(deploymentName).build();
   }
 

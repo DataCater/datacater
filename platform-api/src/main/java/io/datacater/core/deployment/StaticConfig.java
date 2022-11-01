@@ -28,6 +28,7 @@ public class StaticConfig {
   static final String SPEC = "spec";
   static final String STREAM_OUT = "stream-out";
   static final String STREAM_IN = "stream-in";
+  static final String PIPELINE_NODE_TEXT = "pipeline";
   static final String SERIALIZER = "serializer";
   static final String DESERIALIZER = "deserializer";
   static final String EMPTY_STRING = "";
