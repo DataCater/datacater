@@ -61,7 +61,7 @@ class StreamInspectAvroTest {
             new ProducerRecord<>(
                 "streamTestWithRegistry", buildRecord("test", 1000), buildRecord("test", 2000)));
 
-    lastMessageToWaitOn.toCompletableFuture().get(1000, TimeUnit.MILLISECONDS);
+    lastMessageToWaitOn.toCompletableFuture().get(2000, TimeUnit.MILLISECONDS);
 
     Response response =
         given().pathParam("uuid", uuid.toString()).queryParam("limit", "3").get("/{uuid}/inspect");
