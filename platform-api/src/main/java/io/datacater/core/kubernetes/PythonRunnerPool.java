@@ -1,7 +1,6 @@
 package io.datacater.core.kubernetes;
 
 import io.datacater.core.exceptions.DatacaterException;
-import io.datacater.core.exceptions.StatefulSetException;
 import io.fabric8.kubernetes.api.model.ContainerPort;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodBuilder;
@@ -116,13 +115,57 @@ public class PythonRunnerPool {
 
   @PostConstruct
   void initialize(@Observes StartupEvent event) {
-    boolean noStatefulSet = Boolean.FALSE.equals(this.isStatefulSetActive());
     LOGGER.info(
         String.format("Initialising StatefulSet with replicas := %d", EXPECTED_STATEFUL_SETS));
     labeledStatefulSet.setClient(kubernetesClient);
     StatefulSet statefulSet = labeledStatefulSet.blueprint();
     labeledStatefulSet.createStatefulSet(statefulSet);
     labeledStatefulSet.createService();
+  }
+
+  public Uni<NamedPod> getPod() {
+    return sharedData
+        .<String, Deque<NamedPod>>getAsyncMap(POOL_NAME)
+        .onItem()
+        .transformToUni(
+            asyncMap -> asyncMap.get(POOL_NAME).onItem().transform(Deque::pop));
+  }
+
+  public Uni<Void> initializeQueue() {
+    Uni<AsyncMap<String, Deque<NamedPod>>> asyncMap = sharedData.getAsyncMap(POOL_NAME);
+
+    return asyncMap.onItem().transformToUni(map -> map.put(POOL_NAME, new ArrayDeque<>()));
+  }
+
+  public Uni<AsyncMap<String, Deque<NamedPod>>> putPod(NamedPod pod) {
+    // Fetch AsyncMap called POOL_NAME
+    // Fetch Deque called POOL_NAME
+    // Put pod in Deque POOL_NAME
+    // Put update Deque in AsyncMap
+    // Return AsyncMap
+    return sharedData
+        .<String, Deque<NamedPod>>getAsyncMap(POOL_NAME)
+        .onItem()
+        .transformToUni(
+            map -> {
+              Uni<Deque<NamedPod>> pods = map.get(POOL_NAME);
+              return pods.onItem()
+                  .call(
+                      queue -> {
+                        queue.push(pod);
+                        return map.put(POOL_NAME, queue);
+                      })
+                  // TODO: if map was not yet initialized
+                  .replaceWith(map);
+            });
+  }
+
+  public Uni<Integer> executeOnQueue(Function<Deque<NamedPod>, Integer> applicable) {
+    Uni<AsyncMap<String, Deque<NamedPod>>> uniMap =
+        sharedData.<String, Deque<NamedPod>>getAsyncMap(POOL_NAME);
+
+    // flatMap is equivalent to onItem().transformToUni()
+    return uniMap.flatMap(asyncMap -> asyncMap.get(POOL_NAME)).map(applicable);
   }
 
   public NamedPod getNextPod() {
@@ -214,7 +257,7 @@ public class PythonRunnerPool {
               .list()
               .getItems();
       Deque<NamedPod> namedPods =
-          new ArrayDeque<NamedPod>(DataCaterK8sConfig.PYTHON_RUNNER_REPLICAS);
+          new ArrayDeque<>(DataCaterK8sConfig.PYTHON_RUNNER_REPLICAS);
       for (Pod pod : pods) {
         String podName = pod.getMetadata().getName();
         namedPods.add(new NamedPod(podName, pod));
@@ -234,7 +277,7 @@ public class PythonRunnerPool {
                 .list()
                 .getItems();
         Deque<NamedPod> namedPods =
-            new ArrayDeque<NamedPod>(DataCaterK8sConfig.PYTHON_RUNNER_REPLICAS);
+            new ArrayDeque<>(DataCaterK8sConfig.PYTHON_RUNNER_REPLICAS);
         for (Pod pod : pods) {
           String podName = pod.getMetadata().getName();
           namedPods.add(new NamedPod(podName, pod));
@@ -295,27 +338,4 @@ public class PythonRunnerPool {
                         .endMetadata()
                         .build());
       };
-
-  private Boolean isStatefulSetActive() {
-    int statefulSetCount =
-        kubernetesClient
-            .apps()
-            .statefulSets()
-            .inNamespace(DataCaterK8sConfig.NAMESPACE)
-            .withLabels(DataCaterK8sConfig.LABELS)
-            .list()
-            .getItems()
-            .size();
-
-    if (statefulSetCount == EXPECTED_STATEFUL_SETS) {
-      return true;
-    } else if (statefulSetCount > 1) {
-      throw new StatefulSetException(
-          String.format(
-              "Too many statefulSets found for PythonRunner. Expected := %d, Actual := %d",
-              EXPECTED_STATEFUL_SETS, statefulSetCount));
-    } else {
-      return false;
-    }
-  }
 }
