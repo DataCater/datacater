@@ -9,10 +9,7 @@ import io.fabric8.kubernetes.api.model.apps.DeploymentBuilder;
 import io.fabric8.kubernetes.api.model.apps.DeploymentStatus;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.dsl.RollableScalableResource;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import javax.inject.Singleton;
 import org.jboss.logging.Logger;
 
@@ -67,7 +64,7 @@ public class K8Deployment {
             .endResources()
             .withVolumeMounts(getVolumeMount(volumeName))
             .endContainer()
-            .withVolumes(getVolume(volumeName, name))
+            .withVolumes(getVolume(volumeName, configmapName))
             .endSpec()
             .endTemplate()
             .endSpec()
