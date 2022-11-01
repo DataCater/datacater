@@ -62,7 +62,7 @@ datacater:
   pythonrunner:
     image:
       name: datacater/python-runner
-      version: alpha.6
+      version: alpha-20221101
   authorization: true
   api:
     version: alpha
@@ -78,6 +78,10 @@ datacater:
       path: /home/runner/work/cloud-platform/cloud-platform/transforms
     filters:
       path: /home/runner/work/cloud-platform/cloud-platform/filters
+    pythonrunner:
+      image:
+        name: datacater/python-runner
+        version: alpha-20221101
   quarkus:
     http:
       auth:

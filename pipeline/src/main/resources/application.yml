@@ -36,6 +36,10 @@ mp       :
         value:
           deserializer: io.datacater.core.serde.JsonDeserializer
 datacater:
+  python-runner:
+    port: 50000
+    host: localhost
+    version: alpha-20221101
   message:
     batch:
       size: 100
@@ -51,6 +55,7 @@ datacater:
     python-runner:
       port: 50000
       host: localhost
+      version: alpha-20221101
 
 '%test'  :
   datacater:
