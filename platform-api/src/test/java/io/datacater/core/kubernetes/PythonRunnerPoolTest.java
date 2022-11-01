@@ -1,7 +1,5 @@
 package io.datacater.core.kubernetes;
 
-import io.fabric8.kubernetes.api.model.Namespace;
-import io.fabric8.kubernetes.api.model.NamespaceBuilder;
 import io.fabric8.kubernetes.client.server.mock.KubernetesServer;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.TestProfile;
@@ -19,10 +17,6 @@ class PythonRunnerPoolTest {
 
   @Ignore
   void testInitialize() {
-    Namespace ns =
-        new NamespaceBuilder().withNewMetadata().withName("datacater").endMetadata().build();
-    testServer.getClient().namespaces().createOrReplace(ns);
-
     var statefulSets =
         testServer
             .getClient()
