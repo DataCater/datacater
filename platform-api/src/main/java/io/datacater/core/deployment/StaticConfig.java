@@ -53,7 +53,7 @@ public class StaticConfig {
     static final String FULL_IMAGE_NAME =
         ConfigProvider.getConfig()
             .getOptionalValue("datacater.deployment.image", String.class)
-            .orElse("quarkus/pipeline-jvm:latest");
+            .orElse("datacater/pipeline:latest");
   }
 
   static class LoggerMessages {
