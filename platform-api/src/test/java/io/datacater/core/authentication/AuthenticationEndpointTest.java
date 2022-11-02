@@ -22,7 +22,7 @@ class AuthenticationEndpointTest {
 
   @Test()
   void testGetTokenWithCredentials() throws JsonProcessingException {
-    Response response = given().auth().preemptive().basic("superman", "1derW0man.").when().post();
+    Response response = given().auth().preemptive().basic("admin", "admin").when().post();
 
     Assertions.assertEquals(200, response.getStatusCode());
 
