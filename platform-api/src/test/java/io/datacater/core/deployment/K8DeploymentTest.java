@@ -17,6 +17,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
+import java.util.HashMap;
 import java.util.UUID;
 import javax.inject.Inject;
 import org.jboss.logging.Logger;
@@ -96,7 +97,9 @@ public class K8DeploymentTest {
   @Order(2)
   public void testCreateDeployment()
       throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-    deploymentId = k8Deployment.create(pipelineEntity, streamInEntity, streamOutEntity);
+    deploymentId =
+        k8Deployment.create(
+            pipelineEntity, streamInEntity, streamOutEntity, new DeploymentSpec(new HashMap<>()));
     Assertions.assertEquals(true, getDeploymentExistsMethod().invoke(k8Deployment, deploymentId));
   }
 

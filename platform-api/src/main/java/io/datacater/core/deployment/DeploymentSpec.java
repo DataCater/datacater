@@ -8,7 +8,13 @@ public record DeploymentSpec(
             example =
                 """
             {
-            "pipeline": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
-          }
+                "pipeline": "dc161a69-fa49-4b1a-b1b1-6d8246d50d72",
+                "stream-in-config": {
+                  "bootstrap.servers": "localhost:9092"
+                },
+                "stream-out-config": {
+                  "bootstrap.servers": "localhost:9092"
+                }
+              }
         """)
-        Map<String, String> deployment) {}
+        Map<String, Object> deployment) {}

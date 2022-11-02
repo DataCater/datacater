@@ -84,12 +84,14 @@ public class DeploymentEndpoint {
   @DELETE
   @Path("{uuid}")
   public Uni<Response> deleteDeployment(@PathParam("uuid") UUID deploymentId) {
-    return Uni.createFrom().item(deleteK8Deployment(deploymentId));
+    deleteK8Deployment(deploymentId);
+    return Uni.createFrom().item(Response.ok().build());
   }
 
   @PUT
   @Path("{uuid}")
   public Uni<UUID> updateDeployment(@PathParam("uuid") UUID deploymentUuid, DeploymentSpec spec) {
+    deleteK8Deployment(deploymentUuid);
     return apply(spec);
   }
 
@@ -99,32 +101,40 @@ public class DeploymentEndpoint {
             session
                 .find(
                     PipelineEntity.class,
-                    UUID.fromString(spec.deployment().get(StaticConfig.PIPELINE_NODE_TEXT)))
+                    UUID.fromString(
+                        spec.deployment().get(StaticConfig.PIPELINE_NODE_TEXT).toString()))
                 .onItem()
                 .ifNotNull()
-                .transformToUni(pe -> transformPipelineEntity(session, pe)));
+                .transformToUni(pe -> transformPipelineEntity(session, pe, spec)));
   }
 
-  private Uni<UUID> transformPipelineEntity(Mutiny.Session session, PipelineEntity pe) {
+  private Uni<UUID> transformPipelineEntity(
+      Mutiny.Session session, PipelineEntity pe, DeploymentSpec deploymentSpec) {
     return session
         .find(StreamEntity.class, getUUIDFromNode(pe.getMetadata(), StaticConfig.STREAM_IN))
         .onItem()
         .ifNotNull()
-        .transformToUni(streamIn -> transformStreamIn(session, pe, streamIn));
+        .transformToUni(streamIn -> transformStreamIn(session, pe, streamIn, deploymentSpec));
   }
 
   private Uni<UUID> transformStreamIn(
-      Mutiny.Session session, PipelineEntity pe, StreamEntity streamIn) {
+      Mutiny.Session session,
+      PipelineEntity pe,
+      StreamEntity streamIn,
+      DeploymentSpec deploymentSpec) {
     return session
         .find(StreamEntity.class, getUUIDFromNode(pe.getMetadata(), StaticConfig.STREAM_OUT))
         .onItem()
         .ifNotNull()
-        .transformToUni(streamOut -> transformStreamOut(pe, streamOut, streamIn));
+        .transformToUni(streamOut -> transformStreamOut(pe, streamOut, streamIn, deploymentSpec));
   }
 
   private Uni<UUID> transformStreamOut(
-      PipelineEntity pe, StreamEntity streamOut, StreamEntity streamIn) {
-    return Uni.createFrom().item(createDeployment(pe, streamOut, streamIn));
+      PipelineEntity pe,
+      StreamEntity streamOut,
+      StreamEntity streamIn,
+      DeploymentSpec deploymentSpec) {
+    return Uni.createFrom().item(createDeployment(pe, streamOut, streamIn, deploymentSpec));
   }
 
   private String getDeploymentLogs(UUID deploymentId) {
@@ -147,15 +157,18 @@ public class DeploymentEndpoint {
     return k8Deployment.getDeployment(deploymentId);
   }
 
-  private Response deleteK8Deployment(UUID deploymentId) {
+  private void deleteK8Deployment(UUID deploymentId) {
     K8Deployment k8Deployment = new K8Deployment(client);
     k8Deployment.delete(deploymentId);
-    return Response.ok().build();
   }
 
-  private UUID createDeployment(PipelineEntity pe, StreamEntity streamOut, StreamEntity streamIn) {
+  private UUID createDeployment(
+      PipelineEntity pe,
+      StreamEntity streamOut,
+      StreamEntity streamIn,
+      DeploymentSpec deploymentSpec) {
     K8Deployment k8Deployment = new K8Deployment(client);
-    return k8Deployment.create(pe, streamIn, streamOut);
+    return k8Deployment.create(pe, streamIn, streamOut, deploymentSpec);
   }
 
   private UUID getUUIDFromNode(JsonNode node, String key) {

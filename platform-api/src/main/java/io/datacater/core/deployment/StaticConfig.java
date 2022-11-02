@@ -38,17 +38,10 @@ public class StaticConfig {
   static final String KEY_SERIALIZER = "key.serializer";
   static final String VALUE_DESERIALIZER = "value.deserializer";
   static final String VALUE_SERIALIZER = "value.serializer";
-  static final String STREAM_IN_BOOTSTRAP_SERVER =
-      "MP_MESSAGING_INCOMING_STREAM-IN_BOOTSTRAP_SERVERS";
-  static final String STREAM_IN_KEY_DESERIALIZER =
-      "MP_MESSAGING_INCOMING_STREAM-IN_KEY_DESERIALIZER";
-  static final String STREAM_IN_VALUE_DESERIALIZER =
-      "MP_MESSAGING_INCOMING_STREAM-IN_VALUE_DESERIALIZER";
-  static final String STREAM_OUT_BOOTSTRAP_SERVER =
-      "MP_MESSAGING_OUTGOING_STREAM-OUT_BOOTSTRAP_SERVERS";
-  static final String STREAM_OUT_KEY_SERIALIZER = "MP_MESSAGING_OUTGOING_STREAM-OUT_KEY_SERIALIZER";
-  static final String STREAM_OUT_VALUE_SERIALIZER =
-      "MP_MESSAGING_OUTGOING_STREAM-OUT_VALUE_SERIALIZER";
+  static final String STREAMIN_CONFIG_TEXT = "stream-in-config";
+  static final String STREAMOUT_CONFIG_TEXT = "stream-out-config";
+  static final String DC_STREAMIN_CONFIG_TEXT = "DATACATER_STREAM-IN_CONFIG";
+  static final String DC_STREAMOUT_CONFIG_TEXT = "DATACATER_STREAM-OUT_CONFIG";
 
   static class EnvironmentVariables {
     static final String NAMESPACE =
@@ -60,7 +53,7 @@ public class StaticConfig {
     static final String FULL_IMAGE_NAME =
         ConfigProvider.getConfig()
             .getOptionalValue("datacater.deployment.image", String.class)
-            .orElse("datacater/pipeline:latest");
+            .orElse("quarkus/pipeline-jvm:latest");
   }
 
   static class LoggerMessages {

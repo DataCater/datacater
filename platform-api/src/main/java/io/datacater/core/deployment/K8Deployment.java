@@ -1,6 +1,8 @@
 package io.datacater.core.deployment;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.datacater.core.pipeline.PipelineEntity;
 import io.datacater.core.stream.StreamEntity;
 import io.fabric8.kubernetes.api.model.*;
@@ -26,7 +28,11 @@ public class K8Deployment {
     this.k8ConfigMap = new K8ConfigMap(client);
   }
 
-  public UUID create(PipelineEntity pe, StreamEntity streamIn, StreamEntity streamOut) {
+  public UUID create(
+      PipelineEntity pe,
+      StreamEntity streamIn,
+      StreamEntity streamOut,
+      DeploymentSpec deploymentSpec) {
     UUID deploymentId = UUID.randomUUID();
     final String name = StaticConfig.DEPLOYMENT_NAME_PREFIX + deploymentId;
     final String configmapName = StaticConfig.CONFIGMAP_NAME_PREFIX + deploymentId;
@@ -34,7 +40,7 @@ public class K8Deployment {
     k8NameSpace.create();
     k8ConfigMap.getOrCreate(configmapName, pe);
 
-    List<EnvVar> variables = getEnvironmentVariables(streamIn, streamOut);
+    List<EnvVar> variables = getEnvironmentVariables(streamIn, streamOut, deploymentSpec);
 
     Deployment deployment =
         new DeploymentBuilder()
@@ -198,7 +204,11 @@ public class K8Deployment {
     return deployments.get(0).getMetadata().getName();
   }
 
-  private List<EnvVar> getEnvironmentVariables(StreamEntity streamIn, StreamEntity streamOut) {
+  private List<EnvVar> getEnvironmentVariables(
+      StreamEntity streamIn, StreamEntity streamOut, DeploymentSpec deploymentSpec) {
+    Map<String, Object> streamInConfig = getNode(StaticConfig.STREAMIN_CONFIG_TEXT, deploymentSpec);
+    Map<String, Object> streamOutConfig =
+        getNode(StaticConfig.STREAMOUT_CONFIG_TEXT, deploymentSpec);
 
     String streamInBootstrapServers =
         getEnvVariableFromNode(streamIn.getSpec(), StaticConfig.BOOTSTRAP_SERVERS);
@@ -216,20 +226,30 @@ public class K8Deployment {
     List<EnvVar> variables = new ArrayList<>();
     variables.add(createEnvVariable(StaticConfig.STREAM_OUT_CONFIG_NAME, streamIn.getName()));
     variables.add(createEnvVariable(StaticConfig.STREAM_IN_CONFIG_NAME, streamOut.getName()));
-    variables.add(
-        createEnvVariable(StaticConfig.STREAM_IN_BOOTSTRAP_SERVER, streamInBootstrapServers));
-    variables.add(
-        createEnvVariable(StaticConfig.STREAM_IN_KEY_DESERIALIZER, streamInKeyDeserializer));
-    variables.add(
-        createEnvVariable(StaticConfig.STREAM_IN_VALUE_DESERIALIZER, streamInValueDeserializer));
-    variables.add(
-        createEnvVariable(StaticConfig.STREAM_OUT_BOOTSTRAP_SERVER, streamOutBootstrapServers));
-    variables.add(
-        createEnvVariable(StaticConfig.STREAM_OUT_KEY_SERIALIZER, streamOutKeySerializer));
-    variables.add(
-        createEnvVariable(StaticConfig.STREAM_OUT_VALUE_SERIALIZER, streamOutValueSerializer));
 
+    streamInConfig.putIfAbsent(StaticConfig.BOOTSTRAP_SERVERS, streamInBootstrapServers);
+    streamInConfig.putIfAbsent(StaticConfig.KEY_DESERIALIZER, streamInKeyDeserializer);
+    streamInConfig.putIfAbsent(StaticConfig.VALUE_DESERIALIZER, streamInValueDeserializer);
+
+    streamOutConfig.putIfAbsent(StaticConfig.BOOTSTRAP_SERVERS, streamOutBootstrapServers);
+    streamOutConfig.putIfAbsent(StaticConfig.KEY_SERIALIZER, streamOutKeySerializer);
+    streamOutConfig.putIfAbsent(StaticConfig.VALUE_SERIALIZER, streamOutValueSerializer);
+
+    variables.add(
+        createEnvVariable(StaticConfig.DC_STREAMIN_CONFIG_TEXT, streamInConfig.toString()));
+    variables.add(
+        createEnvVariable(StaticConfig.DC_STREAMOUT_CONFIG_TEXT, streamOutConfig.toString()));
     return variables;
+  }
+
+  private Map<String, Object> getNode(String node, DeploymentSpec spec) {
+    ObjectMapper om = new ObjectMapper();
+    Map<String, Object> config =
+        om.convertValue(spec.deployment().get(node), new TypeReference<>() {});
+    if (config == null) {
+      return new HashMap<>();
+    }
+    return config;
   }
 
   private EnvVar createEnvVariable(String name, String value) {
@@ -241,10 +261,10 @@ public class K8Deployment {
       return node.get(field).toString();
     }
     if (field.contains(StaticConfig.DESERIALIZER)) {
-      return io.datacater.core.serde.JsonDeserializer.class.toString();
+      return io.datacater.core.serde.JsonDeserializer.class.getName();
     }
     if (field.contains(StaticConfig.SERIALIZER)) {
-      return io.datacater.core.serde.JsonSerializer.class.toString();
+      return io.datacater.core.serde.JsonSerializer.class.getName();
     }
     if (field.contains(StaticConfig.BOOTSTRAP_SERVERS)) {
       return StaticConfig.LOCALHOST_BOOTSTRAP_SERVER;
