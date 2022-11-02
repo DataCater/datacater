@@ -5,32 +5,42 @@
     "stream-out": "streamoutUUIDPlaceholder"
   },
   "spec": {
-    "filters": [
+    "steps": [
       {
-        "attributeName": "age",
-        "filter": "less-than",
-        "filterConfig": {
-          "value": 50
+        "kind": "Field",
+        "name": "First step",
+        "fields": {
+          "age": {
+            "filter": {
+              "key": "less-than",
+              "config": {
+                "value": 50
+              }
+            }
+          }
         }
-      }
-    ],
-    "transformationSteps": [
+      },
       {
-        "name": "First Step",
-        "transformations": [
-          {
-            "attributeName": "email",
-            "transformation": "hash",
-            "transformationConfig": {
-              "algorithm": "sha1"
+        "kind": "Field",
+        "name": "Second step",
+        "fields": {
+          "email": {
+            "transform": {
+              "key": "hash",
+              "config": {
+                "algorithm": "sha1"
+              }
             }
           },
-          {
-            "attributeName": "name",
-            "transformation": "trim",
-            "filter": "not-empty"
+          "name": {
+            "transform": {
+              "key": "trim"
+            },
+            "filter": {
+              "key": "not-empty"
+            }
           }
-        ]
+        }
       }
     ]
   }
