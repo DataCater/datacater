@@ -18,23 +18,17 @@ mp       :
       stream-out:
         merge: true
         connector: smallrye-kafka
+        kafka-configuration: stream-out-configuration
         topic: stream-out
-        key:
-          serializer: io.datacater.core.serde.JsonSerializer
-        value:
-          serializer: io.datacater.core.serde.JsonSerializer
     incoming:
       stream-in:
         batch: true
         connector: smallrye-kafka
-        topic: stream-in
         max:
           poll:
             records: ${datacater.message.batch.size}
-        key:
-          deserializer: io.datacater.core.serde.JsonDeserializer
-        value:
-          deserializer: io.datacater.core.serde.JsonDeserializer
+        kafka-configuration: stream-in-configuration
+        topic: stream-in
 datacater:
   python-runner:
     port: 50000
@@ -43,6 +37,10 @@ datacater:
   message:
     batch:
       size: 100
+  stream-in:
+    config: '{"key.deserializer": "io.datacater.core.serde.JsonDeserializer", "value.deserializer": "io.datacater.core.serde.JsonDeserializer"}'
+  stream-out:
+    config: '{"key.serializer": "io.datacater.core.serde.JsonSerializer", "value.serializer": "io.datacater.core.serde.JsonSerializer"}'
 
 
 '%dev'   :
