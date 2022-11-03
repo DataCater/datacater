@@ -181,6 +181,7 @@ public class PythonRunnerPool {
             .pods()
             .inNamespace(DataCaterK8sConfig.NAMESPACE)
             .withLabels(DataCaterK8sConfig.LABELS)
+            .withField("status.phase", "Running")
             .list()
             .getItems();
     Deque<NamedPod> namedPods = new ArrayDeque<>(DataCaterK8sConfig.PYTHON_RUNNER_REPLICAS);
