@@ -59,6 +59,8 @@ public class PythonRunnerPool {
 
   private static final int EXPECTED_STATEFUL_SETS = 1;
 
+  private boolean IS_POOL_INITIALISED = false;
+
   private static final String RUNNER_EVAL_PATH = "/";
 
   static class RunnerPool {
@@ -124,45 +126,59 @@ public class PythonRunnerPool {
   }
 
   public Uni<NamedPod> getPod() {
-    return sharedData
-        .<String, Deque<NamedPod>>getAsyncMap(POOL_NAME)
+    return getQueue()
         .onItem()
-        .transformToUni(
-            asyncMap -> asyncMap.get(POOL_NAME).onItem().transform(Deque::pop));
+        .transform(Deque::pop);
   }
 
-  public Uni<Void> initializeQueue() {
+
+  public Uni<Deque<NamedPod>> getQueue() {
+    Uni<AsyncMap<String, Deque<NamedPod>>> defaultMap = sharedData.getAsyncMap(POOL_NAME);
+
+    return defaultMap
+        .chain(map -> map.get(POOL_NAME))
+        .replaceIfNullWith(newQueue()) // initialise queue if map has no queue
+        .chain(queue -> {
+          if (queue.isEmpty()) {
+            return initialiseMapWithQueue(newQueue().get()); // reset queue if all pods were used
+          } else {
+            return Uni.createFrom().item(queue);
+          }
+        });
+  }
+
+  public Uni<Deque<NamedPod>> initialiseMapWithQueue(Deque<NamedPod> queue) {
+    Uni<AsyncMap<String, Deque<NamedPod>>> asyncMap = sharedData.getAsyncMap(POOL_NAME);
+
+    return asyncMap
+        .onItem()
+        .call(map -> map.put(POOL_NAME, queue))
+        .replaceWith(() -> queue);
+  }
+
+  public Uni<Void> initialiseEmptyQueue() {
     Uni<AsyncMap<String, Deque<NamedPod>>> asyncMap = sharedData.getAsyncMap(POOL_NAME);
 
     return asyncMap.onItem().transformToUni(map -> map.put(POOL_NAME, new ArrayDeque<>()));
   }
 
-  public Uni<AsyncMap<String, Deque<NamedPod>>> putPod(NamedPod pod) {
+  public Uni<Deque<NamedPod>> putPod(NamedPod pod) {
     // Fetch AsyncMap called POOL_NAME
     // Fetch Deque called POOL_NAME
     // Put pod in Deque POOL_NAME
     // Put update Deque in AsyncMap
     // Return AsyncMap
-    return sharedData
-        .<String, Deque<NamedPod>>getAsyncMap(POOL_NAME)
+    return getQueue()
         .onItem()
-        .transformToUni(
-            map -> {
-              Uni<Deque<NamedPod>> pods = map.get(POOL_NAME);
-              return pods.onItem()
-                  .call(
-                      queue -> {
-                        queue.push(pod);
-                        return map.put(POOL_NAME, queue);
-                      })
-                  // TODO: if map was not yet initialized
-                  .replaceWith(map);
+        .transform(
+            queue -> {
+              queue.push(pod);
+              return queue;
             });
   }
 
   public Uni<Integer> executeOnQueue(Function<Deque<NamedPod>, Integer> applicable) {
-    Uni<AsyncMap<String, Deque<NamedPod>>> uniMap =
-        sharedData.<String, Deque<NamedPod>>getAsyncMap(POOL_NAME);
+    Uni<AsyncMap<String, Deque<NamedPod>>> uniMap = sharedData.getAsyncMap(POOL_NAME);
 
     // flatMap is equivalent to onItem().transformToUni()
     return uniMap.flatMap(asyncMap -> asyncMap.get(POOL_NAME)).map(applicable);
@@ -247,6 +263,25 @@ public class PythonRunnerPool {
     return supplied;
   }
 
+  Supplier<Deque<NamedPod>> newQueue() {
+    return () -> {
+      List<Pod> pods =
+          kubernetesClient
+              .pods()
+              .inNamespace(DataCaterK8sConfig.NAMESPACE)
+              .withLabels(DataCaterK8sConfig.LABELS)
+              .list()
+              .getItems();
+      Deque<NamedPod> namedPods = new ArrayDeque<>(DataCaterK8sConfig.PYTHON_RUNNER_REPLICAS);
+      for (Pod pod : pods) {
+        String podName = pod.getMetadata().getName();
+        namedPods.add(new NamedPod(podName, pod));
+      }
+
+      return namedPods;
+    };
+  }
+
   Supplier<RunnerPool> newPool() {
     return () -> {
       List<Pod> pods =
@@ -256,8 +291,7 @@ public class PythonRunnerPool {
               .withLabels(DataCaterK8sConfig.LABELS)
               .list()
               .getItems();
-      Deque<NamedPod> namedPods =
-          new ArrayDeque<>(DataCaterK8sConfig.PYTHON_RUNNER_REPLICAS);
+      Deque<NamedPod> namedPods = new ArrayDeque<>(DataCaterK8sConfig.PYTHON_RUNNER_REPLICAS);
       for (Pod pod : pods) {
         String podName = pod.getMetadata().getName();
         namedPods.add(new NamedPod(podName, pod));
@@ -276,8 +310,7 @@ public class PythonRunnerPool {
                 .withLabels(DataCaterK8sConfig.LABELS)
                 .list()
                 .getItems();
-        Deque<NamedPod> namedPods =
-            new ArrayDeque<>(DataCaterK8sConfig.PYTHON_RUNNER_REPLICAS);
+        Deque<NamedPod> namedPods = new ArrayDeque<>(DataCaterK8sConfig.PYTHON_RUNNER_REPLICAS);
         for (Pod pod : pods) {
           String podName = pod.getMetadata().getName();
           namedPods.add(new NamedPod(podName, pod));

@@ -11,7 +11,6 @@ import io.quarkus.test.kubernetes.client.KubernetesTestServer;
 import io.quarkus.test.kubernetes.client.WithKubernetesTestServer;
 import io.smallrye.mutiny.helpers.test.UniAssertSubscriber;
 import java.util.Deque;
-import java.util.function.Function;
 import javax.inject.Inject;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -33,12 +32,11 @@ class PythonRunnerPoolTest {
   @BeforeAll
   void init() {
     NamedPod pod1 = new NamedPod("Hakan", genericPod);
-    var initialise = runnerPool.initializeQueue();
+    var initialise = runnerPool.initialiseEmptyQueue();
     var putPod = runnerPool.putPod(pod1);
     var result = runnerPool.executeOnQueue(Deque::size);
     var uniChain = initialise.chain(() -> putPod).chain(() -> result);
-    var assertSubscriber =
-        uniChain.subscribe().withSubscriber(UniAssertSubscriber.create());
+    var assertSubscriber = uniChain.subscribe().withSubscriber(UniAssertSubscriber.create());
 
     assertSubscriber.awaitItem().assertCompleted();
   }
@@ -55,8 +53,7 @@ class PythonRunnerPoolTest {
   void testGetPod() {
     var getPod = runnerPool.getPod();
     var result = getPod.chain(namedPod -> runnerPool.executeOnQueue(Deque::size));
-    var resultSubscriber =
-        result.subscribe().withSubscriber(UniAssertSubscriber.create());
+    var resultSubscriber = result.subscribe().withSubscriber(UniAssertSubscriber.create());
 
     resultSubscriber.awaitItem().assertCompleted().assertItem(0);
   }

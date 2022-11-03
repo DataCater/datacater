@@ -185,7 +185,7 @@ export function inspectPipeline(
   return function (dispatch) {
     dispatch(requestPipelineInspect());
 
-    return callApi(`/pipelines/preview`, {
+    return callApi(`/pipelines/preview/pooled`, {
       method: "post",
       data: {
         pipeline: pipeline,
