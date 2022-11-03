@@ -128,7 +128,11 @@ public class PythonRunnerPool {
   public Uni<NamedPod> getPod() {
     return getQueue()
         .onItem()
-        .transform(Deque::pop);
+        .transform(queue -> {
+          NamedPod pod = queue.pop();
+          kubernetesClient.pods().delete(pod.pod());
+          return pod;
+        });
   }
 
 
