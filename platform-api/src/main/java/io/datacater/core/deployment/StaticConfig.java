@@ -7,10 +7,8 @@ import org.eclipse.microprofile.config.ConfigProvider;
 public class StaticConfig {
   private StaticConfig() {}
 
-  static final String PULL_POLICY = "IfNotPresent";
   static final String STREAM_IN_CONFIG_NAME = "MP_MESSAGING_INCOMING_STREAM-IN_TOPIC";
   static final String STREAM_OUT_CONFIG_NAME = "MP_MESSAGING_OUTGOING_STREAM-OUT_TOPIC";
-  static final int REPLICAS = 1;
   static final String DATACATER_PIPELINE = "datacater-pipeline";
   static final String APP = "datacater.io/app";
   static final String PIPELINE = "datacater.io/pipeline";
@@ -56,6 +54,21 @@ public class StaticConfig {
         ConfigProvider.getConfig()
             .getOptionalValue("datacater.deployment.image", String.class)
             .orElse("datacater/pipeline:latest");
+
+    static final Integer READY_SECONDS =
+        ConfigProvider.getConfig()
+            .getOptionalValue("datacater.deployment.ready-seconds", Integer.class)
+            .orElse(2);
+
+    static final String PULL_POLICY =
+        ConfigProvider.getConfig()
+            .getOptionalValue("datacater.deployment.pull-policy", String.class)
+            .orElse("IfNotPresent");
+
+    static final int REPLICAS =
+        ConfigProvider.getConfig()
+            .getOptionalValue("datacater.deployment.replicas", Integer.class)
+            .orElse(1);
   }
 
   static class LoggerMessages {
