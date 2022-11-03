@@ -24,7 +24,6 @@ import javax.ws.rs.sse.Sse;
 import javax.ws.rs.sse.SseEventSink;
 import org.eclipse.microprofile.openapi.annotations.security.SecurityRequirement;
 import org.hibernate.reactive.mutiny.Mutiny;
-import org.jboss.logging.Logger;
 
 @Path("/api/alpha/deployments")
 @RolesAllowed("dev")
@@ -32,7 +31,6 @@ import org.jboss.logging.Logger;
 @SecurityRequirement(name = "apiToken")
 @RequestScoped
 public class DeploymentEndpoint {
-  private static final Logger LOGGER = Logger.getLogger(DeploymentEndpoint.class);
   @Inject Mutiny.SessionFactory sf;
 
   @Inject KubernetesClient client;

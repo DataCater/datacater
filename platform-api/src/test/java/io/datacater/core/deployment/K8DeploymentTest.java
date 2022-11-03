@@ -27,7 +27,7 @@ import org.junit.jupiter.api.*;
 @QuarkusTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-public class K8DeploymentTest {
+class K8DeploymentTest {
   private static final Logger LOGGER = Logger.getLogger(K8DeploymentTest.class);
 
   @Inject KubernetesClient client;
@@ -75,7 +75,7 @@ public class K8DeploymentTest {
 
   @Test
   @Order(1)
-  public void testDeploymentExistsMethod()
+  void testDeploymentExistsMethod()
       throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
     Assertions.assertEquals(
         false, getDeploymentExistsMethod().invoke(k8Deployment, UUID.randomUUID()));
@@ -83,7 +83,7 @@ public class K8DeploymentTest {
 
   @Test
   @Order(1)
-  public void testConfigMapExistsMethod()
+  void testConfigMapExistsMethod()
       throws NoSuchMethodException, InvocationTargetException, IllegalAccessException,
           NoSuchFieldException {
     final String nonExistentConfigMap = "test" + UUID.randomUUID();
@@ -95,7 +95,7 @@ public class K8DeploymentTest {
 
   @Test
   @Order(2)
-  public void testCreateDeployment()
+  void testCreateDeployment()
       throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
     deploymentId =
         k8Deployment.create(
@@ -105,7 +105,7 @@ public class K8DeploymentTest {
 
   @Test
   @Order(3)
-  public void testGetLogs() {
+  void testGetLogs() {
     String logs = k8Deployment.getLogs(deploymentId);
     Assertions.assertNotNull(logs);
   }

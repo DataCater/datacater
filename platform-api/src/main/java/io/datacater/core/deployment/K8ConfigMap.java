@@ -7,11 +7,9 @@ import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import javax.enterprise.context.ApplicationScoped;
-import org.jboss.logging.Logger;
 
 @ApplicationScoped
 public class K8ConfigMap {
-  private static final Logger LOGGER = Logger.getLogger(K8ConfigMap.class);
   private final KubernetesClient client;
 
   K8ConfigMap(KubernetesClient client) {

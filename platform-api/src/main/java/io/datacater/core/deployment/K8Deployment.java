@@ -140,7 +140,7 @@ public class K8Deployment {
             .inNamespace(StaticConfig.EnvironmentVariables.NAMESPACE)
             .withName(name)
             .delete();
-    if (status) {
+    if (Boolean.TRUE.equals(status)) {
       LOGGER.info(StaticConfig.LoggerMessages.DEPLOYMENT_DELETED + name);
     } else {
       LOGGER.info(StaticConfig.LoggerMessages.DEPLOYMENT_NOT_DELETED + name);

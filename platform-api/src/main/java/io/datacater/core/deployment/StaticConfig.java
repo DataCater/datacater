@@ -44,6 +44,8 @@ public class StaticConfig {
   static final String DC_STREAMOUT_CONFIG_TEXT = "DATACATER_STREAM-OUT_CONFIG";
 
   static class EnvironmentVariables {
+    private EnvironmentVariables() {}
+
     static final String NAMESPACE =
         ConfigProvider.getConfig()
             .getOptionalValue("datacater.deployment.namespace", String.class)
@@ -57,6 +59,8 @@ public class StaticConfig {
   }
 
   static class LoggerMessages {
+    private LoggerMessages() {}
+
     static final String DEPLOYMENT_DELETED = "DatacaterDeployment deleted successfully: ";
     static final String DEPLOYMENT_NOT_DELETED = "DatacaterDeployment could not be deleted: ";
     static final String NAMESPACE_DELETED = "Namespace deleted successfully: ";
