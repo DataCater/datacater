@@ -166,6 +166,17 @@ public class K8Deployment {
         .getMetadata();
   }
 
+  private boolean exists(UUID deploymentId) {
+    return !client
+        .apps()
+        .deployments()
+        .inNamespace(StaticConfig.EnvironmentVariables.NAMESPACE)
+        .withLabel(StaticConfig.UUID_TEXT, deploymentId.toString())
+        .list()
+        .getItems()
+        .isEmpty();
+  }
+
   private String getDeploymentName(UUID deploymentId) {
     List<Deployment> deployments =
         client
