@@ -15,7 +15,6 @@ import java.net.http.HttpRequest.BodyPublishers;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import javax.annotation.PostConstruct;
@@ -41,12 +40,6 @@ public class PythonRunnerPool {
 
   private static final Logger LOGGER = Logger.getLogger(PythonRunnerPool.class);
   private static final String POOL_NAME = "python-runner";
-
-  private static final String IN_USE_LABEL_KEY = "datacater.io/in-use";
-  private static final String IN_USE_TRUE_LABEL_VALUE = "true";
-  private static final Map<String, String> IN_USE_TRUE_LABEL =
-      Map.of(IN_USE_LABEL_KEY, IN_USE_TRUE_LABEL_VALUE);
-  private static final Long LOCK_TIMEOUT_MS = 10000L;
 
   private static final int EXPECTED_PYTHON_RUNNERS =
       ConfigProvider.getConfig()
