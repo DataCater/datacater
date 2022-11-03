@@ -8,7 +8,6 @@ import io.datacater.core.stream.StreamEntity;
 import io.fabric8.kubernetes.api.model.*;
 import io.fabric8.kubernetes.api.model.apps.Deployment;
 import io.fabric8.kubernetes.api.model.apps.DeploymentBuilder;
-import io.fabric8.kubernetes.api.model.apps.DeploymentStatus;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.dsl.RollableScalableResource;
 import java.util.*;
@@ -147,16 +146,6 @@ public class K8Deployment {
     }
   }
 
-  public DeploymentStatus getDeploymentStatus(String deploymentName) {
-    return client
-        .apps()
-        .deployments()
-        .inNamespace(StaticConfig.EnvironmentVariables.NAMESPACE)
-        .withName(deploymentName)
-        .get()
-        .getStatus();
-  }
-
   public ListMeta getDeployments() {
     return client
         .apps()
@@ -175,17 +164,6 @@ public class K8Deployment {
         .withName(getDeploymentName(deploymentId))
         .get()
         .getMetadata();
-  }
-
-  private boolean exists(UUID deploymentId) {
-    return !client
-        .apps()
-        .deployments()
-        .inNamespace(StaticConfig.EnvironmentVariables.NAMESPACE)
-        .withLabel(StaticConfig.UUID_TEXT, deploymentId.toString())
-        .list()
-        .getItems()
-        .isEmpty();
   }
 
   private String getDeploymentName(UUID deploymentId) {

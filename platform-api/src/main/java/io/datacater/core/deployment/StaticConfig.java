@@ -49,22 +49,18 @@ public class StaticConfig {
             .getOptionalValue("datacater.deployment.namespace", String.class)
             .orElse("datacater")
             .toLowerCase();
-
     static final String FULL_IMAGE_NAME =
         ConfigProvider.getConfig()
             .getOptionalValue("datacater.deployment.image", String.class)
             .orElse("datacater/pipeline:latest");
-
     static final Integer READY_SECONDS =
         ConfigProvider.getConfig()
             .getOptionalValue("datacater.deployment.ready-seconds", Integer.class)
             .orElse(2);
-
     static final String PULL_POLICY =
         ConfigProvider.getConfig()
             .getOptionalValue("datacater.deployment.pull-policy", String.class)
             .orElse("IfNotPresent");
-
     static final int REPLICAS =
         ConfigProvider.getConfig()
             .getOptionalValue("datacater.deployment.replicas", Integer.class)
@@ -76,7 +72,5 @@ public class StaticConfig {
 
     static final String DEPLOYMENT_DELETED = "DatacaterDeployment deleted successfully: ";
     static final String DEPLOYMENT_NOT_DELETED = "DatacaterDeployment could not be deleted: ";
-    static final String NAMESPACE_DELETED = "Namespace deleted successfully: ";
-    static final String NAMESPACE_NOT_DELETED = "Namespace could not be deleted: ";
   }
 }

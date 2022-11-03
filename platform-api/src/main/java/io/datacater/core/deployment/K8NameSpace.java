@@ -39,13 +39,4 @@ public class K8NameSpace {
       client.namespaces().createOrReplace(ns);
     }
   }
-
-  private void delete(String namespace) {
-    boolean status = client.namespaces().withName(namespace).delete();
-    if (status) {
-      LOGGER.info(StaticConfig.LoggerMessages.NAMESPACE_DELETED + namespace);
-    } else {
-      LOGGER.info(StaticConfig.LoggerMessages.NAMESPACE_NOT_DELETED + namespace);
-    }
-  }
 }
