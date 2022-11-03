@@ -13,7 +13,7 @@ import javax.ws.rs.Produces;
 import java.util.Map;
 
 public class KafkaConfig {
-    static private final String errorMsg= "The given Kafka Configuration could not be mapped: ";
+    static private final String errorMsg= "The given Kafka Configuration could not be mapped: %s";
     static final String DATACATER_STREAMIN_CONFIG =
             ConfigProvider.getConfig()
                     .getOptionalValue("datacater.stream-in.config", String.class)
@@ -44,7 +44,7 @@ public class KafkaConfig {
         try{
             map = mapper.readValue(json, new TypeReference<>(){});
         } catch (JsonProcessingException e){
-            throw new KafkaConfigurationException(errorMsg + e.getMessage());
+            throw new KafkaConfigurationException(String.format(errorMsg, e.getMessage()));
         }
         return map;
     }
