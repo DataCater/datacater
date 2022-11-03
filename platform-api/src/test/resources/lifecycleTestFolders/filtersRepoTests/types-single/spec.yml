@@ -1,4 +1,5 @@
 ---
+kind       : Field
 name       : Does not equal value
 key        : types-single
 description: Returns whether the attribute does not equal a specific value.

@@ -1,7 +1,8 @@
 ---
+kind       : Field
 name       : Floor to nearest integer
 key        : floor
-description: Floor the attribute to the nearest integer
+description: Floor the field to the nearest integer
 license    : Apache2
 website    : https://github.com/DataCater/datacater/transforms/floor
 author     :

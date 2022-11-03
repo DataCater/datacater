@@ -76,9 +76,7 @@ public class PipelineEntity {
     this.name = pipeline.getName();
     try {
       this.metadata = pipeline.getSerializedMetadata();
-      this.spec =
-          PipelineSpec.serializePipelineSpec(
-              pipeline.getSpec().getFilters(), pipeline.getSpec().getTransformationSteps());
+      this.spec = PipelineSpec.serializePipelineSpec(pipeline.getSpec().getSteps());
     } catch (JsonProcessingException e) {
       throw new JsonNotParsableException(e.getMessage());
     }

@@ -62,7 +62,7 @@ class FrequentValues extends Component {
   }
 
   render() {
-    const profile = this.props.attributeProfile;
+    const profile = this.props.fieldProfile;
 
     if (profile === undefined) {
       return <ul></ul>;

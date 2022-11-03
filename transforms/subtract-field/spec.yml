@@ -1,0 +1,17 @@
+---
+kind       : Field
+name       : Subtract field
+key        : subtract-field
+config     :
+-   name: fieldName
+    label: Field name
+    type: text
+description: Subtract another field from this field
+license    : Apache2
+website    : https://github.com/DataCater/datacater/transforms/subtract-field
+author     :
+  email: info@datacater.io
+  name: DataCater GmbH
+labels     :
+  input-types: number
+version    : 1.0.0

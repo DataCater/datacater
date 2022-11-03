@@ -27,7 +27,7 @@ function getDataType(value) {
 }
 
 /**
- * Determine the attributes of a list of records and profile them.
+ * Determine the fields of a list of records and profile them.
  *
  * Determine metrics, such as the number of distinct values, the
  * number of  missing values, and the most frequent values.
@@ -49,47 +49,45 @@ export function profileRecords(records) {
   const profile = {};
 
   records.forEach(function (record) {
-    Object.keys(record).forEach(function (attributeName) {
-      const value = record[attributeName];
-      if (profile[attributeName] === undefined) {
-        profile[attributeName] = Object.assign({}, profileTemplate, {
+    Object.keys(record).forEach(function (fieldName) {
+      const value = record[fieldName];
+      if (profile[fieldName] === undefined) {
+        profile[fieldName] = Object.assign({}, profileTemplate, {
           dataType: getDataType(value),
         });
-        profile[attributeName].frequencies = new Map();
-        profile[attributeName].mostFrequentValues = [];
+        profile[fieldName].frequencies = new Map();
+        profile[fieldName].mostFrequentValues = [];
       }
 
       // Detect data type
-      if (profile[attributeName].dataType === undefined) {
-        profile[attributeName].dataType = getDataType(value);
+      if (profile[fieldName].dataType === undefined) {
+        profile[fieldName].dataType = getDataType(value);
       }
 
       // Detect missing values
       if (value == null) {
-        profile[attributeName].missingValues++;
+        profile[fieldName].missingValues++;
       }
 
-      if (profile[attributeName].frequencies.has(value)) {
-        profile[attributeName].frequencies.set(
+      if (profile[fieldName].frequencies.has(value)) {
+        profile[fieldName].frequencies.set(
           value,
-          profile[attributeName].frequencies.get(value) + 1
+          profile[fieldName].frequencies.get(value) + 1
         );
       } else {
-        profile[attributeName].frequencies.set(value, 1);
+        profile[fieldName].frequencies.set(value, 1);
       }
 
       // Bump number of processed values
-      profile[attributeName].totalValues++;
+      profile[fieldName].totalValues++;
     });
   });
 
-  // Determine most frequent values for each attribute
-  const attributeNames = Object.keys(profile);
-  attributeNames.forEach((attributeName) => {
+  // Determine most frequent values for each field
+  const fieldNames = Object.keys(profile);
+  fieldNames.forEach((fieldName) => {
     const sortedFrequencies = new Map(
-      [...profile[attributeName].frequencies.entries()].sort(
-        (a, b) => b[1] - a[1]
-      )
+      [...profile[fieldName].frequencies.entries()].sort((a, b) => b[1] - a[1])
     );
     const sortedFrequenciesKeys = sortedFrequencies.keys();
     for (let i = 0; i < 5; i++) {
@@ -97,9 +95,9 @@ export function profileRecords(records) {
       if (value === undefined) {
         break;
       }
-      profile[attributeName].mostFrequentValues.push({
+      profile[fieldName].mostFrequentValues.push({
         value: value,
-        count: profile[attributeName].frequencies.get(value),
+        count: profile[fieldName].frequencies.get(value),
       });
     }
   });

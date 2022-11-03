@@ -11,21 +11,21 @@ class TableHeaderCell extends Component {
     super(props);
 
     this.openContextBar = this.openContextBar.bind(this);
-    this.renderAttribute = this.renderAttribute.bind(this);
+    this.renderField = this.renderField.bind(this);
   }
 
-  renderAttributeName(attribute) {
-    if (attribute.oldName === undefined) {
+  renderFieldName(field) {
+    if (field.oldName === undefined) {
       return (
         <div className="d-flex align-items-center">
-          {[undefined, ""].includes(attribute.name) && (
+          {[undefined, ""].includes(field.name) && (
             <span className="font-italic">
-              <DataTypeIcon dataType={attribute.dataType} /> Untitled attribute
+              <DataTypeIcon dataType={field.dataType} /> Untitled field
             </span>
           )}
-          {![undefined, ""].includes(attribute.name) && (
+          {![undefined, ""].includes(field.name) && (
             <span>
-              <DataTypeIcon dataType={attribute.dataType} /> {attribute.name}
+              <DataTypeIcon dataType={field.dataType} /> {field.name}
             </span>
           )}
         </div>
@@ -33,61 +33,41 @@ class TableHeaderCell extends Component {
     } else {
       return (
         <div className="d-flex align-items-center">
-          {attribute.oldName}
+          {field.oldName}
           <ArrowRight className="feather-icon" />
-          {attribute.name}
+          {field.name}
         </div>
       );
     }
   }
 
-  openContextBar(attribute) {
-    const { currentPage, editColumnFunc } = this.props.column;
-
-    if (currentPage === "filter") {
-      editColumnFunc(attribute.name, undefined, "filter");
-    } else if (currentPage === "transform") {
-      editColumnFunc(
-        attribute.name,
-        this.props.column.currentStep,
-        "transform"
-      );
-    }
+  openContextBar(field) {
+    this.props.column.editColumnFunc(field.name, this.props.column.currentStep);
   }
 
-  renderAttribute(attribute, idx) {
+  renderField(field, idx) {
     const {
       filterOfCurrentStep,
-      attributeName,
+      fieldName,
       currentPage,
       currentStep,
       filters,
-      introducedAttributes,
+      introducedFields,
       removeColumnFunc,
+      step,
       transforms,
-      transformationOfCurrentStep,
     } = this.props.column;
 
     let sampleCellClassNames = "sample-cell py-2 ps-0";
-
-    let filter = undefined;
-
-    if (
-      currentPage === "filter" &&
-      filterOfCurrentStep !== undefined &&
-      ![undefined, ""].includes(filterOfCurrentStep.filter)
-    ) {
-      const filterKey = filterOfCurrentStep.filter;
-      filter = filters.find((filter) => filter.key === filterKey);
-    }
-
     let transformation = undefined;
+
     if (
       currentStep >= 0 &&
-      transformationOfCurrentStep !== undefined &&
-      ![undefined, ""].includes(transformationOfCurrentStep.transformation)
+      step.fields !== undefined &&
+      step.fields[field.name] !== undefined &&
+      step.fields[field.name].transform !== undefined
     ) {
-      const transformationKey = transformationOfCurrentStep.transformation;
+      const transformationKey = step.fields[field.name].transform.key;
       transformation = this.props.column.transforms.find(
         (transformation) => transformation.key === transformationKey
       );
@@ -98,69 +78,51 @@ class TableHeaderCell extends Component {
         <div className={sampleCellClassNames}>
           <div className="row m-0 align-items-center">
             <div className="col overflow-hidden text-nowrap d-flex align-items-center ps-0 pe-2">
-              {this.renderAttributeName(attribute)}
+              {this.renderFieldName(field)}
             </div>
             <div className="col-auto d-flex align-items-center px-2">
-              {introducedAttributes.includes(attributeName) && (
+              {introducedFields.includes(fieldName) && (
                 <Trash
                   className="feather-icon clickable me-1"
-                  data-attribute-name={attributeName}
+                  data-field-name={fieldName}
                   onClick={removeColumnFunc}
-                  title="Delete Virtual Attribute"
+                  title="Delete Virtual Field"
                 />
               )}
             </div>
           </div>
-          {currentPage === "filter" && filter == null && (
-            <Button
-              variant="white"
-              size="sm"
-              className="w-100 text-left mt-2 d-flex align-items-center text-nowrap btn-outline-primary"
-              onClick={(event) => this.openContextBar(attribute)}
-            >
-              <Filter className="feather-icon me-2" />
-              Apply filter
-            </Button>
-          )}
-          {currentPage === "filter" && filter != null && (
-            <Button
-              variant="primary"
-              size="sm"
-              className="w-100 text-left mt-2 d-flex align-items-center text-nowrap text-white"
-              onClick={(event) => this.openContextBar(attribute)}
-            >
-              <Filter className="feather-icon me-2" />
-              {filter.name}
-            </Button>
-          )}
-          {currentPage === "transform" && transformation == null && (
-            <Button
-              variant="white"
-              size="sm"
-              className="w-100 text-left mt-2 d-flex align-items-center text-nowrap btn-outline-primary"
-              onClick={(event) => this.openContextBar(attribute)}
-            >
-              <Package className="feather-icon me-2" />
-              Apply transformation
-            </Button>
-          )}
-          {currentPage === "transform" && transformation != null && (
-            <Button
-              variant="primary"
-              size="sm"
-              className="w-100 text-left mt-2 d-flex align-items-center text-nowrap text-white"
-              onClick={(event) => this.openContextBar(attribute)}
-            >
-              <Package className="feather-icon me-2" />
-              {transformation.name}
-            </Button>
-          )}
+          {step !== undefined &&
+            step.kind === "Field" &&
+            transformation == null && (
+              <Button
+                variant="white"
+                size="sm"
+                className="w-100 text-left mt-2 d-flex align-items-center text-nowrap btn-outline-primary"
+                onClick={(event) => this.openContextBar(field)}
+              >
+                <Package className="feather-icon me-2" />
+                Apply transform
+              </Button>
+            )}
+          {step !== undefined &&
+            step.kind === "Field" &&
+            transformation != null && (
+              <Button
+                variant="primary"
+                size="sm"
+                className="w-100 text-left mt-2 d-flex align-items-center text-nowrap text-white"
+                onClick={(event) => this.openContextBar(field)}
+              >
+                <Package className="feather-icon me-2" />
+                {transformation.name}
+              </Button>
+            )}
         </div>
         <div className="datacater-stats-content datacater-most-frequent-values-content">
-          {!["array", "object"].includes(attribute.dataType) && (
-            <FrequentValues attributeProfile={attribute} />
+          {!["array", "object"].includes(field.dataType) && (
+            <FrequentValues fieldProfile={field} />
           )}
-          {["array", "object"].includes(attribute.dataType) && (
+          {["array", "object"].includes(field.dataType) && (
             <span className="text-black-50">
               Most frequent values are not available
             </span>
@@ -173,7 +135,7 @@ class TableHeaderCell extends Component {
   render() {
     const { className, column } = this.props;
 
-    const { attribute } = column;
+    const { field } = column;
 
     if (column.isRowNumber) {
       const numberOfColumns =
@@ -181,14 +143,14 @@ class TableHeaderCell extends Component {
       return (
         <div className={className}>
           <div className="d-flex align-items-center justify-content-center">
-            {numberOfColumns} attributes
+            {numberOfColumns} fields
           </div>
         </div>
       );
     } else {
       return (
         <div className={className + " px-2"}>
-          {this.renderAttribute(attribute, attribute.id)}
+          {this.renderField(field, field.id)}
         </div>
       );
     }

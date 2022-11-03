@@ -1,4 +1,5 @@
 ---
+kind       : Field
 name       : Divide by constant value
 key        : types-array
 description: Divides the attribute by a constant value

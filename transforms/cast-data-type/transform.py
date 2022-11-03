@@ -1,4 +1,4 @@
-def transform(value, row, config):
+def transform(value, row: dict, config: dict):
     new_type = config.get("toDataType", "string")
     if new_type == "int" or new_type == "long":
         return int(value)

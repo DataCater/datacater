@@ -8,6 +8,7 @@ import java.util.Map;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record FilterSpec(
+    String kind,
     String name,
     String key,
     String description,
@@ -19,6 +20,7 @@ public record FilterSpec(
     String version) {
   @JsonCreator
   static FilterSpec from(
+      @JsonProperty(value = "kind", required = true) String kind,
       @JsonProperty(value = "name", required = true) String name,
       @JsonProperty(value = "key", required = true) String key,
       @JsonProperty(value = "description") String description,
@@ -29,6 +31,6 @@ public record FilterSpec(
       @JsonProperty(value = "config") List<Map<String, Object>> config,
       @JsonProperty(value = "version", required = true) String version) {
     return new FilterSpec(
-        name, key, description, license, website, author, labels, config, version);
+        kind, name, key, description, license, website, author, labels, config, version);
   }
 }

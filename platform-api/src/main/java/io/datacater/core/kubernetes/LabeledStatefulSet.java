@@ -2,22 +2,7 @@ package io.datacater.core.kubernetes;
 
 import io.datacater.core.exceptions.DatacaterException;
 import io.datacater.core.utilities.StringUtilities;
-import io.fabric8.kubernetes.api.model.Container;
-import io.fabric8.kubernetes.api.model.ContainerBuilder;
-import io.fabric8.kubernetes.api.model.ContainerPort;
-import io.fabric8.kubernetes.api.model.ContainerPortBuilder;
-import io.fabric8.kubernetes.api.model.IntOrString;
-import io.fabric8.kubernetes.api.model.LabelSelectorBuilder;
-import io.fabric8.kubernetes.api.model.LocalObjectReference;
-import io.fabric8.kubernetes.api.model.ObjectMeta;
-import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
-import io.fabric8.kubernetes.api.model.PodSpec;
-import io.fabric8.kubernetes.api.model.PodSpecBuilder;
-import io.fabric8.kubernetes.api.model.PodTemplateSpec;
-import io.fabric8.kubernetes.api.model.PodTemplateSpecBuilder;
-import io.fabric8.kubernetes.api.model.Service;
-import io.fabric8.kubernetes.api.model.ServiceBuilder;
-import io.fabric8.kubernetes.api.model.ServicePortBuilder;
+import io.fabric8.kubernetes.api.model.*;
 import io.fabric8.kubernetes.api.model.apps.StatefulSet;
 import io.fabric8.kubernetes.api.model.apps.StatefulSetBuilder;
 import io.fabric8.kubernetes.api.model.apps.StatefulSetSpec;
@@ -38,6 +23,7 @@ public class LabeledStatefulSet implements Shareable {
 
   void createStatefulSet(StatefulSet statefulSet) {
     try {
+      createNamespace();
       String message =
           String.format(
               "Executing StatefulSet Request against context := %s",
@@ -52,6 +38,27 @@ public class LabeledStatefulSet implements Shareable {
     } catch (KubernetesClientException e) {
       String message = StringUtilities.wrapString(e.getMessage());
       throw new DatacaterException(message);
+    }
+  }
+
+  private boolean namespaceExists() {
+    try {
+      return client.namespaces().list().getItems().stream()
+          .anyMatch(ns -> ns.getMetadata().getNamespace().equals(DataCaterK8sConfig.NAMESPACE));
+    } catch (Exception e) {
+      return false;
+    }
+  }
+
+  protected void createNamespace() {
+    if (!namespaceExists()) {
+      Namespace ns =
+          new NamespaceBuilder()
+              .withNewMetadata()
+              .withName(DataCaterK8sConfig.NAMESPACE)
+              .endMetadata()
+              .build();
+      client.namespaces().createOrReplace(ns);
     }
   }
 

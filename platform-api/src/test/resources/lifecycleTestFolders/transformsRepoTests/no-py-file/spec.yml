@@ -1,4 +1,5 @@
 ---
+kind       : Field
 name       : Capitalize
 key        : capitalize
 description: Capitalize the attribute

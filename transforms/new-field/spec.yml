@@ -1,0 +1,15 @@
+---
+kind       : Field
+name       : Add field
+key        : new-field
+config     :
+-   name: defaultValue
+    label: Default value
+    type: text
+description: Adds a new field to the record
+license    : Apache2
+website    : https://github.com/DataCater/datacater/transforms/new-field
+author     :
+  email: info@datacater.io
+  name: DataCater GmbH
+version    : 1.0.0

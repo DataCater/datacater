@@ -1,21 +1,19 @@
 ---
-apiVersion: datacater.io/v1
-kind      : Pipeline
-metadata  :
-  id: '1'
-  name: Pipeline name
-spec      :
-  filters: []
-  transformationSteps:
-  -   name: First
-      transformations:
-      -   attributeName: name
-          transformation: trim
-      -   attributeName: email
-          transformation: trim
-          filter: not-empty
-      -   attributeName: age
-          transformation: add-column
-          transformationConfig:
-            attributeName: age
-            defaultValue: 42
+spec:
+  steps:
+  -   kind: Field
+      fields:
+        name:
+          transform:
+            key: trim
+        email:
+          transform:
+            key: trim
+          filter:
+            key: not-empty
+        age:
+          transform:
+            key: add-column
+            config:
+              attributeName: age
+              defaultValue: age

@@ -1,0 +1,17 @@
+---
+kind       : Field
+name       : Multiply by field
+key        : multiply-field
+config     :
+-   name: fieldName
+    label: Field name
+    type: text
+description: Multiplies this field by another field
+license    : Apache2
+website    : https://github.com/DataCater/datacater/transforms/multiply-field
+author     :
+  email: info@datacater.io
+  name: DataCater GmbH
+labels     :
+  input-types: number
+version    : 1.0.0

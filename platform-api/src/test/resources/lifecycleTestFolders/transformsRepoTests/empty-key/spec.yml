@@ -1,4 +1,5 @@
 ---
+kind       : Field
 name       : empty-key
 key        :
 description: Adds a new attribute

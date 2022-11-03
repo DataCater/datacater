@@ -50,25 +50,19 @@ class PipelineTest {
   void testToString() {
     // arrange
     String expected =
-        "---\n"
-            + "name: \"pipeline-error-logs\"\n"
+        "---\nname: \"pipeline-error-logs\"\n"
             + "metadata:\n"
             + "  id: \"1\"\n"
             + "  name: \"DoK Demo Pipeline\"\n"
             + "spec:\n"
-            + "  filters:\n"
-            + "  - attributeName: \"age\"\n"
-            + "    filter: \"less-than\"\n"
-            + "    filterConfig:\n"
-            + "      value: 50\n"
-            + "  transformationSteps:\n"
-            + "  - name: \"First Step\"\n"
-            + "    transformations:\n"
-            + "    - attributeName: \"age\"\n"
-            + "      transformation: \"hash\"\n"
-            + "      transformationConfig: null\n"
-            + "      filter: null\n"
-            + "      filterConfig: null\n";
+            + "  steps:\n"
+            + "  - kind: \"Field\"\n"
+            + "    fields:\n"
+            + "      age:\n"
+            + "        filter:\n"
+            + "          key: \"less-than\"\n"
+            + "          config:\n"
+            + "            value: 50\n";
 
     // act
     String obj = pipelineYAML.toString();

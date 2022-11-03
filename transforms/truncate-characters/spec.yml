@@ -1,11 +1,12 @@
 ---
+kind       : Field
 name       : Truncate characters
 key        : truncate-characters
 config     :
 -   name: characters
     label: Characters
     type: text
-description: Truncate the attribute after the given number of characters
+description: Truncate the field after the given number of characters
 license    : Apache2
 website    : https://github.com/DataCater/datacater/transforms/truncate-characters
 author     :

@@ -1,0 +1,32 @@
+---
+version: 2
+updates:
+# Maintain dependencies for GitHub Actions
+-   package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+-   package-ecosystem: gradle
+    directory: /platform-api
+    schedule:
+      interval: weekly
+      day: monday
+      # try and follow Conventional Commits pattern
+      commit-message:
+        prefix: fix
+        prefix-development: chore
+        include: scope
+      labels:
+      -   dependencies
+-   package-ecosystem: npm
+    directory: /ui
+    schedule:
+      interval: weekly
+      day: monday
+      commit-message:
+        prefix: fix
+        prefix-development: chore
+        include: scope
+      labels:
+      -   dependencies

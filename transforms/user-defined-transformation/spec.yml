@@ -1,11 +1,12 @@
 ---
+kind       : Field
 name       : User-defined transform
 key        : user-defined-transformation
 config     :
 -   name: code
     label: Code
     type: text
-description: Custom user-defined transform defined in Python
+description: Custom field-level transform defined in Python
 license    : Apache2
 website    : https://github.com/DataCater/datacater/transforms/user-defined-transformation
 author     :

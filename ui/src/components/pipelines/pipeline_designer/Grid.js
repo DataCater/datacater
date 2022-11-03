@@ -18,13 +18,13 @@ class Grid extends Component {
     this.saveScrollPosition = this.saveScrollPosition.bind(this);
   }
 
-  getCell(sample, attribute) {
+  getCell(sample, field) {
     let classNames = "sample-cell w-100 text-nowrap";
     if (
       sample.lastChange !== undefined &&
-      sample.lastChange[attribute] !== undefined
+      sample.lastChange[field] !== undefined
     ) {
-      if (sample.lastChange[attribute] === this.props.currentStep) {
+      if (sample.lastChange[field] === this.props.currentStep) {
         classNames += " changed-in-current-step";
       } else {
         classNames += " changed-in-previous-step";
@@ -32,16 +32,16 @@ class Grid extends Component {
     }
 
     if (
-      this.props.editColumnAttribute !== undefined &&
-      this.props.editColumnAttribute.name === attribute
+      this.props.editColumnField !== undefined &&
+      this.props.editColumnField.name === field
     ) {
       classNames += " sample-cell-editing";
     }
 
-    const rawValue = sample[attribute.name];
+    const rawValue = sample[field.name];
 
     return (
-      <div className={classNames} key={attribute.name} title={"" + rawValue}>
+      <div className={classNames} key={field.name} title={"" + rawValue}>
         {renderTableCellContent(rawValue)}
       </div>
     );
@@ -53,31 +53,18 @@ class Grid extends Component {
     };
   }
 
-  getColumn(attribute, idx, filters, defaultColumnWidth) {
+  getColumn(field, idx, filters, defaultColumnWidth) {
     const me = this;
-
-    const filterOfCurrentStep = this.props.pipeline.spec.filters.find(
-      (filter) => filter.attributeName === attribute.name
-    );
-
-    const pipelineStep =
-      this.props.pipeline.spec.transformationSteps[this.props.currentStep];
-    let transformationOfCurrentStep = undefined;
-    if (pipelineStep !== undefined) {
-      transformationOfCurrentStep = pipelineStep.transformations.find(
-        (transformation) => transformation.attributeName === attribute.name
-      );
-    }
 
     return {
       // column properties
-      title: attribute.name,
-      width: attribute.id === 0 ? 50 : defaultColumnWidth,
-      key: parseInt(attribute.id),
-      frozen: attribute.id === 0 ? "left" : false,
+      title: field.name,
+      width: field.id === 0 ? 50 : defaultColumnWidth,
+      key: parseInt(field.id),
+      frozen: field.id === 0 ? "left" : false,
       resizable: true,
       dataGetter: ({ rowData, rowIndex }) => {
-        return attribute.id !== 0 ? rowData[attribute.name] : rowIndex + 1;
+        return field.id !== 0 ? rowData[field.name] : rowIndex + 1;
       },
       cellRenderer: function ({
         cellData,
@@ -89,59 +76,58 @@ class Grid extends Component {
         container,
         isScrolling,
       }) {
-        if (!column.isRowNumber && column.attribute !== undefined) {
-          return me.getCell(rowData, column.attribute);
+        if (!column.isRowNumber && column.field !== undefined) {
+          return me.getCell(rowData, column.field);
         } else {
           return cellData;
         }
       },
       // custom properties used for header sub components
-      isRowNumber: attribute.id === 0,
-      attribute: attribute,
+      isRowNumber: field.id === 0,
+      field: field,
       filters: this.props.filters,
-      attributes: this.props.attributes,
-      attributeProfiles: this.props.profile,
-      filterOfCurrentStep: filterOfCurrentStep,
+      fields: this.props.fields,
+      fieldProfiles: this.props.profile,
       pipelineStep: this.props.pipelineStep,
       currentStep: this.props.currentStep,
       currentPage: this.props.currentPage,
-      introducedAttributes: this.props.introducedAttributes,
-      editColumnAttribute: this.props.editColumnAttribute,
+      introducedFields: this.props.introducedFields,
+      editColumnField: this.props.editColumnField,
       editColumnFunc: this.props.editColumnFunc,
       removeColumnFunc: this.props.removeColumnFunc,
       handlePipelineStepChangeFunc: this.props.handlePipelineStepChangeFunc,
       handleChangeFunc: this.props.handleFilterChangeFunc,
       showStatistics: this.props.showStatistics,
-      transformationOfCurrentStep: transformationOfCurrentStep,
+      step: this.props.step,
       transforms: this.props.transforms,
     };
   }
 
   getColumns() {
-    const filters = []; // TODO: Filter.getFilters();
-    let columnsConfig = [...this.props.attributes];
+    const filters = [];
+    let columnsConfig = [...this.props.fields];
     let columns = [];
 
     const firstColumnWidth = 50;
     let defaultColumnWidth = 300;
 
-    // check whether columns fill width of screen
+    // check whether columns fill width of browser
     // If not, increase the default column width
-    const availableWidth = window.screen.width - firstColumnWidth - 3;
-    if (defaultColumnWidth * this.props.attributes.length < availableWidth) {
-      defaultColumnWidth = availableWidth / this.props.attributes.length;
+    const availableWidth = window.innerWidth - firstColumnWidth - 3;
+    if (defaultColumnWidth * this.props.fields.length < availableWidth) {
+      defaultColumnWidth = availableWidth / this.props.fields.length;
     }
 
     // add # row number column
-    columnsConfig = columnsConfig.map((attributeName, idx) =>
-      Object.assign({}, this.props.profile[attributeName], {
+    columnsConfig = columnsConfig.map((fieldName, idx) =>
+      Object.assign({}, this.props.profile[fieldName], {
         id: idx + 1,
-        name: attributeName,
+        name: fieldName,
       })
     );
     columnsConfig.unshift({ id: 0, name: "#" });
-    columnsConfig.map((attribute, idx) =>
-      columns.push(this.getColumn(attribute, idx, filters, defaultColumnWidth))
+    columnsConfig.map((field, idx) =>
+      columns.push(this.getColumn(field, idx, filters, defaultColumnWidth))
     );
 
     return columns;
@@ -174,31 +160,23 @@ class Grid extends Component {
   }
 
   getClassNames(columns) {
-    const { currentStep, editColumnAttribute } = this.props;
-    let classNames;
+    const { currentStep, editColumnField } = this.props;
     let activeColumnIndex;
 
     // highlight active column
-    if (editColumnAttribute !== undefined) {
+    if (editColumnField !== undefined) {
       activeColumnIndex = columns.findIndex(function (column) {
         return (
-          column.attribute !== undefined &&
-          parseInt(column.attribute.id) === parseInt(editColumnAttribute.id)
+          column.field !== undefined && column.field.name === editColumnField
         );
       });
 
       if (activeColumnIndex) {
-        classNames = `active-col-${activeColumnIndex}`;
+        return `active-col-${activeColumnIndex}`;
       }
     }
 
-    if (currentStep === 0) {
-      classNames += " datacater-grid-filters";
-    } else if (currentStep > 0) {
-      classNames += " datacater-grid-pipeline-steps";
-    }
-
-    return classNames;
+    return "";
   }
 
   componentDidUpdate(prevProps, prevState, snapshot) {
@@ -241,7 +219,7 @@ class Grid extends Component {
 
     return (
       <div className="container-fluid">
-        <div className="row mt-2">
+        <div className="row">
           <div
             className={`col-12 w-100 px-0 datacater-grid-container${gridTransformClassName}`}
             style={{ position: "relative" }}
@@ -250,6 +228,7 @@ class Grid extends Component {
               {({ width, height }) => (
                 <BaseTable
                   classPrefix="datacater-grid"
+                  className={classNames}
                   columns={this.getColumns(this.props.profile)}
                   components={{ TableHeaderCell }}
                   data={data}

@@ -1,7 +1,8 @@
 ---
+kind       : Field
 name       : Lowercase
 key        : lowercase
-description: Transform the attribute to lowercase notation
+description: Transform the field to lowercase notation
 license    : Apache2
 website    : https://github.com/DataCater/datacater/transforms/lowercase
 author     :

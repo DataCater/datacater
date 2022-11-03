@@ -1,11 +1,12 @@
 ---
+kind       : Field
 name       : Replace with constant value
 key        : replace-constant
 config     :
 -   name: value
     label: Value
     type: text
-description: Replaces the value of the attribute with a provided constant value
+description: Replaces the value of the field with a provided constant value
 license    : Apache2
 website    : https://github.com/DataCater/datacater/transforms/replace-constant
 author     :

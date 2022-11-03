@@ -62,7 +62,7 @@ datacater:
   pythonrunner:
     image:
       name: datacater/python-runner
-      version: alpha.6
+      version: alpha-20221101
   authorization: true
   api:
     version: alpha
@@ -78,6 +78,10 @@ datacater:
       path: /home/runner/work/cloud-platform/cloud-platform/transforms
     filters:
       path: /home/runner/work/cloud-platform/cloud-platform/filters
+    pythonrunner:
+      image:
+        name: datacater/python-runner
+        version: alpha-20221101
   quarkus:
     http:
       auth:
@@ -139,7 +143,7 @@ datacater:
     pythonrunner:
       image:
         name: datacater/python-runner
-        version: alpha
+        version: alpha-20221101
   quarkus:
     log:
       level: INFO
@@ -173,9 +177,9 @@ datacater:
   mp:
     jwt:
       verify:
-        issuer: localhost
+        issuer: https://cloud.datacater.io
         publickey:
-          location: key.pem
+          location: publicKey.pem
     messaging:
       outgoing:
         testStreamTopicOutAvro:
@@ -195,6 +199,6 @@ datacater:
     jwt:
       sign:
         key:
-          location: key.pem
+          location: privateKey.pem
       new-token:
         lifespan: 7200

@@ -37,15 +37,15 @@ class InspectStream extends Component {
   getColumns(profile) {
     let columnConfigs = [];
 
-    const attributeNames = Object.keys(profile);
+    const fieldNames = Object.keys(profile);
 
     columnConfigs.unshift({ id: 0, name: "#" });
 
-    attributeNames.forEach((attributeName, idx) => {
+    fieldNames.forEach((fieldName, idx) => {
       columnConfigs.push(
-        Object.assign({}, profile[attributeName], {
+        Object.assign({}, profile[fieldName], {
           id: idx + 1,
-          name: attributeName,
+          name: fieldName,
         })
       );
     });
@@ -55,19 +55,19 @@ class InspectStream extends Component {
 
     // check whether columns fill width of screen
     // If not, increase the default column width
-    const availableWidth = window.screen.width - firstColumnWidth - 3;
-    if (defaultColumnWidth * attributeNames.length < availableWidth) {
-      defaultColumnWidth = availableWidth / attributeNames.length;
+    const availableWidth = window.innerWidth - firstColumnWidth - 3;
+    if (defaultColumnWidth * fieldNames.length < availableWidth) {
+      defaultColumnWidth = availableWidth / fieldNames.length;
     }
 
     let columns = [];
     columnConfigs.forEach((columnConfig, idx) => {
-      const attribute = columnConfig;
+      const field = columnConfig;
 
       columns.push({
-        attribute: attribute,
-        attributeName: attribute.name,
-        attributeIndex: idx,
+        field: field,
+        fieldName: field.name,
+        fieldIndex: idx,
         cellRenderer: function ({
           cellData,
           columns,
@@ -78,8 +78,8 @@ class InspectStream extends Component {
           container,
           isScrolling,
         }) {
-          if (!column.isRowNumber && column.attribute !== undefined) {
-            const rawValue = rowData[column.attributeName];
+          if (!column.isRowNumber && column.field !== undefined) {
+            const rawValue = rowData[column.fieldName];
             return (
               <div className="sample-cell w-100 text-nowrap">
                 {renderTableCellContent(rawValue)}
@@ -91,15 +91,15 @@ class InspectStream extends Component {
         },
         createPipelineStatus: this.props.createPipelineStatus,
         dataGetter: ({ rowData, rowIndex }) =>
-          attribute.id !== 0 ? rowData[attribute.name] : rowIndex + 1,
-        flexGrow: attribute.id,
-        frozen: attribute.id === 0 ? "left" : false,
-        handleAttributeChangeFunc: this.props.handleAttributeChangeFunc,
-        isRowNumber: attribute.id === 0,
-        key: parseInt(attribute.id),
+          field.id !== 0 ? rowData[field.name] : rowIndex + 1,
+        flexGrow: field.id,
+        frozen: field.id === 0 ? "left" : false,
+        handleFieldChangeFunc: this.props.handleFieldChangeFunc,
+        isRowNumber: field.id === 0,
+        key: parseInt(field.id),
         resizable: true,
-        title: attribute.name,
-        width: attribute.id === 0 ? firstColumnWidth : defaultColumnWidth,
+        title: field.name,
+        width: field.id === 0 ? firstColumnWidth : defaultColumnWidth,
       });
     });
 

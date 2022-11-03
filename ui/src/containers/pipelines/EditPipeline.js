@@ -18,7 +18,6 @@ import {
 import { Modal } from "react-bootstrap";
 import BaseTable, { AutoResizer } from "react-base-table";
 import PipelineDesigner from "../../components/pipelines/PipelineDesigner";
-import Nav from "../../components/pipelines/pipeline_designer/Nav";
 import Breadcrumb from "../../components/layout/Breadcrumb";
 import { getApiPathPrefix } from "../../helpers/getApiPathPrefix";
 import { deepCopy } from "../../helpers/deepCopy";
@@ -43,12 +42,12 @@ class EditPipeline extends Component {
       addedColumn: false,
       editColumn: undefined,
       contextBarActive: false,
-      currentPage: "explore",
       currentStep: undefined,
       errorMessage: "",
       pipeline: {},
       pipelineUpdated: false,
       pipelineUpdatedAt: undefined,
+      showStepNameForm: false,
       unpersistedChanges: false,
     };
 
@@ -57,18 +56,20 @@ class EditPipeline extends Component {
     this.handleChange = this.handleChange.bind(this);
     this.editColumn = this.editColumn.bind(this);
     this.handleFilterChange = this.handleFilterChange.bind(this);
-    this.handleTransformStepChange = this.handleTransformStepChange.bind(this);
+    this.handleStepChange = this.handleStepChange.bind(this);
     this.delayedReloadSampleRecords =
       this.delayedReloadSampleRecords.bind(this);
-    this.addTransformStep = this.addTransformStep.bind(this);
-    this.removeTransformStep = this.removeTransformStep.bind(this);
-    this.moveTransformStep = this.moveTransformStep.bind(this);
+    this.addStep = this.addStep.bind(this);
+    this.removeStep = this.removeStep.bind(this);
+    this.moveStep = this.moveStep.bind(this);
     this.moveToStep = this.moveToStep.bind(this);
-    this.moveToPage = this.moveToPage.bind(this);
     this.addColumn = this.addColumn.bind(this);
     this.showContextBar = this.showContextBar.bind(this);
     this.hideContextBar = this.hideContextBar.bind(this);
     this.removeColumn = this.removeColumn.bind(this);
+    this.updateStepName = this.updateStepName.bind(this);
+    this.showStepNameForm = this.showStepNameForm.bind(this);
+    this.hideStepNameForm = this.hideStepNameForm.bind(this);
   }
 
   componentDidMount() {
@@ -119,7 +120,7 @@ class EditPipeline extends Component {
     }
   }
 
-  updateSampleRecords(pipeline, previewStage, previewStep) {
+  updateSampleRecords(pipeline, previewStep) {
     const domElement = document.querySelector(".datacater-grid-container");
     if (domElement != null) {
       domElement.style.opacity = 0.2;
@@ -132,7 +133,6 @@ class EditPipeline extends Component {
         .inspectPipeline(
           this.state.pipeline,
           this.props.streams.inspectionResult,
-          previewStage,
           previewStep
         )
         .then(() => {
@@ -160,22 +160,22 @@ class EditPipeline extends Component {
     });
   }
 
-  handleFilterChange(event, attributeName, property, value) {
+  handleFilterChange(event, fieldName, property, value) {
     let pipeline = deepCopy(this.state.pipeline);
     let editColumn = this.state.editColumn;
     let contextBarActive = true;
     let type = event.target.type;
 
-    if (attributeName === undefined && property === undefined) {
-      attributeName = event.target.dataset.attributename;
+    if (fieldName === undefined && property === undefined) {
+      fieldName = event.target.dataset.fieldname;
       property = event.target.name;
       value = event.target.value;
       type = "text";
     }
 
-    // Delete existing filter on given attribute, if it exists
+    // Delete existing filter on given field, if it exists
     const filterIdx = pipeline.spec.filters.findIndex(
-      (filter) => filter.attributeName === attributeName
+      (filter) => filter.fieldName === fieldName
     );
     if (filterIdx > -1) {
       if (property === "filter") {
@@ -194,7 +194,7 @@ class EditPipeline extends Component {
       }
     } else {
       const newFilter = {
-        attributeName: attributeName,
+        fieldName: fieldName,
         filter: value,
         filterConfig: {},
       };
@@ -213,118 +213,128 @@ class EditPipeline extends Component {
     });
   }
 
-  createEditColumnFilterObject(attributeName) {
-    const pipeline = deepCopy(this.state.pipeline);
-    const filter = pipeline.spec.filters.find(
-      (filter) => filter.attributeName === attributeName
-    );
-
+  createEditRecordObject(stepIndex, step) {
     return {
-      type: "filter",
-      attributeName: attributeName,
-      filter: Object.assign({}, filter),
-    };
-  }
-
-  createEditColumnTransformationObject(attributeName, stepIndex) {
-    const pipeline = deepCopy(this.state.pipeline);
-
-    const attribute = pipeline.spec.transformationSteps[
-      stepIndex
-    ].transformations.find(
-      (transform) => transform.attributeName === attributeName
-    );
-
-    return {
-      attributeName: attributeName,
       stepIndex: stepIndex,
-      type: "transform",
+      step: step,
     };
   }
 
-  handleTransformStepChange(
-    event,
-    currentStep,
-    attributeName,
-    property,
-    value,
-    prefix
-  ) {
+  createEditColumnObject(fieldName, stepIndex) {
+    const pipeline = deepCopy(this.state.pipeline);
+
+    const step = pipeline.spec.steps[stepIndex];
+
+    return {
+      fieldName: fieldName,
+      stepIndex: stepIndex,
+      step: step,
+    };
+  }
+
+  handleStepChange(event, currentStep, fieldName, property, value, prefix) {
     let pipeline = deepCopy(this.state.pipeline);
     let editColumn = this.state.editColumn;
     let contextBarActive = true;
 
-    if (
-      currentStep === undefined &&
-      attributeName === undefined &&
-      property === undefined
-    ) {
-      attributeName = event.target.dataset.attributename;
+    if (currentStep === undefined && event !== undefined) {
       currentStep = event.target.dataset.currentstep;
+    }
+    if (fieldName === undefined && event !== undefined) {
+      fieldName = event.target.dataset.fieldname;
+    }
+    if (prefix === undefined && event !== undefined) {
       prefix = event.target.dataset.prefix;
+    }
+    if (property === undefined && event !== undefined) {
       property = event.target.name;
+    }
+    if (value === undefined && event !== undefined) {
       value = event.target.value;
     }
 
-    const transformIdx = pipeline.spec.transformationSteps[
-      currentStep
-    ].transformations.findIndex(
-      (transform) => transform.attributeName === attributeName
-    );
+    const step = pipeline.spec.steps[currentStep - 1];
 
-    if (transformIdx > -1) {
+    if (step.kind === "Record") {
       if (property === "transform") {
         if (value === undefined) {
           // Remove transform
-          pipeline.spec.transformationSteps[currentStep].transformations.splice(
-            transformIdx,
-            1
-          );
+          delete step.transform;
+          pipeline.spec.steps[currentStep - 1] = step;
           editColumn = undefined;
-          contextBarActive = false;
         } else {
-          pipeline.spec.transformationSteps[currentStep].transformations[
-            transformIdx
-          ].transformation = value;
-          editColumn.transform =
-            pipeline.spec.transformationSteps[currentStep].transformations[
-              transformIdx
-            ];
+          pipeline.spec.steps[currentStep - 1]["transform"] = {
+            key: value,
+          };
         }
       } else if (property === "filter") {
-        pipeline.spec.transformationSteps[currentStep].transformations[
-          transformIdx
-        ].filter = value;
-        editColumn.transform =
-          pipeline.spec.transformationSteps[currentStep].transformations[
-            transformIdx
-          ];
+        if (value === undefined) {
+          // Remove filter
+          delete step.filter;
+          pipeline.spec.steps[currentStep - 1] = step;
+          editColumn = undefined;
+        } else {
+          pipeline.spec.steps[currentStep - 1]["filter"] = {
+            key: value,
+          };
+        }
       } else {
-        pipeline.spec.transformationSteps[currentStep].transformations[
-          transformIdx
-        ][prefix][property] = value;
-        editColumn.transform =
-          pipeline.spec.transformationSteps[currentStep].transformations[
-            transformIdx
-          ];
+        const config = {};
+        config[property] = value;
+        pipeline.spec.steps[currentStep - 1][prefix]["config"] = Object.assign(
+          {},
+          pipeline.spec.steps[currentStep - 1][prefix]["config"],
+          config
+        );
       }
     } else {
-      const newTransform = {
-        attributeName: attributeName,
-        transformation: value,
-        transformationConfig: {},
-        filter: null,
-        filterConfig: {},
-      };
-      pipeline.spec.transformationSteps[currentStep].transformations.push(
-        newTransform
-      );
-      editColumn.transform = newTransform;
+      if (value !== undefined) {
+        pipeline.spec.steps[currentStep - 1].fields[fieldName] = Object.assign(
+          {},
+          pipeline.spec.steps[currentStep - 1].fields[fieldName]
+        );
+      }
+      if (property === "transform") {
+        if (value === undefined) {
+          // Remove transform
+          delete step.fields[fieldName].transform;
+          pipeline.spec.steps[currentStep - 1] = step;
+          editColumn = undefined;
+        } else {
+          pipeline.spec.steps[currentStep - 1].fields[fieldName]["transform"] =
+            {
+              key: value,
+            };
+        }
+      } else if (property === "filter") {
+        if (value === undefined) {
+          // Remove filter
+          delete step.fields[fieldName].filter;
+          pipeline.spec.steps[currentStep - 1] = step;
+          editColumn = undefined;
+        } else {
+          pipeline.spec.steps[currentStep - 1].fields[fieldName]["filter"] = {
+            key: value,
+          };
+        }
+      } else {
+        const config = {};
+        config[property] = value;
+        pipeline.spec.steps[currentStep - 1].fields[fieldName][prefix][
+          "config"
+        ] = Object.assign(
+          {},
+          pipeline.spec.steps[currentStep - 1].fields[fieldName][prefix][
+            "config"
+          ],
+          config
+        );
+      }
     }
 
     const type = event !== undefined ? event.target.type : "text";
 
-    this.delayedReloadSampleRecords(pipeline, type, "transform", currentStep);
+    this.delayedReloadSampleRecords(pipeline, type, currentStep);
 
     this.setState({
       addedColumn: false,
@@ -335,7 +345,7 @@ class EditPipeline extends Component {
     });
   }
 
-  delayedReloadSampleRecords(pipeline, eventType, previewStage, previewStep) {
+  delayedReloadSampleRecords(pipeline, eventType, previewStep) {
     if (eventType === "text") {
       let domElements = [
         document.querySelector(".datacater-grid-container"),
@@ -346,164 +356,125 @@ class EditPipeline extends Component {
       clearTimeout(this.bounceTimeout);
       this.bounceTimeout = setTimeout(() => {
         // opacity will be reset by the following function call
-        this.updateSampleRecords(pipeline, previewStage, previewStep);
+        this.updateSampleRecords(pipeline, previewStep);
       }, 500);
     } else {
-      this.updateSampleRecords(pipeline, previewStage, previewStep);
+      this.updateSampleRecords(pipeline, previewStep);
     }
   }
 
-  addTransformStep(event, useCache) {
+  addStep(event) {
     event.preventDefault();
 
     let pipeline = deepCopy(this.state.pipeline);
+    const kind = event.target.dataset.stepKind;
 
-    pipeline.spec.transformationSteps.push({
-      name: "",
-      transformations: [],
-    });
+    if (kind === "Record") {
+      pipeline.spec.steps.push({
+        kind: "Record",
+      });
+    } else {
+      pipeline.spec.steps.push({
+        kind: "Field",
+        fields: {},
+      });
+    }
 
-    const currentStep = pipeline.spec.transformationSteps.length - 1;
+    const currentStep = pipeline.spec.steps.length;
 
-    this.updateSampleRecords(pipeline, "transform", currentStep);
+    this.updateSampleRecords(pipeline, currentStep);
 
     this.setState({
       addedColumn: false,
       contextBarActive: false,
-      currentPage: "transform",
       currentStep: currentStep,
       editColumn: undefined,
       pipeline: pipeline,
+      showStepNameForm: false,
       unpersistedChanges: true,
     });
   }
 
-  removeTransformStep(stepIdx) {
+  removeStep(stepIdx) {
     let pipeline = deepCopy(this.state.pipeline);
-    let currentPage = this.state.currentPage;
     let currentStep = this.state.currentStep;
 
-    // Remove stepIdx from pipeline.spec.transformationSteps
-    pipeline.spec.transformationSteps.splice(stepIdx, 1);
+    // Remove stepIdx from pipeline.spec.steps
+    pipeline.spec.steps.splice(stepIdx - 1, 1);
 
-    if (currentStep > pipeline.spec.transformationSteps.length - 1) {
-      if (pipeline.spec.transformationSteps.length === 0) {
-        currentPage = "explore";
+    if (currentStep > pipeline.spec.steps.length - 1) {
+      if (pipeline.spec.steps.length === 0) {
+        currentStep = undefined;
       } else {
-        currentStep = pipeline.spec.transformationSteps.length - 1;
+        currentStep = pipeline.spec.steps.length - 1;
       }
     }
 
-    this.updateSampleRecords(pipeline, "transform", currentStep);
+    this.updateSampleRecords(pipeline, currentStep);
 
     this.setState({
       addedColumn: false,
-      currentPage: currentPage,
       currentStep: currentStep,
       contextBarActive: false,
       editColumn: undefined,
       pipeline: pipeline,
+      showStepNameForm: false,
       unpersistedChanges: true,
     });
   }
 
-  moveTransformStep(fromPosition, toPosition) {
-    let pipeline = deepCopy(this.state.pipeline);
-    let transformSteps = pipeline.step.transformationSteps;
-    const movingStepIndex = transformSteps.findIndex(function (el) {
-      return el.sortPosition === fromPosition;
-    });
+  moveStep(fromPosition, toPosition) {
+    if (!isNaN(toPosition)) {
+      let pipeline = deepCopy(this.state.pipeline);
+      let steps = pipeline.spec.steps;
 
-    // TODO
-    if (fromPosition > toPosition) {
-      pipelineSteps = pipelineSteps.map(function (step) {
-        if (
-          step.sortPosition >= toPosition &&
-          step.sortPosition < fromPosition
-        ) {
-          step.sortPosition++;
+      const movingStep = deepCopy(steps[fromPosition - 1]);
+
+      if (fromPosition > toPosition) {
+        for (let i = fromPosition - 1; i >= toPosition; i--) {
+          steps[i] = steps[i - 1];
         }
-        return step;
-      });
-      pipelineSteps[movingStepIndex].sortPosition = toPosition;
-    } else if (fromPosition < toPosition) {
-      pipelineSteps = pipelineSteps.map(function (step) {
-        if (
-          step.sortPosition > fromPosition &&
-          step.sortPosition < toPosition
-        ) {
-          step.sortPosition--;
+        steps[toPosition - 1] = movingStep;
+      } else if (fromPosition < toPosition) {
+        toPosition = toPosition - 1;
+        for (let i = fromPosition - 1; i < toPosition - 1; i++) {
+          steps[i] = steps[i + 1];
         }
-        return step;
+        steps[toPosition - 1] = movingStep;
+      }
+
+      pipeline.spec.steps = steps;
+
+      const newCurrentStep = toPosition;
+
+      this.updateSampleRecords(pipeline, newCurrentStep);
+
+      this.setState({
+        addedColumn: false,
+        currentStep: newCurrentStep,
+        contextBarActive: false,
+        editColumn: undefined,
+        pipeline: pipeline,
+        showStepNameForm: false,
+        unpersistedChanges: true,
       });
-      pipelineSteps[movingStepIndex].sortPosition = toPosition - 1;
     }
-
-    pipeline.spec.transformationSteps = transformSteps;
-
-    const newCurrentStep = toPosition;
-
-    this.updateSampleRecords(pipeline, "transform", newCurrentStep);
-
-    this.setState({
-      addedColumn: false,
-      currentStep: newCurrentStep,
-      contextBarActive: false,
-      editColumn: undefined,
-      pipeline: pipeline,
-      unpersistedChanges: true,
-    });
   }
 
   moveToStep(event, newStep) {
     event.preventDefault();
-    this.updateSampleRecords(this.state.pipeline, "transform", newStep);
+    this.updateSampleRecords(this.state.pipeline, newStep);
     this.setState({
       addedColumn: false,
       codeView: false,
-      currentPage: "transform",
       currentStep: newStep,
       contextBarActive: false,
       editColumn: undefined,
+      showStepNameForm: false,
     });
   }
 
-  moveToPage(newPage, newStep) {
-    window.scrollTo(0, 0);
-
-    const pipelineId = this.getPipelineId();
-
-    this.updateSampleRecords(this.state.pipeline, newPage, newStep);
-
-    if (
-      newPage === "transform" &&
-      this.state.pipeline.spec.transformationSteps.length === 0
-    ) {
-      const pipeline = this.state.pipeline;
-      pipeline.spec.transformationSteps.push({
-        name: "",
-        transformations: [],
-      });
-      this.setState({
-        addedColumn: false,
-        currentPage: newPage,
-        currentStep: 0,
-        contextBarActive: false,
-        editColumn: undefined,
-        pipeline: pipeline,
-        unpersistedChanges: true,
-      });
-    } else {
-      this.setState({
-        addedColumn: false,
-        currentPage: newPage,
-        currentStep: newStep,
-        contextBarActive: false,
-        editColumn: undefined,
-      });
-    }
-  }
-
+  // TODO
   addColumn(event) {
     event.preventDefault();
     let pipeline = deepCopy(this.state.pipeline);
@@ -511,18 +482,18 @@ class EditPipeline extends Component {
       (_) => _.sortPosition === this.state.currentStep
     );
     if (stepIndex >= 0) {
-      // add new virtual attribute to data source profile
+      // add new virtual field to data source profile
       const that = this;
       this.props
-        .addDataSourceProfileAttribute(
+        .addDataSourceProfileField(
           this.props.dataSourceProfiles.dataSourceProfile.id
         )
         .then(function () {
-          const virtualAttribute =
-            that.props.dataSourceProfiles.dataSourceProfileAttribute;
-          if (virtualAttribute != null) {
-            pipeline.pipelineSteps[stepIndex].attributes.push({
-              transformAttributeId: virtualAttribute.id,
+          const virtualField =
+            that.props.dataSourceProfiles.dataSourceProfileField;
+          if (virtualField != null) {
+            pipeline.pipelineSteps[stepIndex].fields.push({
+              transformFieldId: virtualField.id,
               transformationAction: "add-column",
               transformationFilter: "",
               actionValue: "",
@@ -534,8 +505,8 @@ class EditPipeline extends Component {
               pipelineStep
             ) {
               if (pipelineStep.sortPosition > that.state.currentStep) {
-                pipelineStep.attributes.push({
-                  transformAttributeId: virtualAttribute.id,
+                pipelineStep.fields.push({
+                  transformFieldId: virtualField.id,
                   transformationAction: "",
                   transformationFilter: "",
                   actionValue: "",
@@ -564,31 +535,36 @@ class EditPipeline extends Component {
     }
   }
 
-  editColumn(attributeName, sortPosition, type) {
+  editColumn(fieldName, sortPosition) {
     const pipeline = deepCopy(this.state.pipeline);
     let editColumn = undefined;
 
-    if (
-      this.state.editColumn !== undefined &&
-      attributeName === this.state.editColumn.attributeName
-    ) {
-      // hide context bar if we click the edit button of an active attribute again
-      this.hideContextBar();
-    } else {
-      // show context bar when editing a transformation or filter
-      this.showContextBar();
+    const currentStep = pipeline.spec.steps[this.state.currentStep - 1];
 
-      if (
-        type === "transform" &&
-        attributeName !== undefined &&
-        sortPosition !== undefined
-      ) {
-        editColumn = this.createEditColumnTransformationObject(
-          attributeName,
-          sortPosition
+    if (currentStep.kind === "Record") {
+      if (this.state.editColumn !== undefined) {
+        this.hideContextBar();
+      } else {
+        this.showContextBar();
+        editColumn = this.createEditRecordObject(
+          this.state.currentStep - 1,
+          currentStep
         );
-      } else if (type === "filter" && attributeName !== undefined) {
-        editColumn = this.createEditColumnFilterObject(attributeName);
+      }
+    } else {
+      if (
+        this.state.editColumn !== undefined &&
+        fieldName === this.state.editColumn.fieldName
+      ) {
+        // hide context bar if we click the edit button of an active field again
+        this.hideContextBar();
+      } else {
+        // show context bar when editing a transformation or filter
+        this.showContextBar();
+
+        if (fieldName !== undefined && sortPosition !== undefined) {
+          editColumn = this.createEditColumnObject(fieldName, sortPosition);
+        }
       }
     }
 
@@ -610,17 +586,16 @@ class EditPipeline extends Component {
     });
   }
 
+  // TODO
   removeColumn(event) {
     event.preventDefault();
 
-    const attributeId = parseInt(event.target.dataset.attributeId);
+    const fieldId = parseInt(event.target.dataset.fieldId);
 
     // remove column from all pipeline steps
     let pipeline = deepCopy(this.state.pipeline);
     pipeline.pipelineSteps = pipeline.pipelineSteps.map(function (step) {
-      step.attributes = step.attributes.filter(
-        (_) => _.transformAttributeId !== attributeId
-      );
+      step.fields = step.fields.filter((_) => _.transformFieldId !== fieldId);
       return step;
     });
 
@@ -631,7 +606,32 @@ class EditPipeline extends Component {
       contextBarActive: false,
       editColumn: undefined,
       pipeline: pipeline,
+      showStepNameForm: false,
       unpersistedChanges: true,
+    });
+  }
+
+  updateStepName(event) {
+    let pipeline = this.state.pipeline;
+
+    pipeline.spec.steps[this.state.currentStep - 1]["name"] =
+      event.target.value;
+
+    this.setState({
+      pipeline: pipeline,
+      unpersistedChanges: true,
+    });
+  }
+
+  showStepNameForm() {
+    this.setState({
+      showStepNameForm: true,
+    });
+  }
+
+  hideStepNameForm() {
+    this.setState({
+      showStepNameForm: false,
     });
   }
 
@@ -734,7 +734,7 @@ class EditPipeline extends Component {
     }
 
     const sampleRecords =
-      this.state.currentPage === "explore" ||
+      this.state.currentStep === undefined ||
       this.props.pipelines.inspectionResult === undefined
         ? deepCopy(this.props.streams.inspectionResult).map(
             (record) => record.value
@@ -763,52 +763,41 @@ class EditPipeline extends Component {
 
     let classNames = "create-pipeline-form pipeline-designer";
 
-    if (this.state.currentPage !== "steps") {
-      classNames += " pipeline-designer-page";
-    }
-
     if (this.state.contextBarActive && this.state.currentStep !== undefined) {
       classNames += " datacater-context-bar-active";
     }
 
-    if (this.state.currentPage === "steps" && this.state.currentStep > 0) {
+    if (this.state.currentStep !== undefined) {
       classNames += " pipeline-designer-transformations";
     }
 
     return (
       <>
-        <div className="container">
-          {header}
-          <div className="row g-3 align-items-center mt-0">
-            <div className="col-6 mb-2">
-              <Nav
-                currentPage={this.state.currentPage}
-                moveToPageFunc={this.moveToPage}
-              />
-            </div>
-          </div>
-        </div>
+        <div className="container">{header}</div>
         {sampleRecords.length > 0 && (
           <PipelineDesigner
-            addTransformStepFunc={this.addTransformStep}
-            attributes={Object.keys(profile)}
+            addStepFunc={this.addStep}
+            fields={Object.keys(profile)}
             contextBarActive={this.state.contextBarActive}
-            currentPage={this.state.currentPage}
             currentStep={this.state.currentStep}
             editColumn={this.state.editColumn}
             editColumnFunc={this.editColumn}
             filters={this.props.filters.filters}
             handleFilterChangeFunc={this.handleFilterChange}
-            handleTransformStepChangeFunc={this.handleTransformStepChange}
+            handleStepChangeFunc={this.handleStepChange}
             hideContextBarFunc={this.hideContextBar}
+            hideStepNameFormFunc={this.hideStepNameForm}
             moveToStepFunc={this.moveToStep}
-            moveTransformStepFunc={this.moveTransformStep}
+            moveStepFunc={this.moveStep}
             pipeline={pipeline}
             previewState={{}}
             profile={profile}
-            removeTransformStepFunc={this.removeTransformStep}
+            removeStepFunc={this.removeStep}
             sampleRecords={sampleRecords}
+            showStepNameForm={this.state.showStepNameForm}
+            showStepNameFormFunc={this.showStepNameForm}
             transforms={this.props.transforms.transforms}
+            updateStepNameFunc={this.updateStepName}
           />
         )}
       </>

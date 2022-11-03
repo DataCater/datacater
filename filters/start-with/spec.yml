@@ -1,11 +1,12 @@
 ---
+kind       : Field
 name       : Starts with substring
 key        : start-with
 config     :
 -   name: value
     label: Value
     type: text
-description: Returns whether the attribute has a provided prefix.
+description: Returns whether the field has a provided prefix.
 license    : Apache2
 website    : https://github.com/DataCater/datacater/filters/start-with
 author     :

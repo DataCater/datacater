@@ -45,9 +45,6 @@ DONOTCOMMIT*
 python-runner/filters/
 python-runner/transforms/
 
-# do not commit security related files
-*.pem
-
 # python
 __pycache__
 .venv

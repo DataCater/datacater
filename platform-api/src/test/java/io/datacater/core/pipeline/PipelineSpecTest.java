@@ -23,29 +23,24 @@ class PipelineSpecTest {
     URL errorLogs = ClassLoader.getSystemClassLoader().getResource("pipeline-test-object.json");
     ObjectMapper mapper = new JsonMapper();
     pipeline = mapper.readValue(errorLogs, Pipeline.class);
-    JsonNode filters = mapper.readTree(mapper.writeValueAsString(pipeline.getSpec().filters));
-    JsonNode transformationSteps =
-        mapper.readTree(mapper.writeValueAsString(pipeline.getSpec().transformationSteps));
   }
 
   @Test
   void testSerializePipelineSpec() throws JsonProcessingException {
     // arrange
     String expectedFilterKey = "less-than";
-    String expectedTransformationStepName = "First Step";
+    String expectedStepName = "First step";
     PipelineSpec spec = pipeline.getSpec();
-    JsonNode node =
-        PipelineSpec.serializePipelineSpec(spec.getFilters(), spec.getTransformationSteps());
+    JsonNode node = PipelineSpec.serializePipelineSpec(spec.getSteps());
 
-    // act
-    JsonNode filters = node.findValue("filters");
-    JsonNode transformationSteps = node.findValue("transformationSteps");
-    String filterKey = filters.findValue("filter").asText();
-    String transformationStepName = transformationSteps.findValue("name").asText();
+    JsonNode steps = node.findValue("steps");
+    JsonNode firstStep = steps.get(0);
 
-    // assert
+    String filterKey = firstStep.findValue("filter").findValue("key").asText();
+    String stepName = firstStep.findValue("name").asText();
+
     Assertions.assertEquals(expectedFilterKey, filterKey);
-    Assertions.assertEquals(expectedTransformationStepName, transformationStepName);
+    Assertions.assertEquals(expectedStepName, stepName);
   }
 
   @Test
