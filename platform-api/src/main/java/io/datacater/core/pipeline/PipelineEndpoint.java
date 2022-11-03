@@ -8,6 +8,7 @@ import io.datacater.core.kubernetes.PythonRunnerPool;
 import io.datacater.core.kubernetes.PythonRunnerPool.NamedPod;
 import io.datacater.core.stream.StreamMessage;
 import io.datacater.core.stream.StreamsUtilities;
+import io.fabric8.kubernetes.client.KubernetesClient;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.tuples.Tuple3;
 import io.smallrye.mutiny.unchecked.Unchecked;
@@ -47,6 +48,7 @@ public class PipelineEndpoint {
   @Inject Mutiny.SessionFactory sf;
   @Inject StreamsUtilities streamsUtil;
   @Inject PythonRunnerPool runnerPool;
+  @Inject KubernetesClient kubernetesClient;
   WebClient client;
 
   public PipelineEndpoint(Vertx vertx) {
@@ -139,15 +141,18 @@ public class PipelineEndpoint {
     Uni<NamedPod> namedPod = runnerPool.getPod();
 
     return namedPod
-        .flatMap(
+        .onItem()
+        .transform(
+            Unchecked.function(
             pod -> {
               HttpRequest preview = pod.buildPost(payload, "/preview");
-              CompletableFuture<HttpResponse<String>> previewSend =
-                  httpClient.sendAsync(preview, BodyHandlers.ofString());
+              HttpResponse<String> previewSend =
+                  httpClient.send(preview, BodyHandlers.ofString());
 
-              return Uni.createFrom().completionStage(previewSend);
-            })
-        .map(HttpResponse::body);
+              kubernetesClient.pods().delete(pod.pod());
+
+              return previewSend.body();
+            }));
   }
 
   @GET
