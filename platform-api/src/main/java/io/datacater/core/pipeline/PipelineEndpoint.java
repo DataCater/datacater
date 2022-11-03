@@ -144,15 +144,15 @@ public class PipelineEndpoint {
         .onItem()
         .transform(
             Unchecked.function(
-            pod -> {
-              HttpRequest preview = pod.buildPost(payload, "/preview");
-              HttpResponse<String> previewSend =
-                  httpClient.send(preview, BodyHandlers.ofString());
+                pod -> {
+                  HttpRequest preview = pod.buildPost(payload, "/preview");
+                  HttpResponse<String> previewSend =
+                      httpClient.send(preview, BodyHandlers.ofString());
 
-              kubernetesClient.pods().delete(pod.pod());
+                  kubernetesClient.pods().delete(pod.pod());
 
-              return previewSend.body();
-            }));
+                  return previewSend.body();
+                }));
   }
 
   @GET

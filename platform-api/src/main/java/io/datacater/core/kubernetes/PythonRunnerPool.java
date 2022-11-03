@@ -48,7 +48,8 @@ public class PythonRunnerPool {
       Map.of(IN_USE_LABEL_KEY, IN_USE_TRUE_LABEL_VALUE);
   private static final Long LOCK_TIMEOUT_MS = 10000L;
 
-  private static final int EXPECTED_PYTHON_RUNNERS = ConfigProvider.getConfig()
+  private static final int EXPECTED_PYTHON_RUNNERS =
+      ConfigProvider.getConfig()
           .getOptionalValue("datacater.pythonrunner.pool.size", Integer.class)
           .orElse(1);
 
@@ -109,11 +110,8 @@ public class PythonRunnerPool {
   }
 
   public Uni<NamedPod> getPod() {
-    return getQueue()
-        .onItem()
-        .transform(Deque::pop);
+    return getQueue().onItem().transform(Deque::pop);
   }
-
 
   public Uni<Deque<NamedPod>> getQueue() {
     Uni<AsyncMap<String, Deque<NamedPod>>> defaultMap = sharedData.getAsyncMap(POOL_NAME);
@@ -121,22 +119,21 @@ public class PythonRunnerPool {
     return defaultMap
         .chain(map -> map.get(POOL_NAME))
         .replaceIfNullWith(newQueue()) // initialise queue if map has no queue
-        .chain(queue -> {
-          if (queue.isEmpty()) {
-            return initialiseMapWithQueue(newQueue().get()); // reset queue if all pods were used
-          } else {
-            return Uni.createFrom().item(queue);
-          }
-        });
+        .chain(
+            queue -> {
+              if (queue.isEmpty()) {
+                return initialiseMapWithQueue(
+                    newQueue().get()); // reset queue if all pods were used
+              } else {
+                return Uni.createFrom().item(queue);
+              }
+            });
   }
 
   public Uni<Deque<NamedPod>> initialiseMapWithQueue(Deque<NamedPod> queue) {
     Uni<AsyncMap<String, Deque<NamedPod>>> asyncMap = sharedData.getAsyncMap(POOL_NAME);
 
-    return asyncMap
-        .onItem()
-        .call(map -> map.put(POOL_NAME, queue))
-        .replaceWith(() -> queue);
+    return asyncMap.onItem().call(map -> map.put(POOL_NAME, queue)).replaceWith(() -> queue);
   }
 
   public Uni<Void> initialiseEmptyQueue() {
