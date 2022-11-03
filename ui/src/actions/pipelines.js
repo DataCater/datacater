@@ -180,7 +180,7 @@ export function inspectPipeline(pipeline, sampleRecords, previewStep) {
   return function (dispatch) {
     dispatch(requestPipelineInspect());
 
-    return callApi(`/pipelines/preview/pooled`, {
+    return callApi(`/pipelines/preview`, {
       method: "post",
       data: {
         pipeline: pipeline,

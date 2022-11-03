@@ -114,28 +114,7 @@ public class PipelineEndpoint {
   @Path("preview")
   @Consumes(MediaType.APPLICATION_JSON)
   @Produces(MediaType.APPLICATION_JSON)
-  public Uni<String> inspectStatic(String payload) {
-    LOGGER.debug(payload);
-    HttpClient httpClient = HttpClient.newHttpClient();
-    Uni<NamedPod> namedPod = runnerPool.getStaticPod();
-
-    return namedPod
-        .flatMap(
-            pod -> {
-              HttpRequest preview = pod.buildPost(payload, "/preview");
-              CompletableFuture<HttpResponse<String>> previewSend =
-                  httpClient.sendAsync(preview, BodyHandlers.ofString());
-
-              return Uni.createFrom().completionStage(previewSend);
-            })
-        .map(response -> response.body());
-  }
-
-  @POST
-  @Path("preview/pooled")
-  @Consumes(MediaType.APPLICATION_JSON)
-  @Produces(MediaType.APPLICATION_JSON)
-  public Uni<String> previewPooled(String payload) {
+  public Uni<String> preview(String payload) {
     LOGGER.debug(payload);
     HttpClient httpClient = HttpClient.newHttpClient();
     Uni<NamedPod> namedPod = runnerPool.getPod();
@@ -161,6 +140,7 @@ public class PipelineEndpoint {
     return transformMessages(uuid);
   }
 
+  // TODO: rework with inspect endpoints
   private Uni<String> transformMessages(UUID uuid) {
     HttpClient httpClient = HttpClient.newHttpClient();
 
