@@ -9,7 +9,7 @@ import javax.ws.rs.core.MediaType;
 import org.eclipse.microprofile.openapi.annotations.security.SecurityRequirement;
 
 @RolesAllowed("dev")
-@Path("/api/alpha/filters")
+@Path("/filters")
 @SecurityRequirement(name = "apiToken")
 public class FilterEndpoint {
   @GET

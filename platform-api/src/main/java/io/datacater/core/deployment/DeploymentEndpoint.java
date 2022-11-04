@@ -25,7 +25,7 @@ import javax.ws.rs.sse.SseEventSink;
 import org.eclipse.microprofile.openapi.annotations.security.SecurityRequirement;
 import org.hibernate.reactive.mutiny.Mutiny;
 
-@Path("/api/alpha/deployments")
+@Path("/deployments")
 @RolesAllowed("dev")
 @Produces(MediaType.APPLICATION_JSON)
 @SecurityRequirement(name = "apiToken")
