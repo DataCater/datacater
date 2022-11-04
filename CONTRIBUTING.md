@@ -37,10 +37,10 @@ pre-commit run --all-files
 - Verify that you can build and run the application locally:
 ```
 # Run tests
-./gradlew clean test
+./gradlew :platform-api:clean test
 
 # Run app locally
-./gradlew quarkusDev
+./gradlew :platform-api:quarkusDev
 
 # Smoke test
 curl localhost:8080/api/filters
@@ -86,7 +86,7 @@ If you need support, feel free to join our [Community Slack](https://join.slack.
 The application can be packaged using:
 
 ```shell script
-./gradlew build
+./gradlew :platform-api:build
 ```
 
 It produces the `quarkus-run.jar` file in the `build/quarkus-app/` directory. Be aware that it’s not an _über-jar_ as
@@ -97,7 +97,7 @@ The application is now runnable using `java -jar build/quarkus-app/quarkus-run.j
 If you want to build an _über-jar_, execute the following command:
 
 ```shell script
-./gradlew build -Dquarkus.package.type=uber-jar
+./gradlew :platform-api:build -Dquarkus.package.type=uber-jar
 ```
 
 The application, packaged as an _über-jar_, is now runnable using `java -jar build/*-runner.jar`.
@@ -107,7 +107,7 @@ The application, packaged as an _über-jar_, is now runnable using `java -jar bu
 You can create a native executable using:
 
 ```shell script
-./gradlew build -Dquarkus.package.type=native
+./gradlew :platform-api:build -Dquarkus.package.type=native
 ```
 
 Or, if you don't have GraalVM installed, you can run the native executable build in a container using:
