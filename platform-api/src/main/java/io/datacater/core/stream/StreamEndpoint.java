@@ -18,7 +18,7 @@ import org.eclipse.microprofile.openapi.annotations.security.SecurityRequirement
 import org.hibernate.reactive.mutiny.Mutiny;
 import org.jboss.logging.Logger;
 
-@Path("/api/alpha/streams")
+@Path("/streams")
 @RolesAllowed("dev")
 @Produces(MediaType.APPLICATION_JSON)
 @SecurityRequirement(name = "apiToken")

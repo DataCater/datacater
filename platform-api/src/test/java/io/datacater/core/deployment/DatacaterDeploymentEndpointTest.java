@@ -25,7 +25,7 @@ import org.junit.jupiter.api.*;
 class DatacaterDeploymentEndpointTest {
   private static final Logger LOGGER = Logger.getLogger(DatacaterDeploymentEndpointTest.class);
 
-  String baseURI = "http://localhost:8081/api/alpha";
+  String baseURI = "http://localhost:8081";
   String deploymentsPath = "/deployments";
 
   UUID deploymentId;
