@@ -20,7 +20,7 @@ You find each component in this repository. See the [File Structure section](#fi
 - Supporting Python-based transforms for ETL and streaming use cases
 - Applying cloud-native principles to data development
 - Supporting a declarative pipeline definition, which enables DataOps and Continuous Delivery
-- Enabling the nteractive development of ETL pipelines with minimal time to production
+- Enabling the interactive development of ETL pipelines with minimal time to production
 
 ### DataCater is not built for
 
