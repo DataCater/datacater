@@ -1,7 +1,15 @@
 import React, { Component } from "react";
 import { Link, Redirect } from "react-router-dom";
 import { signOut } from "../../actions/user_sessions";
-import { Book, Code, Home, Mail, LogOut, Wind } from "react-feather";
+import {
+  Book,
+  Code,
+  Home,
+  Mail,
+  LogOut,
+  PlayCircle,
+  Wind,
+} from "react-feather";
 import "../../scss/nav.scss";
 
 class Navigation extends Component {
@@ -84,6 +92,11 @@ class Navigation extends Component {
                 "Pipelines",
                 "/pipelines",
                 <Code className="feather-icon me-2" />
+              )}
+              {this.renderNavItem(
+                "Deployments",
+                "/deployments",
+                <PlayCircle className="feather-icon me-2" />
               )}
             </ul>
             <div className="my-2 my-md-0">
