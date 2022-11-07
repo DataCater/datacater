@@ -118,4 +118,3 @@ jobs:
                 -Dquarkus.container-image.registry=docker.io \
                 -Dquarkus.container-image.username=datacater \
                 -Dquarkus.container-image.password=${{ secrets.DOCKERHUB_TOKEN }}
-
