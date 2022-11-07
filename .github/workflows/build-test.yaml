@@ -144,7 +144,7 @@ jobs:
         run: |
           docker build -t datacater/python-runner:${RELEASE_VERSION} .
           docker push datacater/python-runner:${RELEASE_VERSION}
-  push_ui:
+  build_and_push_ui:
     if: github.ref_name == 'main' || github.ref_type == 'tag'
     name: Build and push UI image
     needs: build
@@ -158,6 +158,16 @@ jobs:
         with:
           username: datacater
           password: ${{ secrets.DOCKERHUB_TOKEN }}
+    -   name: Use Node.js v18
+        uses: actions/setup-node@v1
+        with:
+          node-version: 18.x
+    -   name: Install UI Dependencies
+        working-directory: ui
+        run: npm ci
+    -   name: Build the UI
+        working-directory: ui
+        run: npm run build --if-present
     -   name: Build image and push it to DockerHub
         working-directory: ui
         if: github.event.action == 'released'
