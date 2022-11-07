@@ -6,6 +6,7 @@ import MainLayout from "../components/layout/MainLayout";
 import Home from "./Home";
 import Login from "./Login";
 import ListDeployments from "./deployments/ListDeployments";
+import NewDeployment from "./deployments/NewDeployment";
 import ListPipelines from "./pipelines/ListPipelines";
 import NewPipeline from "./pipelines/NewPipeline";
 import ShowPipeline from "./pipelines/ShowPipeline";
@@ -41,6 +42,11 @@ class DataCaterApp extends Component {
                 exact
                 path="/deployments"
                 component={ListDeployments}
+              />
+              <PrivateRoute
+                exact
+                path="/deployments/new"
+                component={NewDeployment}
               />
 
               <PrivateRoute exact path="/pipelines" component={ListPipelines} />
