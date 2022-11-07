@@ -1,7 +1,7 @@
 ---
 quarkus  :
   application:
-    name: datacater-pipeline
+    name: pipeline
     version: '1'
   reactive-messaging:
     metrics:
