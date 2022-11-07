@@ -90,6 +90,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     -   uses: actions/checkout@v3
+    -   name: Set RELEASE_VERSION
+        run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
     -   name: Set up JDK 17 and gradle cache
         uses: actions/setup-java@v3
         id: gradle-build
@@ -110,7 +112,7 @@ jobs:
         run: |
           ./gradlew build --info --no-daemon -x test \
                 -Dquarkus.jib.platforms=linux/amd64,linux/arm64 \
-                -Dquarkus.container-image.tag=${GITHUB_REF} \
+                -Dquarkus.container-image.tag=${RELEASE_VERSION} \
                 -Dquarkus.container-image.build=true \
                 -Dquarkus.container-image.push=true \
                 -Dquarkus.container-image.registry=docker.io \
@@ -144,7 +146,7 @@ jobs:
         run: |
           ./gradlew build --info --no-daemon -x test \
                 -Dquarkus.jib.platforms=linux/amd64 \
-                -Dquarkus.container-image.tag=${GITHUB_REF} \
+                -Dquarkus.container-image.tag=${RELEASE_VERSION} \
                 -Dquarkus.container-image.build=true \
                 -Dquarkus.container-image.push=true \
                 -Dquarkus.container-image.registry=docker.io \
