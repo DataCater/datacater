@@ -118,3 +118,24 @@ jobs:
                 -Dquarkus.container-image.registry=docker.io \
                 -Dquarkus.container-image.username=datacater \
                 -Dquarkus.container-image.password=${{ secrets.DOCKERHUB_TOKEN }}
+  push_python_runner:
+    if: github.ref_name == 'main' || github.ref_type == 'tag'
+    name: Build and push Python Runner container
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+    -   uses: actions/checkout@v3
+    -   name: Set RELEASE_VERSION
+        run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
+    -   name: Copy filters and transforms
+        run: |
+          rm -rf python-runner/filters
+          cp -r filters python-runner
+          rm -rf python-runner/transforms
+          cp -r transforms python-runner
+    -   name: Build image
+        working-directory: python-runner
+        if: github.event.action == 'released'
+        run: |
+          docker build -t datacater/python-runner:${RELEASE_VERSION} .
+          docker push datacater/python-runner:${RELEASE_VERSION}
