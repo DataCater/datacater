@@ -18,7 +18,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 @TypeDef(name = JsonTypes.JSON_BIN, typeClass = JsonBinaryType.class)
 @Table(name = "streams")
 @Entity
-public class StreamEntity {
+public class StreamEntity extends AbstractBaseEntity {
   @Id
   @GeneratedValue
   @JsonProperty("uuid")
