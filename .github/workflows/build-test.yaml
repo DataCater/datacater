@@ -42,7 +42,8 @@ jobs:
           java-version: '17'
           distribution: zulu
           cache: gradle
-    -   run: ./gradlew build --no-daemon --info
+    -   run: ./gradlew :platform-api:build --no-daemon
+    -   run: ./gradlew :pipeline:build --no-daemon
     -   name: Cache SonarCloud packages
         uses: actions/cache@v3
         id: setup-sonar-cache
@@ -55,7 +56,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}         # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: ./gradlew :platform-api:build sonarqube --info
+        run: ./gradlew :platform-api:build sonarqube
     -   uses: actions/upload-artifact@v3
         with:
           name: platform-api
@@ -107,10 +108,21 @@ jobs:
           rm -fr $DEST/*
           cp -R $FILTERS_SRC $DEST
           cp -R $TRANSFORM_SRC $DEST
-    -   name: Push to Docker Hub
+    -   name: Push datacater/datacater to Docker Hub
         if: github.event.action == 'released'
         run: |
-          ./gradlew build --info --no-daemon -x test \
+          ./gradlew :platform-api:build --no-daemon -x test \
+                -Dquarkus.jib.platforms=linux/amd64,linux/arm64 \
+                -Dquarkus.container-image.tag=${RELEASE_VERSION} \
+                -Dquarkus.container-image.build=true \
+                -Dquarkus.container-image.push=true \
+                -Dquarkus.container-image.registry=docker.io \
+                -Dquarkus.container-image.username=datacater \
+                -Dquarkus.container-image.password=${{ secrets.DOCKERHUB_TOKEN }}
+    -   name: Push datacater/pipeline to Docker Hub
+        if: github.event.action == 'released'
+        run: |
+          ./gradlew :pipeline:build --no-daemon -x test \
                 -Dquarkus.jib.platforms=linux/amd64,linux/arm64 \
                 -Dquarkus.container-image.tag=${RELEASE_VERSION} \
                 -Dquarkus.container-image.build=true \
