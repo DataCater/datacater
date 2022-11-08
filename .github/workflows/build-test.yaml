@@ -26,7 +26,7 @@ jobs:
 
   build:
     needs: verify-files
-    name: Build & Analyze with Sonar
+    name: Build & analyze with Sonar
     runs-on: ubuntu-latest
     steps:
     -   uses: actions/checkout@v3
@@ -51,12 +51,18 @@ jobs:
           path: ~/.sonar/cache
           key: ${{ runner.os }}-sonar
           restore-keys: ${{ runner.os }}-sonar
-    -   name: Build and Analyze on Sonar
+    -   name: Build and analyze platform-api on Sonar
         id: sonar-check
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}         # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: ./gradlew :platform-api:build sonarqube
+    -   name: Build and analyze pipeline on Sonar
+        id: sonar-check
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}         # Needed to get PR information, if any
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: ./gradlew :pipeline:build sonarqube
     -   uses: actions/upload-artifact@v3
         with:
           name: platform-api
