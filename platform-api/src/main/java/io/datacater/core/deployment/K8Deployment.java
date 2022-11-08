@@ -3,6 +3,7 @@ package io.datacater.core.deployment;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.datacater.core.exceptions.CreateDeploymentException;
 import io.datacater.core.pipeline.PipelineEntity;
 import io.datacater.core.stream.StreamEntity;
 import io.fabric8.kubernetes.api.model.*;
@@ -80,6 +81,10 @@ public class K8Deployment {
         .deployments()
         .inNamespace(StaticConfig.EnvironmentVariables.NAMESPACE)
         .create(deployment);
+
+    if (!exists(deploymentId)) {
+      throw new CreateDeploymentException(StaticConfig.LoggerMessages.DEPLOYMENT_NOT_CREATED);
+    }
     return deploymentId;
   }
 
@@ -147,15 +152,6 @@ public class K8Deployment {
   }
 
   public DeploymentSpec getDeployments() {
-    LOGGER.info(
-        deploymentListToDeploymentSpec(
-                client
-                    .apps()
-                    .deployments()
-                    .inNamespace(StaticConfig.EnvironmentVariables.NAMESPACE)
-                    .list()
-                    .getItems())
-            .toString());
     return deploymentListToDeploymentSpec(
         client
             .apps()

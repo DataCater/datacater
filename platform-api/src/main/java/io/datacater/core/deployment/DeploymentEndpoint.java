@@ -1,6 +1,7 @@
 package io.datacater.core.deployment;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import io.datacater.core.exceptions.CreateDeploymentException;
 import io.datacater.core.pipeline.PipelineEntity;
 import io.datacater.core.stream.StreamEntity;
 import io.fabric8.kubernetes.api.model.apps.Deployment;
@@ -94,15 +95,18 @@ public class DeploymentEndpoint {
 
   private Uni<Response> apply(DeploymentSpec spec) {
     return sf.withTransaction(
-        (session, transaction) ->
-            session
-                .find(
-                    PipelineEntity.class,
-                    UUID.fromString(
-                        spec.deployment().get(StaticConfig.PIPELINE_NODE_TEXT).toString()))
-                .onItem()
-                .ifNotNull()
-                .transformToUni(pe -> transformPipelineEntity(session, pe, spec)));
+            (session, transaction) ->
+                session
+                    .find(
+                        PipelineEntity.class,
+                        UUID.fromString(
+                            spec.deployment().get(StaticConfig.PIPELINE_NODE_TEXT).toString()))
+                    .onItem()
+                    .ifNotNull()
+                    .transformToUni(pe -> transformPipelineEntity(session, pe, spec)))
+        .onItem()
+        .ifNull()
+        .failWith(new CreateDeploymentException(StaticConfig.LoggerMessages.PIPELINE_NOT_FOUND));
   }
 
   private Uni<Response> transformPipelineEntity(
@@ -111,7 +115,10 @@ public class DeploymentEndpoint {
         .find(StreamEntity.class, getUUIDFromNode(pe.getMetadata(), StaticConfig.STREAM_IN))
         .onItem()
         .ifNotNull()
-        .transformToUni(streamIn -> transformStreamIn(session, pe, streamIn, deploymentSpec));
+        .transformToUni(streamIn -> transformStreamIn(session, pe, streamIn, deploymentSpec))
+        .onItem()
+        .ifNull()
+        .failWith(new CreateDeploymentException(StaticConfig.LoggerMessages.STREAMIN_NOT_FOUND));
   }
 
   private Uni<Response> transformStreamIn(
@@ -123,7 +130,10 @@ public class DeploymentEndpoint {
         .find(StreamEntity.class, getUUIDFromNode(pe.getMetadata(), StaticConfig.STREAM_OUT))
         .onItem()
         .ifNotNull()
-        .transformToUni(streamOut -> transformStreamOut(pe, streamOut, streamIn, deploymentSpec));
+        .transformToUni(streamOut -> transformStreamOut(pe, streamOut, streamIn, deploymentSpec))
+        .onItem()
+        .ifNull()
+        .failWith(new CreateDeploymentException(StaticConfig.LoggerMessages.STREAMOUT_NOT_FOUND));
   }
 
   private Uni<Response> transformStreamOut(

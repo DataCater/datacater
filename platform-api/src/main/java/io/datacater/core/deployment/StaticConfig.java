@@ -72,5 +72,9 @@ public class StaticConfig {
 
     static final String DEPLOYMENT_DELETED = "DatacaterDeployment deleted successfully: ";
     static final String DEPLOYMENT_NOT_DELETED = "DatacaterDeployment could not be deleted: ";
+    static final String PIPELINE_NOT_FOUND = "The referenced Pipeline UUID could not be found";
+    static final String STREAMIN_NOT_FOUND = "The referenced Stream-in UUID could not be found";
+    static final String STREAMOUT_NOT_FOUND = "The referenced Stream-out UUID could not be found";
+    static final String DEPLOYMENT_NOT_CREATED = "The Deployment could not be created.";
   }
 }
