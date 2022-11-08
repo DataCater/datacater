@@ -3,7 +3,9 @@ package io.datacater.core.pipeline;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.json.JsonMapper;
+import io.datacater.core.exceptions.DatacaterException;
 import io.datacater.core.exceptions.PipelineNotFoundException;
+import io.datacater.core.kubernetes.DataCaterK8sConfig;
 import io.datacater.core.kubernetes.PythonRunnerPool;
 import io.datacater.core.kubernetes.PythonRunnerPool.NamedPod;
 import io.datacater.core.stream.StreamMessage;
@@ -18,6 +20,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandlers;
+import java.time.Duration;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -33,6 +36,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
 import org.eclipse.microprofile.openapi.annotations.security.SecurityRequirement;
 import org.hibernate.reactive.mutiny.Mutiny;
@@ -114,7 +118,7 @@ public class PipelineEndpoint {
   @Path("preview")
   @Consumes(MediaType.APPLICATION_JSON)
   @Produces(MediaType.APPLICATION_JSON)
-  public Uni<String> preview(String payload) {
+  public Uni<Response> preview(String payload) {
     LOGGER.debug(payload);
     HttpClient httpClient = HttpClient.newHttpClient();
     Uni<NamedPod> namedPod = runnerPool.getPod();
@@ -130,8 +134,11 @@ public class PipelineEndpoint {
 
                   kubernetesClient.pods().delete(pod.pod());
 
-                  return previewSend.body();
-                }));
+                  return Response.ok().entity(previewSend.body()).build();
+                }))
+        .ifNoItem()
+          .after(Duration.ofMillis(DataCaterK8sConfig.PYTHON_RUNNER_PREVIEW_TIMEOUT))
+        .failWith(() -> new DatacaterException("Python runner did not return any result."));
   }
 
   @GET
