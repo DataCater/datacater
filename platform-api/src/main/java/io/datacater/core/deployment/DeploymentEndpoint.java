@@ -3,8 +3,6 @@ package io.datacater.core.deployment;
 import com.fasterxml.jackson.databind.JsonNode;
 import io.datacater.core.pipeline.PipelineEntity;
 import io.datacater.core.stream.StreamEntity;
-import io.fabric8.kubernetes.api.model.ListMeta;
-import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.apps.Deployment;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.dsl.LogWatch;
@@ -37,7 +35,7 @@ public class DeploymentEndpoint {
 
   @GET
   @Path("{uuid}")
-  public Uni<ObjectMeta> getDeployment(@PathParam("uuid") UUID deploymentId) {
+  public Uni<DeploymentSpec> getDeployment(@PathParam("uuid") UUID deploymentId) {
     return Uni.createFrom().item(getK8Deployment(deploymentId));
   }
 
@@ -69,7 +67,7 @@ public class DeploymentEndpoint {
   }
 
   @GET
-  public Uni<ListMeta> getDeployments() {
+  public Uni<DeploymentSpec> getDeployments() {
     return Uni.createFrom().item(getK8Deployments());
   }
 
@@ -145,12 +143,12 @@ public class DeploymentEndpoint {
     return k8Deployment.watchLogs(deploymentId);
   }
 
-  private ListMeta getK8Deployments() {
+  private DeploymentSpec getK8Deployments() {
     K8Deployment k8Deployment = new K8Deployment(client);
     return k8Deployment.getDeployments();
   }
 
-  private ObjectMeta getK8Deployment(UUID deploymentId) {
+  private DeploymentSpec getK8Deployment(UUID deploymentId) {
     K8Deployment k8Deployment = new K8Deployment(client);
     return k8Deployment.getDeployment(deploymentId);
   }

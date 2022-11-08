@@ -146,24 +146,60 @@ public class K8Deployment {
     }
   }
 
-  public ListMeta getDeployments() {
-    return client
-        .apps()
-        .deployments()
-        .inNamespace(StaticConfig.EnvironmentVariables.NAMESPACE)
-        .list()
-        .getMetadata();
+  public DeploymentSpec getDeployments() {
+    LOGGER.info(
+        deploymentListToDeploymentSpec(
+                client
+                    .apps()
+                    .deployments()
+                    .inNamespace(StaticConfig.EnvironmentVariables.NAMESPACE)
+                    .list()
+                    .getItems())
+            .toString());
+    return deploymentListToDeploymentSpec(
+        client
+            .apps()
+            .deployments()
+            .inNamespace(StaticConfig.EnvironmentVariables.NAMESPACE)
+            .list()
+            .getItems());
   }
 
-  public ObjectMeta getDeployment(UUID deploymentId) {
+  private DeploymentSpec deploymentListToDeploymentSpec(List<Deployment> deployments) {
+    Map<String, Object> map = new HashMap<>();
+    for (Deployment deployment : deployments) {
+      map.putAll(objectMetaToMap(deployment.getMetadata()));
+    }
+    return new DeploymentSpec(map);
+  }
 
-    return client
-        .apps()
-        .deployments()
-        .inNamespace(StaticConfig.EnvironmentVariables.NAMESPACE)
-        .withName(getDeploymentName(deploymentId))
-        .get()
-        .getMetadata();
+  private Map<String, Object> objectMetaToMap(ObjectMeta metaData) {
+    Map<String, Object> map = new HashMap<>();
+    Map<String, Object> node = new HashMap<>();
+    if (metaData.getAdditionalProperties() != null) {
+      node.putAll(metaData.getAdditionalProperties());
+    }
+    if (metaData.getLabels() != null) {
+      node.putAll(metaData.getLabels());
+    }
+    if (metaData.getAnnotations() != null) {
+      node.putAll(metaData.getAnnotations());
+    }
+    map.put(metaData.getName(), node);
+    return map;
+  }
+
+  public DeploymentSpec getDeployment(UUID deploymentId) {
+
+    return new DeploymentSpec(
+        objectMetaToMap(
+            client
+                .apps()
+                .deployments()
+                .inNamespace(StaticConfig.EnvironmentVariables.NAMESPACE)
+                .withName(getDeploymentName(deploymentId))
+                .get()
+                .getMetadata()));
   }
 
   private boolean exists(UUID deploymentId) {
