@@ -52,7 +52,7 @@ public class StaticConfig {
     static final String FULL_IMAGE_NAME =
         ConfigProvider.getConfig()
             .getOptionalValue("datacater.deployment.image", String.class)
-            .orElse("datacater/pipeline:latest");
+            .orElse("datacater/pipeline:alpha-20221108");
     static final Integer READY_SECONDS =
         ConfigProvider.getConfig()
             .getOptionalValue("datacater.deployment.ready-seconds", Integer.class)
