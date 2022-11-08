@@ -73,7 +73,7 @@ public class DeploymentEndpoint {
 
   @POST
   @Consumes(MediaType.APPLICATION_JSON)
-  public Uni<UUID> createDeployment(DeploymentSpec spec) {
+  public Uni<Response> createDeployment(DeploymentSpec spec) {
     return apply(spec);
   }
 
@@ -86,12 +86,13 @@ public class DeploymentEndpoint {
 
   @PUT
   @Path("{uuid}")
-  public Uni<UUID> updateDeployment(@PathParam("uuid") UUID deploymentUuid, DeploymentSpec spec) {
+  public Uni<Response> updateDeployment(
+      @PathParam("uuid") UUID deploymentUuid, DeploymentSpec spec) {
     deleteK8Deployment(deploymentUuid);
     return apply(spec);
   }
 
-  private Uni<UUID> apply(DeploymentSpec spec) {
+  private Uni<Response> apply(DeploymentSpec spec) {
     return sf.withTransaction(
         (session, transaction) ->
             session
@@ -104,7 +105,7 @@ public class DeploymentEndpoint {
                 .transformToUni(pe -> transformPipelineEntity(session, pe, spec)));
   }
 
-  private Uni<UUID> transformPipelineEntity(
+  private Uni<Response> transformPipelineEntity(
       Mutiny.Session session, PipelineEntity pe, DeploymentSpec deploymentSpec) {
     return session
         .find(StreamEntity.class, getUUIDFromNode(pe.getMetadata(), StaticConfig.STREAM_IN))
@@ -113,7 +114,7 @@ public class DeploymentEndpoint {
         .transformToUni(streamIn -> transformStreamIn(session, pe, streamIn, deploymentSpec));
   }
 
-  private Uni<UUID> transformStreamIn(
+  private Uni<Response> transformStreamIn(
       Mutiny.Session session,
       PipelineEntity pe,
       StreamEntity streamIn,
@@ -125,12 +126,16 @@ public class DeploymentEndpoint {
         .transformToUni(streamOut -> transformStreamOut(pe, streamOut, streamIn, deploymentSpec));
   }
 
-  private Uni<UUID> transformStreamOut(
+  private Uni<Response> transformStreamOut(
       PipelineEntity pe,
       StreamEntity streamOut,
       StreamEntity streamIn,
       DeploymentSpec deploymentSpec) {
-    return Uni.createFrom().item(createDeployment(pe, streamOut, streamIn, deploymentSpec));
+    return Uni.createFrom()
+        .item(
+            Response.ok()
+                .entity(createDeployment(pe, streamOut, streamIn, deploymentSpec))
+                .build());
   }
 
   private String getDeploymentLogs(UUID deploymentId) {
