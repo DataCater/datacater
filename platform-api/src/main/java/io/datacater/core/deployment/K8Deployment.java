@@ -157,6 +157,7 @@ public class K8Deployment {
             .apps()
             .deployments()
             .inNamespace(StaticConfig.EnvironmentVariables.NAMESPACE)
+            .withLabel(StaticConfig.APP, StaticConfig.DATACATER_PIPELINE)
             .list()
             .getItems());
   }
