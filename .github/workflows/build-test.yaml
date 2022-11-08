@@ -92,7 +92,7 @@ jobs:
           pytest
   push:
     if: github.ref_name == 'main' || github.ref_type == 'tag'
-    name: Build and push container
+    name: Build and push datacater image
     needs: build
     runs-on: ubuntu-latest
     steps:
@@ -125,12 +125,73 @@ jobs:
                 -Dquarkus.container-image.registry=docker.io \
                 -Dquarkus.container-image.username=datacater \
                 -Dquarkus.container-image.password=${{ secrets.DOCKERHUB_TOKEN }}
+  push_pipeline:
+    if: github.ref_name == 'main' || github.ref_type == 'tag'
+    name: Build and push pipeline image
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+    -   uses: actions/checkout@v3
+    -   name: Set RELEASE_VERSION
+        run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
+    -   name: Set up JDK 17 and gradle cache
+        uses: actions/setup-java@v3
+        id: gradle-build
+        with:
+          java-version: '17'
+          distribution: zulu
+          cache: gradle
+    -   run: |
+          FILTERS_SRC="${GITHUB_WORKSPACE}/filters"
+          TRANSFORM_SRC="${GITHUB_WORKSPACE}/transforms"
+          DEST="${GITHUB_WORKSPACE}/platform-api/src/main/jib/datacater"
+          mkdir -p $DEST
+          rm -fr $DEST/*
+          cp -R $FILTERS_SRC $DEST
+          cp -R $TRANSFORM_SRC $DEST
     -   name: Push datacater/pipeline to Docker Hub
         if: github.event.action == 'released'
         run: |
           ./gradlew :pipeline:build --no-daemon -x test \
                 -Dquarkus.jib.platforms=linux/amd64,linux/arm64 \
                 -Dquarkus.container-image.tag=${RELEASE_VERSION} \
+                -Dquarkus.container-image.build=true \
+                -Dquarkus.container-image.push=true \
+                -Dquarkus.container-image.registry=docker.io \
+                -Dquarkus.container-image.username=datacater \
+                -Dquarkus.container-image.password=${{ secrets.DOCKERHUB_TOKEN }}
+  push_pipeline_native:
+    if: github.ref_name == 'main' || github.ref_type == 'tag'
+    name: Build and push native pipeline image
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+    -   uses: actions/checkout@v3
+    -   name: Set RELEASE_VERSION
+        run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
+    -   name: Set up JDK 17 and gradle cache
+        uses: actions/setup-java@v3
+        id: gradle-build
+        with:
+          java-version: '17'
+          distribution: zulu
+          cache: gradle
+    -   run: |
+          FILTERS_SRC="${GITHUB_WORKSPACE}/filters"
+          TRANSFORM_SRC="${GITHUB_WORKSPACE}/transforms"
+          DEST="${GITHUB_WORKSPACE}/platform-api/src/main/jib/datacater"
+          mkdir -p $DEST
+          rm -fr $DEST/*
+          cp -R $FILTERS_SRC $DEST
+          cp -R $TRANSFORM_SRC $DEST
+    -   name: Push datacater/pipeline to Docker Hub
+        if: github.event.action == 'released'
+        run: |
+          ./gradlew :pipeline:build --no-daemon -x test \
+                -Dquarkus.jib.platforms=linux/amd64 \
+                -Dquarkus.native.container-build=true \
+                -Dquarkus.package.type=native \
+                -Dquarkus.container-image.tag=native-${RELEASE_VERSION} \
                 -Dquarkus.container-image.build=true \
                 -Dquarkus.container-image.push=true \
                 -Dquarkus.container-image.registry=docker.io \
