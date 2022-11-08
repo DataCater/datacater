@@ -43,7 +43,7 @@ public class DataCaterK8sConfig {
   public static final long PYTHON_RUNNER_PREVIEW_TIMEOUT =
       ConfigProvider.getConfig()
           .getOptionalValue("datacater.pythonrunner.preview.timeout", Long.class)
-          .orElse(1000L);
+          .orElse(10000L);
   static final int PYTHON_RUNNER_REPLICAS =
       ConfigProvider.getConfig()
           .getOptionalValue("datacater.pythonrunner.replicas", Integer.class)

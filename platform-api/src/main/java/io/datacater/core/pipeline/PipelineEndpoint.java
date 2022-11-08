@@ -137,7 +137,12 @@ public class PipelineEndpoint {
                 }))
         .ifNoItem()
         .after(Duration.ofMillis(DataCaterK8sConfig.PYTHON_RUNNER_PREVIEW_TIMEOUT))
-        .failWith(() -> new DatacaterException("Python runner did not return any result."));
+        .failWith(
+            () ->
+                new DatacaterException(
+                    String.format(
+                        "Calling the Python runner exceeded the timeout of datacater.pythonrunner.preview.timeout=%d.",
+                        DataCaterK8sConfig.PYTHON_RUNNER_PREVIEW_TIMEOUT)));
   }
 
   @GET
