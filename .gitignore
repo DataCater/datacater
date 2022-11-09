@@ -37,7 +37,6 @@ nb-configuration.xml
 # Local environment
 .env
 platform-api/src/main/jib/*
-platform-api/src/main/resources/*.pem
 platform-api/src/main/resources/*roles.properties
 platform-api/src/main/resources/jib
 DONOTCOMMIT*
