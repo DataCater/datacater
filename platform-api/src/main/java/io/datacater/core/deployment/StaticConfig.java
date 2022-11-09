@@ -10,6 +10,7 @@ public class StaticConfig {
   static final String STREAM_IN_CONFIG_NAME = "MP_MESSAGING_INCOMING_STREAM-IN_TOPIC";
   static final String STREAM_OUT_CONFIG_NAME = "MP_MESSAGING_OUTGOING_STREAM-OUT_TOPIC";
   static final String DATACATER_PIPELINE = "datacater-pipeline";
+  static final String PYTHON_RUNNER_NAME = "python-runner";
   static final String APP = "datacater.io/app";
   static final String PIPELINE = "datacater.io/pipeline";
   static final String REVISION = "datacater.io/revision";
@@ -40,6 +41,7 @@ public class StaticConfig {
   static final String STREAMOUT_CONFIG_TEXT = "stream-out-config";
   static final String DC_STREAMIN_CONFIG_TEXT = "DATACATER_STREAM-IN_CONFIG";
   static final String DC_STREAMOUT_CONFIG_TEXT = "DATACATER_STREAM-OUT_CONFIG";
+  static final String HTTP = "http";
 
   static class EnvironmentVariables {
     private EnvironmentVariables() {}
@@ -65,6 +67,16 @@ public class StaticConfig {
         ConfigProvider.getConfig()
             .getOptionalValue("datacater.deployment.replicas", Integer.class)
             .orElse(1);
+    static final String PYTHON_RUNNER_IMAGE_NAME =
+        ConfigProvider.getConfig().getValue("datacater.pythonrunner.image.name", String.class);
+    static final String PYTHON_RUNNER_IMAGE_TAG =
+        ConfigProvider.getConfig()
+            .getOptionalValue("datacater.pythonrunner.image.version", String.class)
+            .orElse("alpha-20221101");
+    static final int PYTHON_RUNNER_CONTAINER_PORT =
+        ConfigProvider.getConfig()
+            .getOptionalValue("datacater.pythonrunner.image.containerPort", Integer.class)
+            .orElse(50000);
   }
 
   static class LoggerMessages {

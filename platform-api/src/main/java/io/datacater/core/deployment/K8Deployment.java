@@ -70,6 +70,7 @@ public class K8Deployment {
             .endResources()
             .withVolumeMounts(getVolumeMount(volumeName))
             .endContainer()
+            .addToContainers(pythonRunnerContainer())
             .withVolumes(getVolume(volumeName, configmapName))
             .endSpec()
             .endTemplate()
@@ -98,6 +99,25 @@ public class K8Deployment {
         StaticConfig.PIPELINE_REV,
         StaticConfig.UUID_TEXT,
         deploymentId.toString());
+  }
+
+  private Container pythonRunnerContainer() {
+    return new ContainerBuilder(true)
+        .withName(StaticConfig.PYTHON_RUNNER_NAME)
+        .withImage(
+            String.format(
+                "%s:%s",
+                StaticConfig.EnvironmentVariables.PYTHON_RUNNER_IMAGE_NAME,
+                StaticConfig.EnvironmentVariables.PYTHON_RUNNER_IMAGE_TAG))
+        .withPorts(this.containerPort())
+        .build();
+  }
+
+  private ContainerPort containerPort() {
+    return new ContainerPortBuilder(true)
+        .withContainerPort(StaticConfig.EnvironmentVariables.PYTHON_RUNNER_CONTAINER_PORT)
+        .withName(StaticConfig.HTTP)
+        .build();
   }
 
   private static VolumeMount getVolumeMount(String volumeName) {
