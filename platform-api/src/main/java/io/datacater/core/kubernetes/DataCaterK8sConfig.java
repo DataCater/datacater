@@ -40,6 +40,10 @@ public class DataCaterK8sConfig {
       ConfigProvider.getConfig()
           .getOptionalValue("datacater.pythonrunner.image.namespace", String.class)
           .orElse("datacater");
+  public static final long PYTHON_RUNNER_PREVIEW_TIMEOUT =
+      ConfigProvider.getConfig()
+          .getOptionalValue("datacater.pythonrunner.preview.timeout", Long.class)
+          .orElse(10000L);
   static final int PYTHON_RUNNER_REPLICAS =
       ConfigProvider.getConfig()
           .getOptionalValue("datacater.pythonrunner.replicas", Integer.class)

@@ -46,8 +46,6 @@ env:
     value: 'alpha'
   - name: QUARKUS_LOG_CONSOLE_JSON
     value: "false"
-  - name: DATACATER_PYTHONRUNNER_IMAGE_NAMESPACE
-    value: "default"
 
 podAnnotations: {}
 

@@ -3,11 +3,14 @@ package io.datacater.core.pipeline;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.json.JsonMapper;
+import io.datacater.core.exceptions.DatacaterException;
 import io.datacater.core.exceptions.PipelineNotFoundException;
+import io.datacater.core.kubernetes.DataCaterK8sConfig;
 import io.datacater.core.kubernetes.PythonRunnerPool;
 import io.datacater.core.kubernetes.PythonRunnerPool.NamedPod;
 import io.datacater.core.stream.StreamMessage;
 import io.datacater.core.stream.StreamsUtilities;
+import io.fabric8.kubernetes.client.KubernetesClient;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.tuples.Tuple3;
 import io.smallrye.mutiny.unchecked.Unchecked;
@@ -17,6 +20,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandlers;
+import java.time.Duration;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -47,6 +51,7 @@ public class PipelineEndpoint {
   @Inject Mutiny.SessionFactory sf;
   @Inject StreamsUtilities streamsUtil;
   @Inject PythonRunnerPool runnerPool;
+  @Inject KubernetesClient kubernetesClient;
   WebClient client;
 
   public PipelineEndpoint(Vertx vertx) {
@@ -112,20 +117,32 @@ public class PipelineEndpoint {
   @Path("preview")
   @Consumes(MediaType.APPLICATION_JSON)
   @Produces(MediaType.APPLICATION_JSON)
-  public Uni<String> inspectStatic(String payload) {
+  public Uni<Response> preview(String payload) {
+    LOGGER.debug(payload);
     HttpClient httpClient = HttpClient.newHttpClient();
-    Uni<NamedPod> namedPod = runnerPool.getStaticPod();
+    Uni<NamedPod> namedPod = runnerPool.getPod();
 
     return namedPod
-        .flatMap(
-            pod -> {
-              HttpRequest preview = pod.buildPost(payload, "/preview");
-              CompletableFuture<HttpResponse<String>> previewSend =
-                  httpClient.sendAsync(preview, BodyHandlers.ofString());
+        .onItem()
+        .transform(
+            Unchecked.function(
+                pod -> {
+                  HttpRequest preview = pod.buildPost(payload, "/preview");
+                  HttpResponse<String> previewSend =
+                      httpClient.send(preview, BodyHandlers.ofString());
 
-              return Uni.createFrom().completionStage(previewSend);
-            })
-        .map(response -> response.body());
+                  kubernetesClient.pods().delete(pod.pod());
+
+                  return Response.ok().entity(previewSend.body()).build();
+                }))
+        .ifNoItem()
+        .after(Duration.ofMillis(DataCaterK8sConfig.PYTHON_RUNNER_PREVIEW_TIMEOUT))
+        .failWith(
+            () ->
+                new DatacaterException(
+                    String.format(
+                        "Calling the Python runner exceeded the timeout of datacater.pythonrunner.preview.timeout=%d.",
+                        DataCaterK8sConfig.PYTHON_RUNNER_PREVIEW_TIMEOUT)));
   }
 
   @GET
@@ -134,6 +151,7 @@ public class PipelineEndpoint {
     return transformMessages(uuid);
   }
 
+  // TODO: rework with inspect endpoints
   private Uni<String> transformMessages(UUID uuid) {
     HttpClient httpClient = HttpClient.newHttpClient();
 

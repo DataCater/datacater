@@ -40,6 +40,8 @@ spec:
             - name: QUARKUS_DATASOURCE_REACTIVE_URL
               value: "postgresql://postgres.{{ $.Release.Namespace | default "default" }}.svc.cluster.local:5432/postgres"
             {{- end }}
+            - name: DATACATER_PYTHONRUNNER_IMAGE_NAMESPACE
+              value: {{ $.Release.Namespace | default "default" }}
             {{- toYaml . | nindent 12 }}
           {{- end }}
           ports:
