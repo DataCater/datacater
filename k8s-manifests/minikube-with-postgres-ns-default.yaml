@@ -111,7 +111,7 @@ metadata:
   namespace: default
 spec:
   containers:
-    - image: datacater/ui:alpha
+    - image: datacater/ui:alpha-20221109-1
       imagePullPolicy: IfNotPresent
       name: ui
       ports:
@@ -235,7 +235,7 @@ spec:
         - name: datacater
           securityContext:
             {}
-          image: "datacater/datacater:alpha.15"
+          image: "datacater/datacater:alpha-20221109-1"
           imagePullPolicy: IfNotPresent
           env:
             - name: QUARKUS_DATASOURCE_REACTIVE_URL
@@ -247,13 +247,13 @@ spec:
             - name: QUARKUS_DATASOURCE_PASSWORD
               value: datacater
             - name: DATACATER_TRANSFORMS_PATH
-              value: /transforms
+              value: /datacater/transforms
             - name: DATACATER_FILTERS_PATH
-              value: /filters
+              value: /datacater/filters
             - name: DATACATER_PYTHONRUNNER_IMAGE_NAME
               value: datacater/python-runner
             - name: DATACATER_PYTHONRUNNER_IMAGE_VERSION
-              value: alpha
+              value: alpha-20221109-1
             - name: QUARKUS_LOG_CONSOLE_JSON
               value: "false"
           ports:
@@ -263,7 +263,7 @@ spec:
           livenessProbe:
             failureThreshold: 3
             httpGet:
-              path: /q/health/live
+              path: /api/alpha/q/health/live
               port: 8080
               scheme: HTTP
             initialDelaySeconds: 10
@@ -273,7 +273,7 @@ spec:
           readinessProbe:
             failureThreshold: 3
             httpGet:
-              path: /q/health/ready
+              path: /api/alpha/q/health/ready
               port: 8080
               scheme: HTTP
             initialDelaySeconds: 10

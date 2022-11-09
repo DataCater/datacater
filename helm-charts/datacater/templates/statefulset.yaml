@@ -51,7 +51,7 @@ spec:
           livenessProbe:
             failureThreshold: 3
             httpGet:
-              path: /q/health/live
+              path: /api/alpha/q/health/live
               port: 8080
               scheme: HTTP
             initialDelaySeconds: 10
@@ -61,7 +61,7 @@ spec:
           readinessProbe:
             failureThreshold: 3
             httpGet:
-              path: /q/health/ready
+              path: /api/alpha/q/health/ready
               port: 8080
               scheme: HTTP
             initialDelaySeconds: 10
