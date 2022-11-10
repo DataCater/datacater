@@ -139,8 +139,23 @@ public class DeploymentEndpoint {
   @DELETE
   @Path("{uuid}")
   public Uni<Response> deleteDeployment(@PathParam("uuid") UUID deploymentId) {
-    deleteK8Deployment(deploymentId);
-    return Uni.createFrom().item(Response.ok().build());
+    return sf.withSession(
+        session ->
+            session
+                .find(DeploymentEntity.class, deploymentId)
+                .onItem()
+                .ifNull()
+                .failWith(
+                    new DeploymentNotFoundException(
+                        StaticConfig.LoggerMessages.DEPLOYMENT_NOT_FOUND))
+                .onItem()
+                .ifNotNull()
+                .call(
+                    se -> {
+                      deleteK8Deployment(deploymentId);
+                      return session.remove(se);
+                    })
+                .replaceWith(Response.ok().build()));
   }
 
   @PUT
