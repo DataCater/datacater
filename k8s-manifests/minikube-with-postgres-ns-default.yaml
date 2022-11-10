@@ -235,7 +235,7 @@ spec:
         - name: datacater
           securityContext:
             {}
-          image: "datacater/datacater:local.3"
+          image: "datacater/datacater:alpha-20221109-1"
           imagePullPolicy: IfNotPresent
           env:
             - name: QUARKUS_DATASOURCE_REACTIVE_URL
