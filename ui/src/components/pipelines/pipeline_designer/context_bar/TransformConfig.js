@@ -206,6 +206,12 @@ class TransformConfig extends Component {
                   input type <i>{fieldDataType}</i>.
                 </div>
               )}
+              {(transform.config === undefined ||
+                Object.keys(transform.config).length === 0) && (
+                <div className="alert alert-primary">
+                  This transform does not require any configuration.
+                </div>
+              )}
               {transform.config !== undefined &&
                 transform.config.map((configOption, idx) => (
                   <div key={idx}>
