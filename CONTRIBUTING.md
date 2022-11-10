@@ -50,6 +50,27 @@ curl localhost:8080/api/filters
 
 > **_NOTE:_**  Quarkus now ships with a Dev UI, which is available in dev mode only at http://localhost:8080/api/q/dev/.
 
+## Remote-dev
+
+Set docker registry to minikube registry.
+```shell
+eval $(minikube -p minikube docker-env)
+```
+
+Build an deploy mutable jar docker container.
+```shell
+./gradlew :platform-api:clean build -x test \
+  -Dquarkus.kubernetes.deploy=true \
+  -Dquarkus.package.type=mutable-jar
+```
+
+Load image to minikube
+
+Connect remote dev via gradlew:
+
+```shell
+./gradlew :platform-api:
+```
 ## Next Steps
 
 We highly recommend to familiarize yourself with the frameworks and libraries used in DataCater:

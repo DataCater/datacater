@@ -8,7 +8,7 @@ metadata:
     helm.sh/chart: datacater-0.1.0
     app.kubernetes.io/name: datacater
     app.kubernetes.io/instance: release-name
-    app.kubernetes.io/version: "2022.06"
+    app.kubernetes.io/version: "alpha-20221109-1"
     app.kubernetes.io/managed-by: Helm
 ---
 # Source: datacater/templates/clusterrole.yaml
@@ -88,7 +88,7 @@ metadata:
     helm.sh/chart: datacater-0.1.0
     app.kubernetes.io/name: datacater
     app.kubernetes.io/instance: release-name
-    app.kubernetes.io/version: "2022.06"
+    app.kubernetes.io/version: "alpha-20221109-1"
     app.kubernetes.io/managed-by: Helm
 spec:
   type: ClusterIP
@@ -211,7 +211,7 @@ metadata:
     helm.sh/chart: datacater-0.1.0
     app.kubernetes.io/name: datacater
     app.kubernetes.io/instance: release-name
-    app.kubernetes.io/version: "2022.06"
+    app.kubernetes.io/version: "alpha-20221109-1"
     app.kubernetes.io/managed-by: Helm
 spec:
   serviceName: datacater
@@ -235,7 +235,7 @@ spec:
         - name: datacater
           securityContext:
             {}
-          image: "datacater/datacater:alpha-20221109-1"
+          image: "datacater/datacater:local.3"
           imagePullPolicy: IfNotPresent
           env:
             - name: QUARKUS_DATASOURCE_REACTIVE_URL

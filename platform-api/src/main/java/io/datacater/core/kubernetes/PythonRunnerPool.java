@@ -103,7 +103,15 @@ public class PythonRunnerPool {
   }
 
   public Uni<NamedPod> getPod() {
-    return getQueue().onItem().transform(Deque::pop);
+    return getQueue()
+        .onItem()
+        .transform(
+            queue -> {
+              var pod = queue.pop();
+              LOGGER.info(
+                  String.format("Returning pod with name %s for interactive usage.", pod.name));
+              return pod;
+            });
   }
 
   public Uni<Deque<NamedPod>> getQueue() {
@@ -115,18 +123,19 @@ public class PythonRunnerPool {
         .chain(
             queue -> {
               if (queue.isEmpty()) {
-                return initialiseMapWithQueue(
-                    newQueue().get()); // reset queue if all pods were used
+                LOGGER.info("Pool of Python Runners is empty. Re-filling with pods in cluster.");
+                return refillQueue(); // reset queue if all pods were used
               } else {
                 return Uni.createFrom().item(queue);
               }
             });
   }
 
-  public Uni<Deque<NamedPod>> initialiseMapWithQueue(Deque<NamedPod> queue) {
+  public Uni<Deque<NamedPod>> refillQueue() {
     Uni<AsyncMap<String, Deque<NamedPod>>> asyncMap = sharedData.getAsyncMap(POOL_NAME);
+    Deque<NamedPod> refill = podsFromKubernetes();
 
-    return asyncMap.onItem().call(map -> map.put(POOL_NAME, queue)).replaceWith(() -> queue);
+    return asyncMap.onItem().call(map -> map.put(POOL_NAME, refill)).replaceWith(() -> refill);
   }
 
   public Uni<Void> initialiseEmptyQueue() {

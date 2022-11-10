@@ -3,7 +3,7 @@
 set -eux
 
 NAME="datacater"
-VERSION="alpha.15"
+VERSION="local.3"
 START_DIR=$PWD
 
 
