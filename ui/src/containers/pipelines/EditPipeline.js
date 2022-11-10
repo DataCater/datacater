@@ -463,7 +463,14 @@ class EditPipeline extends Component {
 
   moveToStep(event, newStep) {
     event.preventDefault();
-    this.updateSampleRecords(this.state.pipeline, newStep);
+
+    // newStep is undefined, if we switch to "Inspect source"
+    // In this case, we do not need to evaluate the pipeline spec
+    // against the source stream
+    if (newStep !== undefined) {
+      this.updateSampleRecords(this.state.pipeline, newStep);
+    }
+
     this.setState({
       addedColumn: false,
       codeView: false,
