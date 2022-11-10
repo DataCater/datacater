@@ -101,6 +101,8 @@ class DatacaterDeploymentEndpointTest {
             .body(jsonString)
             .post(deploymentsPath);
 
+    LOGGER.info(responseDeployment.body().asString());
+
     deploymentId = responseDeployment.body().as(UUID.class);
 
     Assertions.assertEquals(200, responseDeployment.getStatusCode());

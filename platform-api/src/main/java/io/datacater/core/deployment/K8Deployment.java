@@ -28,12 +28,12 @@ public class K8Deployment {
     this.k8ConfigMap = new K8ConfigMap(client);
   }
 
-  public UUID create(
+  public DeploymentSpec create(
       PipelineEntity pe,
       StreamEntity streamIn,
       StreamEntity streamOut,
-      DeploymentSpec deploymentSpec) {
-    UUID deploymentId = UUID.randomUUID();
+      DeploymentSpec deploymentSpec,
+      UUID deploymentId) {
     final String name = StaticConfig.DEPLOYMENT_NAME_PREFIX + deploymentId;
     final String configmapName = StaticConfig.CONFIGMAP_NAME_PREFIX + deploymentId;
     final String volumeName = StaticConfig.VOLUME_NAME_PREFIX + deploymentId;
@@ -77,16 +77,20 @@ public class K8Deployment {
             .endSpec()
             .build();
 
-    client
-        .apps()
-        .deployments()
-        .inNamespace(StaticConfig.EnvironmentVariables.NAMESPACE)
-        .create(deployment);
+    // wait for deployment or pod, must set explicitly
+    // wait for timeout and check if there
+    var tmp =
+        client
+            .apps()
+            .deployments()
+            .inNamespace(StaticConfig.EnvironmentVariables.NAMESPACE)
+            .create(deployment);
 
     if (!exists(deploymentId)) {
       throw new CreateDeploymentException(StaticConfig.LoggerMessages.DEPLOYMENT_NOT_CREATED);
     }
-    return deploymentId;
+
+    return getDeployment(deploymentId);
   }
 
   private static Map<String, String> getLabels(UUID deploymentId) {
