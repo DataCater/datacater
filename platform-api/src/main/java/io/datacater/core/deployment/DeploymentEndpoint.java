@@ -117,29 +117,69 @@ public class DeploymentEndpoint {
         session ->
             session
                 .persist(de)
-                .flatMap(
+                .onItem()
+                .transform(
                     empty -> {
-                      LOGGER.info("starting chain");
-                      return pipelineUni.flatMap(
-                          pipelineEntity -> {
-                            LOGGER.info("found pipeline in chain: " + pipelineEntity.getId());
-                            return streamInUni.flatMap(
-                                streamIn -> {
-                                  LOGGER.info("found pipeline in chain: " + pipelineEntity.getId());
-                                  return streamOutUni.map(
-                                      streamOut -> {
-                                        LOGGER.info(
-                                            "found pipeline in chain: " + pipelineEntity.getId());
-                                        return createDeployment(
-                                            pipelineEntity,
-                                            streamOut,
-                                            streamIn,
-                                            deployment.spec(),
-                                            de);
-                                      });
-                                });
-                          });
+                      LOGGER.info("Transforming empty [persist] to pipeline");
+                      return pipelineUni;
+                    })
+                .onItem()
+                .transformToUni(pipUni -> pipUni) // unpack pipelineEntity form Uni
+                .onItem()
+                .transform(
+                    pipelineEntity -> {
+                      LOGGER.info(
+                          String.format(
+                              "Received pipelineEntity %s", pipelineEntity.asJsonString()));
+                      Uni<PipelineEntity> peu = Uni.createFrom().item(pipelineEntity);
+                      return Uni.combine().all().unis(peu, streamInUni, streamOutUni).asTuple();
+                    })
+                .onItem()
+                .transformToUni(tupleUni -> tupleUni)
+                .onItem()
+                .transform(
+                    tuple -> {
+                      var pe = tuple.getItem1();
+                      LOGGER.info("Trying to process getStream");
+                      var streamIn = tuple.getItem2();
+                      var streamOut = tuple.getItem3();
+                      LOGGER.info(
+                          String.format(
+                              "Received streamIn := %s and streamOut := %s",
+                              streamIn.getName(), streamOut.getName()));
+
+                      return createDeployment(pe, streamOut, streamIn, deployment.spec(), de);
                     }));
+
+    //    return sf.withSession(
+    //        session ->
+    //            session
+    //                .persist(de)
+    //                .flatMap(
+    //                    empty -> {
+    //                      LOGGER.info("starting chain");
+    //                      return pipelineUni.flatMap(
+    //                          pipelineEntity -> {
+    //                            LOGGER.info("found pipeline in chain: " + pipelineEntity.getId());
+    //                            return streamInUni.flatMap(
+    //                                streamIn -> {
+    //                                  LOGGER.info("found pipeline in chain: " +
+    // pipelineEntity.getId());
+    //                                  return streamOutUni.map(
+    //                                      streamOut -> {
+    //                                        LOGGER.info(
+    //                                            "found pipeline in chain: " +
+    // pipelineEntity.getId());
+    //                                        return createDeployment(
+    //                                            pipelineEntity,
+    //                                            streamOut,
+    //                                            streamIn,
+    //                                            deployment.spec(),
+    //                                            de);
+    //                                      });
+    //                                });
+    //                          });
+    //                    }));
   }
 
   @DELETE
