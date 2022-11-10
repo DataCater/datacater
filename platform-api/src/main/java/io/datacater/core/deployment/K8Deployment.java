@@ -77,14 +77,11 @@ public class K8Deployment {
             .endSpec()
             .build();
 
-    // wait for deployment or pod, must set explicitly
-    // wait for timeout and check if there
-    var tmp =
-        client
-            .apps()
-            .deployments()
-            .inNamespace(StaticConfig.EnvironmentVariables.NAMESPACE)
-            .create(deployment);
+    client
+        .apps()
+        .deployments()
+        .inNamespace(StaticConfig.EnvironmentVariables.NAMESPACE)
+        .create(deployment);
 
     if (!exists(deploymentId)) {
       throw new CreateDeploymentException(StaticConfig.LoggerMessages.DEPLOYMENT_NOT_CREATED);

@@ -105,81 +105,35 @@ public class DeploymentEndpoint {
 
   @POST
   @Consumes(MediaType.APPLICATION_JSON)
-  public Uni<DeploymentEntity> createDeployment(io.datacater.core.deployment.Deployment deployment)
+  public Uni<DeploymentSpec> createDeployment(io.datacater.core.deployment.Deployment deployment)
       throws JsonProcessingException {
     DeploymentEntity de = new DeploymentEntity(deployment.spec());
-
     Uni<PipelineEntity> pipelineUni = getPipeline(deployment.spec());
-    Uni<StreamEntity> streamInUni = getStream(pipelineUni, StaticConfig.STREAM_IN);
-    Uni<StreamEntity> streamOutUni = getStream(pipelineUni, StaticConfig.STREAM_OUT);
-
     return sf.withSession(
         session ->
             session
                 .persist(de)
                 .onItem()
-                .transform(
-                    empty -> {
-                      LOGGER.info("Transforming empty [persist] to pipeline");
-                      return pipelineUni;
-                    })
+                .transformToUni(empty -> pipelineUni)
                 .onItem()
-                .transformToUni(pipUni -> pipUni) // unpack pipelineEntity form Uni
-                .onItem()
-                .transform(
-                    pipelineEntity -> {
-                      LOGGER.info(
-                          String.format(
-                              "Received pipelineEntity %s", pipelineEntity.asJsonString()));
-                      Uni<PipelineEntity> peu = Uni.createFrom().item(pipelineEntity);
-                      return Uni.combine().all().unis(peu, streamInUni, streamOutUni).asTuple();
-                    })
-                .onItem()
-                .transformToUni(tupleUni -> tupleUni)
+                .transformToUni(
+                    pipelineEntity ->
+                        Uni.combine()
+                            .all()
+                            .unis(
+                                Uni.createFrom().item(pipelineEntity),
+                                getStream(pipelineEntity, StaticConfig.STREAM_IN),
+                                getStream(pipelineEntity, StaticConfig.STREAM_OUT))
+                            .asTuple())
                 .onItem()
                 .transform(
-                    tuple -> {
-                      var pe = tuple.getItem1();
-                      LOGGER.info("Trying to process getStream");
-                      var streamIn = tuple.getItem2();
-                      var streamOut = tuple.getItem3();
-                      LOGGER.info(
-                          String.format(
-                              "Received streamIn := %s and streamOut := %s",
-                              streamIn.getName(), streamOut.getName()));
-
-                      return createDeployment(pe, streamOut, streamIn, deployment.spec(), de);
-                    }));
-
-    //    return sf.withSession(
-    //        session ->
-    //            session
-    //                .persist(de)
-    //                .flatMap(
-    //                    empty -> {
-    //                      LOGGER.info("starting chain");
-    //                      return pipelineUni.flatMap(
-    //                          pipelineEntity -> {
-    //                            LOGGER.info("found pipeline in chain: " + pipelineEntity.getId());
-    //                            return streamInUni.flatMap(
-    //                                streamIn -> {
-    //                                  LOGGER.info("found pipeline in chain: " +
-    // pipelineEntity.getId());
-    //                                  return streamOutUni.map(
-    //                                      streamOut -> {
-    //                                        LOGGER.info(
-    //                                            "found pipeline in chain: " +
-    // pipelineEntity.getId());
-    //                                        return createDeployment(
-    //                                            pipelineEntity,
-    //                                            streamOut,
-    //                                            streamIn,
-    //                                            deployment.spec(),
-    //                                            de);
-    //                                      });
-    //                                });
-    //                          });
-    //                    }));
+                    tuple ->
+                        createDeployment(
+                            tuple.getItem1(),
+                            tuple.getItem3(),
+                            tuple.getItem2(),
+                            deployment.spec(),
+                            de)));
   }
 
   @DELETE
@@ -189,30 +143,38 @@ public class DeploymentEndpoint {
     return Uni.createFrom().item(Response.ok().build());
   }
 
-  //  @PUT
-  //  @Path("{uuid}")
-  //  public Uni<DeploymentEntity> updateDeployment(
-  //      @PathParam("uuid") UUID deploymentUuid, io.datacater.core.deployment.Deployment
-  // deployment) {
-  //    return sf.withTransaction(
-  //            ((session, transaction) ->
-  //                session
-  //                    .find(DeploymentEntity.class, deploymentUuid)
-  //                    .onItem()
-  //                    .ifNotNull()
-  //                    .transformToUni(
-  //                        Unchecked.function(
-  //                            de -> {
-  //                              deleteK8Deployment(deploymentUuid);
-  //                              apply(session, deployment.spec(), de);
-  //                              return session.merge((de));
-  //                            }))))
-  //        .onFailure()
-  //        .transform(
-  //            ex ->
-  //                new
-  // UpdateDeploymentException(StaticConfig.LoggerMessages.DEPLOYMENT_NOT_UPDATED));
-  //  }
+  @PUT
+  @Path("{uuid}")
+  public Uni<DeploymentSpec> updateDeployment(
+      @PathParam("uuid") UUID deploymentUuid, io.datacater.core.deployment.Deployment deployment) {
+    Uni<PipelineEntity> pipelineUni = getPipeline(deployment.spec());
+    Uni<DeploymentEntity> deploymentUni = getDeploymentUni(deploymentUuid);
+    return pipelineUni
+        .onItem()
+        .transformToUni(
+            pipelineEntity ->
+                Uni.combine()
+                    .all()
+                    .unis(
+                        Uni.createFrom().item(pipelineEntity),
+                        getStream(pipelineEntity, StaticConfig.STREAM_IN),
+                        getStream(pipelineEntity, StaticConfig.STREAM_OUT),
+                        deploymentUni)
+                    .asTuple())
+        .onItem()
+        .transform(
+            tuple ->
+                createDeployment(
+                    tuple.getItem1(),
+                    tuple.getItem3(),
+                    tuple.getItem2(),
+                    deployment.spec(),
+                    tuple.getItem4()))
+        .onFailure()
+        .transform(
+            ex ->
+                new UpdateDeploymentException(StaticConfig.LoggerMessages.DEPLOYMENT_NOT_UPDATED));
+  }
 
   private Uni<PipelineEntity> getPipeline(DeploymentSpec deploymentSpec) {
     return sf.withSession(
@@ -228,35 +190,31 @@ public class DeploymentEndpoint {
                 .onItem()
                 .ifNull()
                 .failWith(
-                    new CreateDeploymentException(StaticConfig.LoggerMessages.PIPELINE_NOT_FOUND))
-                .onItem()
-                .ifNotNull()
-                .transform(
-                    x -> {
-                      LOGGER.info("getPipeline" + x.getId());
-                      return x;
-                    }));
+                    new CreateDeploymentException(StaticConfig.LoggerMessages.PIPELINE_NOT_FOUND)));
   }
 
-  private Uni<StreamEntity> getStream(Uni<PipelineEntity> pipelineUni, String key) {
+  private Uni<DeploymentEntity> getDeploymentUni(UUID deploymentUuid) {
     return sf.withSession(
         session ->
             session
-                .find(
-                    StreamEntity.class,
-                    pipelineUni.map(pe -> getUUIDFromNode(pe.getMetadata(), key)))
+                .find(DeploymentEntity.class, deploymentUuid)
                 .onItem()
                 .ifNull()
                 .failWith(
                     new CreateDeploymentException(
-                        String.format(StaticConfig.LoggerMessages.STREAM_NOT_FOUND, key)))
+                        StaticConfig.LoggerMessages.DEPLOYMENT_NOT_FOUND)));
+  }
+
+  private Uni<StreamEntity> getStream(PipelineEntity pipeline, String key) {
+    return sf.withSession(
+        session ->
+            session
+                .find(StreamEntity.class, getUUIDFromNode(pipeline.getMetadata(), key))
                 .onItem()
-                .ifNotNull()
-                .transform(
-                    x -> {
-                      LOGGER.info("getStream" + x.getId());
-                      return x;
-                    }));
+                .ifNull()
+                .failWith(
+                    new CreateDeploymentException(
+                        String.format(StaticConfig.LoggerMessages.STREAM_NOT_FOUND, key))));
   }
 
   private String getDeploymentLogs(UUID deploymentId) {
@@ -294,20 +252,14 @@ public class DeploymentEndpoint {
     k8Deployment.delete(deploymentId);
   }
 
-  private DeploymentEntity createDeployment(
+  private DeploymentSpec createDeployment(
       PipelineEntity pe,
       StreamEntity streamOut,
       StreamEntity streamIn,
       DeploymentSpec deploymentSpec,
       DeploymentEntity de) {
     K8Deployment k8Deployment = new K8Deployment(client);
-    DeploymentSpec spec = k8Deployment.create(pe, streamIn, streamOut, deploymentSpec, de.getId());
-    try {
-      de.setSpec(DeploymentSpec.serializeDeploymentSpec(spec.deployment()));
-    } catch (JsonProcessingException e) {
-      throw new RuntimeException(e);
-    }
-    return de;
+    return k8Deployment.create(pe, streamIn, streamOut, deploymentSpec, de.getId());
   }
 
   private UUID getUUIDFromNode(JsonNode node, String key) {

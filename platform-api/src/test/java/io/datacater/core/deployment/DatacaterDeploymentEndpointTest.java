@@ -33,6 +33,8 @@ class DatacaterDeploymentEndpointTest {
   @Test
   @Order(1)
   void testCreateDeployment() throws IOException {
+    String deploymentText = "deployment";
+    String uuidLabel = "datacater.io/uuid";
     String streamsPath = "/streams";
     String pipelinesPath = "/pipelines";
 
@@ -101,9 +103,8 @@ class DatacaterDeploymentEndpointTest {
             .body(jsonString)
             .post(deploymentsPath);
 
-    LOGGER.info(responseDeployment.body().asString());
-
-    deploymentId = responseDeployment.body().as(UUID.class);
+    JsonNode ds = mapper.readTree(responseDeployment.body().asString());
+    deploymentId = UUID.fromString(ds.get(deploymentText).findValue(uuidLabel).asText());
 
     Assertions.assertEquals(200, responseDeployment.getStatusCode());
   }
