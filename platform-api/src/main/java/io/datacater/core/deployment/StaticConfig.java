@@ -42,6 +42,8 @@ public class StaticConfig {
   static final String DC_STREAMIN_CONFIG_TEXT = "DATACATER_STREAM-IN_CONFIG";
   static final String DC_STREAMOUT_CONFIG_TEXT = "DATACATER_STREAM-OUT_CONFIG";
   static final String HTTP = "http";
+  static final String READY_REPLICAS = "Ready Replicas";
+  static final String COLLISION_COUNT = "Collision Count";
 
   static class EnvironmentVariables {
     private EnvironmentVariables() {}

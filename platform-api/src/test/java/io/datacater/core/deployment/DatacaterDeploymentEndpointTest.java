@@ -102,6 +102,7 @@ class DatacaterDeploymentEndpointTest {
             .baseUri(baseURI)
             .body(jsonString)
             .post(deploymentsPath);
+    LOGGER.info(responseDeployment.body().asString());
 
     DeploymentEntity deployment =
         mapper.readValue(responseDeployment.body().asString(), DeploymentEntity.class);

@@ -187,38 +187,45 @@ public class K8Deployment {
   private DeploymentSpec deploymentListToDeploymentSpec(List<Deployment> deployments) {
     Map<String, Object> map = new HashMap<>();
     for (Deployment deployment : deployments) {
-      map.putAll(objectMetaToMap(deployment.getMetadata()));
+      map.putAll(deploymentToMetaDataMap(deployment));
     }
     return new DeploymentSpec(map);
   }
 
-  private Map<String, Object> objectMetaToMap(ObjectMeta metaData) {
+  private Map<String, Object> deploymentToMetaDataMap(Deployment deployment) {
     Map<String, Object> map = new HashMap<>();
     Map<String, Object> node = new HashMap<>();
-    if (metaData.getAdditionalProperties() != null) {
-      node.putAll(metaData.getAdditionalProperties());
+    if (deployment.getMetadata().getLabels() != null) {
+      node.putAll(deployment.getMetadata().getLabels());
     }
-    if (metaData.getLabels() != null) {
-      node.putAll(metaData.getLabels());
+    if (deployment.getMetadata().getAnnotations() != null) {
+      node.putAll(deployment.getMetadata().getAnnotations());
     }
-    if (metaData.getAnnotations() != null) {
-      node.putAll(metaData.getAnnotations());
+    if (deployment.getStatus() == null) {
+      // return before trying to add Status MetaData
+      map.put(deployment.getMetadata().getName(), node);
+      return map;
     }
-    map.put(metaData.getName(), node);
+
+    if (deployment.getStatus().getAdditionalProperties() != null) {
+      node.putAll(deployment.getStatus().getAdditionalProperties());
+    }
+    node.put(StaticConfig.READY_REPLICAS, deployment.getStatus().getReadyReplicas());
+    node.put(StaticConfig.COLLISION_COUNT, deployment.getStatus().getCollisionCount());
+    map.put(deployment.getMetadata().getName(), node);
     return map;
   }
 
   public DeploymentSpec getDeployment(UUID deploymentId) {
 
     return new DeploymentSpec(
-        objectMetaToMap(
+        deploymentToMetaDataMap(
             client
                 .apps()
                 .deployments()
                 .inNamespace(StaticConfig.EnvironmentVariables.NAMESPACE)
                 .withName(getDeploymentName(deploymentId))
-                .get()
-                .getMetadata()));
+                .get()));
   }
 
   private boolean exists(UUID deploymentId) {
