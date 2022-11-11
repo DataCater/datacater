@@ -173,25 +173,6 @@ public class K8Deployment {
     }
   }
 
-  public DeploymentSpec getDeployments() {
-    return deploymentListToDeploymentSpec(
-        client
-            .apps()
-            .deployments()
-            .inNamespace(StaticConfig.EnvironmentVariables.NAMESPACE)
-            .withLabel(StaticConfig.APP, StaticConfig.DATACATER_PIPELINE)
-            .list()
-            .getItems());
-  }
-
-  private DeploymentSpec deploymentListToDeploymentSpec(List<Deployment> deployments) {
-    Map<String, Object> map = new HashMap<>();
-    for (Deployment deployment : deployments) {
-      map.putAll(deploymentToMetaDataMap(deployment));
-    }
-    return new DeploymentSpec(map);
-  }
-
   private Map<String, Object> deploymentToMetaDataMap(Deployment deployment) {
     Map<String, Object> map = new HashMap<>();
     Map<String, Object> node = new HashMap<>();
