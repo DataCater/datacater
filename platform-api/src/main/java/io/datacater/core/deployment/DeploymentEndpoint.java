@@ -44,6 +44,10 @@ public class DeploymentEndpoint {
     return sf.withTransaction(
             ((session, transaction) -> session.find(DeploymentEntity.class, deploymentId)))
         .onItem()
+        .ifNull()
+        .failWith(new DeploymentNotFoundException(StaticConfig.LoggerMessages.DEPLOYMENT_NOT_FOUND))
+        .onItem()
+        .ifNotNull()
         .transform(
             deployment -> {
               try {
@@ -51,41 +55,45 @@ public class DeploymentEndpoint {
               } catch (JsonProcessingException e) {
                 throw new RuntimeException(e);
               }
-            })
-        .onItem()
-        .ifNull()
-        .failWith(
-            new DeploymentNotFoundException(StaticConfig.LoggerMessages.DEPLOYMENT_NOT_FOUND));
+            });
   }
 
   @GET
   @Path("{uuid}/logs")
   @Produces(MediaType.TEXT_PLAIN)
   public Uni<String> getLogs(@PathParam("uuid") UUID deploymentId) {
-    return Uni.createFrom().item(getDeploymentLogs(deploymentId));
+
+    return sf.withTransaction(
+            ((session, transaction) -> session.find(DeploymentEntity.class, deploymentId)))
+        .onItem()
+        .ifNull()
+        .failWith(new DeploymentNotFoundException(StaticConfig.LoggerMessages.DEPLOYMENT_NOT_FOUND))
+        .onItem()
+        .ifNotNull()
+        .transform(deployment -> getDeploymentLogs(deployment.getId()));
   }
 
   @GET
   @Path("{uuid}/watch-logs")
   @Produces(MediaType.SERVER_SENT_EVENTS)
-  public Response watchLogs(
-      @PathParam("uuid") UUID deploymentId, @Context Sse sse, @Context SseEventSink eventSink)
-      throws IOException {
-    LogWatch lw =
-        watchDeploymentLogs(deploymentId)
-            .inContainer(StaticConfig.DEPLOYMENT_NAME_PREFIX + deploymentId)
-            .watchLog();
-    InputStream is = lw.getOutput();
-    BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(is));
-    String line;
-    while ((line = bufferedReader.readLine()) != null) {
-      final OutboundSseEvent sseEvent = sse.newEventBuilder().data(line).build();
-
-      eventSink.send(sseEvent);
-    }
-    is.close();
-    lw.close();
-    return Response.ok().build();
+  public Uni<Response> watchLogs(
+      @PathParam("uuid") UUID deploymentId, @Context Sse sse, @Context SseEventSink eventSink) {
+    return sf.withTransaction(
+            ((session, transaction) -> session.find(DeploymentEntity.class, deploymentId)))
+        .onItem()
+        .ifNull()
+        .failWith(new DeploymentNotFoundException(StaticConfig.LoggerMessages.DEPLOYMENT_NOT_FOUND))
+        .onItem()
+        .ifNotNull()
+        .transform(
+            deployment -> {
+              try {
+                watchLogsRunner(deployment.getId(), sse, eventSink);
+              } catch (IOException e) {
+                throw new RuntimeException(e);
+              }
+              return Response.ok().build();
+            });
   }
 
   @GET
@@ -291,5 +299,23 @@ public class DeploymentEndpoint {
 
   private UUID getUUIDFromNode(JsonNode node, String key) {
     return UUID.fromString(node.get(key).asText());
+  }
+
+  private void watchLogsRunner(UUID deploymentId, @Context Sse sse, @Context SseEventSink eventSink)
+      throws IOException {
+    LogWatch lw =
+        watchDeploymentLogs(deploymentId)
+            .inContainer(StaticConfig.DEPLOYMENT_NAME_PREFIX + deploymentId)
+            .watchLog();
+    InputStream is = lw.getOutput();
+    BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(is));
+    String line;
+    while ((line = bufferedReader.readLine()) != null) {
+      final OutboundSseEvent sseEvent = sse.newEventBuilder().data(line).build();
+
+      eventSink.send(sseEvent);
+    }
+    is.close();
+    lw.close();
   }
 }
