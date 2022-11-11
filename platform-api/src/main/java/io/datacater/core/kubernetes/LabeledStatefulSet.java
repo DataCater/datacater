@@ -121,6 +121,27 @@ public class LabeledStatefulSet implements Shareable {
         .withImage(
             String.format("%s:%s", DataCaterK8sConfig.IMAGE_NAME, DataCaterK8sConfig.IMAGE_TAG))
         .withPorts(this.containerPort())
+        //        .withReadinessProbe(ready())
+        //        .withLivenessProbe(ready()) // For now, we use the same probe for ready and live.
+        // Improve if needed.
+        .build();
+  }
+
+  private Probe ready() {
+    var get =
+        new HTTPGetAction(
+            "localhost",
+            null, // no headers required
+            "/health",
+            new IntOrString(this.containerPort().getContainerPort()),
+            "HTTP");
+
+    return new ProbeBuilder()
+        .withHttpGet(get)
+        .withInitialDelaySeconds(0)
+        .withPeriodSeconds(1)
+        .withSuccessThreshold(1)
+        .withFailureThreshold(3)
         .build();
   }
 
