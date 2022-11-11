@@ -71,7 +71,10 @@ public class DeploymentEndpoint {
   public Response watchLogs(
       @PathParam("uuid") UUID deploymentId, @Context Sse sse, @Context SseEventSink eventSink)
       throws IOException {
-    LogWatch lw = watchDeploymentLogs(deploymentId).watchLog();
+    LogWatch lw =
+        watchDeploymentLogs(deploymentId)
+            .inContainer(StaticConfig.DEPLOYMENT_NAME_PREFIX + deploymentId)
+            .watchLog();
     InputStream is = lw.getOutput();
     BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(is));
     String line;

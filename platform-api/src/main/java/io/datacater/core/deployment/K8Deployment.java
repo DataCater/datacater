@@ -145,6 +145,7 @@ public class K8Deployment {
         .deployments()
         .inNamespace(StaticConfig.EnvironmentVariables.NAMESPACE)
         .withName(getDeploymentName(deploymentId))
+        .inContainer(StaticConfig.DEPLOYMENT_NAME_PREFIX + deploymentId)
         .getLog(true);
   }
 
