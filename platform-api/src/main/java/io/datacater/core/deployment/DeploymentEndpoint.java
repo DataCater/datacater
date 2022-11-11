@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import io.datacater.core.exceptions.*;
 import io.datacater.core.pipeline.PipelineEntity;
 import io.datacater.core.stream.StreamEntity;
+import io.datacater.core.utilities.StringUtilities;
 import io.fabric8.kubernetes.api.model.apps.Deployment;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.dsl.LogWatch;
@@ -53,7 +54,7 @@ public class DeploymentEndpoint {
               try {
                 return getK8Deployment(deployment);
               } catch (JsonProcessingException e) {
-                throw new RuntimeException(e);
+                throw new DatacaterException(StringUtilities.wrapString(e.getMessage()));
               }
             });
   }
@@ -90,7 +91,7 @@ public class DeploymentEndpoint {
               try {
                 watchLogsRunner(deployment.getId(), sse, eventSink);
               } catch (IOException e) {
-                throw new RuntimeException(e);
+                throw new DatacaterException(StringUtilities.wrapString(e.getMessage()));
               }
               return Response.ok().build();
             });
@@ -109,7 +110,7 @@ public class DeploymentEndpoint {
                       try {
                         return getK8Deployments(list);
                       } catch (JsonProcessingException e) {
-                        throw new RuntimeException(e);
+                        throw new DatacaterException(StringUtilities.wrapString(e.getMessage()));
                       }
                     }));
   }
