@@ -103,8 +103,9 @@ class DatacaterDeploymentEndpointTest {
             .body(jsonString)
             .post(deploymentsPath);
 
-    JsonNode ds = mapper.readTree(responseDeployment.body().asString());
-    deploymentId = UUID.fromString(ds.get(deploymentText).findValue(uuidLabel).asText());
+    DeploymentEntity deployment =
+        mapper.readValue(responseDeployment.body().asString(), DeploymentEntity.class);
+    deploymentId = deployment.getId();
 
     Assertions.assertEquals(200, responseDeployment.getStatusCode());
   }

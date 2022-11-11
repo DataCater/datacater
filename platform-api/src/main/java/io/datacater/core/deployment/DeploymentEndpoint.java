@@ -105,12 +105,12 @@ public class DeploymentEndpoint {
 
   @POST
   @Consumes(MediaType.APPLICATION_JSON)
-  public Uni<DeploymentSpec> createDeployment(io.datacater.core.deployment.Deployment deployment)
+  public Uni<DeploymentEntity> createDeployment(io.datacater.core.deployment.Deployment deployment)
       throws JsonProcessingException {
     DeploymentEntity de = new DeploymentEntity(deployment.spec());
     Uni<PipelineEntity> pipelineUni = getPipeline(deployment.spec());
-    return sf.withSession(
-        session ->
+    return sf.withTransaction(
+        (session, transaction) ->
             session
                 .persist(de)
                 .onItem()
@@ -160,7 +160,7 @@ public class DeploymentEndpoint {
 
   @PUT
   @Path("{uuid}")
-  public Uni<DeploymentSpec> updateDeployment(
+  public Uni<DeploymentEntity> updateDeployment(
       @PathParam("uuid") UUID deploymentUuid, io.datacater.core.deployment.Deployment deployment) {
     Uni<PipelineEntity> pipelineUni = getPipeline(deployment.spec());
     Uni<DeploymentEntity> deploymentUni = getDeploymentUni(deploymentUuid);
@@ -192,8 +192,8 @@ public class DeploymentEndpoint {
   }
 
   private Uni<PipelineEntity> getPipeline(DeploymentSpec deploymentSpec) {
-    return sf.withSession(
-        session ->
+    return sf.withTransaction(
+        (session, transaction) ->
             session
                 .find(
                     PipelineEntity.class,
@@ -209,8 +209,8 @@ public class DeploymentEndpoint {
   }
 
   private Uni<DeploymentEntity> getDeploymentUni(UUID deploymentUuid) {
-    return sf.withSession(
-        session ->
+    return sf.withTransaction(
+        (session, transaction) ->
             session
                 .find(DeploymentEntity.class, deploymentUuid)
                 .onItem()
@@ -221,8 +221,8 @@ public class DeploymentEndpoint {
   }
 
   private Uni<StreamEntity> getStream(PipelineEntity pipeline, String key) {
-    return sf.withSession(
-        session ->
+    return sf.withTransaction(
+        (session, transaction) ->
             session
                 .find(StreamEntity.class, getUUIDFromNode(pipeline.getMetadata(), key))
                 .onItem()
@@ -267,14 +267,23 @@ public class DeploymentEndpoint {
     k8Deployment.delete(deploymentId);
   }
 
-  private DeploymentSpec createDeployment(
+  private DeploymentEntity createDeployment(
       PipelineEntity pe,
       StreamEntity streamOut,
       StreamEntity streamIn,
       DeploymentSpec deploymentSpec,
       DeploymentEntity de) {
     K8Deployment k8Deployment = new K8Deployment(client);
-    return k8Deployment.create(pe, streamIn, streamOut, deploymentSpec, de.getId());
+    try {
+      de.setSpec(
+          DeploymentSpec.serializeDeploymentSpec(
+              k8Deployment
+                  .create(pe, streamIn, streamOut, deploymentSpec, de.getId())
+                  .deployment()));
+    } catch (JsonProcessingException e) {
+      throw new RuntimeException(e);
+    }
+    return de;
   }
 
   private UUID getUUIDFromNode(JsonNode node, String key) {
