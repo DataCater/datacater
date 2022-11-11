@@ -8,6 +8,9 @@ import { addStream } from "../../actions/streams";
 import { getApiPathPrefix } from "../../helpers/getApiPathPrefix";
 import { getStreamConnectionOptions } from "../../helpers/getStreamConnectionOptions";
 import { getStreamTopicOptions } from "../../helpers/getStreamTopicOptions";
+import { getDeserializerOptions } from "../../helpers/getDeserializerOptions";
+import { getSerializerOptions } from "../../helpers/getSerializerOptions";
+import { isStreamHoldingAvroFormat } from "../../helpers/isStreamHoldingAvroFormat";
 import "../../scss/fonts.scss";
 
 class NewStream extends Component {
@@ -18,6 +21,7 @@ class NewStream extends Component {
       creatingStreamFailed: false,
       errorMessages: {},
       showApiCall: false,
+      showTopicConfig: false,
       stream: {
         spec: {
           kind: "KAFKA",
@@ -40,7 +44,9 @@ class NewStream extends Component {
     this.handleCreateStream = this.handleCreateStream.bind(this);
     this.handleChange = this.handleChange.bind(this);
     this.toggleShowApiCall = this.toggleShowApiCall.bind(this);
+    this.toggleShowTopicConfig = this.toggleShowTopicConfig.bind(this);
     this.updateTempConfig = this.updateTempConfig.bind(this);
+    this.updateConnectionConfig = this.updateConnectionConfig.bind(this);
     this.addConfig = this.addConfig.bind(this);
     this.removeConfig = this.removeConfig.bind(this);
   }
@@ -53,6 +59,14 @@ class NewStream extends Component {
     this.setState({ tempConfig: tempConfig });
   }
 
+  updateConnectionConfig(field, value) {
+    let stream = this.state.stream;
+
+    stream.spec.kafka[field] = value;
+
+    this.setState({ stream: stream });
+  }
+
   addConfig(event) {
     event.preventDefault();
     const tempConfig = this.state.tempConfig;
@@ -61,15 +75,9 @@ class NewStream extends Component {
     if (event.target.dataset.prefix === "spec.kafka") {
       stream.spec.kafka[tempConfig.connectionName] = tempConfig.connectionValue;
       this.setState({ stream: stream, tempConfig: tempConfig });
-    } else if (event.target.dataset.prefix === "spec.kafka.topic") {
-      if (
-        ["num.partitions", "replication.factor"].includes(tempConfig.topicName)
-      ) {
-        stream.spec.kafka.topic[tempConfig.topicName] = tempConfig.topicValue;
-      } else {
-        stream.spec.kafka.topic.config[tempConfig.topicName] =
-          tempConfig.topicValue;
-      }
+    } else if (event.target.dataset.prefix === "spec.kafka.topic.config") {
+      stream.spec.kafka.topic.config[tempConfig.topicName] =
+        tempConfig.topicValue;
       this.setState({ stream: stream, tempConfig: tempConfig });
     }
   }
@@ -82,15 +90,11 @@ class NewStream extends Component {
 
     if (prefix === "spec.kafka") {
       delete stream.spec.kafka[config];
-      this.setState({ stream: stream });
-    } else if (prefix === "spec.kafka.topic") {
-      if (["num.partitions", "replication.factor"].includes(config)) {
-        delete stream.spec.kafka.topic[config];
-      } else {
-        delete stream.spec.kafka.topic.config[config];
-      }
-      this.setState({ stream: stream });
+    } else if (prefix === "spec.kafka.topic.config") {
+      delete stream.spec.kafka.topic.config[config];
     }
+
+    this.setState({ stream: stream });
   }
 
   handleCreateStream(event) {
@@ -129,6 +133,10 @@ class NewStream extends Component {
       case "spec.kafka.topic":
         stream["spec"]["kafka"]["topic"][event.target.name] = newValue;
         break;
+      case "spec.kafka.topic.config":
+        stream["spec"]["kafka"]["topic"]["config"][event.target.name] =
+          newValue;
+        break;
       default:
         stream[event.target.name] = newValue;
         break;
@@ -149,6 +157,14 @@ class NewStream extends Component {
     });
   }
 
+  toggleShowTopicConfig(event) {
+    event.preventDefault();
+
+    this.setState({
+      showTopicConfig: !this.state.showTopicConfig,
+    });
+  }
+
   render() {
     if (this.state.streamCreated) {
       return <Redirect to={"/streams/" + this.props.streams.stream.uuid} />;
@@ -158,14 +174,27 @@ class NewStream extends Component {
 
     const topicOptions = getStreamTopicOptions();
     const connectionOptions = getStreamConnectionOptions();
+    const deserializerOptions = getDeserializerOptions(stream);
+    const serializerOptions = getSerializerOptions(stream);
 
-    const addedTopicConfigs = Object.keys(stream.spec.kafka.topic)
-      .filter((item) => item != "config")
-      .concat(Object.keys(stream.spec.kafka.topic.config));
+    const defaultDeserializer = "io.datacater.core.serde.JsonDeserializer";
+    const defaultSerializer = "io.datacater.core.serde.JsonSerializer";
 
+    const addedTopicConfigs = Object.keys(stream.spec.kafka.topic.config);
     const addedConnectionConfigs = Object.keys(stream.spec.kafka).filter(
-      (item) => !["bootstrap.servers", "topic"].includes(item)
+      (item) =>
+        ![
+          "bootstrap.servers",
+          "key.deserializer",
+          "value.deserializer",
+          "key.serializer",
+          "value.serializer",
+          "schema.registry.url",
+          "topic",
+        ].includes(item)
     );
+
+    const streamHoldsAvroFormat = isStreamHoldingAvroFormat(stream);
 
     return (
       <div className="container">
@@ -245,14 +274,23 @@ class NewStream extends Component {
             </div>
           </div>
           <form>
-            <div className="col-12 mt-4"></div>
-            <div className="col-12">
+            <div className="col-12 mt-4">
               <label htmlFor="name" className="form-label">
-                <h5 className="fw-semibold">Name</h5>
-                <span className="text-muted fs-7">
+                <h5 className="fw-semibold">
+                  Name<span className="text-danger ms-1">*</span>
+                </h5>
+                <span className="text-muted fs-7 me-2">
                   Name of the Apache Kafka topic. If the topic does not yet
                   exist on the broker, we will automatically create it.
                 </span>
+                <a
+                  className="fs-7"
+                  href="/streams/new"
+                  onClick={this.toggleShowTopicConfig}
+                >
+                  {!this.state.showTopicConfig && "Edit topic config"}
+                  {this.state.showTopicConfig && "Hide topic config"}
+                </a>
               </label>
               <input
                 type="text"
@@ -263,90 +301,278 @@ class NewStream extends Component {
                 value={this.state.stream["name"] || ""}
               />
             </div>
-            <div className="col-12 mt-4 mb-0">
-              <h5 className="fw-semibold">Topic configuration</h5>
-              <span className="text-muted fs-7 mb-0">
-                You can here use{" "}
-                <a
-                  href="https://kafka.apache.org/documentation/#topicconfigs"
-                  target="_blank"
-                >
-                  topic-level options
-                </a>
-                .
-              </span>
-            </div>
-            {addedTopicConfigs.length > 0 && (
-              <div className="list-group mt-4">
-                {addedTopicConfigs.map((topicConfig) => (
-                  <div
-                    className="list-group-item list-group-item-action bg-white p-3"
-                    key={topicConfig}
-                  >
-                    <div className="d-flex w-100 justify-content-between mb-1">
-                      <h6 className="d-flex align-items-center">
-                        {topicConfig}
-                      </h6>
+            {this.state.showTopicConfig && (
+              <>
+                <div className="card mt-4">
+                  <div className="card-body">
+                    <div className="col-12 d-flex align-items-center">
+                      <h5 className="fw-semibold d-inline mb-0">
+                        Topic configuration
+                      </h5>
                       <a
-                        className="btn btn-sm btn-outline-primary d-flex align-items-center"
-                        data-config={topicConfig}
-                        data-prefix="spec.kafka.topic"
+                        className="fs-7 ms-2"
                         href="/streams/new"
-                        onClick={this.removeConfig}
+                        onClick={this.toggleShowTopicConfig}
                       >
-                        Remove
+                        Hide
                       </a>
                     </div>
-                    <small>
-                      {stream.spec.kafka.topic[topicConfig] ||
-                        stream.spec.kafka.topic.config[topicConfig]}
-                    </small>
+                    <div className="col-12 mt-2">
+                      <label htmlFor="num.partitions" className="form-label">
+                        num.partitions
+                      </label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        id="num.partitions"
+                        data-prefix="spec.kafka.topic"
+                        name="num.partitions"
+                        onChange={this.handleChange}
+                        placeholder="1"
+                        value={
+                          this.state.stream.spec.kafka["topic"][
+                            "num.partitions"
+                          ] || ""
+                        }
+                      />
+                    </div>
+                    <div className="col-12 mt-2">
+                      <label
+                        htmlFor="replication.factor"
+                        className="form-label"
+                      >
+                        replication.factor
+                      </label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        id="replication.factor"
+                        data-prefix="spec.kafka.topic"
+                        name="replication.factor"
+                        onChange={this.handleChange}
+                        placeholder="3"
+                        value={
+                          this.state.stream.spec.kafka["topic"][
+                            "replication.factor"
+                          ] || ""
+                        }
+                      />
+                    </div>
+                    {addedTopicConfigs.map((topicConfig) => (
+                      <div className="col-12 mt-2" key={topicConfig}>
+                        <label htmlFor={topicConfig} className="form-label">
+                          {topicConfig}
+                          <a
+                            className="ms-2 fs-7"
+                            data-config={topicConfig}
+                            data-prefix="spec.kafka.topic.config"
+                            href="/streams/new"
+                            onClick={this.removeConfig}
+                          >
+                            Remove
+                          </a>
+                        </label>
+                        <input
+                          type="text"
+                          className="form-control"
+                          id={topicConfig}
+                          data-prefix="spec.kafka.topic.config"
+                          name={topicConfig}
+                          onChange={this.handleChange}
+                          value={
+                            this.state.stream.spec.kafka.topic.config[
+                              topicConfig
+                            ] || ""
+                          }
+                        />
+                      </div>
+                    ))}
+                    <div className="col-12 mt-3">
+                      <h6 className="d-inline me-2">Add config</h6>
+                      <span className="text-muted fs-7">
+                        You can here use{" "}
+                        <a
+                          href="https://kafka.apache.org/documentation/#topicconfigs"
+                          target="_blank"
+                        >
+                          topic-level
+                        </a>{" "}
+                        configuration options.
+                      </span>
+                    </div>
+                    <div className="col-12 mt-2">
+                      <div className="row">
+                        <div className="col-md-3">
+                          <label className="form-label">Name</label>
+                          <Creatable
+                            isSearchable
+                            options={topicOptions}
+                            onChange={(value) => {
+                              this.updateTempConfig("topicName", value.value);
+                            }}
+                          />
+                        </div>
+                        <div className="col-md-3">
+                          <label className="form-label">Value</label>
+                          <input
+                            type="text"
+                            className="form-control"
+                            name="topicValue"
+                            onChange={(event) => {
+                              this.updateTempConfig(
+                                "topicValue",
+                                event.target.value
+                              );
+                            }}
+                            value={this.state.tempConfig.topicValue || ""}
+                          />
+                        </div>
+                        <div className="col-md-3 d-flex align-items-end">
+                          <a
+                            href="/streams/new"
+                            className="btn btn-outline-primary"
+                            data-prefix="spec.kafka.topic.config"
+                            onClick={this.addConfig}
+                          >
+                            Add
+                          </a>
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                ))}
-              </div>
+                </div>
+              </>
             )}
             <div className="col-12 mt-4">
-              <h6>Add or update configuration</h6>
+              <h5 className="fw-semibold">Data format</h5>
             </div>
             <div className="col-12">
-              <div className="row">
-                <div className="col-md-3">
-                  <label className="form-label">Name</label>
-                  <Creatable
-                    isSearchable
-                    options={topicOptions}
-                    onChange={(value) => {
-                      this.updateTempConfig("topicName", value.value);
-                    }}
-                  />
-                </div>
-                <div className="col-md-3">
-                  <label className="form-label">Value</label>
+              <label htmlFor="key.deserializer" className="form-label">
+                key.deserializer
+              </label>
+              <Creatable
+                defaultValue={deserializerOptions.find(
+                  (deserializer) => deserializer.value === defaultDeserializer
+                )}
+                isSearchable
+                options={deserializerOptions}
+                onChange={(value) => {
+                  this.updateConnectionConfig("key.deserializer", value.value);
+                }}
+              />
+            </div>
+            <div className="col-12 mt-2">
+              <label htmlFor="value.deserializer" className="form-label">
+                value.deserializer
+              </label>
+              <Creatable
+                defaultValue={deserializerOptions.find(
+                  (deserializer) => deserializer.value === defaultDeserializer
+                )}
+                isSearchable
+                options={deserializerOptions}
+                onChange={(value) => {
+                  this.updateConnectionConfig(
+                    "value.deserializer",
+                    value.value
+                  );
+                }}
+              />
+            </div>
+            <div className="col-12 mt-2">
+              <label htmlFor="key.serializer" className="form-label">
+                key.serializer
+              </label>
+              <Creatable
+                defaultValue={serializerOptions.find(
+                  (deserializer) => deserializer.value === defaultSerializer
+                )}
+                isSearchable
+                options={serializerOptions}
+                onChange={(value) => {
+                  this.updateConnectionConfig("key.serializer", value.value);
+                }}
+              />
+            </div>
+            <div className="col-12 mt-2">
+              <label htmlFor="value.serializer" className="form-label">
+                value.serializer
+              </label>
+              <Creatable
+                defaultValue={serializerOptions.find(
+                  (deserializer) => deserializer.value === defaultSerializer
+                )}
+                isSearchable
+                options={serializerOptions}
+                onChange={(value) => {
+                  this.updateConnectionConfig("value.serializer", value.value);
+                }}
+              />
+            </div>
+            {streamHoldsAvroFormat && (
+              <>
+                <div className="col-12 mt-2">
+                  <label htmlFor="schema.registry.url" className="form-label">
+                    schema.registry.url
+                  </label>
                   <input
                     type="text"
                     className="form-control"
-                    name="topicValue"
-                    onChange={(event) => {
-                      this.updateTempConfig("topicValue", event.target.value);
-                    }}
-                    value={this.state.tempConfig.topicValue || ""}
+                    id="schema.registry.url"
+                    data-prefix="spec.kafka"
+                    name="schema.registry.url"
+                    onChange={this.handleChange}
+                    value={
+                      this.state.stream.spec.kafka["schema.registry.url"] || ""
+                    }
                   />
                 </div>
-                <div className="col-md-3 d-flex align-items-end">
-                  <a
-                    href="/streams/new"
-                    className="btn btn-outline-primary"
-                    data-prefix="spec.kafka.topic"
-                    onClick={this.addConfig}
-                  >
-                    Add
-                  </a>
-                </div>
-              </div>
-            </div>
-            <hr className="my-4" />
+              </>
+            )}
             <div className="col-12 mt-4">
-              <h5 className="fw-semibold">Connection configuration</h5>
+              <h5 className="fw-semibold">Connection</h5>
+            </div>
+            <div className="col-12 mt-2">
+              <label htmlFor="bootstrap.servers" className="form-label">
+                bootstrap.servers<span className="text-danger ms-1">*</span>
+              </label>
+              <input
+                type="text"
+                className="form-control"
+                id="bootstrap.servers"
+                data-prefix="spec.kafka"
+                name="bootstrap.servers"
+                onChange={this.handleChange}
+                value={this.state.stream.spec.kafka["bootstrap.servers"] || ""}
+              />
+            </div>
+            {addedConnectionConfigs.map((connectionConfig) => (
+              <div className="col-12 mt-2" key={connectionConfig}>
+                <label htmlFor={connectionConfig} className="form-label">
+                  {connectionConfig}
+                  <a
+                    className="ms-2 fs-7"
+                    data-config={connectionConfig}
+                    data-prefix="spec.kafka"
+                    href="/streams/new"
+                    onClick={this.removeConfig}
+                  >
+                    Remove
+                  </a>
+                </label>
+                <input
+                  type="text"
+                  className="form-control"
+                  id={connectionConfig}
+                  data-prefix="spec.kafka"
+                  name={connectionConfig}
+                  onChange={this.handleChange}
+                  value={this.state.stream.spec.kafka[connectionConfig] || ""}
+                />
+              </div>
+            ))}
+            <div className="col-12 mt-3">
+              <h6 className="d-inline me-2">Add config</h6>
               <span className="text-muted fs-7">
                 You can here use{" "}
                 <a
@@ -362,53 +588,10 @@ class NewStream extends Component {
                 >
                   producer-level
                 </a>{" "}
-                options.
+                configuration options.
               </span>
             </div>
             <div className="col-12 mt-2">
-              <label htmlFor="bootstrap.servers" className="form-label">
-                bootstrap.servers
-              </label>
-              <input
-                type="text"
-                className="form-control"
-                id="bootstrap.servers"
-                data-prefix="spec.kafka"
-                name="bootstrap.servers"
-                onChange={this.handleChange}
-                value={this.state.stream.spec.kafka["bootstrap.servers"] || ""}
-              />
-            </div>
-            {addedConnectionConfigs.length > 0 && (
-              <div className="list-group mt-4">
-                {addedConnectionConfigs.map((connectionConfig) => (
-                  <div
-                    className="list-group-item list-group-item-action bg-white p-3"
-                    key={connectionConfig}
-                  >
-                    <div className="d-flex w-100 justify-content-between mb-1">
-                      <h6 className="d-flex align-items-center">
-                        {connectionConfig}
-                      </h6>
-                      <a
-                        className="btn btn-sm btn-outline-primary d-flex align-items-center"
-                        data-config={connectionConfig}
-                        data-prefix="spec.kafka"
-                        href="/streams/new"
-                        onClick={this.removeConfig}
-                      >
-                        Remove
-                      </a>
-                    </div>
-                    <small>{stream.spec.kafka[connectionConfig]}</small>
-                  </div>
-                ))}
-              </div>
-            )}
-            <div className="col-12 mt-3">
-              <h6>Add or update configuration</h6>
-            </div>
-            <div className="col-12">
               <div className="row">
                 <div className="col-md-3">
                   <label className="form-label">Name</label>
