@@ -84,8 +84,8 @@ public class StaticConfig {
   static class LoggerMessages {
     private LoggerMessages() {}
 
-    static final String DEPLOYMENT_DELETED = "DatacaterDeployment deleted successfully: ";
-    static final String DEPLOYMENT_NOT_DELETED = "DatacaterDeployment could not be deleted: ";
+    static final String DEPLOYMENT_DELETED = "DatacaterDeployment deleted successfully: %s";
+    static final String DEPLOYMENT_NOT_DELETED = "DatacaterDeployment could not be deleted: %s";
     static final String PIPELINE_NOT_FOUND = "The referenced Pipeline UUID could not be found";
     static final String STREAM_NOT_FOUND = "The referenced %s UUID could not be found";
     static final String DEPLOYMENT_NOT_FOUND = "The referenced Deployment could not be found.";

@@ -4,12 +4,15 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.datacater.core.exceptions.CreateDeploymentException;
+import io.datacater.core.exceptions.DatacaterException;
 import io.datacater.core.pipeline.PipelineEntity;
 import io.datacater.core.stream.StreamEntity;
+import io.datacater.core.utilities.StringUtilities;
 import io.fabric8.kubernetes.api.model.*;
 import io.fabric8.kubernetes.api.model.apps.Deployment;
 import io.fabric8.kubernetes.api.model.apps.DeploymentBuilder;
 import io.fabric8.kubernetes.client.KubernetesClient;
+import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.kubernetes.client.dsl.RollableScalableResource;
 import java.util.*;
 import javax.inject.Singleton;
@@ -42,46 +45,51 @@ public class K8Deployment {
 
     List<EnvVar> variables = getEnvironmentVariables(streamIn, streamOut, deploymentSpec);
 
-    Deployment deployment =
-        new DeploymentBuilder()
-            .withNewMetadata()
-            .withName(name)
-            .addToLabels(getLabels(deploymentId))
-            .endMetadata()
-            .withNewSpec()
-            .withReplicas(StaticConfig.EnvironmentVariables.REPLICAS)
-            .withMinReadySeconds(StaticConfig.EnvironmentVariables.READY_SECONDS)
-            .withNewSelector()
-            .addToMatchLabels(getLabels(deploymentId))
-            .endSelector()
-            .withNewTemplate()
-            .withNewMetadata()
-            .addToLabels(getLabels(deploymentId))
-            .endMetadata()
-            .withNewSpec()
-            .addNewContainer()
-            .withName(name)
-            .withImage(StaticConfig.EnvironmentVariables.FULL_IMAGE_NAME)
-            .withImagePullPolicy(StaticConfig.EnvironmentVariables.PULL_POLICY)
-            .withEnv(variables)
-            .withNewResources()
-            .withRequests(StaticConfig.RESOURCE_REQUESTS)
-            .withLimits(StaticConfig.RESOURCE_LIMITS)
-            .endResources()
-            .withVolumeMounts(getVolumeMount(volumeName))
-            .endContainer()
-            .addToContainers(pythonRunnerContainer())
-            .withVolumes(getVolume(volumeName, configmapName))
-            .endSpec()
-            .endTemplate()
-            .endSpec()
-            .build();
+    try {
+      Deployment deployment =
+          new DeploymentBuilder()
+              .withNewMetadata()
+              .withName(name)
+              .addToLabels(getLabels(deploymentId))
+              .endMetadata()
+              .withNewSpec()
+              .withReplicas(StaticConfig.EnvironmentVariables.REPLICAS)
+              .withMinReadySeconds(StaticConfig.EnvironmentVariables.READY_SECONDS)
+              .withNewSelector()
+              .addToMatchLabels(getLabels(deploymentId))
+              .endSelector()
+              .withNewTemplate()
+              .withNewMetadata()
+              .addToLabels(getLabels(deploymentId))
+              .endMetadata()
+              .withNewSpec()
+              .addNewContainer()
+              .withName(name)
+              .withImage(StaticConfig.EnvironmentVariables.FULL_IMAGE_NAME)
+              .withImagePullPolicy(StaticConfig.EnvironmentVariables.PULL_POLICY)
+              .withEnv(variables)
+              .withNewResources()
+              .withRequests(StaticConfig.RESOURCE_REQUESTS)
+              .withLimits(StaticConfig.RESOURCE_LIMITS)
+              .endResources()
+              .withVolumeMounts(getVolumeMount(volumeName))
+              .endContainer()
+              .addToContainers(pythonRunnerContainer())
+              .withVolumes(getVolume(volumeName, configmapName))
+              .endSpec()
+              .endTemplate()
+              .endSpec()
+              .build();
 
-    client
-        .apps()
-        .deployments()
-        .inNamespace(StaticConfig.EnvironmentVariables.NAMESPACE)
-        .create(deployment);
+      client
+          .apps()
+          .deployments()
+          .inNamespace(StaticConfig.EnvironmentVariables.NAMESPACE)
+          .create(deployment);
+
+    } catch (KubernetesClientException ex) {
+      throw new CreateDeploymentException(StringUtilities.wrapString(ex.getMessage()));
+    }
 
     if (!exists(deploymentId)) {
       throw new CreateDeploymentException(StaticConfig.LoggerMessages.DEPLOYMENT_NOT_CREATED);
@@ -166,10 +174,11 @@ public class K8Deployment {
             .inNamespace(StaticConfig.EnvironmentVariables.NAMESPACE)
             .withName(name)
             .delete();
+
     if (Boolean.TRUE.equals(status)) {
-      LOGGER.info(StaticConfig.LoggerMessages.DEPLOYMENT_DELETED + name);
+      LOGGER.info(String.format(StaticConfig.LoggerMessages.DEPLOYMENT_DELETED, name));
     } else {
-      LOGGER.info(StaticConfig.LoggerMessages.DEPLOYMENT_NOT_DELETED + name);
+      LOGGER.info(String.format(StaticConfig.LoggerMessages.DEPLOYMENT_NOT_DELETED, name));
     }
   }
 
@@ -198,7 +207,6 @@ public class K8Deployment {
   }
 
   public DeploymentSpec getDeployment(UUID deploymentId) {
-
     return new DeploymentSpec(
         deploymentToMetaDataMap(
             client
@@ -231,7 +239,7 @@ public class K8Deployment {
             .getItems();
 
     if (deployments.isEmpty()) {
-      return null;
+      throw new DatacaterException(StaticConfig.LoggerMessages.DEPLOYMENT_NOT_FOUND);
     }
     return deployments.get(0).getMetadata().getName();
   }

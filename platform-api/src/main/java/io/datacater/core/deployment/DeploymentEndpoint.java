@@ -61,7 +61,7 @@ public class DeploymentEndpoint {
 
   @GET
   @Path("{uuid}/logs")
-  @Produces(MediaType.TEXT_PLAIN)
+  @Produces(MediaType.APPLICATION_JSON)
   public Uni<String> getLogs(@PathParam("uuid") UUID deploymentId) {
 
     return sf.withTransaction(
