@@ -18,8 +18,6 @@ export function getStreamConnectionOptions() {
     "group.instance.id",
     "heartbeat.interval.ms",
     "isolation.level",
-    "key.deserializer",
-    "key.serializer",
     "linger.ms",
     "max.partition.fetch.bytes",
     "max.poll.interval.ms",
@@ -52,8 +50,6 @@ export function getStreamConnectionOptions() {
     "ssl.truststore.location",
     "ssl.truststore.password",
     "ssl.truststore.type",
-    "value.deserializer",
-    "value.serializer",
   ];
 
   return options.map((option) =>

@@ -1,8 +1,6 @@
 export function getStreamTopicOptions() {
   // Provide the most important Apache Kafka topic config options
   const options = [
-    "num.partitions",
-    "replication.factor",
     "cleanup.policy",
     "compression.type",
     "delete.retention.ms",
