@@ -3,19 +3,13 @@
 set -eux
 
 NAME="datacater"
-VERSION="local.3"
+VERSION="local.13"
 START_DIR=$PWD
 
 
 echo "cd src/platform-api/srcf/main/resources"
 
 cd platform-api/src/main/resources
-
-echo "Generating certificates"
-
-openssl genrsa -out rsaPrivateKey.pem 2048
-openssl rsa -pubout -in rsaPrivateKey.pem -out publicKey.pem
-openssl pkcs8 -topk8 -nocrypt -inform pem -in rsaPrivateKey.pem -outform pem -out privateKey.pem
 
 echo "Back to root: cd $START_DIR"
 cd "$START_DIR"
