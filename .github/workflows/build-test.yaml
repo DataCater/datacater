@@ -87,9 +87,15 @@ jobs:
         run: |
           cp -r filters python-runner
           cp -r transforms python-runner
-    -   name: Test with pytest
+    -   name: Test python-runner with pytest
         run: |
-          pytest
+          pytest python-runner
+    -   name: Test pre-defined filters with pytest
+        run: |
+          pytest filters
+    -   name: Test pre-defined transforms with pytest
+        run: |
+          pytest transforms
   push:
     if: github.ref_name == 'main' || github.ref_type == 'tag'
     name: Build and push datacater image
