@@ -21,7 +21,6 @@ import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
-import org.eclipse.microprofile.config.ConfigProvider;
 import org.jboss.logging.Logger;
 
 @ApplicationScoped
@@ -40,11 +39,6 @@ public class PythonRunnerPool {
 
   private static final Logger LOGGER = Logger.getLogger(PythonRunnerPool.class);
   private static final String POOL_NAME = "python-runner";
-
-  private static final int EXPECTED_PYTHON_RUNNERS =
-      ConfigProvider.getConfig()
-          .getOptionalValue("datacater.pythonrunner.pool.size", Integer.class)
-          .orElse(1);
 
   private static final String RUNNER_EVAL_PATH = "/";
 
@@ -95,7 +89,9 @@ public class PythonRunnerPool {
   @PostConstruct
   void initialize(@Observes StartupEvent event) {
     LOGGER.info(
-        String.format("Initialising StatefulSet with replicas := %d", EXPECTED_PYTHON_RUNNERS));
+        String.format(
+            "Initialising StatefulSet with replicas := %d",
+            DataCaterK8sConfig.PYTHON_RUNNER_REPLICAS));
     labeledStatefulSet.setClient(kubernetesClient);
     StatefulSet statefulSet = labeledStatefulSet.blueprint();
     labeledStatefulSet.createStatefulSet(statefulSet);
@@ -118,8 +114,14 @@ public class PythonRunnerPool {
     Uni<AsyncMap<String, Deque<NamedPod>>> defaultMap = sharedData.getAsyncMap(POOL_NAME);
 
     return defaultMap
-        .chain(map -> map.get(POOL_NAME))
-        .replaceIfNullWith(newQueue()) // initialise queue if map has no queue
+        .chain(
+            map -> {
+              var pods = podsFromKubernetes();
+              return map.putIfAbsent(POOL_NAME, podsFromKubernetes())
+                  .onItem()
+                  .ifNull()
+                  .continueWith(() -> pods); // The initial call to `putIfAbsent` will return null.
+            })
         .chain(
             queue -> {
               if (queue.isEmpty()) {
@@ -170,10 +172,6 @@ public class PythonRunnerPool {
     RunnerPool pool = newPool().get();
     NamedPod np = pool.getPool().getFirst();
     return Uni.createFrom().item(np);
-  }
-
-  Supplier<Deque<NamedPod>> newQueue() {
-    return this::podsFromKubernetes;
   }
 
   Supplier<RunnerPool> newPool() {
