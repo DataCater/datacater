@@ -24,10 +24,11 @@ for filter_spec_file in iglob("./filters/**/spec.y*ml", recursive=True):
         with open(filter_spec_file, "r") as filter_spec_yaml:
             filter_spec = yaml.safe_load(filter_spec_yaml)
             filter_name = filter_spec["key"]
-            module_dir = filter_dir.replace('./filters', 'filters').replace(
-                '/', '.') + '.filter'
+            module_dir = (
+                filter_dir.replace("./filters", "filters").replace("/", ".") + ".filter"
+            )
             filter_module = import_module(module_dir)
-            FILTERS[filter_name] = getattr(filter_module, 'filter')
+            FILTERS[filter_name] = getattr(filter_module, "filter")
             print("  • Added filter '" + filter_name + "'")
 print("✅ Loaded " + str(len(FILTERS.keys())) + " filters")
 
@@ -39,45 +40,42 @@ for transform_spec_file in iglob("./transforms/**/spec.y*ml", recursive=True):
         with open(transform_spec_file, "r") as transform_spec_yaml:
             transform_spec = yaml.safe_load(transform_spec_yaml)
             transform_name = transform_spec["key"]
-            module_dir = \
-                transform_dir.replace('./transforms', 'transforms')\
-                             .replace('/', '.') + '.transform'
+            module_dir = (
+                transform_dir.replace("./transforms", "transforms").replace("/", ".")
+                + ".transform"
+            )
             transform_module = import_module(module_dir)
-            TRANSFORMS[transform_name] = getattr(transform_module, 'transform')
+            TRANSFORMS[transform_name] = getattr(transform_module, "transform")
             print("  • Added transform '" + transform_name + "'")
 print("✅ Loaded " + str(len(TRANSFORMS.keys())) + " transforms")
 
 # Apply the following transforms, which change the schema of a record,
 # at the end of a transformation step
-INTERNAL_POST_TRANSFORMS = [
-    "cast-data-type",
-    "drop-field",
-    "new-field",
-    "rename-field"
-]
+INTERNAL_POST_TRANSFORMS = ["cast-data-type", "drop-field", "new-field", "rename-field"]
+
 
 class Record(BaseModel):
     key: Optional[Any]
     value: Any
     metadata: dict
 
+
 class PreviewRequest(BaseModel):
     records: List[Record]
     pipeline: dict
     previewStep: Optional[int]
 
+
 class PipelineRequest(BaseModel):
     spec: dict
 
+
 app = FastAPI()
 
-pipeline = {
-    "spec": {
-        "steps": []
-    }
-}
+pipeline = {"spec": {"steps": []}}
 
-def apply_pipeline(record: Record, pipeline: dict, preview_step = None):
+
+def apply_pipeline(record: Record, pipeline: dict, preview_step=None):
     location = {}
     try:
         step_index = 0
@@ -90,76 +88,107 @@ def apply_pipeline(record: Record, pipeline: dict, preview_step = None):
 
                 record_matches_filter = True
                 if record_filter is not None and record_filter.get("key") is not None:
-                    record_matches_filter = FILTERS[
-                        record_filter["key"]](
-                        dict(record),
-                        record_filter.get("config", {}))
-                    if record_matches_filter is False and (record_transform is None or record_transform.get("key") is None):
+                    record_matches_filter = FILTERS[record_filter["key"]](
+                        dict(record), record_filter.get("config", {})
+                    )
+                    if record_matches_filter is False and (
+                        record_transform is None or record_transform.get("key") is None
+                    ):
                         return None
 
                 # Apply transform only if no filter is defined or record matches filter
-                if record_matches_filter and record_transform is not None and record_transform.get("key") is not None:
-                    record = Record.parse_obj(TRANSFORMS[
-                        record_transform["key"]](
-                        dict(record),
-                        record_transform.get("config", {})))
-            else: # step["kind"] == "Field"
+                if (
+                    record_matches_filter
+                    and record_transform is not None
+                    and record_transform.get("key") is not None
+                ):
+                    record = Record.parse_obj(
+                        TRANSFORMS[record_transform["key"]](
+                            dict(record), record_transform.get("config", {})
+                        )
+                    )
+            else:  # step["kind"] == "Field"
                 value = record.value
                 for field_name, field_config in step["fields"].items():
-                    location["path"] = "steps[{}].fields[{}]".format(step_index, field_name)
+                    location["path"] = "steps[{}].fields[{}]".format(
+                        step_index, field_name
+                    )
 
                     field_filter = field_config.get("filter")
                     field_transform = field_config.get("transform")
 
-                    if field_transform is None or field_transform.get("key") not in INTERNAL_POST_TRANSFORMS:  # noqa: E501
+                    if (
+                        field_transform is None
+                        or field_transform.get("key") not in INTERNAL_POST_TRANSFORMS
+                    ):  # noqa: E501
                         field_matches_filter = True
-                        if field_filter is not None and field_filter.get("key") is not None:
-                            field_matches_filter = FILTERS[
-                                field_filter["key"]](
+                        if (
+                            field_filter is not None
+                            and field_filter.get("key") is not None
+                        ):
+                            field_matches_filter = FILTERS[field_filter["key"]](
                                 value.get(field_name, None),
                                 value,
-                                field_filter.get("config", {}))
-                            if field_matches_filter is False and (field_transform is None or field_transform.get("key") is None):
+                                field_filter.get("config", {}),
+                            )
+                            if field_matches_filter is False and (
+                                field_transform is None
+                                or field_transform.get("key") is None
+                            ):
                                 return None
 
                         # Apply transform only if no filter is defined or field matches filter
-                        if field_matches_filter and field_transform is not None and field_transform.get("key") is not None:
-                            value[field_name] = TRANSFORMS[
-                                field_transform["key"]](
+                        if (
+                            field_matches_filter
+                            and field_transform is not None
+                            and field_transform.get("key") is not None
+                        ):
+                            value[field_name] = TRANSFORMS[field_transform["key"]](
                                 value.get(field_name, None),
                                 value,
-                                field_transform.get("config", {}))
+                                field_transform.get("config", {}),
+                            )
 
                 # Apply internal post transforms
                 for field_name, field_config in step["fields"].items():
-                    location["path"] = "steps[{}].fields[{}]".format(step_index, field_name)
+                    location["path"] = "steps[{}].fields[{}]".format(
+                        step_index, field_name
+                    )
 
                     field_filter = field_config.get("filter")
                     field_transform = field_config.get("transform")
 
-                    if field_transform is not None and field_transform.get("key") in INTERNAL_POST_TRANSFORMS:  # noqa: E501
+                    if (
+                        field_transform is not None
+                        and field_transform.get("key") in INTERNAL_POST_TRANSFORMS
+                    ):  # noqa: E501
                         transform_key = field_transform.get("key")
                         field_matches_filter = True
-                        if field_filter is not None and field_filter.get("key") is not None:
-                            field_matches_filter = FILTERS[
-                                field_filter["key"]](
+                        if (
+                            field_filter is not None
+                            and field_filter.get("key") is not None
+                        ):
+                            field_matches_filter = FILTERS[field_filter["key"]](
                                 value.get(field_name, None),
                                 value,
-                                field_filter.get("config", {}))
+                                field_filter.get("config", {}),
+                            )
 
                         # Apply transform only if no filter is defined or field matches filter
                         if field_matches_filter:
                             if transform_key == "drop-field":
                                 value.pop(field_name)
                             elif transform_key == "rename-field":
-                                new_name = field_transform.get("config", {})["newFieldName"]
+                                new_name = field_transform.get("config", {})[
+                                    "newFieldName"
+                                ]
                                 value[new_name] = value.pop(field_name)
                             else:
-                                value[field_name] = TRANSFORMS[
-                                    field_transform["key"]](
+                                value[field_name] = TRANSFORMS[field_transform["key"]](
                                     value.get(field_name, None),
                                     value,
-                                    field_transform.get("config", {}))
+                                    field_transform.get("config", {}),
+                                )
                 record.value = value
 
             if preview_step == step_index:
@@ -167,7 +196,7 @@ def apply_pipeline(record: Record, pipeline: dict, preview_step = None):
 
             step_index = step_index + 1
         return record
-    except: #noqa: E722
+    except:  # noqa: E722
         error_type = sys.exc_info()[0]
         file_name = None
         line_number = None
@@ -177,7 +206,7 @@ def apply_pipeline(record: Record, pipeline: dict, preview_step = None):
             file_line_error = formatted_errors[-4].strip()
             if match := re.search('File "(.*)".*', file_line_error):
                 file_name = match.group(1)
-            if match := re.search('.*line ([0-9]*).*', file_line_error):
+            if match := re.search(".*line ([0-9]*).*", file_line_error):
                 line_number = int(match.group(1))
         error_message = None
         if len(formatted_errors) > 1:
@@ -192,14 +221,16 @@ def apply_pipeline(record: Record, pipeline: dict, preview_step = None):
                 "name": file_name,
                 "lineNumber": line_number,
             },
-            "stacktrace": formatted_errors
+            "stacktrace": formatted_errors,
         }
 
         return record
 
+
 @app.post("/", response_model=Record)
 async def apply_to_single_record(record: Record):
     return apply_pipeline(record, pipeline)
+
 
 @app.post("/batch", response_model=List[Record])
 async def apply_to_multiple_records(records: List[Record], response: Response):
@@ -210,30 +241,33 @@ async def apply_to_multiple_records(records: List[Record], response: Response):
             processed_records.append(record)
     return processed_records
 
+
 @app.post("/preview", response_model=List[Record])
 async def preview(previewRequest: PreviewRequest, response: Response):
     processed_records = []
     for record in previewRequest.records:
-        processed_record = apply_pipeline(record, previewRequest.pipeline, previewRequest.previewStep)
+        processed_record = apply_pipeline(
+            record, previewRequest.pipeline, previewRequest.previewStep
+        )
         if processed_record is not None:
             processed_records.append(processed_record)
     return processed_records
 
+
 @app.get("/health")
 async def health():
     try:
-        status_ok = {"status": 200,
-                     "message": "All systems are UP and running!"}
+        status_ok = {"status": 200, "message": "All systems are UP and running!"}
         return status_ok
     except:  # noqa: E722
         return {
             "status_code": 500,
             "message": "We could not process your request "
-                       "due to an internal server error!"
+            "due to an internal server error!",
         }
 
+
 @app.post("/pipeline")
-async def store_pipeline(request: PipelineRequest,
-                         response: Response):
+async def store_pipeline(request: PipelineRequest, response: Response):
     global pipeline
     pipeline["spec"] = request.spec
