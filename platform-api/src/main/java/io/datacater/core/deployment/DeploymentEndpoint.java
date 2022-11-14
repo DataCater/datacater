@@ -63,7 +63,6 @@ public class DeploymentEndpoint {
   @Path("{uuid}/logs")
   @Produces(MediaType.APPLICATION_JSON)
   public Uni<String> getLogs(@PathParam("uuid") UUID deploymentId) {
-
     return sf.withTransaction(
             ((session, transaction) -> session.find(DeploymentEntity.class, deploymentId)))
         .onItem()
@@ -151,23 +150,18 @@ public class DeploymentEndpoint {
   @DELETE
   @Path("{uuid}")
   public Uni<Response> deleteDeployment(@PathParam("uuid") UUID deploymentId) {
-    return sf.withSession(
-        session ->
+    return sf.withTransaction(
+        ((session, tx) ->
             session
                 .find(DeploymentEntity.class, deploymentId)
                 .onItem()
-                .ifNull()
-                .failWith(
-                    new DeploymentNotFoundException(
-                        StaticConfig.LoggerMessages.DEPLOYMENT_NOT_FOUND))
-                .onItem()
                 .ifNotNull()
                 .call(
-                    se -> {
+                    de -> {
                       deleteK8Deployment(deploymentId);
-                      return session.remove(se);
+                      return session.remove(de);
                     })
-                .replaceWith(Response.ok().build()));
+                .replaceWith(Response.ok().build())));
   }
 
   @PUT
@@ -191,7 +185,7 @@ public class DeploymentEndpoint {
         .onItem()
         .transform(
             tuple ->
-                createDeployment(
+                updateDeployment(
                     tuple.getItem1(),
                     tuple.getItem3(),
                     tuple.getItem2(),
@@ -268,9 +262,9 @@ public class DeploymentEndpoint {
   private DeploymentEntity getK8Deployment(DeploymentEntity deployment)
       throws JsonProcessingException {
     K8Deployment k8Deployment = new K8Deployment(client);
-    deployment.setSpec(
-        DeploymentSpec.serializeDeploymentSpec(
-            k8Deployment.getDeployment(deployment.getId()).deployment()));
+    DeploymentSpec spec = k8Deployment.getDeployment(deployment.getId());
+    JsonNode specNode = DeploymentSpec.serializeDeploymentSpec(spec.deployment());
+    deployment.setSpec(specNode);
     return deployment;
   }
 
@@ -293,9 +287,19 @@ public class DeploymentEndpoint {
                   .create(pe, streamIn, streamOut, deploymentSpec, de.getId())
                   .deployment()));
     } catch (JsonProcessingException e) {
-      throw new RuntimeException(e);
+      throw new DatacaterException(StringUtilities.wrapString(e.getMessage()));
     }
     return de;
+  }
+
+  private DeploymentEntity updateDeployment(
+      PipelineEntity pe,
+      StreamEntity streamOut,
+      StreamEntity streamIn,
+      DeploymentSpec deploymentSpec,
+      DeploymentEntity de) {
+    deleteK8Deployment(de.getId());
+    return createDeployment(pe, streamOut, streamIn, deploymentSpec, de);
   }
 
   private UUID getUUIDFromNode(JsonNode node, String key) {

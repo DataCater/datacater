@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.datacater.core.exceptions.CreateDeploymentException;
-import io.datacater.core.exceptions.DatacaterException;
+import io.datacater.core.exceptions.DeploymentNotFoundException;
 import io.datacater.core.pipeline.PipelineEntity;
 import io.datacater.core.stream.StreamEntity;
 import io.datacater.core.utilities.StringUtilities;
@@ -237,9 +237,8 @@ public class K8Deployment {
             .withLabel(StaticConfig.UUID_TEXT, deploymentId.toString())
             .list()
             .getItems();
-
     if (deployments.isEmpty()) {
-      throw new DatacaterException(StaticConfig.LoggerMessages.DEPLOYMENT_NOT_FOUND);
+      throw new DeploymentNotFoundException(StaticConfig.LoggerMessages.DEPLOYMENT_NOT_FOUND);
     }
     return deployments.get(0).getMetadata().getName();
   }
