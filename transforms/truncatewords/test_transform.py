@@ -40,6 +40,15 @@ def test_truncate_words_no_change():
     )
 
 
+def test_truncate_negative_number_of_words():
+    with pytest.raises(AssertionError):
+        transform.transform(
+            "DataCater is the developer-friendly ETL platform.",
+            {},
+            {"words": -1},
+        )
+
+
 def test_truncate_words_empty_string():
     assert transform.transform("", {}, {"words": 1000}) == ""
 

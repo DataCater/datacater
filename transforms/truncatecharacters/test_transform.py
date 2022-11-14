@@ -31,6 +31,15 @@ def test_truncate_characters_no_change():
     )
 
 
+def test_truncate_negative_number_of_characters():
+    with pytest.raises(AssertionError):
+        transform.transform(
+            "DataCater is the developer-friendly ETL platform.",
+            {},
+            {"characters": -1},
+        )
+
+
 def test_truncate_characters_empty_string():
     assert transform.transform("", {}, {"characters": 1000}) == ""
 
