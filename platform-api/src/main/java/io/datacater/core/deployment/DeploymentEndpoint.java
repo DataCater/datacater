@@ -245,7 +245,7 @@ public class DeploymentEndpoint {
     K8Deployment k8Deployment = new K8Deployment(client);
     for (DeploymentEntity deployment : deployments) {
       deployment.setSpec(
-          DeploymentSpec.serializeDeploymentSpec(
+          DeploymentEntity.serializeMap(
               k8Deployment.getDeployment(deployment.getId()).deployment()));
     }
     return deployments;
@@ -255,7 +255,7 @@ public class DeploymentEndpoint {
       throws JsonProcessingException {
     K8Deployment k8Deployment = new K8Deployment(client);
     DeploymentSpec spec = k8Deployment.getDeployment(deployment.getId());
-    JsonNode specNode = DeploymentSpec.serializeDeploymentSpec(spec.deployment());
+    JsonNode specNode = DeploymentEntity.serializeMap(spec.deployment());
     deployment.setSpec(specNode);
     return deployment;
   }
@@ -272,15 +272,9 @@ public class DeploymentEndpoint {
       DeploymentSpec deploymentSpec,
       DeploymentEntity de) {
     K8Deployment k8Deployment = new K8Deployment(client);
-    try {
-      de.setSpec(
-          DeploymentSpec.serializeDeploymentSpec(
-              k8Deployment
-                  .create(pe, streamIn, streamOut, deploymentSpec, de.getId())
-                  .deployment()));
-    } catch (JsonProcessingException e) {
-      throw new DatacaterException(StringUtilities.wrapString(e.getMessage()));
-    }
+    de.setStatus(
+        DeploymentEntity.serializeMap(
+            k8Deployment.create(pe, streamIn, streamOut, deploymentSpec, de.getId()).deployment()));
     return de;
   }
 

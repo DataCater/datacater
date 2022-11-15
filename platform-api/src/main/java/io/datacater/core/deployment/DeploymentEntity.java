@@ -1,12 +1,13 @@
 package io.datacater.core.deployment;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.quarkiverse.hibernate.types.json.JsonBinaryType;
 import io.quarkiverse.hibernate.types.json.JsonType;
 import io.quarkiverse.hibernate.types.json.JsonTypes;
 import java.util.Date;
+import java.util.Map;
 import java.util.UUID;
 import javax.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -37,14 +38,27 @@ public class DeploymentEntity {
   @JsonProperty("spec")
   private JsonNode spec;
 
+  @JsonProperty("status")
+  @Transient
+  private JsonNode status;
+
   protected DeploymentEntity() {}
 
-  public DeploymentEntity(DeploymentSpec spec) throws JsonProcessingException {
-    this.spec = DeploymentSpec.serializeDeploymentSpec(spec.deployment());
+  public static JsonNode serializeMap(Map<String, Object> map) {
+    ObjectMapper objectMapper = new ObjectMapper();
+    return objectMapper.valueToTree(map);
+  }
+
+  public DeploymentEntity(DeploymentSpec spec) {
+    this.spec = DeploymentEntity.serializeMap(spec.deployment());
   }
 
   protected void setSpec(JsonNode spec) {
     this.spec = spec;
+  }
+
+  protected void setStatus(JsonNode status) {
+    this.status = status;
   }
 
   protected UUID getId() {
