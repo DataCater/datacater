@@ -2,23 +2,11 @@
 
 set -eux
 
+DAY_HOUR_MIN="$(date '+%d-%H-%M')"
 NAME="datacater"
-VERSION="local.13"
+VERSION="$DAY_HOUR_MIN"
+#VERSION="local.20"
 START_DIR=$PWD
-
-
-echo "cd src/platform-api/srcf/main/resources"
-
-cd platform-api/src/main/resources
-
-echo "Back to root: cd $START_DIR"
-cd "$START_DIR"
-
-
-echo "Copy transforms and filters into jib builder"
-# mkdir platform-api/src/main/jib if not exists
-#cp -R filters platform-api/src/main/jib
-#cp -R transforms platform-api/src/main/jib
 
 
 echo "Building version $VERSION"
@@ -35,7 +23,7 @@ minikube image load datacater/$NAME:$VERSION
 echo "Loaded image datacater/$NAME:$VERSION"
 
  helm template ./helm-charts/datacater\
-   --set image.tag=$VERSION --skip-tests\
+   --set image.tag=$VERSION\
    --set image.repository=datacater/$NAME --skip-tests\
     > k8s-manifests/minikube-with-postgres-ns-default.yaml
 

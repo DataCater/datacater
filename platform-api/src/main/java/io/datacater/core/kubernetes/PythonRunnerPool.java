@@ -114,14 +114,8 @@ public class PythonRunnerPool {
     Uni<AsyncMap<String, Deque<NamedPod>>> defaultMap = sharedData.getAsyncMap(POOL_NAME);
 
     return defaultMap
-        .chain(
-            map -> {
-              var pods = podsFromKubernetes();
-              return map.putIfAbsent(POOL_NAME, podsFromKubernetes())
-                  .onItem()
-                  .ifNull()
-                  .continueWith(() -> pods); // The initial call to `putIfAbsent` will return null.
-            })
+        .call(map -> map.putIfAbsent(POOL_NAME, podsFromKubernetes()))
+        .chain(map -> map.get(POOL_NAME))
         .chain(
             queue -> {
               if (queue.isEmpty()) {
