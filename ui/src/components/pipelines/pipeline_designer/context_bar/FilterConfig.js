@@ -188,6 +188,12 @@ class FilterConfig extends Component {
                   <i>{fieldDataType}</i>.
                 </div>
               )}
+              {(filter.config === undefined ||
+                Object.keys(filter.config).length === 0) && (
+                <div className="alert alert-primary">
+                  This filter does not require any configuration.
+                </div>
+              )}
               {filter.config !== undefined &&
                 filter.config.map((configOption, idx) => (
                   <div key={idx}>
