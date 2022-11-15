@@ -3,12 +3,16 @@ package io.datacater.core.deployment;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.datacater.core.exceptions.CreateDeploymentException;
+import io.datacater.core.exceptions.DeploymentNotFoundException;
 import io.datacater.core.pipeline.PipelineEntity;
 import io.datacater.core.stream.StreamEntity;
+import io.datacater.core.utilities.StringUtilities;
 import io.fabric8.kubernetes.api.model.*;
 import io.fabric8.kubernetes.api.model.apps.Deployment;
 import io.fabric8.kubernetes.api.model.apps.DeploymentBuilder;
 import io.fabric8.kubernetes.client.KubernetesClient;
+import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.kubernetes.client.dsl.RollableScalableResource;
 import java.util.*;
 import javax.inject.Singleton;
@@ -27,12 +31,12 @@ public class K8Deployment {
     this.k8ConfigMap = new K8ConfigMap(client);
   }
 
-  public UUID create(
+  public Map<String, Object> create(
       PipelineEntity pe,
       StreamEntity streamIn,
       StreamEntity streamOut,
-      DeploymentSpec deploymentSpec) {
-    UUID deploymentId = UUID.randomUUID();
+      DeploymentSpec deploymentSpec,
+      UUID deploymentId) {
     final String name = StaticConfig.DEPLOYMENT_NAME_PREFIX + deploymentId;
     final String configmapName = StaticConfig.CONFIGMAP_NAME_PREFIX + deploymentId;
     final String volumeName = StaticConfig.VOLUME_NAME_PREFIX + deploymentId;
@@ -41,46 +45,57 @@ public class K8Deployment {
 
     List<EnvVar> variables = getEnvironmentVariables(streamIn, streamOut, deploymentSpec);
 
-    Deployment deployment =
-        new DeploymentBuilder()
-            .withNewMetadata()
-            .withName(name)
-            .addToLabels(getLabels(deploymentId))
-            .endMetadata()
-            .withNewSpec()
-            .withReplicas(StaticConfig.EnvironmentVariables.REPLICAS)
-            .withMinReadySeconds(StaticConfig.EnvironmentVariables.READY_SECONDS)
-            .withNewSelector()
-            .addToMatchLabels(getLabels(deploymentId))
-            .endSelector()
-            .withNewTemplate()
-            .withNewMetadata()
-            .addToLabels(getLabels(deploymentId))
-            .endMetadata()
-            .withNewSpec()
-            .addNewContainer()
-            .withName(name)
-            .withImage(StaticConfig.EnvironmentVariables.FULL_IMAGE_NAME)
-            .withImagePullPolicy(StaticConfig.EnvironmentVariables.PULL_POLICY)
-            .withEnv(variables)
-            .withNewResources()
-            .withRequests(StaticConfig.RESOURCE_REQUESTS)
-            .withLimits(StaticConfig.RESOURCE_LIMITS)
-            .endResources()
-            .withVolumeMounts(getVolumeMount(volumeName))
-            .endContainer()
-            .withVolumes(getVolume(volumeName, configmapName))
-            .endSpec()
-            .endTemplate()
-            .endSpec()
-            .build();
+    try {
+      Deployment deployment =
+          new DeploymentBuilder()
+              .withNewMetadata()
+              .withName(name)
+              .addToLabels(getLabels(deploymentId))
+              .endMetadata()
+              .withNewSpec()
+              .withReplicas(StaticConfig.EnvironmentVariables.REPLICAS)
+              .withMinReadySeconds(StaticConfig.EnvironmentVariables.READY_SECONDS)
+              .withNewSelector()
+              .addToMatchLabels(getLabels(deploymentId))
+              .endSelector()
+              .withNewTemplate()
+              .withNewMetadata()
+              .addToLabels(getLabels(deploymentId))
+              .endMetadata()
+              .withNewSpec()
+              .addNewContainer()
+              .withName(name)
+              .withImage(StaticConfig.EnvironmentVariables.FULL_IMAGE_NAME)
+              .withImagePullPolicy(StaticConfig.EnvironmentVariables.PULL_POLICY)
+              .withEnv(variables)
+              .withNewResources()
+              .withRequests(StaticConfig.RESOURCE_REQUESTS)
+              .withLimits(StaticConfig.RESOURCE_LIMITS)
+              .endResources()
+              .withVolumeMounts(getVolumeMount(volumeName))
+              .endContainer()
+              .addToContainers(pythonRunnerContainer())
+              .withVolumes(getVolume(volumeName, configmapName))
+              .endSpec()
+              .endTemplate()
+              .endSpec()
+              .build();
 
-    client
-        .apps()
-        .deployments()
-        .inNamespace(StaticConfig.EnvironmentVariables.NAMESPACE)
-        .create(deployment);
-    return deploymentId;
+      client
+          .apps()
+          .deployments()
+          .inNamespace(StaticConfig.EnvironmentVariables.NAMESPACE)
+          .create(deployment);
+
+    } catch (KubernetesClientException ex) {
+      throw new CreateDeploymentException(StringUtilities.wrapString(ex.getMessage()));
+    }
+
+    if (!exists(deploymentId)) {
+      throw new CreateDeploymentException(StaticConfig.LoggerMessages.DEPLOYMENT_NOT_CREATED);
+    }
+
+    return getDeployment(deploymentId);
   }
 
   private static Map<String, String> getLabels(UUID deploymentId) {
@@ -93,6 +108,25 @@ public class K8Deployment {
         StaticConfig.PIPELINE_REV,
         StaticConfig.UUID_TEXT,
         deploymentId.toString());
+  }
+
+  private Container pythonRunnerContainer() {
+    return new ContainerBuilder(true)
+        .withName(StaticConfig.PYTHON_RUNNER_NAME)
+        .withImage(
+            String.format(
+                "%s:%s",
+                StaticConfig.EnvironmentVariables.PYTHON_RUNNER_IMAGE_NAME,
+                StaticConfig.EnvironmentVariables.PYTHON_RUNNER_IMAGE_TAG))
+        .withPorts(this.containerPort())
+        .build();
+  }
+
+  private ContainerPort containerPort() {
+    return new ContainerPortBuilder(true)
+        .withContainerPort(StaticConfig.EnvironmentVariables.PYTHON_RUNNER_CONTAINER_PORT)
+        .withName(StaticConfig.HTTP)
+        .build();
   }
 
   private static VolumeMount getVolumeMount(String volumeName) {
@@ -119,6 +153,7 @@ public class K8Deployment {
         .deployments()
         .inNamespace(StaticConfig.EnvironmentVariables.NAMESPACE)
         .withName(getDeploymentName(deploymentId))
+        .inContainer(StaticConfig.DEPLOYMENT_NAME_PREFIX + deploymentId)
         .getLog(true);
   }
 
@@ -139,31 +174,55 @@ public class K8Deployment {
             .inNamespace(StaticConfig.EnvironmentVariables.NAMESPACE)
             .withName(name)
             .delete();
+
     if (Boolean.TRUE.equals(status)) {
-      LOGGER.info(StaticConfig.LoggerMessages.DEPLOYMENT_DELETED + name);
+      LOGGER.info(String.format(StaticConfig.LoggerMessages.DEPLOYMENT_DELETED, name));
     } else {
-      LOGGER.info(StaticConfig.LoggerMessages.DEPLOYMENT_NOT_DELETED + name);
+      LOGGER.info(String.format(StaticConfig.LoggerMessages.DEPLOYMENT_NOT_DELETED, name));
     }
   }
 
-  public ListMeta getDeployments() {
-    return client
-        .apps()
-        .deployments()
-        .inNamespace(StaticConfig.EnvironmentVariables.NAMESPACE)
-        .list()
-        .getMetadata();
+  private Map<String, Object> deploymentToMetaDataMap(Deployment deployment) {
+    Map<String, Object> map = new HashMap<>();
+    Map<String, Object> node = new HashMap<>();
+    if (deployment.getMetadata().getLabels() != null) {
+      node.putAll(deployment.getMetadata().getLabels());
+    }
+    if (deployment.getMetadata().getAnnotations() != null) {
+      node.putAll(deployment.getMetadata().getAnnotations());
+    }
+    if (deployment.getStatus() == null) {
+      // return before trying to add Status MetaData
+      map.put(deployment.getMetadata().getName(), node);
+      return map;
+    }
+
+    if (deployment.getStatus().getAdditionalProperties() != null) {
+      node.putAll(deployment.getStatus().getAdditionalProperties());
+    }
+    if (deployment.getStatus().getConditions() != null) {
+      node.put(StaticConfig.CONDITIONS, deployment.getStatus().getConditions());
+    }
+    map.put(deployment.getMetadata().getName(), node);
+    return map;
   }
 
-  public ObjectMeta getDeployment(UUID deploymentId) {
-
-    return client
-        .apps()
-        .deployments()
-        .inNamespace(StaticConfig.EnvironmentVariables.NAMESPACE)
-        .withName(getDeploymentName(deploymentId))
-        .get()
-        .getMetadata();
+  public Map<String, Object> getDeployment(UUID deploymentId) {
+    try {
+      return deploymentToMetaDataMap(
+          client
+              .apps()
+              .deployments()
+              .inNamespace(StaticConfig.EnvironmentVariables.NAMESPACE)
+              .withName(getDeploymentName(deploymentId))
+              .get());
+    } catch (DeploymentNotFoundException ex) {
+      Map<String, Object> errorMap = new HashMap<>();
+      Map<String, Object> messageMap = new HashMap<>();
+      messageMap.put(StaticConfig.MESSAGE_TAG, StaticConfig.LoggerMessages.K8_DEPLOYMENT_NOT_FOUND);
+      errorMap.put(StaticConfig.ERROR_TAG, messageMap);
+      return errorMap;
+    }
   }
 
   private boolean exists(UUID deploymentId) {
@@ -186,9 +245,8 @@ public class K8Deployment {
             .withLabel(StaticConfig.UUID_TEXT, deploymentId.toString())
             .list()
             .getItems();
-
     if (deployments.isEmpty()) {
-      return null;
+      throw new DeploymentNotFoundException(StaticConfig.LoggerMessages.DEPLOYMENT_NOT_FOUND);
     }
     return deployments.get(0).getMetadata().getName();
   }

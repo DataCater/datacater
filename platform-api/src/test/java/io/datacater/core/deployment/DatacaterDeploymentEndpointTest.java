@@ -25,9 +25,11 @@ import org.junit.jupiter.api.*;
 class DatacaterDeploymentEndpointTest {
   private static final Logger LOGGER = Logger.getLogger(DatacaterDeploymentEndpointTest.class);
 
-  String baseURI = "http://localhost:8081";
-  String deploymentsPath = "/deployments";
+  final String baseURI = "http://localhost:8081";
+  final String deploymentsPath = "/deployments";
+  final String deploymentPath = "deploymentTests/deployment.json";
 
+  UUID pipelineId;
   UUID deploymentId;
 
   @Test
@@ -43,7 +45,6 @@ class DatacaterDeploymentEndpointTest {
     String streamInPath = "deploymentTests/streamin.json";
     String streamOutPath = "deploymentTests/streamout.json";
     String pipelinePath = "deploymentTests/pipeline.json";
-    String deploymentPath = "deploymentTests/deployment.json";
 
     // add stream in
     URL JsonURL = ClassLoader.getSystemClassLoader().getResource(streamInPath);
@@ -86,13 +87,13 @@ class DatacaterDeploymentEndpointTest {
     PipelineEntity pipeline =
         mapper.readValue(responsePipeline.body().asString(), PipelineEntity.class);
 
-    UUID pipelineUUID = pipeline.getId();
+    pipelineId = pipeline.getId();
 
     // add deployment
     JsonURL = ClassLoader.getSystemClassLoader().getResource(deploymentPath);
     json = mapper.readTree(JsonURL);
     jsonString = json.toString();
-    jsonString = jsonString.replace(pipelineUUIDPlaceholder, pipelineUUID.toString());
+    jsonString = jsonString.replace(pipelineUUIDPlaceholder, pipelineId.toString());
 
     Response responseDeployment =
         given()
@@ -101,19 +102,66 @@ class DatacaterDeploymentEndpointTest {
             .body(jsonString)
             .post(deploymentsPath);
 
-    deploymentId = responseDeployment.body().as(UUID.class);
+    DeploymentEntity deployment =
+        mapper.readValue(responseDeployment.body().asString(), DeploymentEntity.class);
+    deploymentId = deployment.getId();
 
     Assertions.assertEquals(200, responseDeployment.getStatusCode());
   }
 
   @Test
   @Order(2)
-  void testGetDeployments() {
-    given().baseUri(baseURI).get(deploymentsPath).then().statusCode(200);
+  void testGetDeployment() {
+    given()
+        .pathParam("uuid", deploymentId)
+        .baseUri(baseURI)
+        .get(deploymentsPath + "/{uuid}")
+        .then()
+        .statusCode(200);
   }
 
   @Test
   @Order(3)
+  void testGetDeployments() {
+    given().baseUri(baseURI).get(deploymentsPath).then().statusCode(200);
+  }
+
+  // only testing that logs can be fetched.
+  // Log validity  ist harder to test, since logs will always change
+  @Test
+  @Order(4)
+  void testGetDeploymentLogs() {
+    given()
+        .pathParam("uuid", deploymentId)
+        .baseUri(baseURI)
+        .get(deploymentsPath + "/{uuid}/logs")
+        .then()
+        .statusCode(200);
+  }
+
+  @Test
+  @Order(5)
+  void testUpdateDeployment() throws IOException {
+    String pipelineUUIDPlaceholder = "pipelineUUIDPlaceholder";
+    URL JsonURL = ClassLoader.getSystemClassLoader().getResource(deploymentPath);
+    ObjectMapper mapper = new JsonMapper();
+    JsonNode json = mapper.readTree(JsonURL);
+    String jsonString = json.toString();
+    jsonString = jsonString.replace(pipelineUUIDPlaceholder, pipelineId.toString());
+
+    Response responseDeployment =
+        given()
+            .pathParam("uuid", deploymentId)
+            .contentType(ContentType.JSON)
+            .baseUri(baseURI)
+            .body(jsonString)
+            .put(deploymentsPath + "/{uuid}");
+
+    Assertions.assertEquals(200, responseDeployment.getStatusCode());
+  }
+
+  @Test
+  @Order(6)
   void testDeleteDeployment() {
     Response response =
         RestAssured.given()
@@ -123,5 +171,49 @@ class DatacaterDeploymentEndpointTest {
             .delete(deploymentsPath + "/{uuid}");
 
     Assertions.assertEquals(200, response.getStatusCode());
+  }
+
+  @Test
+  @Order(7)
+  void testGetDeletedDeployment() {
+    given()
+        .pathParam("uuid", deploymentId)
+        .baseUri(baseURI)
+        .get(deploymentsPath + "/{uuid}")
+        .then()
+        .statusCode(404);
+  }
+
+  @Test
+  @Order(8)
+  void testGetUnknownDeployment() {
+    given()
+        .pathParam("uuid", UUID.randomUUID())
+        .baseUri(baseURI)
+        .get(deploymentsPath + "/{uuid}")
+        .then()
+        .statusCode(404);
+  }
+
+  @Test
+  @Order(9)
+  void testGetUnknownDeploymentLogs() {
+    given()
+        .pathParam("uuid", UUID.randomUUID())
+        .baseUri(baseURI)
+        .get(deploymentsPath + "/{uuid}/logs")
+        .then()
+        .statusCode(404);
+  }
+
+  @Test
+  @Order(10)
+  void testWatchUnknownDeploymentLogs() {
+    given()
+        .pathParam("uuid", UUID.randomUUID())
+        .baseUri(baseURI)
+        .get(deploymentsPath + "/{uuid}/watch-logs")
+        .then()
+        .statusCode(404);
   }
 }
