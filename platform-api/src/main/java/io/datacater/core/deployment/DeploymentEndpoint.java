@@ -1,6 +1,5 @@
 package io.datacater.core.deployment;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import io.datacater.core.exceptions.*;
 import io.datacater.core.pipeline.PipelineEntity;
@@ -48,14 +47,7 @@ public class DeploymentEndpoint {
         .failWith(new DeploymentNotFoundException(StaticConfig.LoggerMessages.DEPLOYMENT_NOT_FOUND))
         .onItem()
         .ifNotNull()
-        .transform(
-            deployment -> {
-              try {
-                return getK8Deployment(deployment);
-              } catch (JsonProcessingException e) {
-                throw new DatacaterException(StringUtilities.wrapString(e.getMessage()));
-              }
-            });
+        .transform(this::getK8Deployment);
   }
 
   @GET
@@ -103,14 +95,7 @@ public class DeploymentEndpoint {
                 .createQuery("from DeploymentEntity", DeploymentEntity.class)
                 .getResultList()
                 .onItem()
-                .transform(
-                    list -> {
-                      try {
-                        return getK8Deployments(list);
-                      } catch (JsonProcessingException e) {
-                        throw new DatacaterException(StringUtilities.wrapString(e.getMessage()));
-                      }
-                    }));
+                .transform(this::getK8Deployments));
   }
 
   @POST
