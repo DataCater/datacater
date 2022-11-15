@@ -1,7 +1,5 @@
 {
   "spec": {
-    "deployment": {
       "pipeline": "pipelineUUIDPlaceholder"
-    }
   }
 }

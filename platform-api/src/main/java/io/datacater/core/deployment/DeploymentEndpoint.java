@@ -116,10 +116,10 @@ public class DeploymentEndpoint {
 
   @POST
   @Consumes(MediaType.APPLICATION_JSON)
-  public Uni<DeploymentEntity> createDeployment(io.datacater.core.deployment.Deployment deployment)
+  public Uni<DeploymentEntity> createDeployment(DeploymentSpec spec)
       throws JsonProcessingException {
-    DeploymentEntity de = new DeploymentEntity(deployment.spec());
-    Uni<PipelineEntity> pipelineUni = getPipeline(deployment.spec());
+    DeploymentEntity de = new DeploymentEntity(spec);
+    Uni<PipelineEntity> pipelineUni = getPipeline(spec);
     return sf.withTransaction(
         (session, transaction) ->
             session
@@ -140,11 +140,7 @@ public class DeploymentEndpoint {
                 .transform(
                     tuple ->
                         createDeployment(
-                            tuple.getItem1(),
-                            tuple.getItem3(),
-                            tuple.getItem2(),
-                            deployment.spec(),
-                            de)));
+                            tuple.getItem1(), tuple.getItem3(), tuple.getItem2(), spec, de)));
   }
 
   @DELETE
@@ -167,8 +163,8 @@ public class DeploymentEndpoint {
   @PUT
   @Path("{uuid}")
   public Uni<DeploymentEntity> updateDeployment(
-      @PathParam("uuid") UUID deploymentUuid, io.datacater.core.deployment.Deployment deployment) {
-    Uni<PipelineEntity> pipelineUni = getPipeline(deployment.spec());
+      @PathParam("uuid") UUID deploymentUuid, DeploymentSpec spec) {
+    Uni<PipelineEntity> pipelineUni = getPipeline(spec);
     Uni<DeploymentEntity> deploymentUni = getDeploymentUni(deploymentUuid);
     return pipelineUni
         .onItem()
@@ -186,11 +182,7 @@ public class DeploymentEndpoint {
         .transform(
             tuple ->
                 updateDeployment(
-                    tuple.getItem1(),
-                    tuple.getItem3(),
-                    tuple.getItem2(),
-                    deployment.spec(),
-                    tuple.getItem4()))
+                    tuple.getItem1(), tuple.getItem3(), tuple.getItem2(), spec, tuple.getItem4()))
         .onFailure()
         .transform(
             ex ->

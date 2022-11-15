@@ -1,6 +1,5 @@
 package io.datacater.core.deployment;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -22,6 +21,7 @@ public record DeploymentSpec(
                 }
               }
         """)
+        @JsonProperty(value = "spec", required = true)
         Map<String, Object> deployment) {
 
   public static JsonNode serializeDeploymentSpec(Map<String, Object> deployment)
@@ -29,10 +29,5 @@ public record DeploymentSpec(
     ObjectMapper objectMapper = new ObjectMapper();
     DeploymentSpec ds = new DeploymentSpec(deployment);
     return objectMapper.readTree(objectMapper.writeValueAsString(ds));
-  }
-
-  @JsonCreator
-  static DeploymentSpec from(@JsonProperty("deployment") Map<String, Object> deployment) {
-    return new DeploymentSpec(deployment);
   }
 }
