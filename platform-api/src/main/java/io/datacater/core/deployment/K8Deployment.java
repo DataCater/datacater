@@ -203,20 +203,26 @@ public class K8Deployment {
     if (deployment.getStatus().getConditions() != null) {
       node.put(StaticConfig.CONDITIONS, deployment.getStatus().getConditions());
     }
-    node.put(StaticConfig.READY_REPLICAS, deployment.getStatus().getReadyReplicas());
-    node.put(StaticConfig.COLLISION_COUNT, deployment.getStatus().getCollisionCount());
     map.put(deployment.getMetadata().getName(), node);
     return map;
   }
 
   public Map<String, Object> getDeployment(UUID deploymentId) {
-    return deploymentToMetaDataMap(
-        client
-            .apps()
-            .deployments()
-            .inNamespace(StaticConfig.EnvironmentVariables.NAMESPACE)
-            .withName(getDeploymentName(deploymentId))
-            .get());
+    try {
+      return deploymentToMetaDataMap(
+          client
+              .apps()
+              .deployments()
+              .inNamespace(StaticConfig.EnvironmentVariables.NAMESPACE)
+              .withName(getDeploymentName(deploymentId))
+              .get());
+    } catch (DeploymentNotFoundException ex) {
+      Map<String, Object> errorMap = new HashMap<>();
+      Map<String, Object> messageMap = new HashMap<>();
+      messageMap.put(StaticConfig.MESSAGE_TAG, StaticConfig.LoggerMessages.K8_DEPLOYMENT_NOT_FOUND);
+      errorMap.put(StaticConfig.ERROR_TAG, messageMap);
+      return errorMap;
+    }
   }
 
   private boolean exists(UUID deploymentId) {

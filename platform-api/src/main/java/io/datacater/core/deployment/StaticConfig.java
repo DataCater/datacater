@@ -42,9 +42,9 @@ public class StaticConfig {
   static final String DC_STREAMIN_CONFIG_TEXT = "DATACATER_STREAM-IN_CONFIG";
   static final String DC_STREAMOUT_CONFIG_TEXT = "DATACATER_STREAM-OUT_CONFIG";
   static final String HTTP = "http";
-  static final String READY_REPLICAS = "Ready Replicas";
-  static final String COLLISION_COUNT = "Collision Count";
   static final String CONDITIONS = "Conditions";
+  static final String ERROR_TAG = "error";
+  static final String MESSAGE_TAG = "message";
 
   static class EnvironmentVariables {
     private EnvironmentVariables() {}
@@ -90,6 +90,8 @@ public class StaticConfig {
     static final String PIPELINE_NOT_FOUND = "The referenced Pipeline UUID could not be found";
     static final String STREAM_NOT_FOUND = "The referenced %s UUID could not be found";
     static final String DEPLOYMENT_NOT_FOUND = "The referenced Deployment could not be found.";
+    static final String K8_DEPLOYMENT_NOT_FOUND =
+        "The referenced Kubernetes Deployment could not be found.";
     static final String DEPLOYMENT_NOT_CREATED = "The Deployment could not be created.";
     static final String DEPLOYMENT_NOT_UPDATED = "The Deployment could not be updated.";
   }
