@@ -27,7 +27,6 @@ import javax.ws.rs.sse.Sse;
 import javax.ws.rs.sse.SseEventSink;
 import org.eclipse.microprofile.openapi.annotations.security.SecurityRequirement;
 import org.hibernate.reactive.mutiny.Mutiny;
-import org.jboss.logging.Logger;
 
 @Path("/deployments")
 @RolesAllowed("dev")
@@ -35,7 +34,6 @@ import org.jboss.logging.Logger;
 @SecurityRequirement(name = "apiToken")
 @RequestScoped
 public class DeploymentEndpoint {
-  private static final Logger LOGGER = Logger.getLogger(DeploymentEndpoint.class);
   @Inject Mutiny.SessionFactory sf;
 
   @Inject KubernetesClient client;
@@ -240,8 +238,7 @@ public class DeploymentEndpoint {
     return k8Deployment.watchLogs(deploymentId);
   }
 
-  private List<DeploymentEntity> getK8Deployments(List<DeploymentEntity> deployments)
-      throws JsonProcessingException {
+  private List<DeploymentEntity> getK8Deployments(List<DeploymentEntity> deployments) {
     K8Deployment k8Deployment = new K8Deployment(client);
     for (DeploymentEntity deployment : deployments) {
       deployment.setStatus(
@@ -250,8 +247,7 @@ public class DeploymentEndpoint {
     return deployments;
   }
 
-  private DeploymentEntity getK8Deployment(DeploymentEntity deployment)
-      throws JsonProcessingException {
+  private DeploymentEntity getK8Deployment(DeploymentEntity deployment) {
     K8Deployment k8Deployment = new K8Deployment(client);
     Map<String, Object> map = k8Deployment.getDeployment(deployment.getId());
     JsonNode node = DeploymentEntity.serializeMap(map);
