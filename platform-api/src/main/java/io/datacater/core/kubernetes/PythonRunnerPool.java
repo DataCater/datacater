@@ -21,7 +21,6 @@ import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
-import org.eclipse.microprofile.config.ConfigProvider;
 import org.jboss.logging.Logger;
 
 @ApplicationScoped
@@ -40,11 +39,6 @@ public class PythonRunnerPool {
 
   private static final Logger LOGGER = Logger.getLogger(PythonRunnerPool.class);
   private static final String POOL_NAME = "python-runner";
-
-  private static final int EXPECTED_PYTHON_RUNNERS =
-      ConfigProvider.getConfig()
-          .getOptionalValue("datacater.pythonrunner.pool.size", Integer.class)
-          .orElse(1);
 
   private static final String RUNNER_EVAL_PATH = "/";
 
@@ -95,7 +89,9 @@ public class PythonRunnerPool {
   @PostConstruct
   void initialize(@Observes StartupEvent event) {
     LOGGER.info(
-        String.format("Initialising StatefulSet with replicas := %d", EXPECTED_PYTHON_RUNNERS));
+        String.format(
+            "Initialising StatefulSet with replicas := %d",
+            DataCaterK8sConfig.PYTHON_RUNNER_REPLICAS));
     labeledStatefulSet.setClient(kubernetesClient);
     StatefulSet statefulSet = labeledStatefulSet.blueprint();
     labeledStatefulSet.createStatefulSet(statefulSet);
@@ -103,30 +99,39 @@ public class PythonRunnerPool {
   }
 
   public Uni<NamedPod> getPod() {
-    return getQueue().onItem().transform(Deque::pop);
+    return getQueue()
+        .onItem()
+        .transform(
+            queue -> {
+              var pod = queue.pop();
+              LOGGER.info(
+                  String.format("Returning pod with name %s for interactive usage.", pod.name));
+              return pod;
+            });
   }
 
   public Uni<Deque<NamedPod>> getQueue() {
     Uni<AsyncMap<String, Deque<NamedPod>>> defaultMap = sharedData.getAsyncMap(POOL_NAME);
 
     return defaultMap
+        .call(map -> map.putIfAbsent(POOL_NAME, podsFromKubernetes()))
         .chain(map -> map.get(POOL_NAME))
-        .replaceIfNullWith(newQueue()) // initialise queue if map has no queue
         .chain(
             queue -> {
               if (queue.isEmpty()) {
-                return initialiseMapWithQueue(
-                    newQueue().get()); // reset queue if all pods were used
+                LOGGER.info("Pool of Python Runners is empty. Re-filling with pods in cluster.");
+                return refillQueue(); // reset queue if all pods were used
               } else {
                 return Uni.createFrom().item(queue);
               }
             });
   }
 
-  public Uni<Deque<NamedPod>> initialiseMapWithQueue(Deque<NamedPod> queue) {
+  public Uni<Deque<NamedPod>> refillQueue() {
     Uni<AsyncMap<String, Deque<NamedPod>>> asyncMap = sharedData.getAsyncMap(POOL_NAME);
+    Deque<NamedPod> refill = podsFromKubernetes();
 
-    return asyncMap.onItem().call(map -> map.put(POOL_NAME, queue)).replaceWith(() -> queue);
+    return asyncMap.onItem().call(map -> map.put(POOL_NAME, refill)).replaceWith(() -> refill);
   }
 
   public Uni<Void> initialiseEmptyQueue() {
@@ -161,10 +166,6 @@ public class PythonRunnerPool {
     RunnerPool pool = newPool().get();
     NamedPod np = pool.getPool().getFirst();
     return Uni.createFrom().item(np);
-  }
-
-  Supplier<Deque<NamedPod>> newQueue() {
-    return this::podsFromKubernetes;
   }
 
   Supplier<RunnerPool> newPool() {
