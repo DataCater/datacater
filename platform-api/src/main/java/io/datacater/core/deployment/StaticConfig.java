@@ -44,6 +44,7 @@ public class StaticConfig {
   static final String HTTP = "http";
   static final String READY_REPLICAS = "Ready Replicas";
   static final String COLLISION_COUNT = "Collision Count";
+  static final String CONDITIONS = "Conditions";
 
   static class EnvironmentVariables {
     private EnvironmentVariables() {}

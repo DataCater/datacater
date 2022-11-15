@@ -31,7 +31,7 @@ public class K8Deployment {
     this.k8ConfigMap = new K8ConfigMap(client);
   }
 
-  public DeploymentSpec create(
+  public Map<String, Object> create(
       PipelineEntity pe,
       StreamEntity streamIn,
       StreamEntity streamOut,
@@ -200,21 +200,23 @@ public class K8Deployment {
     if (deployment.getStatus().getAdditionalProperties() != null) {
       node.putAll(deployment.getStatus().getAdditionalProperties());
     }
+    if (deployment.getStatus().getConditions() != null) {
+      node.put(StaticConfig.CONDITIONS, deployment.getStatus().getConditions());
+    }
     node.put(StaticConfig.READY_REPLICAS, deployment.getStatus().getReadyReplicas());
     node.put(StaticConfig.COLLISION_COUNT, deployment.getStatus().getCollisionCount());
     map.put(deployment.getMetadata().getName(), node);
     return map;
   }
 
-  public DeploymentSpec getDeployment(UUID deploymentId) {
-    return new DeploymentSpec(
-        deploymentToMetaDataMap(
-            client
-                .apps()
-                .deployments()
-                .inNamespace(StaticConfig.EnvironmentVariables.NAMESPACE)
-                .withName(getDeploymentName(deploymentId))
-                .get()));
+  public Map<String, Object> getDeployment(UUID deploymentId) {
+    return deploymentToMetaDataMap(
+        client
+            .apps()
+            .deployments()
+            .inNamespace(StaticConfig.EnvironmentVariables.NAMESPACE)
+            .withName(getDeploymentName(deploymentId))
+            .get());
   }
 
   private boolean exists(UUID deploymentId) {

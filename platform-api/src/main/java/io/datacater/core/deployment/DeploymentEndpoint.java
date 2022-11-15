@@ -13,6 +13,7 @@ import io.fabric8.kubernetes.client.dsl.RollableScalableResource;
 import io.smallrye.mutiny.Uni;
 import java.io.*;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import javax.annotation.security.RolesAllowed;
 import javax.enterprise.context.RequestScoped;
@@ -116,8 +117,7 @@ public class DeploymentEndpoint {
 
   @POST
   @Consumes(MediaType.APPLICATION_JSON)
-  public Uni<DeploymentEntity> createDeployment(DeploymentSpec spec)
-      throws JsonProcessingException {
+  public Uni<DeploymentEntity> createDeployment(DeploymentSpec spec) {
     DeploymentEntity de = new DeploymentEntity(spec);
     Uni<PipelineEntity> pipelineUni = getPipeline(spec);
     return sf.withTransaction(
@@ -244,9 +244,8 @@ public class DeploymentEndpoint {
       throws JsonProcessingException {
     K8Deployment k8Deployment = new K8Deployment(client);
     for (DeploymentEntity deployment : deployments) {
-      deployment.setSpec(
-          DeploymentEntity.serializeMap(
-              k8Deployment.getDeployment(deployment.getId()).deployment()));
+      deployment.setStatus(
+          DeploymentEntity.serializeMap(k8Deployment.getDeployment(deployment.getId())));
     }
     return deployments;
   }
@@ -254,9 +253,9 @@ public class DeploymentEndpoint {
   private DeploymentEntity getK8Deployment(DeploymentEntity deployment)
       throws JsonProcessingException {
     K8Deployment k8Deployment = new K8Deployment(client);
-    DeploymentSpec spec = k8Deployment.getDeployment(deployment.getId());
-    JsonNode specNode = DeploymentEntity.serializeMap(spec.deployment());
-    deployment.setSpec(specNode);
+    Map<String, Object> map = k8Deployment.getDeployment(deployment.getId());
+    JsonNode node = DeploymentEntity.serializeMap(map);
+    deployment.setStatus(node);
     return deployment;
   }
 
@@ -274,7 +273,7 @@ public class DeploymentEndpoint {
     K8Deployment k8Deployment = new K8Deployment(client);
     de.setStatus(
         DeploymentEntity.serializeMap(
-            k8Deployment.create(pe, streamIn, streamOut, deploymentSpec, de.getId()).deployment()));
+            k8Deployment.create(pe, streamIn, streamOut, deploymentSpec, de.getId())));
     return de;
   }
 
