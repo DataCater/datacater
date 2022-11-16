@@ -1,8 +1,8 @@
-# DataCater - the streaming data pipeline platform
+# DataCater
 
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=DataCater_cloud-platform&metric=alert_status&token=64e2de6e7a588f2317c38b1536395e6a4d565108)](https://sonarcloud.io/summary/new_code?id=DataCater_cloud-platform)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=DataCater_datacater&metric=alert_status&token=64e2de6e7a588f2317c38b1536395e6a4d565108)](https://sonarcloud.io/summary/new_code?id=DataCater_datacater)
 
-----
+[<p align="center"><img src="logo.png" alt="DataCater logo" width="350"/></p>](https://datacater.io)
 
 Welcome to the real-time, cloud-native data pipeline platform based on Apache Kafka® and Kubernetes® that enables data and developer teams to unlock the full value of their data faster.
 
@@ -143,24 +143,24 @@ Yes, please reach out to [support@datacater.io](mailto:support@datacater.io) to 
 
 ### What are the features in Open Core vs. Enterprise version?
 
-| Feature                                 | Open Core  | Enterprise  |
-| :----------                             | :--------- | :---------- |
-| API                                     | ✅         |             |
-| Interactive pipeline designer           | ✅         |             |
-| Pre-defined transforms                  | ✅         |             |
-| Custom Python transforms                | ✅         |             |
-| Pre-defined filters                     | ✅         |             |
-| Custom Python filters                   | ✅         |             |
-| Declarative pipeline definitions (YAML) | ✅         |             |
-| User authentication                     | ✅         |             |
-| CLI (coming soon)                       | ✅         |             |
-| Collaboration and projects              |            | ✅          |
-| Plug & play connectors                  |            | ✅          |
-| Data masking                            |            | ✅          |
-| SAML/SSO                                |            | ✅          |
-| RBAC                                    |            | ✅          |
-| Audit log                               |            | ✅          |
-| Health notifications                    |            | ✅          |
+| Feature                          | Open Core  | Enterprise  |
+| :----------                      | :--------- | :---------- |
+| API                              | ✅         |             |
+| Interactive pipeline designer    | ✅         |             |
+| Pre-defined transforms           | ✅         |             |
+| Custom Python transforms         | ✅         |             |
+| Pre-defined filters              | ✅         |             |
+| Custom Python filters            | ✅         |             |
+| Declarative pipeline definitions | ✅         |             |
+| User authentication              | ✅         |             |
+| CLI (coming soon)                | ✅         |             |
+| Collaboration and projects       |            | ✅          |
+| Plug & play connectors           |            | ✅          |
+| Data masking                     |            | ✅          |
+| SAML/SSO                         |            | ✅          |
+| RBAC                             |            | ✅          |
+| Audit log                        |            | ✅          |
+| Health notifications             |            | ✅          |
 
 ## Support
 
