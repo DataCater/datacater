@@ -216,4 +216,16 @@ class DatacaterDeploymentEndpointTest {
         .then()
         .statusCode(404);
   }
+
+  @Test
+  @Order(10)
+  void testDeleteUnknownDeployment() {
+    given()
+        .contentType(ContentType.JSON)
+        .baseUri(baseURI)
+        .pathParam("uuid", UUID.randomUUID())
+        .delete(deploymentsPath + "/{uuid}")
+        .then()
+        .statusCode(404);
+  }
 }

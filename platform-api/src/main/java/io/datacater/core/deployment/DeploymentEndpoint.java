@@ -134,6 +134,11 @@ public class DeploymentEndpoint {
             session
                 .find(DeploymentEntity.class, deploymentId)
                 .onItem()
+                .ifNull()
+                .failWith(
+                    new DeploymentNotFoundException(
+                        StaticConfig.LoggerMessages.DEPLOYMENT_NOT_FOUND))
+                .onItem()
                 .ifNotNull()
                 .call(
                     de -> {
