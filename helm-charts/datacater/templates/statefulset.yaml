@@ -40,6 +40,8 @@ spec:
             - name: QUARKUS_DATASOURCE_REACTIVE_URL
               value: "postgresql://postgres.{{ $.Release.Namespace | default "default" }}.svc.cluster.local:5432/postgres"
             {{- end }}
+            - name: DATACATER_PYTHONRUNNER_IMAGE_NAMESPACE
+              value: {{ $.Release.Namespace | default "default" }}
             {{- toYaml . | nindent 12 }}
           {{- end }}
           ports:
@@ -49,7 +51,7 @@ spec:
           livenessProbe:
             failureThreshold: 3
             httpGet:
-              path: /q/health/live
+              path: /api/alpha/q/health/live
               port: 8080
               scheme: HTTP
             initialDelaySeconds: 10
@@ -59,7 +61,7 @@ spec:
           readinessProbe:
             failureThreshold: 3
             httpGet:
-              path: /q/health/ready
+              path: /api/alpha/q/health/ready
               port: 8080
               scheme: HTTP
             initialDelaySeconds: 10

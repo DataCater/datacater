@@ -1,2 +1,2 @@
 def transform(value, row: dict, config: dict):
-    return value / row[config["value"]]
+    return value / config["value"]

@@ -1,2 +1,2 @@
 def filter(value, row: dict, config: dict) -> bool:
-    return config.get("value", None) in value
+    return config["value"] in value

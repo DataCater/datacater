@@ -10,12 +10,13 @@ public class StaticConfig {
   static final String STREAM_IN_CONFIG_NAME = "MP_MESSAGING_INCOMING_STREAM-IN_TOPIC";
   static final String STREAM_OUT_CONFIG_NAME = "MP_MESSAGING_OUTGOING_STREAM-OUT_TOPIC";
   static final String DATACATER_PIPELINE = "datacater-pipeline";
+  static final String PYTHON_RUNNER_NAME = "python-runner";
   static final String APP = "datacater.io/app";
   static final String PIPELINE = "datacater.io/pipeline";
   static final String REVISION = "datacater.io/revision";
   static final String PIPELINE_NO = "1";
   static final String PIPELINE_REV = "1";
-  static final String UUID_TEXT = "uuid";
+  static final String UUID_TEXT = "datacater.io/uuid";
   static final String MOUNT_PATH = "/usr/app";
   static final Map<String, Quantity> RESOURCE_REQUESTS =
       Map.of("cpu", new Quantity("0.1"), "memory", new Quantity("1.5Gi"));
@@ -40,6 +41,10 @@ public class StaticConfig {
   static final String STREAMOUT_CONFIG_TEXT = "stream-out-config";
   static final String DC_STREAMIN_CONFIG_TEXT = "DATACATER_STREAM-IN_CONFIG";
   static final String DC_STREAMOUT_CONFIG_TEXT = "DATACATER_STREAM-OUT_CONFIG";
+  static final String HTTP = "http";
+  static final String CONDITIONS = "Conditions";
+  static final String ERROR_TAG = "error";
+  static final String MESSAGE_TAG = "message";
 
   static class EnvironmentVariables {
     private EnvironmentVariables() {}
@@ -52,7 +57,7 @@ public class StaticConfig {
     static final String FULL_IMAGE_NAME =
         ConfigProvider.getConfig()
             .getOptionalValue("datacater.deployment.image", String.class)
-            .orElse("datacater/pipeline:latest");
+            .orElse("datacater/pipeline:alpha-20221108");
     static final Integer READY_SECONDS =
         ConfigProvider.getConfig()
             .getOptionalValue("datacater.deployment.ready-seconds", Integer.class)
@@ -65,12 +70,29 @@ public class StaticConfig {
         ConfigProvider.getConfig()
             .getOptionalValue("datacater.deployment.replicas", Integer.class)
             .orElse(1);
+    static final String PYTHON_RUNNER_IMAGE_NAME =
+        ConfigProvider.getConfig().getValue("datacater.pythonrunner.image.name", String.class);
+    static final String PYTHON_RUNNER_IMAGE_TAG =
+        ConfigProvider.getConfig()
+            .getOptionalValue("datacater.pythonrunner.image.version", String.class)
+            .orElse("alpha-20221101");
+    static final int PYTHON_RUNNER_CONTAINER_PORT =
+        ConfigProvider.getConfig()
+            .getOptionalValue("datacater.pythonrunner.image.containerPort", Integer.class)
+            .orElse(50000);
   }
 
   static class LoggerMessages {
     private LoggerMessages() {}
 
-    static final String DEPLOYMENT_DELETED = "DatacaterDeployment deleted successfully: ";
-    static final String DEPLOYMENT_NOT_DELETED = "DatacaterDeployment could not be deleted: ";
+    static final String DEPLOYMENT_DELETED = "DatacaterDeployment deleted successfully: %s";
+    static final String DEPLOYMENT_NOT_DELETED = "DatacaterDeployment could not be deleted: %s";
+    static final String PIPELINE_NOT_FOUND = "The referenced Pipeline UUID could not be found";
+    static final String STREAM_NOT_FOUND = "The referenced %s UUID could not be found";
+    static final String DEPLOYMENT_NOT_FOUND = "The referenced Deployment could not be found.";
+    static final String K8_DEPLOYMENT_NOT_FOUND =
+        "The referenced Kubernetes Deployment could not be found.";
+    static final String DEPLOYMENT_NOT_CREATED = "The Deployment could not be created.";
+    static final String DEPLOYMENT_NOT_UPDATED = "The Deployment could not be updated.";
   }
 }

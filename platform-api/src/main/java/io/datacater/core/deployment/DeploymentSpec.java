@@ -1,5 +1,6 @@
 package io.datacater.core.deployment;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Map;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
@@ -17,4 +18,5 @@ public record DeploymentSpec(
                 }
               }
         """)
+        @JsonProperty(value = "spec", required = true)
         Map<String, Object> deployment) {}

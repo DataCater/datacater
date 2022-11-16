@@ -6,329 +6,131 @@ from runner import app
 
 client = TestClient(app)
 
+
 def test_batch_apply_transform():
     # Upload pipeline
-    client.post("/pipeline", json = {
-        "spec": {
-            "steps": [
-                {
-                    "kind": "Field",
-                    "fields": {
-                        "company": {
-                            "transform": {
-                                "key": "trim"
-                            }
-                        }
+    client.post(
+        "/pipeline",
+        json={
+            "spec": {
+                "steps": [
+                    {
+                        "kind": "Field",
+                        "fields": {"company": {"transform": {"key": "trim"}}},
                     }
-                }
-            ]
-        }
-    })
-    # Apply pipeline to records
-    response = client.post("/batch", json = [
-        {
-            "key": {},
-            "value": {
-                "company": " DataCater GmbH     "
-            },
-            "metadata": {}
-        }
-    ])
-    assert response.json() == [{
-        "key": {},
-        "value": {
-            "company": "DataCater GmbH"
+                ]
+            }
         },
-        "metadata": {}
-    }]
+    )
+    # Apply pipeline to records
+    response = client.post(
+        "/batch",
+        json=[
+            {"key": {}, "value": {"company": " DataCater GmbH     "}, "metadata": {}}
+        ],
+    )
+    assert response.json() == [
+        {"key": {}, "value": {"company": "DataCater GmbH"}, "metadata": {}}
+    ]
     assert response.status_code == 200
+
 
 def test_batch_apply_transform_new_field():
     # Upload pipeline
-    client.post("/pipeline", json = {
-        "spec": {
-            "steps": [
-                {
-                    "kind": "Field",
-                    "fields": {
-                        "company": {
-                            "transform": {
-                                "key": "trim"
-                            }
-                        },
-                        "city": {
-                            "transform": {
-                                "key": "new-field",
-                                "config": {
-                                    "defaultValue": "Frankfurt"
+    client.post(
+        "/pipeline",
+        json={
+            "spec": {
+                "steps": [
+                    {
+                        "kind": "Field",
+                        "fields": {
+                            "company": {"transform": {"key": "trim"}},
+                            "city": {
+                                "transform": {
+                                    "key": "new-field",
+                                    "config": {"defaultValue": "Frankfurt"},
                                 }
-                            }
-                        }
+                            },
+                        },
                     }
-                }
-            ]
-        }
-    })
+                ]
+            }
+        },
+    )
     # Apply pipeline to records
-    response = client.post("/batch", json = [
+    response = client.post(
+        "/batch",
+        json=[
+            {"key": {}, "value": {"company": " DataCater GmbH     "}, "metadata": {}}
+        ],
+    )
+    assert response.json() == [
         {
             "key": {},
-            "value": {
-                "company": " DataCater GmbH     "
-            },
-            "metadata": {}
+            "value": {"city": "Frankfurt", "company": "DataCater GmbH"},
+            "metadata": {},
         }
-    ])
-    assert response.json() == [{
-        "key": {},
-        "value": {
-            "city": "Frankfurt",
-            "company": "DataCater GmbH"
-        },
-        "metadata": {}
-    }]
+    ]
     assert response.status_code == 200
+
 
 def test_batch_apply_transform_new_field_rename_field():
     # Upload pipeline
-    client.post("/pipeline", json = {
-        "spec": {
-            "steps": [
-                {
-                    "kind": "Field",
-                    "fields": {
-                        "company": {
-                            "transform": {
-                                "key": "trim"
+    client.post(
+        "/pipeline",
+        json={
+            "spec": {
+                "steps": [
+                    {
+                        "kind": "Field",
+                        "fields": {
+                            "company": {"transform": {"key": "trim"}},
+                            "city": {
+                                "transform": {
+                                    "key": "new-field",
+                                    "config": {"defaultValue": "Frankfurt"},
+                                }
+                            },
+                        },
+                    },
+                    {
+                        "kind": "Field",
+                        "fields": {
+                            "city": {
+                                "transform": {
+                                    "key": "rename-field",
+                                    "config": {"newFieldName": "company_city"},
+                                }
                             }
                         },
-                        "city": {
-                            "transform": {
-                                "key": "new-field",
-                                "config": {
-                                    "defaultValue": "Frankfurt"
-                                }
-                            }
-                        }
-                    }
-                },
-                {
-                    "kind": "Field",
-                    "fields": {
-                        "city": {
-                            "transform": {
-                                "key": "rename-field",
-                                "config": {
-                                    "newFieldName": "company_city"
-                                }
-                            }
-                        }
-                    }
-                }
-            ]
-        }
-    })
+                    },
+                ]
+            }
+        },
+    )
     # Apply pipeline to records
-    response = client.post("/batch", json = [
+    response = client.post(
+        "/batch",
+        json=[
+            {"key": {}, "value": {"company": " DataCater GmbH     "}, "metadata": {}}
+        ],
+    )
+    assert response.json() == [
         {
             "key": {},
-            "value": {
-                "company": " DataCater GmbH     "
-            },
-            "metadata": {}
+            "value": {"company_city": "Frankfurt", "company": "DataCater GmbH"},
+            "metadata": {},
         }
-    ])
-    assert response.json() == [{
-        "key": {},
-        "value": {
-            "company_city": "Frankfurt",
-            "company": "DataCater GmbH"
-        },
-        "metadata": {}
-    }]
+    ]
     assert response.status_code == 200
+
 
 def test_batch_apply_record_transform_with_error():
     # Upload pipeline
-    client.post("/pipeline", json = {
-        "spec": {
-            "steps": [
-                {
-                    "kind": "Record",
-                    "transform": {
-                        "key": "user-defined-record-transformation",
-                        "config": {
-                            "code": "def transform(record):\n  record[\"value\"] = { \"company\" : str(1 / 0) }\n  return record"
-                        }
-                    }
-                },
-            ]
-        }
-    })
-    # Apply pipeline to records
-    response = client.post("/batch", json = [
-        {
-            "key": {},
-            "value": {
-                "company": "DataCater GmbH"
-            },
-            "metadata": {}
-        }
-    ])
-    assert response.json()[0]["metadata"]["error"]["exceptionMessage"] == "ZeroDivisionError: division by zero"
-
-def test_batch_apply_transform_new_field_rename_field_drop_field():
-    # Upload pipeline
-    client.post("/pipeline", json = {
-        "spec": {
-            "steps": [
-                {
-                    "kind": "Field",
-                    "fields": {
-                        "company": {
-                            "transform": {
-                                "key": "trim"
-                            }
-                        },
-                        "city": {
-                            "transform": {
-                                "key": "new-field",
-                                "config": {
-                                    "defaultValue": "Frankfurt"
-                                }
-                            }
-                        }
-                    }
-                },
-                {
-                    "kind": "Field",
-                    "fields": {
-                        "city": {
-                            "transform": {
-                                "key": "rename-field",
-                                "config": {
-                                    "newFieldName": "company_city"
-                                }
-                            }
-                        }
-                    }
-                },
-                {
-                    "kind": "Field",
-                    "fields": {
-                        "company_city": {
-                            "transform": {
-                                "key": "drop-field"
-                            }
-                        }
-                    }
-                }
-            ]
-        }
-    })
-    # Apply pipeline to records
-    response = client.post("/batch", json = [
-        {
-            "key": {},
-            "value": {
-                "company": " DataCater GmbH     "
-            },
-            "metadata": {}
-        }
-    ])
-    assert response.json() == [{
-        "key": {},
-        "value": {
-            "company": "DataCater GmbH"
-        },
-        "metadata": {}
-    }]
-    assert response.status_code == 200
-
-def test_preview_apply_transform():
-    response = client.post("/preview", json = {
-        "pipeline": {
-            "spec": {
-                "steps": [
-                    {
-                        "kind": "Field",
-                        "fields": {
-                            "company": {
-                                "transform": {
-                                    "key": "trim"
-                                }
-                            }
-                        }
-                    }
-                ]
-            }
-        },
-        "records": [
-            {
-                "key": {},
-                "value": {
-                    "company": " DataCater GmbH     "
-                },
-                "metadata": {}
-            }
-        ]
-    })
-
-    assert response.json() == [{
-        "key": {},
-        "value": {
-            "company": "DataCater GmbH"
-        },
-        "metadata": {}
-    }]
-
-    assert response.status_code == 200
-
-def test_preview_apply_user_defined_transform():
-    response = client.post("/preview", json = {
-        "pipeline": {
-            "spec": {
-                "steps": [
-                    {
-                        "kind": "Field",
-                        "fields": {
-                            "company": {
-                                "transform": {
-                                    "key": "user-defined-transformation",
-                                    "config": {
-                                        "code": "def transform(value, record):\n  return value.replace('GmbH', 'AG')"
-                                    }
-                                }
-                            }
-                        }
-                    }
-                ]
-            }
-        },
-        "records": [
-            {
-                "key": {},
-                "value": {
-                    "company": "DataCater GmbH"
-                },
-                "metadata": {}
-            }
-        ]
-    })
-
-    assert response.json() == [{
-        "key": {},
-        "value": {
-            "company": "DataCater AG"
-        },
-        "metadata": {}
-    }]
-
-    assert response.status_code == 200
-
-def test_preview_apply_user_defined_record_transform():
-    response = client.post("/preview", json = {
-        "pipeline": {
+    client.post(
+        "/pipeline",
+        json={
             "spec": {
                 "steps": [
                     {
@@ -336,257 +138,350 @@ def test_preview_apply_user_defined_record_transform():
                         "transform": {
                             "key": "user-defined-record-transformation",
                             "config": {
-                                "code": "def transform(record):\n  record['value']['website'] = 'https://datacater.io'\n  return record"
-                            }
-                        }
+                                "code": 'def transform(record):\n  record["value"] = { "company" : str(1 / 0) }\n  return record'
+                            },
+                        },
+                    },
+                ]
+            }
+        },
+    )
+    # Apply pipeline to records
+    response = client.post(
+        "/batch",
+        json=[{"key": {}, "value": {"company": "DataCater GmbH"}, "metadata": {}}],
+    )
+    assert (
+        response.json()[0]["metadata"]["error"]["exceptionMessage"]
+        == "ZeroDivisionError: division by zero"
+    )
+
+
+def test_batch_apply_transform_new_field_rename_field_drop_field():
+    # Upload pipeline
+    client.post(
+        "/pipeline",
+        json={
+            "spec": {
+                "steps": [
+                    {
+                        "kind": "Field",
+                        "fields": {
+                            "company": {"transform": {"key": "trim"}},
+                            "city": {
+                                "transform": {
+                                    "key": "new-field",
+                                    "config": {"defaultValue": "Frankfurt"},
+                                }
+                            },
+                        },
                     },
                     {
                         "kind": "Field",
                         "fields": {
-                            "company": {
+                            "city": {
                                 "transform": {
-                                    "key": "user-defined-transformation",
-                                    "config": {
-                                        "code": "def transform(value, record):\n  return value.replace('GmbH', 'AG')"
-                                    }
+                                    "key": "rename-field",
+                                    "config": {"newFieldName": "company_city"},
                                 }
                             }
-                        }
-                    }
-                ]
-            }
-        },
-        "records": [
-            {
-                "key": {},
-                "value": {
-                    "company": "DataCater GmbH"
-                },
-                "metadata": {}
-            }
-        ]
-    })
-
-    assert response.json() == [{
-        "key": {},
-        "value": {
-            "company": "DataCater AG",
-            "website": "https://datacater.io"
-        },
-        "metadata": {}
-    }]
-
-    assert response.status_code == 200
-
-def test_preview_apply_filter():
-    response = client.post("/preview", json = {
-        "pipeline": {
-            "spec": {
-                "steps": [
-                    {
-                        "kind": "Field",
-                        "fields": {
-                            "company": {
-                                "filter": {
-                                    "key": "contain",
-                                    "config": {
-                                        "value": "Cat"
-                                    }
-                                }
-                            }
-                        }
-                    }
-                ]
-            }
-        },
-        "records": [
-            {
-                "key": {},
-                "value": {
-                    "company": "DataCater GmbH"
-                },
-                "metadata": {}
-            },
-            {
-                "key": {},
-                "value": {
-                    "company": "DataKater GmbH"
-                },
-                "metadata": {}
-            },
-        ]
-    })
-
-    assert response.json() == [{
-        "key": {},
-        "value": {
-            "company": "DataCater GmbH"
-        },
-        "metadata": {}
-    }]
-
-    assert response.status_code == 200
-
-def test_preview_apply_user_defined_filter():
-    response = client.post("/preview", json = {
-        "pipeline": {
-            "spec": {
-                "steps": [
-                    {
-                        "kind": "Field",
-                        "fields": {
-                            "company": {
-                                "filter": {
-                                    "key": "user-defined-filter",
-                                    "config": {
-                                        "code": "def filter(value, row):\n  return value.startswith('DataKater')"
-                                    }
-                                }
-                            }
-                        }
-                    }
-                ]
-            }
-        },
-        "records": [
-            {
-                "key": {},
-                "value": {
-                    "company": "DataCater GmbH"
-                },
-                "metadata": {}
-            },
-            {
-                "key": {},
-                "value": {
-                    "company": "DataKater GmbH"
-                },
-                "metadata": {}
-            },
-        ]
-    })
-
-    assert response.json() == [{
-        "key": {},
-        "value": {
-            "company": "DataKater GmbH"
-        },
-        "metadata": {}
-    }]
-
-    assert response.status_code == 200
-
-def test_preview_apply_user_defined_record_filter():
-    response = client.post("/preview", json = {
-        "pipeline": {
-            "spec": {
-                "steps": [
-                    {
-                        "kind": "Field",
-                        "fields": {
-                            "company": {
-                                "transform": {
-                                    "key": "user-defined-transformation",
-                                    "config": {
-                                        "code": "def transform(value, record):\n  return value.replace('GmbH', 'AG')"
-                                    }
-                                }
-                            }
-                        }
+                        },
                     },
                     {
-                        "kind": "Record",
-                        "filter": {
-                            "key": "user-defined-record-filter",
-                            "config": {
-                                "code": "def filter(record):\n  return record['value']['company'].endswith('AG')"
-                            }
-                        }
-                    }
+                        "kind": "Field",
+                        "fields": {
+                            "company_city": {"transform": {"key": "drop-field"}}
+                        },
+                    },
                 ]
             }
         },
-        "records": [
-            {
-                "key": {},
-                "value": {
-                    "company": "DataCater GmbH"
-                },
-                "metadata": {}
-            }
-        ]
-    })
+    )
+    # Apply pipeline to records
+    response = client.post(
+        "/batch",
+        json=[
+            {"key": {}, "value": {"company": " DataCater GmbH     "}, "metadata": {}}
+        ],
+    )
+    assert response.json() == [
+        {"key": {}, "value": {"company": "DataCater GmbH"}, "metadata": {}}
+    ]
+    assert response.status_code == 200
 
-    assert response.json() == [{
-        "key": {},
-        "value": {
-            "company": "DataCater AG"
+
+def test_preview_apply_transform():
+    response = client.post(
+        "/preview",
+        json={
+            "pipeline": {
+                "spec": {
+                    "steps": [
+                        {
+                            "kind": "Field",
+                            "fields": {"company": {"transform": {"key": "trim"}}},
+                        }
+                    ]
+                }
+            },
+            "records": [
+                {
+                    "key": {},
+                    "value": {"company": " DataCater GmbH     "},
+                    "metadata": {},
+                }
+            ],
         },
-        "metadata": {}
-    }]
+    )
+
+    assert response.json() == [
+        {"key": {}, "value": {"company": "DataCater GmbH"}, "metadata": {}}
+    ]
 
     assert response.status_code == 200
 
-def test_preview_filter_transform_combination():
-    response = client.post("/preview", json = {
-        "pipeline": {
-            "spec": {
-                "steps": [
-                    {
-                        "kind": "Field",
-                        "fields": {
-                            "company": {
-                                "transform": {
-                                    "key": "user-defined-transformation",
-                                    "config": {
-                                        "code": "def transform(value, record):\n  return value.replace('GmbH', 'AG')"
+
+def test_preview_apply_user_defined_transform():
+    response = client.post(
+        "/preview",
+        json={
+            "pipeline": {
+                "spec": {
+                    "steps": [
+                        {
+                            "kind": "Field",
+                            "fields": {
+                                "company": {
+                                    "transform": {
+                                        "key": "user-defined-transformation",
+                                        "config": {
+                                            "code": "def transform(value, record):\n  return value.replace('GmbH', 'AG')"
+                                        },
                                     }
+                                }
+                            },
+                        }
+                    ]
+                }
+            },
+            "records": [
+                {"key": {}, "value": {"company": "DataCater GmbH"}, "metadata": {}}
+            ],
+        },
+    )
+
+    assert response.json() == [
+        {"key": {}, "value": {"company": "DataCater AG"}, "metadata": {}}
+    ]
+
+    assert response.status_code == 200
+
+
+def test_preview_apply_user_defined_record_transform():
+    response = client.post(
+        "/preview",
+        json={
+            "pipeline": {
+                "spec": {
+                    "steps": [
+                        {
+                            "kind": "Record",
+                            "transform": {
+                                "key": "user-defined-record-transformation",
+                                "config": {
+                                    "code": "def transform(record):\n  record['value']['website'] = 'https://datacater.io'\n  return record"
                                 },
-                                "filter": {
-                                    "key": "user-defined-filter",
-                                    "config": {
-                                        "code": "def filter(value, record):\n  return 'Cat' in value"
+                            },
+                        },
+                        {
+                            "kind": "Field",
+                            "fields": {
+                                "company": {
+                                    "transform": {
+                                        "key": "user-defined-transformation",
+                                        "config": {
+                                            "code": "def transform(value, record):\n  return value.replace('GmbH', 'AG')"
+                                        },
                                     }
-                                },
-                            }
-                        }
-                    },
-                ]
-            }
-        },
-        "records": [
-            {
-                "key": {},
-                "value": {
-                    "company": "DataCater GmbH"
-                },
-                "metadata": {}
+                                }
+                            },
+                        },
+                    ]
+                }
             },
-            {
-                "key": {},
-                "value": {
-                    "company": "DataKater GmbH"
-                },
-                "metadata": {}
-            }
-        ]
-    })
+            "records": [
+                {"key": {}, "value": {"company": "DataCater GmbH"}, "metadata": {}}
+            ],
+        },
+    )
 
     assert response.json() == [
         {
             "key": {},
-            "value": {
-                "company": "DataCater AG"
-            },
-            "metadata": {}
-        },
-        {
-            "key": {},
-            "value": {
-                "company": "DataKater GmbH"
-            },
-            "metadata": {}
+            "value": {"company": "DataCater AG", "website": "https://datacater.io"},
+            "metadata": {},
         }
+    ]
+
+    assert response.status_code == 200
+
+
+def test_preview_apply_filter():
+    response = client.post(
+        "/preview",
+        json={
+            "pipeline": {
+                "spec": {
+                    "steps": [
+                        {
+                            "kind": "Field",
+                            "fields": {
+                                "company": {
+                                    "filter": {
+                                        "key": "contain",
+                                        "config": {"value": "Cat"},
+                                    }
+                                }
+                            },
+                        }
+                    ]
+                }
+            },
+            "records": [
+                {"key": {}, "value": {"company": "DataCater GmbH"}, "metadata": {}},
+                {"key": {}, "value": {"company": "DataKater GmbH"}, "metadata": {}},
+            ],
+        },
+    )
+
+    assert response.json() == [
+        {"key": {}, "value": {"company": "DataCater GmbH"}, "metadata": {}}
+    ]
+
+    assert response.status_code == 200
+
+
+def test_preview_apply_user_defined_filter():
+    response = client.post(
+        "/preview",
+        json={
+            "pipeline": {
+                "spec": {
+                    "steps": [
+                        {
+                            "kind": "Field",
+                            "fields": {
+                                "company": {
+                                    "filter": {
+                                        "key": "user-defined-filter",
+                                        "config": {
+                                            "code": "def filter(value, row):\n  return value.startswith('DataKater')"
+                                        },
+                                    }
+                                }
+                            },
+                        }
+                    ]
+                }
+            },
+            "records": [
+                {"key": {}, "value": {"company": "DataCater GmbH"}, "metadata": {}},
+                {"key": {}, "value": {"company": "DataKater GmbH"}, "metadata": {}},
+            ],
+        },
+    )
+
+    assert response.json() == [
+        {"key": {}, "value": {"company": "DataKater GmbH"}, "metadata": {}}
+    ]
+
+    assert response.status_code == 200
+
+
+def test_preview_apply_user_defined_record_filter():
+    response = client.post(
+        "/preview",
+        json={
+            "pipeline": {
+                "spec": {
+                    "steps": [
+                        {
+                            "kind": "Field",
+                            "fields": {
+                                "company": {
+                                    "transform": {
+                                        "key": "user-defined-transformation",
+                                        "config": {
+                                            "code": "def transform(value, record):\n  return value.replace('GmbH', 'AG')"
+                                        },
+                                    }
+                                }
+                            },
+                        },
+                        {
+                            "kind": "Record",
+                            "filter": {
+                                "key": "user-defined-record-filter",
+                                "config": {
+                                    "code": "def filter(record):\n  return record['value']['company'].endswith('AG')"
+                                },
+                            },
+                        },
+                    ]
+                }
+            },
+            "records": [
+                {"key": {}, "value": {"company": "DataCater GmbH"}, "metadata": {}}
+            ],
+        },
+    )
+
+    assert response.json() == [
+        {"key": {}, "value": {"company": "DataCater AG"}, "metadata": {}}
+    ]
+
+    assert response.status_code == 200
+
+
+def test_preview_filter_transform_combination():
+    response = client.post(
+        "/preview",
+        json={
+            "pipeline": {
+                "spec": {
+                    "steps": [
+                        {
+                            "kind": "Field",
+                            "fields": {
+                                "company": {
+                                    "transform": {
+                                        "key": "user-defined-transformation",
+                                        "config": {
+                                            "code": "def transform(value, record):\n  return value.replace('GmbH', 'AG')"
+                                        },
+                                    },
+                                    "filter": {
+                                        "key": "user-defined-filter",
+                                        "config": {
+                                            "code": "def filter(value, record):\n  return 'Cat' in value"
+                                        },
+                                    },
+                                }
+                            },
+                        },
+                    ]
+                }
+            },
+            "records": [
+                {"key": {}, "value": {"company": "DataCater GmbH"}, "metadata": {}},
+                {"key": {}, "value": {"company": "DataKater GmbH"}, "metadata": {}},
+            ],
+        },
+    )
+
+    assert response.json() == [
+        {"key": {}, "value": {"company": "DataCater AG"}, "metadata": {}},
+        {"key": {}, "value": {"company": "DataKater GmbH"}, "metadata": {}},
     ]
 
     assert response.status_code == 200

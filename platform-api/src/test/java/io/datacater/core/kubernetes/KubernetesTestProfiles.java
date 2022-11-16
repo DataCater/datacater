@@ -17,7 +17,7 @@ public class KubernetesTestProfiles {
     }
   }
 
-  public static class PythonRunnerPoolTest implements QuarkusTestProfile {
+  public static class PythonRunnerPoolTestProfile implements QuarkusTestProfile {
     @Override
     public Map<String, String> getConfigOverrides() {
       return Map.of("datacater.pythonrunner.image.name", "ghcr.io/datacater/python-runner");

@@ -50,7 +50,7 @@ smallrye :
   jwt:
     sign:
       key:
-        location: cert.pem
+        location: key.pem
     new-token:
       lifespan: 7200
 mp       :
@@ -58,7 +58,7 @@ mp       :
     verify:
       issuer: https://datacater.io
       publickey:
-        location: key.pem
+        location: cert.pem
 datacater:
   pythonrunner:
     image:
@@ -119,7 +119,7 @@ datacater:
       verify:
         issuer: localhost
         publickey:
-          location: key.pem
+          location: cert.pem
     messaging:
       connector:
         smallrye-kafka:
@@ -130,7 +130,7 @@ datacater:
     jwt:
       sign:
         key:
-          location: cert.pem
+          location: key.pem
       new-token:
         lifespan: 7200
 

@@ -97,9 +97,13 @@ class K8DeploymentTest {
   @Order(2)
   void testCreateDeployment()
       throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-    deploymentId =
-        k8Deployment.create(
-            pipelineEntity, streamInEntity, streamOutEntity, new DeploymentSpec(new HashMap<>()));
+    deploymentId = UUID.randomUUID();
+    k8Deployment.create(
+        pipelineEntity,
+        streamInEntity,
+        streamOutEntity,
+        new DeploymentSpec(new HashMap<>()),
+        deploymentId);
     Assertions.assertEquals(true, getDeploymentExistsMethod().invoke(k8Deployment, deploymentId));
   }
 
