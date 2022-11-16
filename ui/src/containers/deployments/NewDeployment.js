@@ -18,7 +18,6 @@ class NewDeployment extends Component {
       errorMessages: {},
       showApiCall: false,
       deployment: {
-        metadata: {},
         spec: {},
       },
       deploymentCreated: false,

@@ -1,21 +1,26 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
-import { Copy } from "react-feather";
+import { Copy, Trash2 } from "react-feather";
+import { Redirect } from "react-router-dom";
+import * as YAML from "json-to-pretty-yaml";
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import Breadcrumb from "../../components/layout/Breadcrumb";
 import { getApiPathPrefix } from "../../helpers/getApiPathPrefix";
-import { fetchDeployments } from "../../actions/deployments";
+import { deleteDeployment, fetchDeployment } from "../../actions/deployments";
 
-class ListDeployments extends Component {
+class ShowDeployment extends Component {
   constructor(props) {
     super(props);
     this.state = {
       showApiCall: false,
+      deploymentDeleted: false,
     };
     this.toggleShowApiCall = this.toggleShowApiCall.bind(this);
+    this.handleDelete = this.handleDelete.bind(this);
   }
 
   componentDidMount() {
-    this.props.fetchDeployments();
+    this.props.fetchDeployment(this.getDeploymentId());
   }
 
   toggleShowApiCall(event) {
@@ -26,8 +31,28 @@ class ListDeployments extends Component {
     });
   }
 
+  getDeploymentId() {
+    return this.props.match.params.id;
+  }
+
+  handleDelete(event) {
+    event.preventDefault();
+
+    if (
+      window.confirm("Are you sure that you want to delete the deployment?")
+    ) {
+      this.props.deleteDeployment(this.getDeploymentId()).then(() => {
+        this.setState({ deploymentDeleted: true });
+      });
+    }
+  }
+
   render() {
-    const deployments = this.props.deployments.deployments;
+    if (this.state.deploymentDeleted) {
+      return <Redirect to="/deployments" />;
+    }
+
+    const deployment = this.props.deployments.deployment;
 
     if (![undefined, ""].includes(this.props.deployments.errorMessage)) {
       return (
@@ -42,10 +67,19 @@ class ListDeployments extends Component {
       );
     }
 
+    if (deployment === undefined) {
+      return <div></div>;
+    }
+
     return (
       <div className="container">
         <div className="row">
-          <Breadcrumb items={[{ name: "Deployments" }]} />
+          <Breadcrumb
+            items={[
+              { name: "Deployments", uri: "/deployments" },
+              { name: deployment.uuid },
+            ]}
+          />
           <div className="col-12 mt-3">
             <div
               className="card welcome-card py-2"
@@ -53,13 +87,12 @@ class ListDeployments extends Component {
             >
               <div className="card-body text-center p-0">
                 <div className="row justify-content-center">
-                  <div className="col-8 text-start">
-                    <h4 className="fw-semibold mb-0">Deployments</h4>
-                    <p className="text-white mb-0">
-                      Deployments operate Pipelines.
-                    </p>
+                  <div className="col-6 text-start d-flex align-items-center">
+                    <h4 className="fw-semibold mb-0">
+                      {deployment.name || "Untitled deployment"}
+                    </h4>
                   </div>
-                  <div className="col-4 d-flex align-items-center justify-content-end">
+                  <div className="col-6 d-flex align-items-center justify-content-end">
                     <div>
                       <a
                         href="/deployments"
@@ -68,14 +101,25 @@ class ListDeployments extends Component {
                       >
                         {this.state.showApiCall ? "Hide" : "Show"} API call
                       </a>
-                      {deployments.length > 0 && (
-                        <a
-                          href="/deployments/new"
-                          className="btn btn-primary text-white ms-2"
-                        >
-                          Create new deployment
-                        </a>
-                      )}
+                      <a
+                        href={`/deployments/${deployment.uuid}/edit`}
+                        className="btn btn-primary text-white ms-2"
+                      >
+                        Edit
+                      </a>
+                      <a
+                        href={`/deployments/${deployment.uuid}/logs`}
+                        className="btn btn-light ms-2"
+                      >
+                        Logs
+                      </a>
+                      <a
+                        href={`/deployments/${deployment.uuid}`}
+                        onClick={this.handleDelete}
+                        className="btn btn-light btn-outline-danger ms-2"
+                      >
+                        <Trash2 className="feather-icon" />
+                      </a>
                     </div>
                   </div>
                 </div>
@@ -100,14 +144,18 @@ class ListDeployments extends Component {
                           navigator.clipboard.writeText(
                             "curl " +
                               getApiPathPrefix(true) +
-                              "/deployments -H'Authorization:Bearer YOUR_TOKEN'"
+                              "/deployments/" +
+                              deployment.uuid +
+                              " -H'Authorization:Bearer YOUR_TOKEN'"
                           );
                         }}
                       >
                         <Copy className="feather-icon" />
                       </a>
                       <code className="text-white">
-                        $ curl {getApiPathPrefix(true)}/deployments/ \<br />
+                        $ curl {getApiPathPrefix(true)}/deployments/
+                        {stream.uuid} \
+                        <br />
                         <span className="me-2"></span>{" "}
                         -H&apos;Authorization:Bearer YOUR_TOKEN&apos;
                         <br />
@@ -121,41 +169,18 @@ class ListDeployments extends Component {
         </div>
         <div className="row mt-4">
           <div className="col-12">
-            {deployments.length === 0 && (
-              <div className="card">
-                <div className="card-body">
-                  <div className="d-flex align-items-center justify-content-center m-5">
-                    <a
-                      href="/deployments/new"
-                      className="btn btn-lg text-white"
-                      style={{ backgroundImage: "url(/images/bg-card.jpg)" }}
-                    >
-                      Create your first deployment
-                    </a>
-                  </div>
-                </div>
+            <div className="card">
+              <div className="card-body">
+                <SyntaxHighlighter
+                  language="yaml"
+                  showLineNumbers={true}
+                  showInlineLineNumbers={true}
+                  customStyle={{ marginBottom: "0px", background: "none" }}
+                >
+                  {YAML.stringify(deployment)}
+                </SyntaxHighlighter>
               </div>
-            )}
-            {deployments.length > 0 && (
-              <div className="list-group">
-                {deployments.map((deployment) => (
-                  <a
-                    href={`/deployments/${deployment.uuid}`}
-                    key={deployment.uuid}
-                    className="list-group-item list-group-item-action bg-white p-4"
-                  >
-                    <div className="d-flex w-100 justify-content-between mb-1">
-                      <h5 className="d-flex align-items-center">
-                        {deployment.name || "Untitled deployment"}
-                      </h5>
-                      <small className="d-flex align-items-center">
-                        {deployment.uuid}
-                      </small>
-                    </div>
-                  </a>
-                ))}
-              </div>
-            )}
+            </div>
           </div>
         </div>
       </div>
@@ -170,7 +195,8 @@ const mapStateToProps = function (state) {
 };
 
 const mapDispatchToProps = {
-  fetchDeployments: fetchDeployments,
+  deleteDeployment: deleteDeployment,
+  fetchDeployment: fetchDeployment,
 };
 
-export default connect(mapStateToProps, mapDispatchToProps)(ListDeployments);
+export default connect(mapStateToProps, mapDispatchToProps)(ShowDeployment);
