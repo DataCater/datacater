@@ -33,6 +33,9 @@ public class DeploymentEntity {
   @JsonProperty("updatedAt")
   private Date updatedAt;
 
+  @JsonProperty("name")
+  private String name;
+
   @Type(type = JsonTypes.JSON)
   @Column(name = "spec", columnDefinition = JsonTypes.JSON_BIN)
   @JsonProperty("spec")
@@ -50,6 +53,7 @@ public class DeploymentEntity {
   }
 
   public DeploymentEntity(DeploymentSpec spec) {
+    this.name = spec.name();
     this.spec = DeploymentEntity.serializeMap(spec.deployment());
   }
 

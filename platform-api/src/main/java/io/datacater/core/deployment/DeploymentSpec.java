@@ -1,10 +1,13 @@
 package io.datacater.core.deployment;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.Nulls;
 import java.util.Map;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
 public record DeploymentSpec(
+    @JsonProperty(value = "name") @JsonSetter(nulls = Nulls.AS_EMPTY) String name,
     @Schema(
             example =
                 """

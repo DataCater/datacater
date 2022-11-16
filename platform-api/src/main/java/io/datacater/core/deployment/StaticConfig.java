@@ -17,6 +17,7 @@ public class StaticConfig {
   static final String PIPELINE_NO = "1";
   static final String PIPELINE_REV = "1";
   static final String UUID_TEXT = "datacater.io/uuid";
+  static final String DEPLOYMENT_NAME_TEXT = "datacater.io/name";
   static final String MOUNT_PATH = "/usr/app";
   static final Map<String, Quantity> RESOURCE_REQUESTS =
       Map.of("cpu", new Quantity("0.1"), "memory", new Quantity("1.5Gi"));

@@ -102,7 +102,7 @@ class K8DeploymentTest {
         pipelineEntity,
         streamInEntity,
         streamOutEntity,
-        new DeploymentSpec(new HashMap<>()),
+        new DeploymentSpec("", new HashMap<>()),
         deploymentId);
     Assertions.assertEquals(true, getDeploymentExistsMethod().invoke(k8Deployment, deploymentId));
   }
