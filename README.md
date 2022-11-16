@@ -1,11 +1,9 @@
-# DataCater
+[<p align="center"><img src="logo.png" alt="DataCater logo" width="400"/></p>](https://datacater.io)
 
 [![Documentation](https://img.shields.io/badge/documentation-black)](https://docs.datacater.io)
 [![Slack](https://img.shields.io/badge/slack-purple)](https://join.slack.com/t/datacater/shared_invite/zt-17cga6jg3-rGdgQZU6iX~mJGC8j~UNlw)
 [![Build & Test](https://github.com/DataCater/datacater/actions/workflows/build-test.yaml/badge.svg)](https://github.com/DataCater/datacater/actions/workflows/build-test.yaml)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=DataCater_datacater&metric=alert_status&token=64e2de6e7a588f2317c38b1536395e6a4d565108)](https://sonarcloud.io/summary/new_code?id=DataCater_datacater)
-
-[<p align="center"><img src="logo.png" alt="DataCater logo" width="350"/></p>](https://datacater.io)
 
 Welcome to the real-time, cloud-native data pipeline platform based on Apache Kafka® and Kubernetes® that enables data and developer teams to unlock the full value of their data faster.
 
