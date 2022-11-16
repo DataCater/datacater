@@ -20,7 +20,6 @@ import javax.inject.Inject;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.eclipse.microprofile.reactive.messaging.Channel;
 import org.eclipse.microprofile.reactive.messaging.Emitter;
-import org.junit.Ignore;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -136,43 +135,5 @@ class PipelineEndpointTest {
 
     Response response = request.put("{uuid}");
     Assertions.assertEquals(200, response.getStatusCode());
-  }
-
-  @Ignore
-  void testPipelineInspect() throws IOException {
-    URL streamJson =
-        ClassLoader.getSystemClassLoader()
-            .getResource("streamTestFiles/stream-test-json-format.json");
-    JsonNode stream = mapper.readTree(streamJson);
-    Response response =
-        given()
-            .basePath("/streams")
-            .header("Content-Type", "application/json")
-            .body(stream.toString())
-            .post();
-
-    JsonNode responseJson = mapper.readTree(response.body().asString());
-    UUID uuid = UUID.fromString(responseJson.get("uuid").asText());
-
-    Map<String, String> pipelineMetadata = pipeline.getMetadata();
-    pipelineMetadata.put("stream-in", uuid.toString());
-    String name = "pipeline-inspect-test";
-    Pipeline withStreamIn = Pipeline.from(name, pipelineMetadata, pipeline.getSpec());
-
-    Response responsePipeline =
-        given()
-            .header("Content-Type", "application/json")
-            .body(mapper.writeValueAsString(withStreamIn))
-            .post();
-
-    UUID pipelineInspectionId =
-        UUID.fromString(mapper.readTree(responsePipeline.body().asString()).get("id").asText());
-
-    Response pipelineInspection =
-        given()
-            .header("Content-Type", "application/json")
-            .get(String.format("%s/inspect", pipelineInspectionId));
-
-    Assertions.assertEquals(200, pipelineInspection.statusCode());
   }
 }

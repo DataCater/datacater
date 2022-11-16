@@ -109,7 +109,7 @@ public class PipelineEndpoint {
                 .find(PipelineEntity.class, uuid)
                 .onItem()
                 .ifNotNull()
-                .call(pe -> session.remove(pe))
+                .call(session::remove)
                 .replaceWith(Response.ok().build())));
   }
 
@@ -203,7 +203,7 @@ public class PipelineEndpoint {
                         return response.body();
                       })
                   .flatMap(specPostResponse -> transform)
-                  .map(response -> response.body());
+                  .map(HttpResponse::body);
             }));
   }
 }

@@ -42,7 +42,4 @@ class PipelineSpecTest {
     Assertions.assertEquals(expectedFilterKey, filterKey);
     Assertions.assertEquals(expectedStepName, stepName);
   }
-
-  @Test
-  void testSpecFromJsonNode() {}
 }
