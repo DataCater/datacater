@@ -1,5 +1,6 @@
 package io.datacater.core.exceptions;
 
+import io.datacater.core.ExcludeFromGeneratedCoverageReport;
 import io.quarkus.security.UnauthorizedException;
 import java.security.Principal;
 import javax.ws.rs.core.Context;
@@ -10,6 +11,7 @@ import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
 
+@ExcludeFromGeneratedCoverageReport
 @Provider
 public class UnauthorizedExceptionMapper implements ExceptionMapper<UnauthorizedException> {
 
