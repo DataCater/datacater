@@ -1,0 +1,82 @@
+{
+  "pipeline": {
+    "uuid": "1c1787c8-ae7c-4c81-b6a7-cc5abf942452",
+    "createdAt": "2022-11-09T10:19:15.081+00:00",
+    "updatedAt": "2022-11-17T11:34:50.600+00:00",
+    "name": "yo",
+    "metadata": {
+      "stream-in": "c6eea63b-5144-4efc-8a9e-295e33ebc5d0",
+      "stream-out": "d29f4a8a-5924-4f38-b6bf-5f93df073c27"
+    },
+    "spec": {
+      "steps": [
+        {
+          "kind": "Field",
+          "name": "yooop",
+          "fields": {
+            "ordertime": {
+              "transform": {
+                "key": "user-defined-transformation",
+                "config": {
+                  "code": "# field: Value of the field that the transform is applied to.\n# record: The entire record as dict.\ndef transform(field, record: dict):\n  # Return the processed field.\n  return \"12344xyx56456\""
+                }
+              }
+            },
+            "orderid": {
+              "filter": {
+                "key": "empty"
+              },
+              "transform": {
+                "key": ""
+              }
+            },
+            "itemid": {
+              "transform": {
+                "key": "uppercase"
+              }
+            }
+          }
+        },
+        {
+          "kind": "Record",
+          "transform": {
+            "key": "user-defined-record-transformation",
+            "config": {
+              "code": "# record[\"key\"]: The key of the Apache Kafka record. Can be overwritten.\n# record[\"value\"]: The value of the Apache Kafka record. Can be overwritten.\n# record[\"metadata\"]: The metadata of the Apache Kafka record, e.g., the offset or the timestamp. Cannot be overwritten.\ndef transform(record: dict) -> dict:\n  # Return the processed record.\n  record[\"value\"][\"new_field\"] = \"blafoo\"\n  return record"
+            }
+          }
+        }
+      ]
+    }
+  },
+  "records": [
+    {
+      "key": {
+        "ordertime": 1497014222380,
+        "orderid": 18,
+        "itemid": "Item_184",
+        "address": {
+          "city": "Mountain View",
+          "state": "CA",
+          "zipcode": 94041
+        }
+      },
+      "value": {
+        "ordertime": 1497014222380,
+        "orderid": 18,
+        "itemid": "Item_184",
+        "address": {
+          "city": "Mountain View",
+          "state": "CA",
+          "zipcode": 94041
+        }
+      },
+      "metadata": {
+        "partition": 3,
+        "offset": 0,
+        "timestamp": 1668684861615
+      }
+    }
+  ],
+  "previewStep": 2
+}
