@@ -8,7 +8,7 @@ metadata:
     helm.sh/chart: datacater-0.1.0
     app.kubernetes.io/name: datacater
     app.kubernetes.io/instance: release-name
-    app.kubernetes.io/version: "alpha-20221109-1"
+    app.kubernetes.io/version: "alpha-20221116"
     app.kubernetes.io/managed-by: Helm
 ---
 # Source: datacater/templates/clusterrole.yaml
@@ -43,10 +43,10 @@ metadata:
   name: datacater-api
 rules:
   - apiGroups: [""] # "" indicates the core API group
-    resources: ["pods", "pods/log", "services", "namespace"]
+    resources: ["pods", "pods/log", "services", "namespace", "configmaps"]
     verbs: ["get", "watch", "list", "create", "delete", "patch", "update"]
   - apiGroups: ["apps"]
-    resources: ["statefulsets", "deployment"]
+    resources: ["statefulsets", "deployments", "configmaps", "replicasets"]
     verbs: ["get", "watch", "list", "create", "delete", "patch", "update"]
 ---
 # Source: datacater/templates/rolebinding.yaml
@@ -88,7 +88,7 @@ metadata:
     helm.sh/chart: datacater-0.1.0
     app.kubernetes.io/name: datacater
     app.kubernetes.io/instance: release-name
-    app.kubernetes.io/version: "alpha-20221109-1"
+    app.kubernetes.io/version: "alpha-20221116"
     app.kubernetes.io/managed-by: Helm
 spec:
   type: ClusterIP
@@ -111,7 +111,7 @@ metadata:
   namespace: default
 spec:
   containers:
-    - image: datacater/ui:alpha-20221109-1
+    - image: datacater/ui:alpha-20221116
       imagePullPolicy: IfNotPresent
       name: ui
       ports:
@@ -211,7 +211,7 @@ metadata:
     helm.sh/chart: datacater-0.1.0
     app.kubernetes.io/name: datacater
     app.kubernetes.io/instance: release-name
-    app.kubernetes.io/version: "alpha-20221109-1"
+    app.kubernetes.io/version: "alpha-20221116"
     app.kubernetes.io/managed-by: Helm
 spec:
   serviceName: datacater
@@ -235,7 +235,7 @@ spec:
         - name: datacater
           securityContext:
             {}
-          image: "datacater/datacater:alpha-20221109-1"
+          image: "datacater/datacater:alpha-20221116"
           imagePullPolicy: IfNotPresent
           env:
             - name: QUARKUS_DATASOURCE_REACTIVE_URL
@@ -246,6 +246,8 @@ spec:
               value: postgres
             - name: QUARKUS_DATASOURCE_PASSWORD
               value: datacater
+            - name: DATACATER_DEPLOYMENT_NAMESPACE
+              value: default
             - name: DATACATER_TRANSFORMS_PATH
               value: /datacater/transforms
             - name: DATACATER_FILTERS_PATH
@@ -253,7 +255,7 @@ spec:
             - name: DATACATER_PYTHONRUNNER_IMAGE_NAME
               value: datacater/python-runner
             - name: DATACATER_PYTHONRUNNER_IMAGE_VERSION
-              value: alpha-20221109-1
+              value: alpha-20221116
             - name: QUARKUS_LOG_CONSOLE_JSON
               value: "false"
           ports:

@@ -5,6 +5,11 @@ import { PrivateRoute } from "../components/PrivateRoute";
 import MainLayout from "../components/layout/MainLayout";
 import Home from "./Home";
 import Login from "./Login";
+import ListDeployments from "./deployments/ListDeployments";
+import NewDeployment from "./deployments/NewDeployment";
+import ShowDeployment from "./deployments/ShowDeployment";
+import EditDeployment from "./deployments/EditDeployment";
+import DeploymentLogs from "./deployments/DeploymentLogs";
 import ListPipelines from "./pipelines/ListPipelines";
 import NewPipeline from "./pipelines/NewPipeline";
 import ShowPipeline from "./pipelines/ShowPipeline";
@@ -35,6 +40,32 @@ class DataCaterApp extends Component {
 
               <PrivateRoute exact path="/home" component={Home} />
               <Route exact path="/sign_in" component={Login} />
+
+              <PrivateRoute
+                exact
+                path="/deployments"
+                component={ListDeployments}
+              />
+              <PrivateRoute
+                exact
+                path="/deployments/new"
+                component={NewDeployment}
+              />
+              <PrivateRoute
+                exact
+                path="/deployments/:id/edit"
+                component={EditDeployment}
+              />
+              <PrivateRoute
+                exact
+                path="/deployments/:id/logs"
+                component={DeploymentLogs}
+              />
+              <PrivateRoute
+                exact
+                path="/deployments/:id"
+                component={ShowDeployment}
+              />
 
               <PrivateRoute exact path="/pipelines" component={ListPipelines} />
               <PrivateRoute
