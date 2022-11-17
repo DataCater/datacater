@@ -113,7 +113,7 @@ class EditDeployment extends Component {
             items={[
               { name: "Deployments", uri: "/deployments" },
               { name: deployment.uuid, uri: `/deployments/${deployment.uuid}` },
-              { name: "Settings" },
+              { name: "Edit" },
             ]}
           />
           <div className="col-12 mt-3">

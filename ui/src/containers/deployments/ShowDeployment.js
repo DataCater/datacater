@@ -154,7 +154,7 @@ class ShowDeployment extends Component {
                       </a>
                       <code className="text-white">
                         $ curl {getApiPathPrefix(true)}/deployments/
-                        {stream.uuid} \
+                        {deployment.uuid} \
                         <br />
                         <span className="me-2"></span>{" "}
                         -H&apos;Authorization:Bearer YOUR_TOKEN&apos;
