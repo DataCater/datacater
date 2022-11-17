@@ -14,10 +14,10 @@ public record DeploymentSpec(
             {
                 "pipeline": "dc161a69-fa49-4b1a-b1b1-6d8246d50d72",
                 "stream-in-config": {
-                  "bootstrap.servers": "localhost:9092"
+                  "uuid": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
                 },
                 "stream-out-config": {
-                  "bootstrap.servers": "localhost:9092"
+                  "uuid": "49b079f8-c685-43ac-8419-986060573045"
                 }
               }
         """)
