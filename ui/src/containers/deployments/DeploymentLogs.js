@@ -4,7 +4,10 @@ import { Copy, Trash2 } from "react-feather";
 import { Redirect } from "react-router-dom";
 import Breadcrumb from "../../components/layout/Breadcrumb";
 import { getApiPathPrefix } from "../../helpers/getApiPathPrefix";
-import { fetchDeployment, fetchDeploymentLogs } from "../../actions/deployments";
+import {
+  fetchDeployment,
+  fetchDeploymentLogs,
+} from "../../actions/deployments";
 
 class DeploymentLogs extends Component {
   constructor(props) {
@@ -27,7 +30,7 @@ class DeploymentLogs extends Component {
   }
 
   componentWillUnmount() {
-     clearInterval(this.followLogsIntervalId);
+    clearInterval(this.followLogsIntervalId);
   }
 
   toggleShowApiCall(event) {
@@ -41,7 +44,7 @@ class DeploymentLogs extends Component {
   fetchLogs() {
     this.props.fetchDeploymentLogs(this.getDeploymentId()).then(() => {
       this.setState({
-        logMessages: this.props.deployments.logMessages
+        logMessages: this.props.deployments.logMessages,
       });
     });
   }
@@ -56,9 +59,7 @@ class DeploymentLogs extends Component {
       clearInterval(this.followLogsIntervalId);
     } else {
       // Start following logs
-      this.followLogsIntervalId = setInterval(
-        this.fetchLogs,
-        2000);
+      this.followLogsIntervalId = setInterval(this.fetchLogs, 2000);
     }
 
     this.setState({
@@ -99,9 +100,13 @@ class DeploymentLogs extends Component {
     }
 
     const maxLogScreenHeight = window.innerHeight - 320;
-    const followLogsClassNames = (this.state.followLogs) ? "btn btn-sm btn-primary text-white" : "btn btn-sm btn-outline-primary";
-    const wrapLinesClassNames = (this.state.wrapLines) ? "btn btn-sm btn-primary text-white ms-2" : "btn btn-sm btn-outline-primary ms-2";
-    const whitespaceWrap = (this.state.wrapLines) ? "normal" : "nowrap";
+    const followLogsClassNames = this.state.followLogs
+      ? "btn btn-sm btn-primary text-white"
+      : "btn btn-sm btn-outline-primary";
+    const wrapLinesClassNames = this.state.wrapLines
+      ? "btn btn-sm btn-primary text-white ms-2"
+      : "btn btn-sm btn-outline-primary ms-2";
+    const whitespaceWrap = this.state.wrapLines ? "normal" : "nowrap";
 
     return (
       <div className="container">
@@ -183,44 +188,59 @@ class DeploymentLogs extends Component {
         </div>
         <div className="row mt-4">
           <div className="col-12">
-            {!this.props.deployments.fetchingLogMessages && (this.state.logMessages === undefined || this.state.logMessages.length === 0) &&
-              <div className="alert alert-warning" role="alert">
-                We couldn&apos;t read any log messages.
-              </div>
-            }
-            {this.state.logMessages !== undefined && this.state.logMessages.length > 0 &&
-              <>
-                <div className="mb-2">
-                  <a
-                    href={`/deployments/${deployment.uuid}/logs`}
-                    onClick={this.toggleFollowLogs}
-                    className={followLogsClassNames}
-                  >
-                    Follow logs
-                  </a>
-                  <a
-                    href={`/deployments/${deployment.uuid}/logs`}
-                    onClick={this.toggleWrapLines}
-                    className={wrapLinesClassNames}
-                  >
-                    Wrap lines
-                  </a>
+            {!this.props.deployments.fetchingLogMessages &&
+              (this.state.logMessages === undefined ||
+                this.state.logMessages.length === 0) && (
+                <div className="alert alert-warning" role="alert">
+                  We couldn&apos;t read any log messages.
                 </div>
-                <div className="card">
-                  <div className="card-body bg-dark p-0">
-                    <code className="bg-dark text-white d-block p-2 ps-3 pt-3" style={{fontFamily: "Roboto Mono,monospace", maxHeight: maxLogScreenHeight, overflow: "scroll", whiteSpace: whitespaceWrap}}>
-                      {this.state.logMessages.map((logMessage, idx) => (
-                        <React.Fragment key={idx}>
-                          <span className="me-2" style={{color: "#ae75e6"}}>{logMessage.timestamp}</span>
-                          <span className="me-2" style={{color: "#b4d2ea"}}>{logMessage.loggerName}</span>
-                          {logMessage.message} <br />
-                        </React.Fragment>
-                      ))}
-                    </code>
+              )}
+            {this.state.logMessages !== undefined &&
+              this.state.logMessages.length > 0 && (
+                <>
+                  <div className="mb-2">
+                    <a
+                      href={`/deployments/${deployment.uuid}/logs`}
+                      onClick={this.toggleFollowLogs}
+                      className={followLogsClassNames}
+                    >
+                      Follow logs
+                    </a>
+                    <a
+                      href={`/deployments/${deployment.uuid}/logs`}
+                      onClick={this.toggleWrapLines}
+                      className={wrapLinesClassNames}
+                    >
+                      Wrap lines
+                    </a>
                   </div>
-                </div>
-              </>
-            }
+                  <div className="card">
+                    <div className="card-body bg-dark p-0">
+                      <code
+                        className="bg-dark text-white d-block p-2 ps-3 pt-3"
+                        style={{
+                          fontFamily: "Roboto Mono,monospace",
+                          maxHeight: maxLogScreenHeight,
+                          overflow: "scroll",
+                          whiteSpace: whitespaceWrap,
+                        }}
+                      >
+                        {this.state.logMessages.map((logMessage, idx) => (
+                          <React.Fragment key={idx}>
+                            <span className="me-2" style={{ color: "#ae75e6" }}>
+                              {logMessage.timestamp}
+                            </span>
+                            <span className="me-2" style={{ color: "#b4d2ea" }}>
+                              {logMessage.loggerName}
+                            </span>
+                            {logMessage.message} <br />
+                          </React.Fragment>
+                        ))}
+                      </code>
+                    </div>
+                  </div>
+                </>
+              )}
           </div>
         </div>
       </div>

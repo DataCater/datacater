@@ -5,7 +5,7 @@ const deployments = (state, action) => {
     deployment: undefined,
     deployments: [],
     fetchingLogs: false,
-    logMessages: []
+    logMessages: [],
   };
 
   switch (action.type) {
@@ -98,7 +98,7 @@ const deployments = (state, action) => {
         // TODO: Remove once API returns valid JSON not ND-JSON
         .split("\n")
         .slice(-101, -1)
-        .map(logLine => {
+        .map((logLine) => {
           return JSON.parse(logLine);
         });
       return {
