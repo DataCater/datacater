@@ -1,0 +1,11 @@
+{
+  "spec": {
+      "pipeline": "pipelineUUIDPlaceholder",
+    "stream-in-config": {
+      "uuid": "streaminUUIDPlaceholder"
+    },
+    "stream-out-config": {
+      "uuid": "streamoutUUIDPlaceholder"
+    }
+  }
+}
