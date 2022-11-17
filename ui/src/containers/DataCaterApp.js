@@ -9,6 +9,7 @@ import ListDeployments from "./deployments/ListDeployments";
 import NewDeployment from "./deployments/NewDeployment";
 import ShowDeployment from "./deployments/ShowDeployment";
 import EditDeployment from "./deployments/EditDeployment";
+import DeploymentLogs from "./deployments/DeploymentLogs";
 import ListPipelines from "./pipelines/ListPipelines";
 import NewPipeline from "./pipelines/NewPipeline";
 import ShowPipeline from "./pipelines/ShowPipeline";
@@ -54,6 +55,11 @@ class DataCaterApp extends Component {
                 exact
                 path="/deployments/:id/edit"
                 component={EditDeployment}
+              />
+              <PrivateRoute
+                exact
+                path="/deployments/:id/logs"
+                component={DeploymentLogs}
               />
               <PrivateRoute
                 exact

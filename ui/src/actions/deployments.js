@@ -165,3 +165,39 @@ export function deleteDeployment(id) {
     });
   };
 }
+
+export function fetchDeploymentLogs(id) {
+  const requestDeploymentLogs = () => ({
+    type: "REQUEST_LOGS_DEPLOYMENT",
+  });
+
+  const receivedDeploymentLogs = (response) => ({
+    type: "RECEIVE_LOGS_DEPLOYMENT",
+    logMessages: response,
+  });
+
+  const receivedDeploymentLogsFailed = (response) => ({
+    type: "RECEIVE_LOGS_DEPLOYMENT_FAILED",
+    errorMessage: response,
+  });
+
+  return function (dispatch) {
+    dispatch(requestDeploymentLogs());
+
+    return callApi(`/deployments/${id}/logs`).then(
+      (response) => dispatch(receivedDeploymentLogs(response.data)),
+      (error) => {
+        if (error.response.status === 401) {
+          localStorage.removeItem("userToken");
+          window.location = "/sign_in";
+        } else if (error.response.status === 404) {
+          window.location = "/404";
+        } else {
+          dispatch(
+            receivedDeploymentLogsFailed(JSON.stringify(error.response.data))
+          );
+        }
+      }
+    );
+  };
+}

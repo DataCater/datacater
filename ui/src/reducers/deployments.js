@@ -4,6 +4,8 @@ const deployments = (state, action) => {
     fetchingDeployments: false,
     deployment: undefined,
     deployments: [],
+    fetchingLogs: false,
+    logMessages: []
   };
 
   switch (action.type) {
@@ -83,6 +85,34 @@ const deployments = (state, action) => {
         ...state,
         errorMessage: action.errorMessage,
         deployment: undefined,
+      };
+    case "REQUEST_LOGS_DEPLOYMENT":
+      return {
+        ...state,
+        errorMessage: undefined,
+        fetchingLogMessages: true,
+        logMessages: [],
+      };
+    case "RECEIVE_LOGS_DEPLOYMENT":
+      const logMessages = action.logMessages
+        // TODO: Remove once API returns valid JSON not ND-JSON
+        .split("\n")
+        .slice(-101, -1)
+        .map(logLine => {
+          return JSON.parse(logLine);
+        });
+      return {
+        ...state,
+        errorMessage: undefined,
+        fetchingLogMessages: false,
+        logMessages: logMessages,
+      };
+    case "RECEIVE_LOGS_DEPLOYMENT_FAILED":
+      return {
+        ...state,
+        errorMessage: action.errorMessage,
+        fetchingLogMessages: false,
+        logMessages: [],
       };
     default:
       return state || initialState;
