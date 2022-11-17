@@ -1,8 +1,8 @@
 {
   "name": "pipeline-test",
   "metadata": {
-    "stream-in": "streaminUUIDPlaceholder",
-    "stream-out": "streamoutUUIDPlaceholder"
+    "stream-in": "7b44c6bd-6a9f-4f33-870d-76355647b8e5",
+    "stream-out": "555d11b1-cdf8-4f12-980e-9d5ce7d874ef"
   },
   "spec": {
     "steps": [

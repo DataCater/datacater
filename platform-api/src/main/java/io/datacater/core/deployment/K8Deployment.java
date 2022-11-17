@@ -253,34 +253,14 @@ public class K8Deployment {
 
   private List<EnvVar> getEnvironmentVariables(
       StreamEntity streamIn, StreamEntity streamOut, DeploymentSpec deploymentSpec) {
-    Map<String, Object> streamInConfig = getNode(StaticConfig.STREAMIN_CONFIG_TEXT, deploymentSpec);
-    Map<String, Object> streamOutConfig =
-        getNode(StaticConfig.STREAMOUT_CONFIG_TEXT, deploymentSpec);
-
-    String streamInBootstrapServers =
-        getEnvVariableFromNode(streamIn.getSpec(), StaticConfig.BOOTSTRAP_SERVERS);
-    String streamInKeyDeserializer =
-        getEnvVariableFromNode(streamIn.getSpec(), StaticConfig.KEY_DESERIALIZER);
-    String streamInValueDeserializer =
-        getEnvVariableFromNode(streamIn.getSpec(), StaticConfig.VALUE_DESERIALIZER);
-    String streamOutBootstrapServers =
-        getEnvVariableFromNode(streamOut.getSpec(), StaticConfig.BOOTSTRAP_SERVERS);
-    String streamOutKeySerializer =
-        getEnvVariableFromNode(streamOut.getSpec(), StaticConfig.KEY_SERIALIZER);
-    String streamOutValueSerializer =
-        getEnvVariableFromNode(streamOut.getSpec(), StaticConfig.VALUE_SERIALIZER);
+    Map<String, Object> streamInConfig = nodeToMap(streamIn.getSpec());
+    Map<String, Object> streamOutConfig = nodeToMap(streamOut.getSpec());
+    streamInConfig.putAll(getNode(StaticConfig.STREAMIN_CONFIG_TEXT, deploymentSpec));
+    streamOutConfig.putAll(getNode(StaticConfig.STREAMOUT_CONFIG_TEXT, deploymentSpec));
 
     List<EnvVar> variables = new ArrayList<>();
     variables.add(createEnvVariable(StaticConfig.STREAM_OUT_CONFIG_NAME, streamIn.getName()));
     variables.add(createEnvVariable(StaticConfig.STREAM_IN_CONFIG_NAME, streamOut.getName()));
-
-    streamInConfig.putIfAbsent(StaticConfig.BOOTSTRAP_SERVERS, streamInBootstrapServers);
-    streamInConfig.putIfAbsent(StaticConfig.KEY_DESERIALIZER, streamInKeyDeserializer);
-    streamInConfig.putIfAbsent(StaticConfig.VALUE_DESERIALIZER, streamInValueDeserializer);
-
-    streamOutConfig.putIfAbsent(StaticConfig.BOOTSTRAP_SERVERS, streamOutBootstrapServers);
-    streamOutConfig.putIfAbsent(StaticConfig.KEY_SERIALIZER, streamOutKeySerializer);
-    streamOutConfig.putIfAbsent(StaticConfig.VALUE_SERIALIZER, streamOutValueSerializer);
 
     variables.add(
         createEnvVariable(StaticConfig.DC_STREAMIN_CONFIG_TEXT, streamInConfig.toString()));
@@ -293,6 +273,15 @@ public class K8Deployment {
     ObjectMapper om = new ObjectMapper();
     Map<String, Object> config =
         om.convertValue(spec.deployment().get(node), new TypeReference<>() {});
+    if (config == null) {
+      return new HashMap<>();
+    }
+    return config;
+  }
+
+  private Map<String, Object> nodeToMap(JsonNode node) {
+    ObjectMapper om = new ObjectMapper();
+    Map<String, Object> config = om.convertValue(node, new TypeReference<>() {});
     if (config == null) {
       return new HashMap<>();
     }
