@@ -46,7 +46,7 @@ rules:
     resources: ["pods", "pods/log", "services", "namespace", "configmaps"]
     verbs: ["get", "watch", "list", "create", "delete", "patch", "update"]
   - apiGroups: ["apps"]
-    resources: ["statefulsets", "deployments", "configmaps"]
+    resources: ["statefulsets", "deployments", "configmaps", "replicasets"]
     verbs: ["get", "watch", "list", "create", "delete", "patch", "update"]
 ---
 # Source: datacater/templates/rolebinding.yaml
