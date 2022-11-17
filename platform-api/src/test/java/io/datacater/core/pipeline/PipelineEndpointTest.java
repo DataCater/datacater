@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
 import io.vertx.core.json.JsonObject;
@@ -137,7 +138,7 @@ class PipelineEndpointTest {
     Assertions.assertEquals(200, response.getStatusCode());
   }
 
-  @Ignore("not working at the moment because statefulset will not start")
+  @Ignore
   void testPipelineInspect() throws IOException {
     URL streamJson =
         ClassLoader.getSystemClassLoader()
@@ -175,5 +176,21 @@ class PipelineEndpointTest {
             .get(pipelinesPath + String.format("/%s/inspect", pipelineInspectionId));
 
     Assertions.assertEquals(200, pipelineInspection.statusCode());
+  }
+
+  @Ignore
+  void testPipelinePreview() throws IOException {
+    URL pipelinePreview = ClassLoader.getSystemClassLoader().getResource("pipeline_preview.json");
+
+    JsonNode pipeline = mapper.readTree(pipelinePreview);
+
+    Response response =
+        given()
+            .contentType(ContentType.JSON)
+            .body(pipeline.asText())
+            .baseUri(baseURI)
+            .post(pipelinesPath + "/preview");
+
+    Assertions.assertEquals(200, response.statusCode());
   }
 }
