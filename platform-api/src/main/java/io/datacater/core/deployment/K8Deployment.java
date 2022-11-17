@@ -1,5 +1,6 @@
 package io.datacater.core.deployment;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -253,6 +254,7 @@ public class K8Deployment {
 
   private List<EnvVar> getEnvironmentVariables(
       StreamEntity streamIn, StreamEntity streamOut, DeploymentSpec deploymentSpec) {
+    ObjectMapper objectMapper = new ObjectMapper();
     Map<String, Object> streamInConfig = nodeToMap(streamIn.getSpec().get("kafka"));
     Map<String, Object> streamOutConfig = nodeToMap(streamOut.getSpec().get("kafka"));
     streamInConfig.putAll(getNode(StaticConfig.STREAMIN_CONFIG_TEXT, deploymentSpec));
@@ -285,10 +287,19 @@ public class K8Deployment {
     variables.add(createEnvVariable(StaticConfig.STREAM_OUT_CONFIG_NAME, streamIn.getName()));
     variables.add(createEnvVariable(StaticConfig.STREAM_IN_CONFIG_NAME, streamOut.getName()));
 
-    variables.add(
-        createEnvVariable(StaticConfig.DC_STREAMIN_CONFIG_TEXT, streamInConfig.toString()));
-    variables.add(
-        createEnvVariable(StaticConfig.DC_STREAMOUT_CONFIG_TEXT, streamOutConfig.toString()));
+    try {
+      variables.add(
+          createEnvVariable(
+              StaticConfig.DC_STREAMIN_CONFIG_TEXT,
+              "'" + objectMapper.writeValueAsString(streamInConfig).replace("'", "''") + "'"));
+      variables.add(
+          createEnvVariable(
+              StaticConfig.DC_STREAMOUT_CONFIG_TEXT,
+              "'" + objectMapper.writeValueAsString(streamOutConfig).replace("'", "''") + "'"));
+    } catch (JsonProcessingException e) {
+      throw new CreateDeploymentException(StringUtilities.wrapString(e.getMessage()));
+    }
+
     return variables;
   }
 
