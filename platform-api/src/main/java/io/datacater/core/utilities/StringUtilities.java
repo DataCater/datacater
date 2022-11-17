@@ -7,6 +7,8 @@ import java.util.stream.Collectors;
 
 public class StringUtilities {
 
+  private StringUtilities() {}
+
   @ExcludeFromGeneratedCoverageReport
   public static String wrapString(String text) {
     String[] lines = text.split(System.lineSeparator());

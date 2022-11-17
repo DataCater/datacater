@@ -46,8 +46,7 @@ public class Pipeline {
   @JsonIgnore
   static Pipeline from(PipelineEntity pe) throws JsonProcessingException {
     ObjectMapper mapper = new ObjectMapper();
-    Map<String, String> metadata =
-        (Map<String, String>) mapper.readValue(pe.getSpec().asText(), Map.class);
+    Map<String, String> metadata = mapper.readValue(pe.getSpec().asText(), Map.class);
     PipelineSpec spec = PipelineSpec.from(pe.getSpec());
     return new Pipeline(pe.getName(), metadata, spec);
   }

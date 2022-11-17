@@ -1,9 +1,11 @@
 package io.datacater.core.exceptions;
 
+import io.datacater.core.ExcludeFromGeneratedCoverageReport;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.ExceptionMapper;
 
+@ExcludeFromGeneratedCoverageReport
 public class NoItemsForTransformationExceptionMapper
     implements ExceptionMapper<NoItemsForTransformationException> {
 

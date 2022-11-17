@@ -1,6 +1,7 @@
 package io.datacater.core.deployment;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.datacater.core.exceptions.*;
 import io.datacater.core.pipeline.PipelineEntity;
 import io.datacater.core.stream.StreamEntity;
@@ -116,8 +117,16 @@ public class DeploymentEndpoint {
                             .all()
                             .unis(
                                 Uni.createFrom().item(pipelineEntity),
-                                getStream(pipelineEntity, StaticConfig.STREAM_IN),
-                                getStream(pipelineEntity, StaticConfig.STREAM_OUT))
+                                getStream(
+                                    spec,
+                                    StaticConfig.STREAM_IN_CONFIG,
+                                    pipelineEntity,
+                                    StaticConfig.STREAM_IN),
+                                getStream(
+                                    spec,
+                                    StaticConfig.STREAM_OUT_CONFIG,
+                                    pipelineEntity,
+                                    StaticConfig.STREAM_OUT))
                             .asTuple())
                 .onItem()
                 .transform(
@@ -133,6 +142,11 @@ public class DeploymentEndpoint {
         ((session, tx) ->
             session
                 .find(DeploymentEntity.class, deploymentId)
+                .onItem()
+                .ifNull()
+                .failWith(
+                    new DeploymentNotFoundException(
+                        StaticConfig.LoggerMessages.DEPLOYMENT_NOT_FOUND))
                 .onItem()
                 .ifNotNull()
                 .call(
@@ -157,8 +171,16 @@ public class DeploymentEndpoint {
                     .all()
                     .unis(
                         Uni.createFrom().item(pipelineEntity),
-                        getStream(pipelineEntity, StaticConfig.STREAM_IN),
-                        getStream(pipelineEntity, StaticConfig.STREAM_OUT),
+                        getStream(
+                            spec,
+                            StaticConfig.STREAM_IN_CONFIG,
+                            pipelineEntity,
+                            StaticConfig.STREAM_IN),
+                        getStream(
+                            spec,
+                            StaticConfig.STREAM_OUT_CONFIG,
+                            pipelineEntity,
+                            StaticConfig.STREAM_OUT),
                         deploymentUni)
                     .asTuple())
         .onItem()
@@ -176,13 +198,7 @@ public class DeploymentEndpoint {
     return sf.withTransaction(
         (session, transaction) ->
             session
-                .find(
-                    PipelineEntity.class,
-                    UUID.fromString(
-                        deploymentSpec
-                            .deployment()
-                            .get(StaticConfig.PIPELINE_NODE_TEXT)
-                            .toString()))
+                .find(PipelineEntity.class, getPipelineUUIDFromMap(deploymentSpec.deployment()))
                 .onItem()
                 .ifNull()
                 .failWith(
@@ -201,11 +217,14 @@ public class DeploymentEndpoint {
                         StaticConfig.LoggerMessages.DEPLOYMENT_NOT_FOUND)));
   }
 
-  private Uni<StreamEntity> getStream(PipelineEntity pipeline, String key) {
+  private Uni<StreamEntity> getStream(
+      DeploymentSpec spec, String deploymentSpecKey, PipelineEntity pipeline, String key) {
     return sf.withTransaction(
         (session, transaction) ->
             session
-                .find(StreamEntity.class, getUUIDFromNode(pipeline.getMetadata(), key))
+                .find(
+                    StreamEntity.class,
+                    getStreamUUID(spec, deploymentSpecKey, pipeline.getMetadata(), key))
                 .onItem()
                 .ifNull()
                 .failWith(
@@ -268,8 +287,38 @@ public class DeploymentEndpoint {
     return createDeployment(pe, streamOut, streamIn, deploymentSpec, de);
   }
 
-  private UUID getUUIDFromNode(JsonNode node, String key) {
-    return UUID.fromString(node.get(key).asText());
+  private UUID getStreamUUID(
+      DeploymentSpec spec, String deploymentSpecKey, JsonNode node, String key) {
+    // try and get from deploymentSpec
+    String uuidString = "";
+    ObjectMapper mapper = new ObjectMapper();
+    Map<String, Object> streamConfig =
+        mapper.convertValue(spec.deployment().get(deploymentSpecKey), Map.class);
+    if (streamConfig != null && streamConfig.get("uuid") != null) {
+      uuidString = streamConfig.get("uuid").toString();
+    }
+
+    // if not in deploymentSpec, try and get from pipeline
+    if ((uuidString == null || uuidString.isEmpty() || uuidString.isBlank())
+        && node.get(key) != null) {
+      uuidString = node.get(key).asText();
+    }
+
+    // if in neither, throw exception
+    if (uuidString == null || uuidString.isEmpty() || uuidString.isBlank()) {
+      throw new CreateDeploymentException(
+          String.format(StaticConfig.LoggerMessages.STREAM_NOT_FOUND, key));
+    }
+
+    return UUID.fromString(uuidString);
+  }
+
+  private UUID getPipelineUUIDFromMap(Map<String, Object> map) {
+    try {
+      return UUID.fromString(map.get(StaticConfig.PIPELINE_NODE_TEXT).toString());
+    } catch (Exception e) {
+      throw new CreateDeploymentException(StaticConfig.LoggerMessages.PIPELINE_NOT_FOUND);
+    }
   }
 
   private void watchLogsRunner(UUID deploymentId, @Context Sse sse, @Context SseEventSink eventSink)

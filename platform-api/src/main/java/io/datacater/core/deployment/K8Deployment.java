@@ -50,17 +50,17 @@ public class K8Deployment {
           new DeploymentBuilder()
               .withNewMetadata()
               .withName(name)
-              .addToLabels(getLabels(deploymentId))
+              .addToLabels(getLabels(deploymentId, deploymentSpec.name()))
               .endMetadata()
               .withNewSpec()
               .withReplicas(StaticConfig.EnvironmentVariables.REPLICAS)
               .withMinReadySeconds(StaticConfig.EnvironmentVariables.READY_SECONDS)
               .withNewSelector()
-              .addToMatchLabels(getLabels(deploymentId))
+              .addToMatchLabels(getLabels(deploymentId, deploymentSpec.name()))
               .endSelector()
               .withNewTemplate()
               .withNewMetadata()
-              .addToLabels(getLabels(deploymentId))
+              .addToLabels(getLabels(deploymentId, deploymentSpec.name()))
               .endMetadata()
               .withNewSpec()
               .addNewContainer()
@@ -98,7 +98,7 @@ public class K8Deployment {
     return getDeployment(deploymentId);
   }
 
-  private static Map<String, String> getLabels(UUID deploymentId) {
+  private static Map<String, String> getLabels(UUID deploymentId, String prettyName) {
     return Map.of(
         StaticConfig.APP,
         StaticConfig.DATACATER_PIPELINE,
@@ -107,7 +107,9 @@ public class K8Deployment {
         StaticConfig.REVISION,
         StaticConfig.PIPELINE_REV,
         StaticConfig.UUID_TEXT,
-        deploymentId.toString());
+        deploymentId.toString(),
+        StaticConfig.DEPLOYMENT_NAME_TEXT,
+        prettyName);
   }
 
   private Container pythonRunnerContainer() {

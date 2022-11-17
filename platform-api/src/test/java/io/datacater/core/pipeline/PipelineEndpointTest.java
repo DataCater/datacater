@@ -5,14 +5,13 @@ import static io.restassured.RestAssured.given;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
-import io.quarkus.test.common.http.TestHTTPEndpoint;
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
 import io.vertx.core.json.JsonObject;
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Map;
 import java.util.UUID;
@@ -21,16 +20,15 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 import org.eclipse.microprofile.reactive.messaging.Channel;
 import org.eclipse.microprofile.reactive.messaging.Emitter;
 import org.junit.Ignore;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.*;
 
 @QuarkusTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@TestHTTPEndpoint(PipelineEndpoint.class)
 class PipelineEndpointTest {
 
+  final String baseURI = "http://localhost:8081";
+  final String streamsPath = "/streams";
+  final String pipelinesPath = "/pipelines";
   Pipeline pipeline;
   JsonNode pipelineJson;
 
@@ -41,7 +39,7 @@ class PipelineEndpointTest {
   Emitter<ProducerRecord<JsonObject, JsonObject>> producer;
 
   @BeforeAll
-  void setUp() throws IOException, URISyntaxException {
+  void setUp() throws IOException {
     JsonObject key = new JsonObject(Map.of("key", UUID.randomUUID()));
     JsonObject value = new JsonObject(Map.of("value", UUID.randomUUID()));
 
@@ -57,12 +55,12 @@ class PipelineEndpointTest {
 
   @Test
   void testGetPipelines() {
-    given().get().then().statusCode(200);
+    given().baseUri(baseURI).get(pipelinesPath).then().statusCode(200);
   }
 
   @Test
   void testNonParsable() {
-    given().post("/pipeline").then().statusCode(405);
+    given().baseUri(baseURI).post(pipelinesPath).then().statusCode(415);
   }
 
   @Test
@@ -73,22 +71,23 @@ class PipelineEndpointTest {
     request.header("Content-Type", "application/json");
     request.body(json);
 
-    Response response = request.post();
+    Response response = request.baseUri(baseURI).post(pipelinesPath);
     Assertions.assertEquals(200, response.getStatusCode());
   }
 
   @Test
   void testGetValidPipeline() throws IOException {
     ObjectMapper mapper = new JsonMapper();
-    RequestSpecification request = RestAssured.given();
+    RequestSpecification request = RestAssured.given().baseUri(baseURI);
     String json = pipelineJson.toString();
     request.header("Content-Type", "application/json");
     request.body(json);
 
-    Response responsePost = request.post();
+    Response responsePost = request.post(pipelinesPath);
     PipelineEntity pe = mapper.readValue(responsePost.body().asString(), PipelineEntity.class);
 
-    Response responseGet = given().pathParam("uuid", pe.getId()).get("{uuid}");
+    Response responseGet =
+        given().baseUri(baseURI).pathParam("uuid", pe.getId()).get(pipelinesPath + "/{uuid}");
 
     Assertions.assertEquals(200, responseGet.getStatusCode());
     Assertions.assertTrue(responseGet.body().asString().contains(String.valueOf(pe.getId())));
@@ -100,16 +99,17 @@ class PipelineEndpointTest {
         ClassLoader.getSystemClassLoader().getResource("pipeline-test-delete-object.json");
     ObjectMapper mapper = new JsonMapper();
     JsonNode pipelineJson = mapper.readTree(pipelineJsonURL);
-    RequestSpecification requestPost = given();
+    RequestSpecification requestPost = given().baseUri(baseURI);
     String json = pipelineJson.toString();
     requestPost.header("Content-Type", "application/json");
     requestPost.body(json);
 
-    Response responsePost = requestPost.post();
+    Response responsePost = requestPost.post(pipelinesPath);
     PipelineEntity pe = mapper.readValue(responsePost.body().asString(), PipelineEntity.class);
 
-    RequestSpecification requestDelete = RestAssured.given().pathParam("uuid", pe.getId());
-    Response response = requestDelete.delete("{uuid}");
+    RequestSpecification requestDelete =
+        RestAssured.given().baseUri(baseURI).pathParam("uuid", pe.getId());
+    Response response = requestDelete.delete(pipelinesPath + "/{uuid}");
 
     Assertions.assertEquals(200, response.getStatusCode());
   }
@@ -120,21 +120,21 @@ class PipelineEndpointTest {
         ClassLoader.getSystemClassLoader().getResource("pipeline-test-delete-object.json");
     ObjectMapper mapper = new JsonMapper();
     JsonNode pipelineJson = mapper.readTree(pipelineJsonURL);
-    RequestSpecification requestPost = given();
+    RequestSpecification requestPost = given().baseUri(baseURI);
     String json = pipelineJson.toString();
     requestPost.header("Content-Type", "application/json");
     requestPost.body(json);
 
-    Response responsePost = requestPost.post();
+    Response responsePost = requestPost.post(pipelinesPath);
     PipelineEntity pe = mapper.readValue(responsePost.body().asString(), PipelineEntity.class);
 
-    RequestSpecification request = given().pathParam("uuid", pe.getId());
+    RequestSpecification request = given().baseUri(baseURI).pathParam("uuid", pe.getId());
     String jsonPut = pipelineJson.toString();
 
     request.header("Content-Type", "application/json");
     request.body(jsonPut);
 
-    Response response = request.put("{uuid}");
+    Response response = request.put(pipelinesPath + "/{uuid}");
     Assertions.assertEquals(200, response.getStatusCode());
   }
 
@@ -146,10 +146,10 @@ class PipelineEndpointTest {
     JsonNode stream = mapper.readTree(streamJson);
     Response response =
         given()
-            .basePath("/streams")
+            .baseUri(baseURI)
             .header("Content-Type", "application/json")
             .body(stream.toString())
-            .post();
+            .post(streamsPath);
 
     JsonNode responseJson = mapper.readTree(response.body().asString());
     UUID uuid = UUID.fromString(responseJson.get("uuid").asText());
@@ -158,21 +158,39 @@ class PipelineEndpointTest {
     pipelineMetadata.put("stream-in", uuid.toString());
     String name = "pipeline-inspect-test";
     Pipeline withStreamIn = Pipeline.from(name, pipelineMetadata, pipeline.getSpec());
-
     Response responsePipeline =
         given()
+            .baseUri(baseURI)
             .header("Content-Type", "application/json")
             .body(mapper.writeValueAsString(withStreamIn))
-            .post();
+            .post(pipelinesPath);
 
-    UUID pipelineInspectionId =
-        UUID.fromString(mapper.readTree(responsePipeline.body().asString()).get("id").asText());
+    PipelineEntity pe = mapper.readValue(responsePipeline.body().asString(), PipelineEntity.class);
+
+    UUID pipelineInspectionId = pe.getId();
 
     Response pipelineInspection =
         given()
+            .baseUri(baseURI)
             .header("Content-Type", "application/json")
-            .get(String.format("%s/inspect", pipelineInspectionId));
+            .get(pipelinesPath + String.format("/%s/inspect", pipelineInspectionId));
 
     Assertions.assertEquals(200, pipelineInspection.statusCode());
+  }
+
+  @Ignore
+  void testPipelinePreview() throws IOException {
+    URL pipelinePreview = ClassLoader.getSystemClassLoader().getResource("pipeline_preview.json");
+
+    JsonNode pipeline = mapper.readTree(pipelinePreview);
+
+    Response response =
+        given()
+            .contentType(ContentType.JSON)
+            .body(pipeline.asText())
+            .baseUri(baseURI)
+            .post(pipelinesPath + "/preview");
+
+    Assertions.assertEquals(200, response.statusCode());
   }
 }

@@ -24,15 +24,15 @@ import org.eclipse.microprofile.config.ConfigProvider;
  *
  * <p>Optional connection options: - value.deserializer.schema - schema.registry.url
  *
- * <p>Optional config options: - auth... (TODO) - key.format (default: json) - num.partitions
- * (default: 3) - replication.factor (default: 1) - value.format (default: json)
+ * <p>Optional config options: - key.format (default: json) - num.partitions (default: 3) -
+ * replication.factor (default: 1) - value.format (default: json)
  *
  * <p>You can pass all other official Topic-level configuration options as config values (<a
  * href="https://kafka.apache.org/documentation/#topicconfigs">https://kafka.apache.org/documentation/#topicconfigs</a>).
  */
 public class KafkaStreamsAdmin implements StreamService {
-  private static final String PARTITIONS = "partition.count";
-  private static final String REPLICATIONFACTOR = "replication.factor";
+  private static final String PARTITION_COUNT = "partition.count";
+  private static final String REPLICATION_FACTOR = "replication.factor";
   private final Admin admin;
   private final KafkaConsumer<Object, Object> consumer;
 
@@ -91,14 +91,14 @@ public class KafkaStreamsAdmin implements StreamService {
   }
 
   private static int getPartitions(Map<String, Object> topicConfig) {
-    if (topicConfig.get(PARTITIONS) instanceof String partitions) {
+    if (topicConfig.get(PARTITION_COUNT) instanceof String partitions) {
       return Integer.parseInt(partitions);
     }
     return DEFAULT_NUM_PARTITIONS;
   }
 
   private static Short getReplicationFactor(Map<String, Object> topicConfig) {
-    if (topicConfig.get(REPLICATIONFACTOR) instanceof String repFactor) {
+    if (topicConfig.get(REPLICATION_FACTOR) instanceof String repFactor) {
       return Short.valueOf(repFactor);
     }
     return DEFAULT_REPLICATION_FACTOR;
@@ -111,8 +111,8 @@ public class KafkaStreamsAdmin implements StreamService {
   }
 
   public Boolean isValidConfig(Map<String, String> config) {
-    Optional<String> newPartitions = Optional.ofNullable(config.get(PARTITIONS));
-    Optional<String> newReplicationFactor = Optional.ofNullable(config.get(REPLICATIONFACTOR));
+    Optional<String> newPartitions = Optional.ofNullable(config.get(PARTITION_COUNT));
+    Optional<String> newReplicationFactor = Optional.ofNullable(config.get(REPLICATION_FACTOR));
     if (streamExists()
         && newReplicationFactor.isPresent()
         && !Short.valueOf(newReplicationFactor.get()).equals(this.replication)) {
@@ -181,28 +181,28 @@ public class KafkaStreamsAdmin implements StreamService {
     if (!streamExists()) {
       return messageList;
     }
-    List<TopicPartition> partitions = getPartitions(consumer.partitionsFor(this.name));
-    if (partitions.isEmpty()) {
+    List<TopicPartition> partitionsList = getPartitions(consumer.partitionsFor(this.name));
+    if (partitionsList.isEmpty()) {
       return messageList;
     }
-    consumer.assign(partitions);
-    setPartitionOffsets(partitions, limit);
+    consumer.assign(partitionsList);
+    setPartitionOffsets(partitionsList, limit);
 
     ConsumerRecords<Object, Object> consumerRecords =
         consumer.poll(Duration.ofMillis(KAFKA_API_TIMEOUT_MS));
 
     consumerRecords.forEach(item -> messageList.add(recordToStreamMessage(item)));
-    return messageList.stream().limit(limit).collect(Collectors.toList());
+    return messageList.stream().limit(limit).toList();
   }
 
   private List<TopicPartition> getPartitions(List<PartitionInfo> allPartitions) {
-    List<TopicPartition> partitions = new ArrayList<>();
+    List<TopicPartition> partitionsList = new ArrayList<>();
     for (PartitionInfo partitionInfo : allPartitions) {
       TopicPartition partition =
           new TopicPartition(partitionInfo.topic(), partitionInfo.partition());
-      partitions.add(partition);
+      partitionsList.add(partition);
     }
-    return partitions;
+    return partitionsList;
   }
 
   private void setPartitionOffsets(List<TopicPartition> allPartitions, long limit) {

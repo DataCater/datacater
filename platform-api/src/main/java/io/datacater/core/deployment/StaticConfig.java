@@ -17,6 +17,7 @@ public class StaticConfig {
   static final String PIPELINE_NO = "1";
   static final String PIPELINE_REV = "1";
   static final String UUID_TEXT = "datacater.io/uuid";
+  static final String DEPLOYMENT_NAME_TEXT = "datacater.io/name";
   static final String MOUNT_PATH = "/usr/app";
   static final Map<String, Quantity> RESOURCE_REQUESTS =
       Map.of("cpu", new Quantity("0.1"), "memory", new Quantity("1.5Gi"));
@@ -27,6 +28,8 @@ public class StaticConfig {
   static final String SPEC = "spec";
   static final String STREAM_OUT = "stream-out";
   static final String STREAM_IN = "stream-in";
+  static final String STREAM_IN_CONFIG = "stream-in-config";
+  static final String STREAM_OUT_CONFIG = "stream-out-config";
   static final String PIPELINE_NODE_TEXT = "pipeline";
   static final String SERIALIZER = "serializer";
   static final String DESERIALIZER = "deserializer";
@@ -57,7 +60,7 @@ public class StaticConfig {
     static final String FULL_IMAGE_NAME =
         ConfigProvider.getConfig()
             .getOptionalValue("datacater.deployment.image", String.class)
-            .orElse("datacater/pipeline:alpha-20221108");
+            .orElse("datacater/pipeline:alpha-20221117");
     static final Integer READY_SECONDS =
         ConfigProvider.getConfig()
             .getOptionalValue("datacater.deployment.ready-seconds", Integer.class)
@@ -75,7 +78,7 @@ public class StaticConfig {
     static final String PYTHON_RUNNER_IMAGE_TAG =
         ConfigProvider.getConfig()
             .getOptionalValue("datacater.pythonrunner.image.version", String.class)
-            .orElse("alpha-20221101");
+            .orElse("alpha-20221117");
     static final int PYTHON_RUNNER_CONTAINER_PORT =
         ConfigProvider.getConfig()
             .getOptionalValue("datacater.pythonrunner.image.containerPort", Integer.class)

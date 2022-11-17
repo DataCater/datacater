@@ -82,7 +82,7 @@ datacater:
     pythonrunner:
       image:
         name: datacater/python-runner
-        version: alpha-20221101
+        version: alpha-20221117
   quarkus:
     http:
       auth:
@@ -144,7 +144,7 @@ datacater:
     pythonrunner:
       image:
         name: datacater/python-runner
-        version: alpha-20221101
+        version: alpha-20221117
   quarkus:
     log:
       level: INFO
