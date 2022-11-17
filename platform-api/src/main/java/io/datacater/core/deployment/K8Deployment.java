@@ -253,10 +253,33 @@ public class K8Deployment {
 
   private List<EnvVar> getEnvironmentVariables(
       StreamEntity streamIn, StreamEntity streamOut, DeploymentSpec deploymentSpec) {
-    Map<String, Object> streamInConfig = nodeToMap(streamIn.getSpec());
-    Map<String, Object> streamOutConfig = nodeToMap(streamOut.getSpec());
+    Map<String, Object> streamInConfig = nodeToMap(streamIn.getSpec().get("kafka"));
+    Map<String, Object> streamOutConfig = nodeToMap(streamOut.getSpec().get("kafka"));
     streamInConfig.putAll(getNode(StaticConfig.STREAMIN_CONFIG_TEXT, deploymentSpec));
     streamOutConfig.putAll(getNode(StaticConfig.STREAMOUT_CONFIG_TEXT, deploymentSpec));
+
+    streamInConfig.putIfAbsent(
+        StaticConfig.BOOTSTRAP_SERVERS,
+        getEnvVariableFromNode(streamIn.getSpec(), StaticConfig.BOOTSTRAP_SERVERS));
+    streamInConfig.putIfAbsent(
+        StaticConfig.KEY_DESERIALIZER,
+        getEnvVariableFromNode(streamIn.getSpec(), StaticConfig.KEY_DESERIALIZER));
+    streamInConfig.putIfAbsent(
+        StaticConfig.VALUE_DESERIALIZER,
+        getEnvVariableFromNode(streamIn.getSpec(), StaticConfig.VALUE_DESERIALIZER));
+
+    streamOutConfig.putIfAbsent(
+        StaticConfig.BOOTSTRAP_SERVERS,
+        getEnvVariableFromNode(streamOut.getSpec(), StaticConfig.BOOTSTRAP_SERVERS));
+    streamOutConfig.putIfAbsent(
+        StaticConfig.KEY_SERIALIZER,
+        getEnvVariableFromNode(streamOut.getSpec(), StaticConfig.KEY_SERIALIZER));
+    streamOutConfig.putIfAbsent(
+        StaticConfig.VALUE_SERIALIZER,
+        getEnvVariableFromNode(streamOut.getSpec(), StaticConfig.VALUE_SERIALIZER));
+
+    streamInConfig.remove("topic");
+    streamOutConfig.remove("topic");
 
     List<EnvVar> variables = new ArrayList<>();
     variables.add(createEnvVariable(StaticConfig.STREAM_OUT_CONFIG_NAME, streamIn.getName()));
