@@ -181,13 +181,7 @@ public class DeploymentEndpoint {
     return sf.withTransaction(
         (session, transaction) ->
             session
-                .find(
-                    PipelineEntity.class,
-                    UUID.fromString(
-                        deploymentSpec
-                            .deployment()
-                            .get(StaticConfig.PIPELINE_NODE_TEXT)
-                            .toString()))
+                .find(PipelineEntity.class, getPipelineUUIDFromMap(deploymentSpec.deployment()))
                 .onItem()
                 .ifNull()
                 .failWith(
@@ -210,7 +204,7 @@ public class DeploymentEndpoint {
     return sf.withTransaction(
         (session, transaction) ->
             session
-                .find(StreamEntity.class, getUUIDFromNode(pipeline.getMetadata(), key))
+                .find(StreamEntity.class, getStreamUUIDFromNode(pipeline.getMetadata(), key))
                 .onItem()
                 .ifNull()
                 .failWith(
@@ -273,8 +267,22 @@ public class DeploymentEndpoint {
     return createDeployment(pe, streamOut, streamIn, deploymentSpec, de);
   }
 
-  private UUID getUUIDFromNode(JsonNode node, String key) {
-    return UUID.fromString(node.get(key).asText());
+  private UUID getStreamUUIDFromNode(JsonNode node, String key) {
+    try {
+
+      return UUID.fromString(node.get(key).asText());
+    } catch (Exception e) {
+      throw new CreateDeploymentException(
+          String.format(StaticConfig.LoggerMessages.STREAM_NOT_FOUND, key));
+    }
+  }
+
+  private UUID getPipelineUUIDFromMap(Map<String, Object> map) {
+    try {
+      return UUID.fromString(map.get(StaticConfig.PIPELINE_NODE_TEXT).toString());
+    } catch (Exception e) {
+      throw new CreateDeploymentException(StaticConfig.LoggerMessages.PIPELINE_NOT_FOUND);
+    }
   }
 
   private void watchLogsRunner(UUID deploymentId, @Context Sse sse, @Context SseEventSink eventSink)
