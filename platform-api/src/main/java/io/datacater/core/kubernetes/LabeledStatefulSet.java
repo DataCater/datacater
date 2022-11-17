@@ -140,7 +140,7 @@ public class LabeledStatefulSet implements Shareable {
         .withInitialDelaySeconds(0)
         .withPeriodSeconds(1)
         .withSuccessThreshold(1)
-        .withFailureThreshold(3)
+        .withFailureThreshold(10)
         .build();
   }
 
