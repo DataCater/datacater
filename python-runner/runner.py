@@ -76,9 +76,10 @@ app = FastAPI()
 pipeline = {"spec": {"steps": []}}
 
 # Load pipeline spec from config map
-if path.isfile("/usr/app/spec"):
-    config_map = open("/usr/app/spec", "r")
-    pipeline = json.loads(config_map.read())
+CONFIG_MAP_FILE = "/usr/app/spec"
+if path.isfile(CONFIG_MAP_FILE):
+    config_map = open(CONFIG_MAP_FILE, "r")
+    pipeline["spec"] = json.loads(config_map.read())
     config_map.close()
 
 def apply_pipeline(record: Record, pipeline: dict, preview_step=None):
