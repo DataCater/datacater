@@ -238,7 +238,7 @@ async def apply_to_multiple_records(records: List[Record], response: Response):
     for record in records:
         processed_record = apply_pipeline(record, pipeline)
         if processed_record is not None:
-            processed_records.append(record)
+            processed_records.append(processed_record)
     return processed_records
 
 
