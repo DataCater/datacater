@@ -76,7 +76,7 @@ app = FastAPI()
 pipeline = {"spec": {"steps": []}}
 
 # Load pipeline spec from config map
-CONFIG_MAP_FILE = "/usr/app/spec"
+CONFIG_MAP_FILE = "/usr/app/mounts/spec"
 if path.isfile(CONFIG_MAP_FILE):
     config_map = open(CONFIG_MAP_FILE, "r")
     pipeline["spec"] = json.loads(config_map.read())
