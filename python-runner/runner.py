@@ -8,6 +8,7 @@ from importlib import import_module
 from os import path
 from typing import List, Optional, Any
 
+import json
 import yaml
 from fastapi import FastAPI, Response, status
 from fastapi.responses import JSONResponse
@@ -74,6 +75,11 @@ app = FastAPI()
 
 pipeline = {"spec": {"steps": []}}
 
+# Load pipeline spec from config map
+if path.isfile("/usr/app/spec"):
+    config_map = open("/usr/app/spec", "r")
+    pipeline = json.loads(config_map.read())
+    config_map.close()
 
 def apply_pipeline(record: Record, pipeline: dict, preview_step=None):
     location = {}
