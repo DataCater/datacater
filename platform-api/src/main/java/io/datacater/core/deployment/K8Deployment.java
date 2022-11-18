@@ -255,10 +255,13 @@ public class K8Deployment {
   private List<EnvVar> getEnvironmentVariables(
       StreamEntity streamIn, StreamEntity streamOut, DeploymentSpec deploymentSpec) {
     ObjectMapper objectMapper = new ObjectMapper();
-    Map<String, Object> streamInConfig = nodeToMap(streamIn.getSpec().get("kafka"));
-    Map<String, Object> streamOutConfig = nodeToMap(streamOut.getSpec().get("kafka"));
+    Map<String, Object> streamInConfig = nodeToMap(streamIn.getSpec().get(StaticConfig.KAFKA_TAG));
+    Map<String, Object> streamOutConfig =
+        nodeToMap(streamOut.getSpec().get(StaticConfig.KAFKA_TAG));
     streamInConfig.putAll(getNode(StaticConfig.STREAMIN_CONFIG_TEXT, deploymentSpec));
     streamOutConfig.putAll(getNode(StaticConfig.STREAMOUT_CONFIG_TEXT, deploymentSpec));
+    streamInConfig.remove(StaticConfig.TOPIC_TAG);
+    streamOutConfig.remove(StaticConfig.TOPIC_TAG);
 
     streamInConfig.putIfAbsent(
         StaticConfig.BOOTSTRAP_SERVERS,
@@ -280,22 +283,19 @@ public class K8Deployment {
         StaticConfig.VALUE_SERIALIZER,
         getEnvVariableFromNode(streamOut.getSpec(), StaticConfig.VALUE_SERIALIZER));
 
-    streamInConfig.remove("topic");
-    streamOutConfig.remove("topic");
-
     List<EnvVar> variables = new ArrayList<>();
-    variables.add(createEnvVariable(StaticConfig.STREAM_OUT_CONFIG_NAME, streamIn.getName()));
-    variables.add(createEnvVariable(StaticConfig.STREAM_IN_CONFIG_NAME, streamOut.getName()));
+    variables.add(createEnvVariable(StaticConfig.STREAM_IN_CONFIG_NAME, streamIn.getName()));
+    variables.add(createEnvVariable(StaticConfig.STREAM_OUT_CONFIG_NAME, streamOut.getName()));
 
     try {
       variables.add(
           createEnvVariable(
               StaticConfig.DC_STREAMIN_CONFIG_TEXT,
-              "'" + objectMapper.writeValueAsString(streamInConfig).replace("'", "''") + "'"));
+              objectMapper.writeValueAsString(streamInConfig)));
       variables.add(
           createEnvVariable(
               StaticConfig.DC_STREAMOUT_CONFIG_TEXT,
-              "'" + objectMapper.writeValueAsString(streamOutConfig).replace("'", "''") + "'"));
+              objectMapper.writeValueAsString(streamOutConfig)));
     } catch (JsonProcessingException e) {
       throw new CreateDeploymentException(StringUtilities.wrapString(e.getMessage()));
     }

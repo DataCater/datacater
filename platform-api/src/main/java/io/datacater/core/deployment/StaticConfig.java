@@ -7,8 +7,8 @@ import org.eclipse.microprofile.config.ConfigProvider;
 public class StaticConfig {
   private StaticConfig() {}
 
-  static final String STREAM_IN_CONFIG_NAME = "MP_MESSAGING_INCOMING_STREAM-IN_TOPIC";
-  static final String STREAM_OUT_CONFIG_NAME = "MP_MESSAGING_OUTGOING_STREAM-OUT_TOPIC";
+  static final String STREAM_IN_CONFIG_NAME = "MP_MESSAGING_INCOMING_STREAM_IN_TOPIC";
+  static final String STREAM_OUT_CONFIG_NAME = "MP_MESSAGING_OUTGOING_STREAM_OUT_TOPIC";
   static final String DATACATER_PIPELINE = "datacater-pipeline";
   static final String PYTHON_RUNNER_NAME = "python-runner";
   static final String APP = "datacater.io/app";
@@ -32,6 +32,8 @@ public class StaticConfig {
   static final String DESERIALIZER = "deserializer";
   static final String EMPTY_STRING = "";
   static final String LOCALHOST_BOOTSTRAP_SERVER = "localhost:9092";
+  static final String KAFKA_TAG = "kafka";
+  static final String TOPIC_TAG = "topic";
   static final String BOOTSTRAP_SERVERS = "bootstrap.servers";
   static final String KEY_DESERIALIZER = "key.deserializer";
   static final String KEY_SERIALIZER = "key.serializer";
@@ -39,8 +41,8 @@ public class StaticConfig {
   static final String VALUE_SERIALIZER = "value.serializer";
   static final String STREAMIN_CONFIG_TEXT = "stream-in-config";
   static final String STREAMOUT_CONFIG_TEXT = "stream-out-config";
-  static final String DC_STREAMIN_CONFIG_TEXT = "DATACATER_STREAM-IN_CONFIG";
-  static final String DC_STREAMOUT_CONFIG_TEXT = "DATACATER_STREAM-OUT_CONFIG";
+  static final String DC_STREAMIN_CONFIG_TEXT = "DATACATER_STREAM_IN_CONFIG";
+  static final String DC_STREAMOUT_CONFIG_TEXT = "DATACATER_STREAM_OUT_CONFIG";
   static final String HTTP = "http";
   static final String CONDITIONS = "Conditions";
   static final String ERROR_TAG = "error";
