@@ -14,6 +14,7 @@ import {
   Search,
   Table,
   Type,
+  X,
 } from "react-feather";
 import { Modal } from "react-bootstrap";
 import BaseTable, { AutoResizer } from "react-base-table";
@@ -668,6 +669,35 @@ class EditPipeline extends Component {
                 </div>
                 <div className="col-4 d-flex align-items-center justify-content-end">
                   <div>
+                    {this.props.pipelines.inspectingPipelineFailed ===
+                      false && (
+                      <button
+                        className="btn btn-sm btn-primary text-white btn-pill me-2"
+                        onClick={(e) => e.preventDefault()}
+                      >
+                        <span className="d-flex align-items-center">
+                          <Check className="feather-icon" />
+                          Preview
+                        </span>
+                      </button>
+                    )}
+                    {this.props.pipelines.inspectingPipelineFailed === true && (
+                      <button
+                        className="btn btn-sm btn-danger btn-pill me-2"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          this.updateSampleRecords(
+                            this.state.pipeline,
+                            this.state.currentStep
+                          );
+                        }}
+                      >
+                        <span className="d-flex align-items-center">
+                          <X className="feather-icon" />
+                          Preview failed (Retry)
+                        </span>
+                      </button>
+                    )}
                     <button
                       className="btn btn-sm btn-light btn-pill"
                       onClick={(e) => e.preventDefault()}
