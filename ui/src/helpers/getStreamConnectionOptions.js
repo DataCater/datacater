@@ -14,7 +14,6 @@ export function getStreamConnectionOptions() {
     "enable.idempotence",
     "fetch.max.bytes",
     "fetch.min.bytes",
-    "group.id",
     "group.instance.id",
     "heartbeat.interval.ms",
     "isolation.level",
