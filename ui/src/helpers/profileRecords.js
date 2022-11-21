@@ -49,8 +49,9 @@ export function profileRecords(records) {
   const profile = {};
 
   records.forEach(function (record) {
-    Object.keys(record).forEach(function (fieldName) {
-      const value = record[fieldName];
+    const recordValue = record["value"];
+    Object.keys(recordValue).forEach(function (fieldName) {
+      const value = recordValue[fieldName];
       if (profile[fieldName] === undefined) {
         profile[fieldName] = Object.assign({}, profileTemplate, {
           dataType: getDataType(value),

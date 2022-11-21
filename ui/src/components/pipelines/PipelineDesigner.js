@@ -157,6 +157,7 @@ class PipelineDesigner extends Component {
             introducedFields={[]}
             moveStepFunc={this.props.moveStepFunc}
             moveToStepFunc={this.props.moveToStepFunc}
+            openDebugViewFunc={this.props.openDebugViewFunc}
             originalRecordsSize={this.props.originalRecordsSize}
             pipeline={this.props.pipeline}
             profile={this.props.profile}

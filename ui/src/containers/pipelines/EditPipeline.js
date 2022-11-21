@@ -18,6 +18,7 @@ import {
 import { Modal } from "react-bootstrap";
 import BaseTable, { AutoResizer } from "react-base-table";
 import PipelineDesigner from "../../components/pipelines/PipelineDesigner";
+import DebugView from "../../components/pipelines/pipeline_designer/grid/DebugView";
 import Breadcrumb from "../../components/layout/Breadcrumb";
 import { getApiPathPrefix } from "../../helpers/getApiPathPrefix";
 import { deepCopy } from "../../helpers/deepCopy";
@@ -43,6 +44,7 @@ class EditPipeline extends Component {
       editColumn: undefined,
       contextBarActive: false,
       currentStep: undefined,
+      debugRecord: undefined,
       errorMessage: "",
       pipeline: {},
       pipelineUpdated: false,
@@ -70,6 +72,8 @@ class EditPipeline extends Component {
     this.updateStepName = this.updateStepName.bind(this);
     this.showStepNameForm = this.showStepNameForm.bind(this);
     this.hideStepNameForm = this.hideStepNameForm.bind(this);
+    this.openDebugView = this.openDebugView.bind(this);
+    this.closeDebugView = this.closeDebugView.bind(this);
   }
 
   componentDidMount() {
@@ -641,6 +645,17 @@ class EditPipeline extends Component {
       showStepNameForm: false,
     });
   }
+  openDebugView(record) {
+    this.setState({
+      debugRecord: record,
+    });
+  }
+
+  closeDebugView() {
+    this.setState({
+      debugRecord: undefined,
+    });
+  }
 
   render() {
     const pipeline = this.state.pipeline;
@@ -743,12 +758,8 @@ class EditPipeline extends Component {
     const sampleRecords =
       this.state.currentStep === undefined ||
       this.props.pipelines.inspectionResult === undefined
-        ? deepCopy(this.props.streams.inspectionResult).map(
-            (record) => record.value
-          )
-        : deepCopy(this.props.pipelines.inspectionResult).map(
-            (record) => record.value
-          );
+        ? deepCopy(this.props.streams.inspectionResult)
+        : deepCopy(this.props.pipelines.inspectionResult);
 
     if (sampleRecords.length === 0) {
       return (
@@ -781,6 +792,13 @@ class EditPipeline extends Component {
     return (
       <>
         <div className="container">{header}</div>
+        {this.state.debugRecord !== undefined && (
+          <DebugView
+            closeDebugViewFunc={this.closeDebugView}
+            pipeline={this.state.pipeline}
+            record={this.state.debugRecord}
+          />
+        )}
         {sampleRecords.length > 0 && (
           <PipelineDesigner
             addStepFunc={this.addStep}
@@ -796,6 +814,7 @@ class EditPipeline extends Component {
             hideStepNameFormFunc={this.hideStepNameForm}
             moveToStepFunc={this.moveToStep}
             moveStepFunc={this.moveStep}
+            openDebugViewFunc={this.openDebugView}
             pipeline={pipeline}
             previewState={{}}
             profile={profile}
