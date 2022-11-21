@@ -258,7 +258,7 @@ class EditPipeline extends Component {
 
     if (step.kind === "Record") {
       if (property === "transform") {
-        if (value === undefined) {
+        if ([undefined, ""].includes(value)) {
           // Remove transform
           delete step.transform;
           pipeline.spec.steps[currentStep - 1] = step;
@@ -269,7 +269,7 @@ class EditPipeline extends Component {
           };
         }
       } else if (property === "filter") {
-        if (value === undefined) {
+        if ([undefined, ""].includes(value)) {
           // Remove filter
           delete step.filter;
           pipeline.spec.steps[currentStep - 1] = step;
@@ -296,9 +296,13 @@ class EditPipeline extends Component {
         );
       }
       if (property === "transform") {
-        if (value === undefined) {
+        if ([undefined, ""].includes(value)) {
           // Remove transform
           delete step.fields[fieldName].transform;
+          // Remove field if no filter is defined
+          if (Object.keys(step.fields[fieldName]).length === 0) {
+            delete step.fields[fieldName];
+          }
           pipeline.spec.steps[currentStep - 1] = step;
           editColumn = undefined;
         } else {
@@ -308,9 +312,13 @@ class EditPipeline extends Component {
             };
         }
       } else if (property === "filter") {
-        if (value === undefined) {
+        if ([undefined, ""].includes(value)) {
           // Remove filter
           delete step.fields[fieldName].filter;
+          // Remove field if no transform is defined
+          if (Object.keys(step.fields[fieldName]).length === 0) {
+            delete step.fields[fieldName];
+          }
           pipeline.spec.steps[currentStep - 1] = step;
           editColumn = undefined;
         } else {

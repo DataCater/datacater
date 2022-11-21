@@ -44,7 +44,8 @@ public class K8Deployment {
     k8NameSpace.create();
     k8ConfigMap.getOrCreate(configmapName, pe);
 
-    List<EnvVar> variables = getEnvironmentVariables(streamIn, streamOut, deploymentSpec);
+    List<EnvVar> variables =
+        getEnvironmentVariables(streamIn, streamOut, deploymentSpec, deploymentId);
 
     try {
       Deployment deployment =
@@ -256,7 +257,7 @@ public class K8Deployment {
   }
 
   private List<EnvVar> getEnvironmentVariables(
-      StreamEntity streamIn, StreamEntity streamOut, DeploymentSpec deploymentSpec) {
+      StreamEntity streamIn, StreamEntity streamOut, DeploymentSpec deploymentSpec, UUID uuid) {
     ObjectMapper objectMapper = new ObjectMapper();
     Map<String, Object> streamInConfig = nodeToMap(streamIn.getSpec().get(StaticConfig.KAFKA_TAG));
     Map<String, Object> streamOutConfig =
@@ -275,6 +276,7 @@ public class K8Deployment {
     streamInConfig.putIfAbsent(
         StaticConfig.VALUE_DESERIALIZER,
         getEnvVariableFromNode(streamIn.getSpec(), StaticConfig.VALUE_DESERIALIZER));
+    streamInConfig.put(StaticConfig.GROUP_ID, uuid);
 
     streamOutConfig.putIfAbsent(
         StaticConfig.BOOTSTRAP_SERVERS,

@@ -1,29 +1,12 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
-import { Copy } from "react-feather";
 import Breadcrumb from "../../components/layout/Breadcrumb";
-import { getApiPathPrefix } from "../../helpers/getApiPathPrefix";
+import Header from "../../components/layout/Header";
 import { fetchStreams } from "../../actions/streams";
 
 class ListStreams extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      showApiCall: false,
-    };
-    this.toggleShowApiCall = this.toggleShowApiCall.bind(this);
-  }
-
   componentDidMount() {
     this.props.fetchStreams();
-  }
-
-  toggleShowApiCall(event) {
-    event.preventDefault();
-
-    this.setState({
-      showApiCall: !this.state.showApiCall,
-    });
   }
 
   render() {
@@ -46,78 +29,24 @@ class ListStreams extends Component {
       <div className="container">
         <div className="row">
           <Breadcrumb items={[{ name: "Streams" }]} />
-          <div className="col-12 mt-3">
-            <div
-              className="card welcome-card py-2"
-              style={{ backgroundImage: "url(/images/bg-card.jpg)" }}
-            >
-              <div className="card-body text-center p-0">
-                <div className="row justify-content-center">
-                  <div className="col-8 text-start">
-                    <h4 className="fw-semibold mb-0">Streams</h4>
-                    <p className="text-white mb-0">
-                      Streams connect Apache Kafka® topics with your pipeline.
-                    </p>
-                  </div>
-                  <div className="col-4 d-flex align-items-center justify-content-end">
-                    <div>
-                      <a
-                        href="/streams"
-                        className="btn btn-light btn-pill"
-                        onClick={this.toggleShowApiCall}
-                      >
-                        {this.state.showApiCall ? "Hide" : "Show"} API call
-                      </a>
-                      {streams.length > 0 && (
-                        <a
-                          href="/streams/new"
-                          className="btn btn-primary text-white ms-2"
-                        >
-                          Create new stream
-                        </a>
-                      )}
-                    </div>
-                  </div>
-                </div>
-                {this.state.showApiCall && (
-                  <div className="bg-black mx-n3 p-3 mt-3 mb-n3 text-start">
-                    <pre className="mb-0">
-                      <a
-                        href="https://docs.datacater.io/docs/api/streams/"
-                        target="_blank"
-                        rel="noreferrer"
-                        className="btn btn-sm btn-light float-end"
-                      >
-                        See docs
-                      </a>
-                      <a
-                        href="/streams/"
-                        target="_blank"
-                        rel="noreferrer"
-                        className="btn btn-sm btn-light me-2 float-end"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          navigator.clipboard.writeText(
-                            "curl " +
-                              getApiPathPrefix(true) +
-                              "/streams -H'Authorization:Bearer YOUR_TOKEN'"
-                          );
-                        }}
-                      >
-                        <Copy className="feather-icon" />
-                      </a>
-                      <code className="text-white">
-                        $ curl {getApiPathPrefix(true)}/streams/ \<br />
-                        <span className="me-2"></span>{" "}
-                        -H&apos;Authorization:Bearer YOUR_TOKEN&apos;
-                        <br />
-                      </code>
-                    </pre>
-                  </div>
+          <Header
+            apiDocs="https://docs.datacater.io/docs/api/streams/"
+            apiPath="/streams/"
+            buttons={
+              <>
+                {streams.length > 0 && (
+                  <a
+                    href="/streams/new"
+                    className="btn btn-primary text-white ms-2"
+                  >
+                    Create new stream
+                  </a>
                 )}
-              </div>
-            </div>
-          </div>
+              </>
+            }
+            title="Streams"
+            subTitle="Streams connect Apache Kafka® topics with your pipeline."
+          />
         </div>
         <div className="row mt-4">
           <div className="col-12">
