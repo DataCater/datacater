@@ -23,6 +23,18 @@ body {
   background-color: #f7fbf8;
 }
 
+.text-purple {
+  color: rgb(174, 117, 230);
+}
+
+.text-blue-light {
+  color: rgb(180, 210, 234);
+}
+
+.bg-gradient-purple {
+  background-image: linear-gradient(to right, #ae75e6, #b5e0ec);
+}
+
 .header-body {
   padding-top: 1.5rem;
   padding-bottom: 1.5rem;

@@ -1,9 +1,8 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
-import { Copy, Trash2 } from "react-feather";
 import { Redirect } from "react-router-dom";
 import Breadcrumb from "../../components/layout/Breadcrumb";
-import { getApiPathPrefix } from "../../helpers/getApiPathPrefix";
+import Header from "../../components/layout/Header";
 import {
   fetchDeployment,
   fetchDeploymentLogs,
@@ -14,11 +13,9 @@ class DeploymentLogs extends Component {
     super(props);
     this.state = {
       followLogs: false,
-      showApiCall: false,
       logMessages: [],
       wrapLines: false,
     };
-    this.toggleShowApiCall = this.toggleShowApiCall.bind(this);
     this.fetchLogs = this.fetchLogs.bind(this);
     this.toggleFollowLogs = this.toggleFollowLogs.bind(this);
     this.toggleWrapLines = this.toggleWrapLines.bind(this);
@@ -118,73 +115,11 @@ class DeploymentLogs extends Component {
               { name: "Logs" },
             ]}
           />
-          <div className="col-12 mt-3">
-            <div
-              className="card welcome-card py-2"
-              style={{ backgroundImage: "url(/images/bg-card.jpg)" }}
-            >
-              <div className="card-body text-center p-0">
-                <div className="row justify-content-center">
-                  <div className="col-6 text-start d-flex align-items-center">
-                    <h4 className="fw-semibold mb-0">
-                      {deployment.name || "Untitled deployment"}
-                    </h4>
-                  </div>
-                  <div className="col-6 d-flex align-items-center justify-content-end">
-                    <div>
-                      <a
-                        href="/deployments"
-                        className="btn btn-light btn-pill"
-                        onClick={this.toggleShowApiCall}
-                      >
-                        {this.state.showApiCall ? "Hide" : "Show"} API call
-                      </a>
-                    </div>
-                  </div>
-                </div>
-                {this.state.showApiCall && (
-                  <div className="bg-black mx-n3 p-3 mt-3 mb-n3 text-start">
-                    <pre className="mb-0">
-                      <a
-                        href="https://docs.datacater.io/docs/api/deployments/"
-                        target="_blank"
-                        rel="noreferrer"
-                        className="btn btn-sm btn-light float-end"
-                      >
-                        See docs
-                      </a>
-                      <a
-                        href="/deployments/"
-                        target="_blank"
-                        rel="noreferrer"
-                        className="btn btn-sm btn-light me-2 float-end"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          navigator.clipboard.writeText(
-                            "curl " +
-                              getApiPathPrefix(true) +
-                              "/deployments/" +
-                              deployment.uuid +
-                              " -H'Authorization:Bearer YOUR_TOKEN'"
-                          );
-                        }}
-                      >
-                        <Copy className="feather-icon" />
-                      </a>
-                      <code className="text-white">
-                        $ curl {getApiPathPrefix(true)}/deployments/
-                        {deployment.uuid}/logs \
-                        <br />
-                        <span className="me-2"></span>{" "}
-                        -H&apos;Authorization:Bearer YOUR_TOKEN&apos;
-                        <br />
-                      </code>
-                    </pre>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
+          <Header
+            apiDocs="https://docs.datacater.io/docs/api/deployments/"
+            apiPath={`/deployments/${deployment.uuid}/logs`}
+            title={deployment.name || "Untitled deployment"}
+          />
         </div>
         <div className="row mt-4">
           <div className="col-12">
