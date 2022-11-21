@@ -38,10 +38,7 @@ class Home extends Component {
           <main role="main" className="col-10 mx-auto pt-3 px-4">
             <div className="row">
               <div className="col-12">
-                <div
-                  className="card welcome-card mt-2"
-                  style={{ backgroundImage: "url(/images/bg-card.jpg)" }}
-                >
+                <div className="card welcome-card mt-2 bg-gradient-purple">
                   <div className="card-body text-center">
                     <div className="row justify-content-center">
                       <div className="col-12">

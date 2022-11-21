@@ -1,12 +1,11 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
 import { Redirect } from "react-router-dom";
-import { Copy } from "react-feather";
 import Select from "react-select";
 import Breadcrumb from "../../components/layout/Breadcrumb";
+import Header from "../../components/layout/Header";
 import { fetchDeployment, updateDeployment } from "../../actions/deployments";
 import { fetchPipelines } from "../../actions/pipelines";
-import { getApiPathPrefix } from "../../helpers/getApiPathPrefix";
 import "../../scss/fonts.scss";
 
 class EditDeployment extends Component {
@@ -16,14 +15,12 @@ class EditDeployment extends Component {
     this.state = {
       updatingDeploymentFailed: false,
       errorMessages: {},
-      showApiCall: false,
       deployment: undefined,
       deploymentUpdated: false,
     };
 
     this.handleUpdateDeployment = this.handleUpdateDeployment.bind(this);
     this.handleChange = this.handleChange.bind(this);
-    this.toggleShowApiCall = this.toggleShowApiCall.bind(this);
   }
 
   componentDidMount() {
@@ -77,14 +74,6 @@ class EditDeployment extends Component {
     });
   }
 
-  toggleShowApiCall(event) {
-    event.preventDefault();
-
-    this.setState({
-      showApiCall: !this.state.showApiCall,
-    });
-  }
-
   render() {
     if (this.state.deploymentUpdated) {
       return <Redirect to={`/deployments/${this.getDeploymentId()}`} />;
@@ -116,77 +105,13 @@ class EditDeployment extends Component {
               { name: "Edit" },
             ]}
           />
-          <div className="col-12 mt-3">
-            <div
-              className="card welcome-card py-2"
-              style={{ backgroundImage: "url(/images/bg-card.jpg)" }}
-            >
-              <div className="card-body text-center p-0">
-                <div className="row justify-content-center align-items-center">
-                  <div className="col-10 text-start">
-                    <h4 className="fw-semibold mb-0">
-                      {deployment.name || "Untitled deployment"}
-                    </h4>
-                  </div>
-                  <div className="col-2 d-flex align-items-center justify-content-end">
-                    <a
-                      href="/deployments/edit"
-                      className="btn btn-light btn-pill"
-                      onClick={this.toggleShowApiCall}
-                    >
-                      {this.state.showApiCall ? "Hide" : "Show"} API call
-                    </a>
-                  </div>
-                </div>
-                {this.state.showApiCall && (
-                  <div className="bg-black mx-n3 p-3 mt-3 mb-n3 text-start">
-                    <pre className="mb-0">
-                      <a
-                        href="https://docs.datacater.io/docs/api/deployments/"
-                        target="_blank"
-                        rel="noreferrer"
-                        className="btn btn-sm btn-light float-end"
-                      >
-                        See docs
-                      </a>
-                      <a
-                        href="/deployments/new/"
-                        target="_blank"
-                        rel="noreferrer"
-                        className="btn btn-sm btn-light me-2 float-end"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          navigator.clipboard.writeText(
-                            "curl " +
-                              getApiPathPrefix(true) +
-                              "/deployments/" +
-                              deployment.uuid +
-                              " -XPUT -H'Content-Type:application/json' -H'Authorization:Bearer YOUR_TOKEN' -d'" +
-                              JSON.stringify(apiPayload) +
-                              "'"
-                          );
-                        }}
-                      >
-                        <Copy className="feather-icon" />
-                      </a>
-                      <code className="text-white">
-                        $ curl {getApiPathPrefix(true)}/deployments/
-                        {deployment.uuid} \
-                        <br />
-                        <span className="me-2"></span> -XPUT \<br />
-                        <span className="me-2"></span>{" "}
-                        -H&apos;Authorization:Bearer YOUR_TOKEN&apos; \<br />
-                        <span className="me-2"></span>{" "}
-                        -H&apos;Content-Type:application/json&apos; \<br />
-                        <span className="me-2"></span> -d&apos;
-                        {JSON.stringify(apiPayload)}&apos;
-                      </code>
-                    </pre>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
+          <Header
+            apiDocs="https://docs.datacater.io/docs/api/deployments/"
+            apiPath={`/deployments/${deployment.uuid}`}
+            httpMethod="PUT"
+            requestBody={apiPayload}
+            title={deployment.name || "Untitled deployment"}
+          />
           <form>
             <div className="col-12 mt-4">
               <label htmlFor="name" className="form-label">

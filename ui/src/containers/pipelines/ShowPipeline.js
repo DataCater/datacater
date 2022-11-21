@@ -1,34 +1,24 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
-import { Copy, Settings, Trash2 } from "react-feather";
+import { Settings, Trash2 } from "react-feather";
 import { Redirect } from "react-router-dom";
 import * as YAML from "json-to-pretty-yaml";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import Breadcrumb from "../../components/layout/Breadcrumb";
-import { getApiPathPrefix } from "../../helpers/getApiPathPrefix";
+import Header from "../../components/layout/Header";
 import { deletePipeline, fetchPipeline } from "../../actions/pipelines";
 
 class ShowPipeline extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      showApiCall: false,
       pipelineDeleted: false,
     };
-    this.toggleShowApiCall = this.toggleShowApiCall.bind(this);
     this.handleDelete = this.handleDelete.bind(this);
   }
 
   componentDidMount() {
     this.props.fetchPipeline(this.getPipelineId());
-  }
-
-  toggleShowApiCall(event) {
-    event.preventDefault();
-
-    this.setState({
-      showApiCall: !this.state.showApiCall,
-    });
   }
 
   getPipelineId() {
@@ -78,90 +68,34 @@ class ShowPipeline extends Component {
               { name: pipeline.uuid },
             ]}
           />
-          <div className="col-12 mt-3">
-            <div
-              className="card welcome-card py-2"
-              style={{ backgroundImage: "url(/images/bg-card.jpg)" }}
-            >
-              <div className="card-body text-center p-0">
-                <div className="row justify-content-center">
-                  <div className="col-6 text-start d-flex align-items-center">
-                    <h4 className="fw-semibold mb-0">{pipeline.name}</h4>
-                  </div>
-                  <div className="col-6 d-flex align-items-center justify-content-end">
-                    <div>
-                      <a
-                        href="/pipelines"
-                        className="btn btn-light btn-pill"
-                        onClick={this.toggleShowApiCall}
-                      >
-                        {this.state.showApiCall ? "Hide" : "Show"} API call
-                      </a>
-                      <a
-                        href={`/pipelines/${pipeline.uuid}/edit`}
-                        className="btn btn-primary text-white ms-2"
-                      >
-                        Edit in Pipeline Designer
-                      </a>
-                      <a
-                        href={`/pipelines/${pipeline.uuid}/settings`}
-                        className="btn btn-light ms-2"
-                      >
-                        <Settings className="feather-icon" />
-                      </a>
-                      <a
-                        href={`/pipelines/${pipeline.uuid}`}
-                        onClick={this.handleDelete}
-                        className="btn btn-light btn-outline-danger ms-2"
-                      >
-                        <Trash2 className="feather-icon" />
-                      </a>
-                    </div>
-                  </div>
-                </div>
-                {this.state.showApiCall && (
-                  <div className="bg-black mx-n3 p-3 mt-3 mb-n3 text-start">
-                    <pre className="mb-0">
-                      <a
-                        href="https://docs.datacater.io/docs/api/pipelines/"
-                        target="_blank"
-                        rel="noreferrer"
-                        className="btn btn-sm btn-light float-end"
-                      >
-                        See docs
-                      </a>
-                      <a
-                        href="/pipelines/"
-                        target="_blank"
-                        rel="noreferrer"
-                        className="btn btn-sm btn-light me-2 float-end"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          navigator.clipboard.writeText(
-                            "curl " +
-                              getApiPathPrefix(true) +
-                              "/pipelines/" +
-                              pipeline.uuid +
-                              " -H'Authorization:Bearer YOUR_TOKEN'"
-                          );
-                        }}
-                      >
-                        <Copy className="feather-icon" />
-                      </a>
-                      <code className="text-white">
-                        $ curl {getApiPathPrefix(true)}/pipelines/
-                        {pipeline.uuid} \
-                        <br />
-                        <span className="me-2"></span>{" "}
-                        -H&apos;Authorization:Bearer YOUR_TOKEN&apos;
-                        <br />
-                      </code>
-                    </pre>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
+          <Header
+            apiDocs="https://docs.datacater.io/docs/api/pipelines/"
+            apiPath={`/pipelines/${pipeline.uuid}`}
+            buttons={
+              <>
+                <a
+                  href={`/pipelines/${pipeline.uuid}/edit`}
+                  className="btn btn-primary text-white ms-2"
+                >
+                  Edit in Pipeline Designer
+                </a>
+                <a
+                  href={`/pipelines/${pipeline.uuid}/settings`}
+                  className="btn btn-light ms-2"
+                >
+                  <Settings className="feather-icon" />
+                </a>
+                <a
+                  href={`/pipelines/${pipeline.uuid}`}
+                  onClick={this.handleDelete}
+                  className="btn btn-light btn-outline-danger ms-2"
+                >
+                  <Trash2 className="feather-icon" />
+                </a>
+              </>
+            }
+            title={pipeline.name || "Untitled pipeline"}
+          />
         </div>
         <div className="row mt-4">
           <div className="col-12">
