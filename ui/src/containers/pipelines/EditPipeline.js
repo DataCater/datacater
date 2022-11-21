@@ -778,6 +778,22 @@ class EditPipeline extends Component {
       );
     }
 
+    if (
+      this.props.streams.errorMessage !== undefined ||
+      this.props.pipelines.errorMessage !== undefined
+    ) {
+      return (
+        <div className="container">
+          {header}
+          <div className="alert alert-danger mt-4" role="alert">
+            <p className="h6 fs-bolder">API response:</p>
+            {this.props.streams.errorMessage ||
+              this.props.pipelines.errorMessage}
+          </div>
+        </div>
+      );
+    }
+
     const sampleRecords =
       this.state.currentStep === undefined ||
       this.props.pipelines.inspectionResult === undefined
