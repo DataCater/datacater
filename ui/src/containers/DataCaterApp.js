@@ -39,7 +39,7 @@ class DataCaterApp extends Component {
               <Route exact path="/" render={() => <Redirect to="/home" />} />
 
               <PrivateRoute exact path="/home" component={Home} />
-              <Route exact path="/sign_in" component={Login} />
+              <Route exact path="/sign_in" render={props => <Login {...props} />} />
 
               <PrivateRoute
                 exact
