@@ -25,11 +25,13 @@ public class K8Deployment {
   private final KubernetesClient client;
   private final K8ConfigMap k8ConfigMap;
   private final K8NameSpace k8NameSpace;
+  private final K8Service k8Service;
 
   public K8Deployment(KubernetesClient client) {
     this.client = client;
     this.k8NameSpace = new K8NameSpace(client);
     this.k8ConfigMap = new K8ConfigMap(client);
+    this.k8Service = new K8Service(client);
   }
 
   public Map<String, Object> create(
@@ -41,8 +43,10 @@ public class K8Deployment {
     final String name = StaticConfig.DEPLOYMENT_NAME_PREFIX + deploymentId;
     final String configmapName = StaticConfig.CONFIGMAP_NAME_PREFIX + deploymentId;
     final String volumeName = StaticConfig.VOLUME_NAME_PREFIX + deploymentId;
+    final String serviceName = StaticConfig.SERVICE_NAME_PREFIX + deploymentId;
     k8NameSpace.create();
     k8ConfigMap.getOrCreate(configmapName, pe);
+    k8Service.getOrCreate(serviceName);
 
     List<EnvVar> variables =
         getEnvironmentVariables(streamIn, streamOut, deploymentSpec, deploymentId);
@@ -52,31 +56,23 @@ public class K8Deployment {
           new DeploymentBuilder()
               .withNewMetadata()
               .withName(name)
-              .addToLabels(getLabels(deploymentId, deploymentSpec.name()))
+              .addToLabels(getLabels(deploymentId, deploymentSpec.name(), serviceName))
               .endMetadata()
               .withNewSpec()
               .withReplicas(StaticConfig.EnvironmentVariables.REPLICAS)
               .withMinReadySeconds(StaticConfig.EnvironmentVariables.READY_SECONDS)
               .withNewSelector()
-              .addToMatchLabels(getLabels(deploymentId, deploymentSpec.name()))
+              .addToMatchLabels(getLabels(deploymentId, deploymentSpec.name(), serviceName))
               .endSelector()
               .withNewTemplate()
               .withNewMetadata()
-              .addToLabels(getLabels(deploymentId, deploymentSpec.name()))
+              .addToLabels(getLabels(deploymentId, deploymentSpec.name(), serviceName))
               .endMetadata()
               .withNewSpec()
-              .addNewContainer()
-              .withName(name)
-              .withImage(StaticConfig.EnvironmentVariables.FULL_IMAGE_NAME)
-              .withImagePullPolicy(StaticConfig.EnvironmentVariables.PULL_POLICY)
-              .withEnv(variables)
-              .withNewResources()
-              .withRequests(StaticConfig.RESOURCE_REQUESTS)
-              .withLimits(StaticConfig.RESOURCE_LIMITS)
-              .endResources()
-              .withVolumeMounts(getVolumeMount(volumeName))
-              .endContainer()
-              .addToContainers(pythonRunnerContainer(volumeName))
+              .addAllToContainers(
+                  List.of(
+                      deploymentContainer(name, volumeName, variables),
+                      pythonRunnerContainer(volumeName)))
               .withVolumes(getVolume(volumeName, configmapName))
               .endSpec()
               .endTemplate()
@@ -100,7 +96,8 @@ public class K8Deployment {
     return getDeployment(deploymentId);
   }
 
-  private static Map<String, String> getLabels(UUID deploymentId, String prettyName) {
+  private static Map<String, String> getLabels(
+      UUID deploymentId, String prettyName, String serviceName) {
     return Map.of(
         StaticConfig.APP,
         StaticConfig.DATACATER_PIPELINE,
@@ -111,7 +108,9 @@ public class K8Deployment {
         StaticConfig.UUID_TEXT,
         deploymentId.toString(),
         StaticConfig.DEPLOYMENT_NAME_TEXT,
-        prettyName);
+        prettyName,
+        StaticConfig.DEPLOYMENT_SERVICE_TEXT,
+        serviceName);
   }
 
   private Container pythonRunnerContainer(String volumeName) {
@@ -122,14 +121,30 @@ public class K8Deployment {
                 "%s:%s",
                 StaticConfig.EnvironmentVariables.PYTHON_RUNNER_IMAGE_NAME,
                 StaticConfig.EnvironmentVariables.PYTHON_RUNNER_IMAGE_TAG))
-        .withPorts(this.containerPort())
+        .withPorts(
+            this.containerPort(StaticConfig.EnvironmentVariables.PYTHON_RUNNER_CONTAINER_PORT))
         .withVolumeMounts(getVolumeMount(volumeName))
         .build();
   }
 
-  private ContainerPort containerPort() {
+  private Container deploymentContainer(String name, String volumeName, List<EnvVar> variables) {
+    return new ContainerBuilder(true)
+        .withName(name)
+        .withImage(StaticConfig.EnvironmentVariables.FULL_IMAGE_NAME)
+        .withImagePullPolicy(StaticConfig.EnvironmentVariables.PULL_POLICY)
+        .withEnv(variables)
+        .withNewResources()
+        .withRequests(StaticConfig.RESOURCE_REQUESTS)
+        .withLimits(StaticConfig.RESOURCE_LIMITS)
+        .endResources()
+        .withPorts(this.containerPort(StaticConfig.EnvironmentVariables.DEPLOYMENT_CONTAINER_PORT))
+        .withVolumeMounts(getVolumeMount(volumeName))
+        .build();
+  }
+
+  private ContainerPort containerPort(int port) {
     return new ContainerPortBuilder(true)
-        .withContainerPort(StaticConfig.EnvironmentVariables.PYTHON_RUNNER_CONTAINER_PORT)
+        .withContainerPort(port)
         .withName(StaticConfig.HTTP)
         .build();
   }
@@ -172,6 +187,8 @@ public class K8Deployment {
 
   public void delete(UUID deploymentId) {
     String name = getDeploymentName(deploymentId);
+    String serviceName = StaticConfig.SERVICE_NAME_PREFIX + deploymentId;
+    String configMapName = StaticConfig.CONFIGMAP_NAME_PREFIX + deploymentId;
     Boolean status =
         client
             .apps()
@@ -181,6 +198,8 @@ public class K8Deployment {
             .delete();
 
     if (Boolean.TRUE.equals(status)) {
+      k8Service.delete(serviceName);
+      k8ConfigMap.delete(configMapName);
       LOGGER.info(String.format(StaticConfig.LoggerMessages.DEPLOYMENT_DELETED, name));
     } else {
       LOGGER.info(String.format(StaticConfig.LoggerMessages.DEPLOYMENT_NOT_DELETED, name));
