@@ -9,7 +9,7 @@ Welcome to the real-time, cloud-native data pipeline platform based on Apache Ka
 
 DataCater is a simple yet powerful approach to building modern, real-time data pipelines. According to reports of our users, data and dev teams save 40% of the time spent on crafting data pipelines and go from zero to production in a matter of minutes.
 
-Users can choose from an extensive repository of [filter functions](https://github.com/DataCater/datacater/tree/main/filters), apply [transformations](https://github.com/DataCater/cloud-platform/tree/main/transforms), or code their own transforms in Python® to build their streaming data pipelines.
+Users can choose from an extensive repository of [filter functions](https://github.com/DataCater/datacater/tree/main/filters), apply [transformations](https://github.com/DataCater/datacater/tree/main/transforms), or code their own transforms in Python® to build their streaming data pipelines.
 
 You find each component in this repository. See the [File Structure section](#file-structure) for orientation.
 
@@ -169,4 +169,4 @@ We provide support and help in our [Community Slack](https://join.slack.com/t/da
 
 ## License
 
-DataCater is source-available and [licensed under the BSL 1.1](https://github.com/DataCater/cloud-platform/blob/main/LICENSE), converting to the open-source Apache 2.0 license 4 years after the release.
+DataCater is source-available and [licensed under the BSL 1.1](https://github.com/DataCater/datacater/blob/main/LICENSE), converting to the open-source Apache 2.0 license 4 years after the release.
