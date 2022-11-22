@@ -27,6 +27,8 @@ public class StaticConfig {
   static final String CONFIGMAP_NAME_PREFIX = "datacater-configmap-";
   static final String VOLUME_NAME_PREFIX = "datacater-volume-";
   static final String SERVICE_NAME_PREFIX = "datacater-service-";
+  static final String NONE = "None";
+  static final String TCP_TAG = "TCP";
   static final String SPEC = "spec";
   static final String STREAM_OUT = "stream-out";
   static final String STREAM_IN = "stream-in";

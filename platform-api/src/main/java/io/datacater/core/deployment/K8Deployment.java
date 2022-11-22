@@ -45,8 +45,6 @@ public class K8Deployment {
     final String volumeName = StaticConfig.VOLUME_NAME_PREFIX + deploymentId;
     final String serviceName = StaticConfig.SERVICE_NAME_PREFIX + deploymentId;
     k8NameSpace.create();
-    k8ConfigMap.getOrCreate(configmapName, pe);
-    k8Service.getOrCreate(serviceName);
 
     List<EnvVar> variables =
         getEnvironmentVariables(streamIn, streamOut, deploymentSpec, deploymentId);
@@ -92,7 +90,8 @@ public class K8Deployment {
     if (!exists(deploymentId)) {
       throw new CreateDeploymentException(StaticConfig.LoggerMessages.DEPLOYMENT_NOT_CREATED);
     }
-
+    k8ConfigMap.getOrCreate(configmapName, pe);
+    k8Service.create(serviceName);
     return getDeployment(deploymentId);
   }
 

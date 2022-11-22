@@ -2,7 +2,7 @@ package io.datacater.core.deployment;
 
 import io.fabric8.kubernetes.api.model.*;
 import io.fabric8.kubernetes.client.KubernetesClient;
-import io.fabric8.kubernetes.client.dsl.ServiceResource;
+import java.util.List;
 import java.util.Map;
 import javax.enterprise.context.ApplicationScoped;
 
@@ -15,47 +15,56 @@ public class K8Service {
   }
 
   private boolean exists(String name) {
-    return getResource(name) != null;
-  }
-
-  private Service get(String name) {
-    return getResource(name).get();
+    return !getListByLabel(name).isEmpty();
   }
 
   public void delete(String name) {
-    getResource(name).delete();
+    client.services().inNamespace(StaticConfig.EnvironmentVariables.NAMESPACE).delete(get(name));
   }
 
-  private ServiceResource<Service> getResource(String name) {
+  private Service get(String name) {
+    return getListByLabel(name).get(0);
+  }
+
+  private List<Service> getListByLabel(String name) {
     return client
         .services()
         .inNamespace(StaticConfig.EnvironmentVariables.NAMESPACE)
-        .withName(name);
+        .withLabel(StaticConfig.DEPLOYMENT_SERVICE_TEXT, name)
+        .list()
+        .getItems();
   }
 
-  public Service getOrCreate(String name) {
-    if (exists(name)) {
-      return get(name);
+  public void create(String name) {
+    if (!exists(name)) {
+      createService(name);
     }
-    return create(name);
   }
 
-  private Service create(String name) {
-    return new ServiceBuilder()
-        .withNewMetadata()
-        .withName(name)
-        .endMetadata()
-        .withNewSpec()
-        .withSelector(Map.of(StaticConfig.DEPLOYMENT_SERVICE_TEXT, name))
-        .withPorts(port())
-        .endSpec()
-        .build();
+  private Service createService(String name) {
+    Service service =
+        new ServiceBuilder()
+            .withNewMetadata()
+            .withName(name)
+            .withLabels(Map.of(StaticConfig.DEPLOYMENT_SERVICE_TEXT, name))
+            .endMetadata()
+            .withNewSpec()
+            .withClusterIP(StaticConfig.NONE)
+            .withSelector(Map.of(StaticConfig.DEPLOYMENT_SERVICE_TEXT, name))
+            .withPorts(port())
+            .endSpec()
+            .build();
+    client
+        .services()
+        .inNamespace(StaticConfig.EnvironmentVariables.NAMESPACE)
+        .createOrReplace(service);
+    return service;
   }
 
   private ServicePort port() {
     return new ServicePortBuilder()
-        .withProtocol("TCP")
-        .withNewTargetPort(StaticConfig.EnvironmentVariables.DEPLOYMENT_CONTAINER_PORT)
+        .withProtocol(StaticConfig.TCP_TAG)
+        .withPort(StaticConfig.EnvironmentVariables.DEPLOYMENT_CONTAINER_PORT)
         .build();
   }
 }
