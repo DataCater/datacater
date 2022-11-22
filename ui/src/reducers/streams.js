@@ -103,7 +103,7 @@ const streams = (state, action) => {
     case "RECEIVE_STREAM_INSPECT_FAILED":
       return {
         ...state,
-        errorMessage: state.errorMessage,
+        errorMessage: action.errorMessage,
         inspectingStream: false,
         inspectionResult: undefined,
       };

@@ -766,19 +766,6 @@ class EditPipeline extends Component {
     }
 
     if (
-      pipeline === undefined ||
-      this.props.streams.inspectingStream ||
-      this.props.streams.inspectionResult === undefined
-    ) {
-      return (
-        <div className="container">
-          {header}
-          {loader}
-        </div>
-      );
-    }
-
-    if (
       this.props.streams.errorMessage !== undefined ||
       this.props.pipelines.errorMessage !== undefined
     ) {
@@ -794,6 +781,19 @@ class EditPipeline extends Component {
       );
     }
 
+    if (
+      pipeline === undefined ||
+      this.props.streams.inspectingStream ||
+      this.props.streams.inspectionResult === undefined
+    ) {
+      return (
+        <div className="container">
+          {header}
+          {loader}
+        </div>
+      );
+    }
+
     const sampleRecords =
       this.state.currentStep === undefined ||
       this.props.pipelines.inspectionResult === undefined
@@ -804,7 +804,7 @@ class EditPipeline extends Component {
             (record) => record.value
           );
 
-    if (sampleRecords.length === 0) {
+    if (this.state.currentStep === undefined && sampleRecords.length === 0) {
       return (
         <div className="container">
           {header}
@@ -835,7 +835,7 @@ class EditPipeline extends Component {
     return (
       <>
         <div className="container">{header}</div>
-        {sampleRecords.length > 0 && (
+        {sampleRecords !== undefined && (
           <PipelineDesigner
             addStepFunc={this.addStep}
             fields={Object.keys(profile)}
