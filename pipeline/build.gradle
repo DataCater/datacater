@@ -22,12 +22,16 @@ dependencies {
     implementation 'io.quarkus:quarkus-logging-json'
     implementation 'io.quarkus:quarkus-arc'
 
+    //monitoring and logging
     implementation 'io.quarkus:quarkus-smallrye-openapi'
+    implementation 'io.quarkus:quarkus-smallrye-health'
+    implementation 'io.quarkus:quarkus-micrometer-registry-prometheus'
 
-    // smallrye reactive messaging
+    //smallrye reactive messaging
     implementation 'io.quarkus:quarkus-smallrye-reactive-messaging'
     implementation 'io.quarkus:quarkus-smallrye-reactive-messaging-kafka'
 
+    //reactive
     implementation 'io.quarkus:quarkus-resteasy-reactive-jackson'
     implementation 'io.quarkus:quarkus-vertx'
     implementation 'io.smallrye.reactive:smallrye-mutiny-vertx-web-client'
