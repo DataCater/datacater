@@ -89,6 +89,7 @@ class EditDeployment extends Component {
     delete apiPayload.uuid;
     delete apiPayload.createdAt;
     delete apiPayload.updatedAt;
+    delete apiPayload.status;
 
     const pipelineOptions = this.props.pipelines.pipelines.map((pipeline) => {
       const name = `${pipeline.name || "Untitled pipeline"} (${pipeline.uuid})`;

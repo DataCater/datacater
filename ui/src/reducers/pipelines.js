@@ -3,6 +3,7 @@ const pipelines = (state, action) => {
     errorMessage: undefined,
     fetchingPipelines: false,
     inspectingPipeline: false,
+    inspectingPipelineFailed: false,
     inspectionResult: undefined,
     pipelines: [],
     pipeline: undefined,
@@ -36,6 +37,7 @@ const pipelines = (state, action) => {
       return {
         ...state,
         fetchingPipelines: true,
+        inspectingPipelineFailed: undefined,
         updatingPipeline: false,
       };
     case "RECEIVE_PIPELINE":
@@ -82,6 +84,7 @@ const pipelines = (state, action) => {
         ...state,
         errorMessage: undefined,
         inspectingPipeline: true,
+        inspectingPipelineFailed: undefined,
         inspectionResult: undefined,
       };
     case "RECEIVE_PIPELINE_INSPECT":
@@ -89,6 +92,7 @@ const pipelines = (state, action) => {
         ...state,
         errorMessage: undefined,
         inspectingPipeline: false,
+        inspectingPipelineFailed: false,
         inspectionResult: action.inspectionResult,
       };
     case "RECEIVE_PIPELINE_INSPECT_FAILED":
@@ -96,6 +100,7 @@ const pipelines = (state, action) => {
         ...state,
         errorMessage: state.errorMessage,
         inspectingPipeline: false,
+        inspectingPipelineFailed: true,
         inspectionResult: undefined,
       };
     default:

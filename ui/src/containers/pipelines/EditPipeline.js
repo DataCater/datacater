@@ -14,6 +14,7 @@ import {
   Search,
   Table,
   Type,
+  X,
 } from "react-feather";
 import { Modal } from "react-bootstrap";
 import BaseTable, { AutoResizer } from "react-base-table";
@@ -137,7 +138,8 @@ class EditPipeline extends Component {
         .inspectPipeline(
           this.state.pipeline,
           this.props.streams.inspectionResult,
-          previewStep
+          // UI starts at index 1, Python runner starts at index 0
+          previewStep - 1
         )
         .then(() => {
           if (domElement != null) {
@@ -261,7 +263,7 @@ class EditPipeline extends Component {
 
     if (step.kind === "Record") {
       if (property === "transform") {
-        if (value === undefined) {
+        if ([undefined, ""].includes(value)) {
           // Remove transform
           delete step.transform;
           pipeline.spec.steps[currentStep - 1] = step;
@@ -272,7 +274,7 @@ class EditPipeline extends Component {
           };
         }
       } else if (property === "filter") {
-        if (value === undefined) {
+        if ([undefined, ""].includes(value)) {
           // Remove filter
           delete step.filter;
           pipeline.spec.steps[currentStep - 1] = step;
@@ -299,9 +301,13 @@ class EditPipeline extends Component {
         );
       }
       if (property === "transform") {
-        if (value === undefined) {
+        if ([undefined, ""].includes(value)) {
           // Remove transform
           delete step.fields[fieldName].transform;
+          // Remove field if no filter is defined
+          if (Object.keys(step.fields[fieldName]).length === 0) {
+            delete step.fields[fieldName];
+          }
           pipeline.spec.steps[currentStep - 1] = step;
           editColumn = undefined;
         } else {
@@ -311,9 +317,13 @@ class EditPipeline extends Component {
             };
         }
       } else if (property === "filter") {
-        if (value === undefined) {
+        if ([undefined, ""].includes(value)) {
           // Remove filter
           delete step.fields[fieldName].filter;
+          // Remove field if no transform is defined
+          if (Object.keys(step.fields[fieldName]).length === 0) {
+            delete step.fields[fieldName];
+          }
           pipeline.spec.steps[currentStep - 1] = step;
           editColumn = undefined;
         } else {
@@ -412,6 +422,11 @@ class EditPipeline extends Component {
       } else {
         currentStep = pipeline.spec.steps.length - 1;
       }
+    }
+
+    // Step cannot go below 1
+    if (currentStep < 1) {
+      currentStep = 1;
     }
 
     this.updateSampleRecords(pipeline, currentStep);
@@ -683,6 +698,35 @@ class EditPipeline extends Component {
                 </div>
                 <div className="col-4 d-flex align-items-center justify-content-end">
                   <div>
+                    {this.props.pipelines.inspectingPipelineFailed ===
+                      false && (
+                      <button
+                        className="btn btn-sm btn-primary text-white btn-pill me-2"
+                        onClick={(e) => e.preventDefault()}
+                      >
+                        <span className="d-flex align-items-center">
+                          <Check className="feather-icon" />
+                          Preview
+                        </span>
+                      </button>
+                    )}
+                    {this.props.pipelines.inspectingPipelineFailed === true && (
+                      <button
+                        className="btn btn-sm btn-danger btn-pill me-2"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          this.updateSampleRecords(
+                            this.state.pipeline,
+                            this.state.currentStep
+                          );
+                        }}
+                      >
+                        <span className="d-flex align-items-center">
+                          <X className="feather-icon" />
+                          Preview failed (Retry)
+                        </span>
+                      </button>
+                    )}
                     <button
                       className="btn btn-sm btn-light btn-pill"
                       onClick={(e) => e.preventDefault()}
@@ -743,6 +787,22 @@ class EditPipeline extends Component {
     }
 
     if (
+      this.props.streams.errorMessage !== undefined ||
+      this.props.pipelines.errorMessage !== undefined
+    ) {
+      return (
+        <div className="container">
+          {header}
+          <div className="alert alert-danger mt-4" role="alert">
+            <p className="h6 fs-bolder">API response:</p>
+            {this.props.streams.errorMessage ||
+              this.props.pipelines.errorMessage}
+          </div>
+        </div>
+      );
+    }
+
+    if (
       pipeline === undefined ||
       this.props.streams.inspectingStream ||
       this.props.streams.inspectionResult === undefined
@@ -761,7 +821,7 @@ class EditPipeline extends Component {
         ? deepCopy(this.props.streams.inspectionResult)
         : deepCopy(this.props.pipelines.inspectionResult);
 
-    if (sampleRecords.length === 0) {
+    if (this.state.currentStep === undefined && sampleRecords.length === 0) {
       return (
         <div className="container">
           {header}
@@ -799,7 +859,7 @@ class EditPipeline extends Component {
             record={this.state.debugRecord}
           />
         )}
-        {sampleRecords.length > 0 && (
+        {sampleRecords !== undefined && (
           <PipelineDesigner
             addStepFunc={this.addStep}
             fields={Object.keys(profile)}

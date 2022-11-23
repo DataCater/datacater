@@ -37,6 +37,7 @@ public class StaticConfig {
   static final String LOCALHOST_BOOTSTRAP_SERVER = "localhost:9092";
   static final String KAFKA_TAG = "kafka";
   static final String TOPIC_TAG = "topic";
+  static final String GROUP_ID = "group.id";
   static final String BOOTSTRAP_SERVERS = "bootstrap.servers";
   static final String KEY_DESERIALIZER = "key.deserializer";
   static final String KEY_SERIALIZER = "key.serializer";

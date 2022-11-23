@@ -180,11 +180,12 @@ class Grid extends Component {
   }
 
   calculateHeaderHeight() {
-    const { currentPage } = this.props;
+    const { step } = this.props;
     let headerHeight = 153;
 
-    // filters or pipeline steps (for Apply filter/transformation button)
-    if (["filter", "transform"].includes(currentPage)) {
+    // Increase header height for step of kind 'Field'
+    // to leave room for "Apply transform" buttons
+    if (step !== undefined && step.kind === "Field") {
       headerHeight += 40;
     }
 
