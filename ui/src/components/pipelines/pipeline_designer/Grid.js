@@ -18,8 +18,42 @@ class Grid extends Component {
     this.saveScrollPosition = this.saveScrollPosition.bind(this);
   }
 
-  getCell(sample, field) {
+  getCell(sample, column) {
     let classNames = "sample-cell w-100 text-nowrap";
+
+    const field = column.field;
+    const rawValue = sample["value"][field.name];
+    const error = sample["metadata"]["error"];
+
+    // Check whether an error has occured when applying the pipeline spec
+    // in the current or a previous step
+    if (error !== undefined) {
+      const myRegexp = /steps\[(\d+)\].*/g;
+      const match = myRegexp.exec(error["location"]["path"]);
+      if (match != null && match.length == 2) {
+        const step = parseInt(match[1]);
+
+        if (step + 1 === column.currentStep) {
+          classNames += " clickable error-in-current-step";
+        } else if (step + 1 < column.currentStep) {
+          classNames += " clickable error-in-previous-step";
+        }
+
+        return (
+          <div
+            className={classNames}
+            key={field.name}
+            onClick={() => {
+              column.openDebugViewFunc(sample);
+            }}
+          >
+            <i>{renderTableCellContent(rawValue)}</i>
+          </div>
+        );
+      }
+    }
+
+    /*
     if (
       sample.lastChange !== undefined &&
       sample.lastChange[field] !== undefined
@@ -30,6 +64,7 @@ class Grid extends Component {
         classNames += " changed-in-previous-step";
       }
     }
+    */
 
     if (
       this.props.editColumnField !== undefined &&
@@ -37,8 +72,6 @@ class Grid extends Component {
     ) {
       classNames += " sample-cell-editing";
     }
-
-    const rawValue = sample[field.name];
 
     return (
       <div className={classNames} key={field.name} title={"" + rawValue}>
@@ -77,7 +110,7 @@ class Grid extends Component {
         isScrolling,
       }) {
         if (!column.isRowNumber && column.field !== undefined) {
-          return me.getCell(rowData, column.field);
+          return me.getCell(rowData, column);
         } else {
           return cellData;
         }
@@ -97,6 +130,7 @@ class Grid extends Component {
       removeColumnFunc: this.props.removeColumnFunc,
       handlePipelineStepChangeFunc: this.props.handlePipelineStepChangeFunc,
       handleChangeFunc: this.props.handleFilterChangeFunc,
+      openDebugViewFunc: this.props.openDebugViewFunc,
       showStatistics: this.props.showStatistics,
       step: this.props.step,
       transforms: this.props.transforms,
@@ -135,9 +169,7 @@ class Grid extends Component {
 
   getData() {
     // filter records which were dropped
-    const sampleRecords = this.props.sampleRecords.filter(
-      (record) => record.isDropped !== true
-    );
+    const sampleRecords = this.props.sampleRecords;
 
     // we have to make sure that the samples get an id property. this is needed for row hover / selection
     sampleRecords.forEach(function (sample, index) {

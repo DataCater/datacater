@@ -150,7 +150,7 @@ class TableHeaderCell extends Component {
     } else {
       return (
         <div className={className + " px-2"}>
-          {this.renderField(field, field.id)}
+          {this.renderField(field, field["__dc__id"])}
         </div>
       );
     }
