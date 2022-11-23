@@ -7,7 +7,7 @@ metadata:
   namespace: default
 spec:
   containers:
-    - image: datacater/ui:alpha-20221122
+    - image: datacater/ui:alpha-20221123
       imagePullPolicy: IfNotPresent
       name: ui
       ports:
