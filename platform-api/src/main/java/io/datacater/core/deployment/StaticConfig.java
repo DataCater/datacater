@@ -79,7 +79,7 @@ public class StaticConfig {
     static final int DEPLOYMENT_CONTAINER_PORT =
         ConfigProvider.getConfig()
             .getOptionalValue("datacater.deployment.image.containerPort", Integer.class)
-            .orElse(51000);
+            .orElse(8080);
     static final int REPLICAS =
         ConfigProvider.getConfig()
             .getOptionalValue("datacater.deployment.replicas", Integer.class)

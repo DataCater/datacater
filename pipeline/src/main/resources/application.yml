@@ -12,6 +12,8 @@ quarkus  :
     group: datacater
     name: ${quarkus.application.name}
     tag: ${quarkus.application.version}
+    http:
+      cors: true
 mp       :
   messaging:
     outgoing:

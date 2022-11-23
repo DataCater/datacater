@@ -49,7 +49,6 @@ public class K8Service {
             .withLabels(Map.of(StaticConfig.DEPLOYMENT_SERVICE_TEXT, name))
             .endMetadata()
             .withNewSpec()
-            .withClusterIP(StaticConfig.NONE)
             .withSelector(Map.of(StaticConfig.DEPLOYMENT_SERVICE_TEXT, name))
             .withPorts(port())
             .endSpec()
