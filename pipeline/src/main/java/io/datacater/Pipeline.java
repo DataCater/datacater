@@ -10,6 +10,7 @@ import java.time.Duration;
 import java.util.UUID;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import java.net.ConnectException;
 
 import io.vertx.mutiny.core.Vertx;
 import io.vertx.mutiny.core.buffer.Buffer;
@@ -43,11 +44,40 @@ public class Pipeline {
   @Blocking
   @Acknowledgment(Acknowledgment.Strategy.POST_PROCESSING)
   public void processUUID(ConsumerRecords<JsonObject, JsonObject> messages) {
-    // This is deliberately blocking
-    handleMessages(messages);
+    try {
+      // This is deliberately blocking
+      handleMessages(messages);
+    } catch (ConnectException e) {
+      LOGGER.warn("Connection to Python-Runner sidecar failed: %s. Attempt: 0".format(e.getMessage()), e);
+
+      int retries = 0;
+
+      // Perform `PipelineConfig.CONNECTION_RETRIES` connection attempts
+      while (retries < PipelineConfig.CONNECTION_RETRIES) {
+        try {
+          // Wait `PipelineConfig.CONNECTION_RETRY_WAIT` milliseconds before performing the next connection attempt
+          Thread.sleep(PipelineConfig.CONNECTION_RETRY_WAIT);
+          handleMessages(messages);
+          break;
+        } catch (ConnectException ce) {
+          retries = retries + 1;
+          LOGGER.warn(
+                  "Connection to Python-Runner sidecar failed: %s. Attempt: %d".format(ce.getMessage(), retries),
+                  ce);
+        } catch (InterruptedException ie) {
+          LOGGER.error("Thread got interrupted", ie);
+          throw new RuntimeException(ie);
+        }
+      }
+
+      // Fail if we saturated all connection attempts
+      if (retries >= PipelineConfig.CONNECTION_RETRIES) {
+        throw new TransformationException("All connection attempts to Python-Runner sidecar failed.");
+      }
+    }
   }
 
-  private void handleMessages(ConsumerRecords<JsonObject, JsonObject> messages) {
+  private void handleMessages(ConsumerRecords<JsonObject, JsonObject> messages) throws ConnectException {
     HttpRequest<Buffer> request = client.post(getPort(), getHost(), PipelineConfig.ENDPOINT)
             .putHeader(PipelineConfig.HEADER, PipelineConfig.HEADER_TYPE);
     HttpResponse<Buffer> response = request.sendJson(getMessages(messages)).await().atMost(Duration.ofSeconds(PipelineConfig.DATACATER_PYTHONRUNNER_TIMEOUT));
