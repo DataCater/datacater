@@ -134,7 +134,8 @@ class EditPipeline extends Component {
         .inspectPipeline(
           this.state.pipeline,
           this.props.streams.inspectionResult,
-          previewStep
+          // UI starts at index 1, Python runner starts at index 0
+          previewStep - 1
         )
         .then(() => {
           if (domElement != null) {
@@ -417,6 +418,11 @@ class EditPipeline extends Component {
       } else {
         currentStep = pipeline.spec.steps.length - 1;
       }
+    }
+
+    // Step cannot go below 1
+    if (currentStep < 1) {
+      currentStep = 1;
     }
 
     this.updateSampleRecords(pipeline, currentStep);
