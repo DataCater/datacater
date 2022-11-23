@@ -11,6 +11,7 @@ import java.util.UUID;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import java.net.ConnectException;
+import java.util.concurrent.CompletionException;
 
 import io.vertx.mutiny.core.Vertx;
 import io.vertx.mutiny.core.buffer.Buffer;
@@ -47,7 +48,7 @@ public class Pipeline {
     try {
       // This is deliberately blocking
       handleMessages(messages);
-    } catch (ConnectException e) {
+    } catch (CompletionException | ConnectException e) {
       LOGGER.warn("Connection to Python-Runner sidecar failed: %s. Attempt: 0".format(e.getMessage()), e);
 
       int retries = 0;
@@ -59,7 +60,7 @@ public class Pipeline {
           Thread.sleep(PipelineConfig.CONNECTION_RETRY_WAIT);
           handleMessages(messages);
           break;
-        } catch (ConnectException ce) {
+        } catch (CompletionException | ConnectException ce) {
           retries = retries + 1;
           LOGGER.warn(
                   "Connection to Python-Runner sidecar failed: %s. Attempt: %d".format(ce.getMessage(), retries),
