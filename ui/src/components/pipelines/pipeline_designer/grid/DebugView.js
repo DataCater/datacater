@@ -70,7 +70,7 @@ class DebugView extends Component {
               ></button>
             </div>
             <div className="modal-body" style={{ height: "60vh" }}>
-              <ul className="nav nav-pills">
+              <ul className="nav nav-pills mb-3">
                 <li className="nav-item">
                   {this.state.tab === "error" && (
                     <a
@@ -143,6 +143,7 @@ class DebugView extends Component {
                   fontSize: "10px",
                   marginBottom: "0px",
                   background: "none",
+                  border: "1px solid #dee2e6",
                 }}
               >
                 {debugContent}
