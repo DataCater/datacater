@@ -86,7 +86,7 @@ public class DeploymentEndpoint {
                 deployment -> {
                   HttpClient httpClient = HttpClient.newHttpClient();
                   HttpRequest req =
-                      buildRequest(
+                      buildDeploymentServiceRequest(
                           deploymentId, StaticConfig.EnvironmentVariables.DEPLOYMENT_HEALTH_PATH);
                   HttpResponse<String> response =
                       httpClient.send(req, HttpResponse.BodyHandlers.ofString());
@@ -110,7 +110,7 @@ public class DeploymentEndpoint {
                 deployment -> {
                   HttpClient httpClient = HttpClient.newHttpClient();
                   HttpRequest req =
-                      buildRequest(
+                      buildDeploymentServiceRequest(
                           deploymentId, StaticConfig.EnvironmentVariables.DEPLOYMENT_METRICS_PATH);
                   HttpResponse<String> response =
                       httpClient.send(req, HttpResponse.BodyHandlers.ofString());
@@ -290,7 +290,7 @@ public class DeploymentEndpoint {
     return k8Deployment.getLogs(deploymentId);
   }
 
-  private HttpRequest buildRequest(UUID deploymentId, String path) {
+  private HttpRequest buildDeploymentServiceRequest(UUID deploymentId, String path) {
     K8Deployment k8Deployment = new K8Deployment(client);
     String clusterIp = k8Deployment.getClusterIp(deploymentId);
     String uriReady =
