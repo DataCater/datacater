@@ -76,6 +76,18 @@ public class StaticConfig {
         ConfigProvider.getConfig()
             .getOptionalValue("datacater.deployment.pull-policy", String.class)
             .orElse("IfNotPresent");
+    static final String DEPLOYMENT_HEALTH_PATH =
+        ConfigProvider.getConfig()
+            .getOptionalValue("datacater.deployment.health-path", String.class)
+            .orElse("/q/health");
+    static final String DEPLOYMENT_METRICS_PATH =
+        ConfigProvider.getConfig()
+            .getOptionalValue("datacater.deployment.metrics-path", String.class)
+            .orElse("/q/metrics");
+    public static final long DEPLOYMENT_STATS_TIMEOUT =
+        ConfigProvider.getConfig()
+            .getOptionalValue("datacater.deployment.stats.timeout", Long.class)
+            .orElse(10000L);
     static final int DEPLOYMENT_CONTAINER_PORT =
         ConfigProvider.getConfig()
             .getOptionalValue("datacater.deployment.image.containerPort", Integer.class)

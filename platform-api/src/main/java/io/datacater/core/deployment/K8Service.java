@@ -22,6 +22,16 @@ public class K8Service {
     client.services().inNamespace(StaticConfig.EnvironmentVariables.NAMESPACE).delete(get(name));
   }
 
+  public String getClusterIp(String serviceName) {
+    return client
+        .services()
+        .inNamespace(StaticConfig.EnvironmentVariables.NAMESPACE)
+        .withName(serviceName)
+        .get()
+        .getSpec()
+        .getClusterIP();
+  }
+
   private Service get(String name) {
     return getListByLabel(name).get(0);
   }
