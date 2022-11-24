@@ -295,8 +295,11 @@ public class DeploymentEndpoint {
     String clusterIp = k8Deployment.getClusterIp(deploymentId);
     String uriReady =
         String.format(
-            "http://%s:%d%s",
-            clusterIp, StaticConfig.EnvironmentVariables.DEPLOYMENT_CONTAINER_PORT, path);
+            "%s://%s:%d%s",
+            StaticConfig.EnvironmentVariables.DEPLOYMENT_CONTAINER_PROTOCOL,
+            clusterIp,
+            StaticConfig.EnvironmentVariables.DEPLOYMENT_CONTAINER_PORT,
+            path);
 
     return HttpRequest.newBuilder()
         .GET()

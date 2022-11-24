@@ -90,8 +90,12 @@ public class StaticConfig {
             .orElse(10000L);
     static final int DEPLOYMENT_CONTAINER_PORT =
         ConfigProvider.getConfig()
-            .getOptionalValue("datacater.deployment.image.containerPort", Integer.class)
+            .getOptionalValue("datacater.deployment.image.container.port", Integer.class)
             .orElse(8080);
+    static final String DEPLOYMENT_CONTAINER_PROTOCOL =
+        ConfigProvider.getConfig()
+            .getOptionalValue("datacater.deployment.image.container.protocol", String.class)
+            .orElse("http");
     static final int REPLICAS =
         ConfigProvider.getConfig()
             .getOptionalValue("datacater.deployment.replicas", Integer.class)
