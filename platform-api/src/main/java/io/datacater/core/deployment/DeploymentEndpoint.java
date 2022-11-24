@@ -11,7 +11,12 @@ import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.dsl.LogWatch;
 import io.fabric8.kubernetes.client.dsl.RollableScalableResource;
 import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.unchecked.Unchecked;
 import java.io.*;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -62,7 +67,55 @@ public class DeploymentEndpoint {
         .failWith(new DeploymentNotFoundException(StaticConfig.LoggerMessages.DEPLOYMENT_NOT_FOUND))
         .onItem()
         .ifNotNull()
-        .transform(deployment -> getDeploymentLogs(deployment.getId()));
+        .transform(Unchecked.function(deployment -> getDeploymentLogs(deployment.getId())));
+  }
+
+  @GET
+  @Path("{uuid}/health")
+  @Produces(MediaType.APPLICATION_JSON)
+  public Uni<Response> getHealth(@PathParam("uuid") UUID deploymentId) {
+    return sf.withTransaction(
+            ((session, transaction) -> session.find(DeploymentEntity.class, deploymentId)))
+        .onItem()
+        .ifNull()
+        .failWith(new DeploymentNotFoundException(StaticConfig.LoggerMessages.DEPLOYMENT_NOT_FOUND))
+        .onItem()
+        .ifNotNull()
+        .transform(
+            Unchecked.function(
+                deployment -> {
+                  HttpClient httpClient = HttpClient.newHttpClient();
+                  HttpRequest req =
+                      buildDeploymentServiceRequest(
+                          deploymentId, StaticConfig.EnvironmentVariables.DEPLOYMENT_HEALTH_PATH);
+                  HttpResponse<String> response =
+                      httpClient.send(req, HttpResponse.BodyHandlers.ofString());
+                  return Response.ok().entity(response.body()).build();
+                }));
+  }
+
+  @GET
+  @Path("{uuid}/metrics")
+  @Produces(MediaType.TEXT_PLAIN)
+  public Uni<Response> getMetrics(@PathParam("uuid") UUID deploymentId) {
+    return sf.withTransaction(
+            ((session, transaction) -> session.find(DeploymentEntity.class, deploymentId)))
+        .onItem()
+        .ifNull()
+        .failWith(new DeploymentNotFoundException(StaticConfig.LoggerMessages.DEPLOYMENT_NOT_FOUND))
+        .onItem()
+        .ifNotNull()
+        .transform(
+            Unchecked.function(
+                deployment -> {
+                  HttpClient httpClient = HttpClient.newHttpClient();
+                  HttpRequest req =
+                      buildDeploymentServiceRequest(
+                          deploymentId, StaticConfig.EnvironmentVariables.DEPLOYMENT_METRICS_PATH);
+                  HttpResponse<String> response =
+                      httpClient.send(req, HttpResponse.BodyHandlers.ofString());
+                  return Response.ok().entity(response.body()).build();
+                }));
   }
 
   @GET
@@ -235,6 +288,24 @@ public class DeploymentEndpoint {
   private String getDeploymentLogs(UUID deploymentId) {
     K8Deployment k8Deployment = new K8Deployment(client);
     return k8Deployment.getLogs(deploymentId);
+  }
+
+  private HttpRequest buildDeploymentServiceRequest(UUID deploymentId, String path) {
+    K8Deployment k8Deployment = new K8Deployment(client);
+    String clusterIp = k8Deployment.getClusterIp(deploymentId);
+    String uriReady =
+        String.format(
+            "%s://%s:%d%s",
+            StaticConfig.EnvironmentVariables.DEPLOYMENT_CONTAINER_PROTOCOL,
+            clusterIp,
+            StaticConfig.EnvironmentVariables.DEPLOYMENT_CONTAINER_PORT,
+            path);
+
+    return HttpRequest.newBuilder()
+        .GET()
+        .version(HttpClient.Version.HTTP_1_1)
+        .uri(URI.create(uriReady))
+        .build();
   }
 
   private RollableScalableResource<Deployment> watchDeploymentLogs(UUID deploymentId) {

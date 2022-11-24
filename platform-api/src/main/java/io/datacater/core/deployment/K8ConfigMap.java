@@ -50,6 +50,14 @@ public class K8ConfigMap {
     return client.configMaps().inNamespace(StaticConfig.EnvironmentVariables.NAMESPACE).create(map);
   }
 
+  public void delete(String name) {
+    client
+        .configMaps()
+        .inNamespace(StaticConfig.EnvironmentVariables.NAMESPACE)
+        .withName(name)
+        .delete();
+  }
+
   private ObjectMeta getMetaData(String name) {
     return new ObjectMetaBuilder()
         .withName(name)

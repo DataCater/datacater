@@ -18,6 +18,7 @@ public class StaticConfig {
   static final String PIPELINE_REV = "1";
   static final String UUID_TEXT = "datacater.io/uuid";
   static final String DEPLOYMENT_NAME_TEXT = "datacater.io/name";
+  static final String DEPLOYMENT_SERVICE_TEXT = "datacater.io/service";
   static final String MOUNT_PATH = "/usr/app/mounts";
   static final Map<String, Quantity> RESOURCE_REQUESTS =
       Map.of("cpu", new Quantity("0.1"), "memory", new Quantity("1.5Gi"));
@@ -25,6 +26,9 @@ public class StaticConfig {
   static final String DEPLOYMENT_NAME_PREFIX = "datacater-deployment-";
   static final String CONFIGMAP_NAME_PREFIX = "datacater-configmap-";
   static final String VOLUME_NAME_PREFIX = "datacater-volume-";
+  static final String SERVICE_NAME_PREFIX = "datacater-service-";
+  static final String NONE = "None";
+  static final String TCP_TAG = "TCP";
   static final String SPEC = "spec";
   static final String STREAM_OUT = "stream-out";
   static final String STREAM_IN = "stream-in";
@@ -72,6 +76,26 @@ public class StaticConfig {
         ConfigProvider.getConfig()
             .getOptionalValue("datacater.deployment.pull-policy", String.class)
             .orElse("IfNotPresent");
+    static final String DEPLOYMENT_HEALTH_PATH =
+        ConfigProvider.getConfig()
+            .getOptionalValue("datacater.deployment.health-path", String.class)
+            .orElse("/q/health");
+    static final String DEPLOYMENT_METRICS_PATH =
+        ConfigProvider.getConfig()
+            .getOptionalValue("datacater.deployment.metrics-path", String.class)
+            .orElse("/q/metrics");
+    public static final long DEPLOYMENT_STATS_TIMEOUT =
+        ConfigProvider.getConfig()
+            .getOptionalValue("datacater.deployment.stats.timeout", Long.class)
+            .orElse(10000L);
+    static final int DEPLOYMENT_CONTAINER_PORT =
+        ConfigProvider.getConfig()
+            .getOptionalValue("datacater.deployment.image.container.port", Integer.class)
+            .orElse(8080);
+    static final String DEPLOYMENT_CONTAINER_PROTOCOL =
+        ConfigProvider.getConfig()
+            .getOptionalValue("datacater.deployment.image.container.protocol", String.class)
+            .orElse("http");
     static final int REPLICAS =
         ConfigProvider.getConfig()
             .getOptionalValue("datacater.deployment.replicas", Integer.class)
