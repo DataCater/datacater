@@ -29,6 +29,7 @@ public class StreamEndpoint {
           .getOptionalValue("kafka.api.timeout.ms", Integer.class)
           .orElse(5000);
   @Inject Mutiny.SessionFactory sf;
+
   @Inject StreamsUtilities streamsUtil;
 
   @GET
@@ -51,7 +52,7 @@ public class StreamEndpoint {
   public Uni<List<StreamEntity>> getStreams() {
     return sf.withSession(
         session -> {
-          session.enableFilter("tenantFilter").setParameter("tenantId", "DataCater");
+          LOGGER.info(session.getEnabledFilter("tenantFilter").getName());
           return session.createQuery("from StreamEntity", StreamEntity.class).getResultList();
         });
   }
