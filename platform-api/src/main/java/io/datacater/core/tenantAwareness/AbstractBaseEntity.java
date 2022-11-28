@@ -34,6 +34,6 @@ public abstract class AbstractBaseEntity implements TenantAware, Serializable {
   }
 
   public AbstractBaseEntity() {
-    this.tenantId = "DataCaterNew";
+    this.tenantId = "DataCater";
   }
 }
