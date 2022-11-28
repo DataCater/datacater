@@ -5,7 +5,9 @@ const deployments = (state, action) => {
     deployment: undefined,
     deployments: [],
     fetchingLogs: false,
+    health: undefined,
     logMessages: [],
+    metrics: undefined,
   };
 
   switch (action.type) {
@@ -113,6 +115,38 @@ const deployments = (state, action) => {
         errorMessage: action.errorMessage,
         fetchingLogMessages: false,
         logMessages: [],
+      };
+    case "REQUEST_HEALTH_DEPLOYMENT":
+      return {
+        ...state,
+        health: undefined,
+      };
+    case "RECEIVE_HEALTH_DEPLOYMENT":
+      return {
+        ...state,
+        health: action.health,
+      };
+    case "RECEIVE_HEALTH_DEPLOYMENT_FAILED":
+      return {
+        ...state,
+        errorMessage: action.errorMessage,
+        health: undefined,
+      };
+    case "REQUEST_METRICS_DEPLOYMENT":
+      return {
+        ...state,
+        metrics: undefined,
+      };
+    case "RECEIVE_METRICS_DEPLOYMENT":
+      return {
+        ...state,
+        metrics: action.metrics,
+      };
+    case "RECEIVE_METRICS_DEPLOYMENT_FAILED":
+      return {
+        ...state,
+        errorMessage: action.errorMessage,
+        metrics: undefined,
       };
     default:
       return state || initialState;

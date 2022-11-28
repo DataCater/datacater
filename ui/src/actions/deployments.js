@@ -201,3 +201,75 @@ export function fetchDeploymentLogs(id) {
     );
   };
 }
+
+export function fetchDeploymentHealth(id) {
+  const requestDeploymentHealth = () => ({
+    type: "REQUEST_HEALTH_DEPLOYMENT",
+  });
+
+  const receivedDeploymentHealth = (response) => ({
+    type: "RECEIVE_HEALTH_DEPLOYMENT",
+    health: response,
+  });
+
+  const receivedDeploymentHealthFailed = (response) => ({
+    type: "RECEIVE_HEALTH_DEPLOYMENT_FAILED",
+    errorMessage: response,
+  });
+
+  return function (dispatch) {
+    dispatch(requestDeploymentHealth());
+
+    return callApi(`/deployments/${id}/health`).then(
+      (response) => dispatch(receivedDeploymentHealth(response.data)),
+      (error) => {
+        if (error.response.status === 401) {
+          localStorage.removeItem("userToken");
+          window.location = "/sign_in";
+        } else if (error.response.status === 404) {
+          window.location = "/404";
+        } else {
+          dispatch(
+            receivedDeploymentHealthFailed(JSON.stringify(error.response.data))
+          );
+        }
+      }
+    );
+  };
+}
+
+export function fetchDeploymentMetrics(id) {
+  const requestDeploymentMetrics = () => ({
+    type: "REQUEST_METRICS_DEPLOYMENT",
+  });
+
+  const receivedDeploymentMetrics = (response) => ({
+    type: "RECEIVE_METRICS_DEPLOYMENT",
+    metrics: response,
+  });
+
+  const receivedDeploymentMetricsFailed = (response) => ({
+    type: "RECEIVE_METRICS_DEPLOYMENT_FAILED",
+    errorMessage: response,
+  });
+
+  return function (dispatch) {
+    dispatch(requestDeploymentMetrics());
+
+    return callApi(`/deployments/${id}/metrics`).then(
+      (response) => dispatch(receivedDeploymentMetrics(response.data)),
+      (error) => {
+        if (error.response.status === 401) {
+          localStorage.removeItem("userToken");
+          window.location = "/sign_in";
+        } else if (error.response.status === 404) {
+          window.location = "/404";
+        } else {
+          dispatch(
+            receivedDeploymentMetricsFailed(JSON.stringify(error.response.data))
+          );
+        }
+      }
+    );
+  };
+}
