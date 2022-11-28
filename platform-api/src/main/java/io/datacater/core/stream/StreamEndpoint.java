@@ -2,6 +2,7 @@ package io.datacater.core.stream;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.datacater.core.exceptions.*;
+import io.datacater.core.tenantAwareness.DataCaterTransactional;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.unchecked.Unchecked;
 import java.util.List;
@@ -22,6 +23,7 @@ import org.jboss.logging.Logger;
 @RolesAllowed("dev")
 @Produces(MediaType.APPLICATION_JSON)
 @SecurityRequirement(name = "apiToken")
+@DataCaterTransactional
 public class StreamEndpoint {
   private static final Logger LOGGER = Logger.getLogger(StreamEndpoint.class);
   private static final Integer KAFKA_API_TIMEOUT_MS =
@@ -50,7 +52,8 @@ public class StreamEndpoint {
 
   @GET
   public Uni<List<StreamEntity>> getStreams() {
-    return sf.withSession( session -> session.createQuery("from StreamEntity", StreamEntity.class).getResultList());
+    return sf.withSession(
+        session -> session.createQuery("from StreamEntity", StreamEntity.class).getResultList());
   }
 
   @POST

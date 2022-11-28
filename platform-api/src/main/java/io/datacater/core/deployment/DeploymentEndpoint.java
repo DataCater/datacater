@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.datacater.core.exceptions.*;
 import io.datacater.core.pipeline.PipelineEntity;
 import io.datacater.core.stream.StreamEntity;
+import io.datacater.core.tenantAwareness.DataCaterTransactional;
 import io.datacater.core.utilities.StringUtilities;
 import io.fabric8.kubernetes.api.model.apps.Deployment;
 import io.fabric8.kubernetes.client.KubernetesClient;
@@ -38,6 +39,7 @@ import org.hibernate.reactive.mutiny.Mutiny;
 @Produces(MediaType.APPLICATION_JSON)
 @SecurityRequirement(name = "apiToken")
 @RequestScoped
+@DataCaterTransactional
 public class DeploymentEndpoint {
   @Inject Mutiny.SessionFactory sf;
 

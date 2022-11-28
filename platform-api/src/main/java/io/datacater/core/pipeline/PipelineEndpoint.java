@@ -10,6 +10,7 @@ import io.datacater.core.kubernetes.PythonRunnerPool;
 import io.datacater.core.kubernetes.PythonRunnerPool.NamedPod;
 import io.datacater.core.stream.StreamMessage;
 import io.datacater.core.stream.StreamsUtilities;
+import io.datacater.core.tenantAwareness.DataCaterTransactional;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.tuples.Tuple3;
@@ -45,6 +46,7 @@ import org.jboss.logging.Logger;
 @RolesAllowed("dev")
 @Produces(MediaType.APPLICATION_JSON)
 @SecurityRequirement(name = "apiToken")
+@DataCaterTransactional
 public class PipelineEndpoint {
 
   static final Logger LOGGER = Logger.getLogger(PipelineEndpoint.class);
