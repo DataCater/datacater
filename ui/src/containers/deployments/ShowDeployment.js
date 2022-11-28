@@ -81,8 +81,15 @@ class ShowDeployment extends Component {
     } else {
       const parsedMetric = parseInt(metric);
 
-      if (parsedMetric < 1024) {
-        return parsedMetric;
+      const KILO = 1024;
+      const MEGA = KILO * KILO;
+
+      if (parsedMetric < KILO) {
+        return parsedMetric.toFixed(1);
+      } else if (parsedMetric < MEGA) {
+        return (parsedMetric / KILO).toFixed(1) + "k";
+      } else {
+        return (parsedMetric / MEGA).toFixed(1) + "M";
       }
     }
   }
