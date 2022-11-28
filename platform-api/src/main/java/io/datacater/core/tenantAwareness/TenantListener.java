@@ -1,4 +1,4 @@
-package io.datacater.core.stream;
+package io.datacater.core.tenantAwareness;
 
 import javax.persistence.PrePersist;
 import javax.persistence.PreRemove;

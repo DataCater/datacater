@@ -1,4 +1,4 @@
-package io.datacater.core.stream;
+package io.datacater.core.tenantAwareness;
 
 import java.io.Serializable;
 import javax.persistence.Column;

@@ -1,4 +1,4 @@
-package io.datacater.core.lifecycle;
+package io.datacater.core.tenantAwareness;
 
 import io.datacater.core.ExcludeFromGeneratedCoverageReport;
 import io.quarkus.runtime.StartupEvent;

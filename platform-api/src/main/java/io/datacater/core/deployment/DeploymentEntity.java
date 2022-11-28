@@ -3,6 +3,7 @@ package io.datacater.core.deployment;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.datacater.core.tenantAwareness.AbstractBaseEntity;
 import io.quarkiverse.hibernate.types.json.JsonBinaryType;
 import io.quarkiverse.hibernate.types.json.JsonType;
 import io.quarkiverse.hibernate.types.json.JsonTypes;
@@ -19,7 +20,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 @TypeDef(name = JsonTypes.JSON_BIN, typeClass = JsonBinaryType.class)
 @Table(name = "deployments")
 @Entity
-public class DeploymentEntity {
+public class DeploymentEntity extends AbstractBaseEntity {
   @Id
   @GeneratedValue
   @JsonProperty("uuid")

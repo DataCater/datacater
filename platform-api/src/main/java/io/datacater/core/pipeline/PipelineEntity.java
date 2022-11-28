@@ -9,6 +9,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import io.datacater.core.ExcludeFromGeneratedCoverageReport;
 import io.datacater.core.exceptions.JsonNotParsableException;
+import io.datacater.core.tenantAwareness.AbstractBaseEntity;
 import io.quarkiverse.hibernate.types.json.JsonBinaryType;
 import io.quarkiverse.hibernate.types.json.JsonType;
 import io.quarkiverse.hibernate.types.json.JsonTypes;
@@ -28,7 +29,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 @Table(name = "pipeline")
 @TypeDef(name = JsonTypes.JSON, typeClass = JsonType.class)
 @TypeDef(name = JsonTypes.JSON_BIN, typeClass = JsonBinaryType.class)
-public class PipelineEntity {
+public class PipelineEntity extends AbstractBaseEntity {
   @Id
   @GeneratedValue
   @JsonProperty("uuid")

@@ -1,4 +1,4 @@
-package io.datacater.core.stream;
+package io.datacater.core.tenantAwareness;
 
 public interface TenantAware {
 

@@ -50,11 +50,7 @@ public class StreamEndpoint {
 
   @GET
   public Uni<List<StreamEntity>> getStreams() {
-    return sf.withSession(
-        session -> {
-          LOGGER.info(session.getEnabledFilter("tenantFilter").getName());
-          return session.createQuery("from StreamEntity", StreamEntity.class).getResultList();
-        });
+    return sf.withSession( session -> session.createQuery("from StreamEntity", StreamEntity.class).getResultList());
   }
 
   @POST
