@@ -226,8 +226,6 @@ export function fetchDeploymentHealth(id) {
         if (error.response.status === 401) {
           localStorage.removeItem("userToken");
           window.location = "/sign_in";
-        } else if (error.response.status === 404) {
-          window.location = "/404";
         } else {
           dispatch(
             receivedDeploymentHealthFailed(JSON.stringify(error.response.data))
@@ -236,6 +234,14 @@ export function fetchDeploymentHealth(id) {
       }
     );
   };
+}
+
+export function resetDeploymentHealth() {
+  return function (dispatch) {
+    dispatch({
+      type: 'RESET_HEALTH_DEPLOYMENT'
+    });
+  }
 }
 
 export function fetchDeploymentMetrics(id) {
@@ -262,8 +268,6 @@ export function fetchDeploymentMetrics(id) {
         if (error.response.status === 401) {
           localStorage.removeItem("userToken");
           window.location = "/sign_in";
-        } else if (error.response.status === 404) {
-          window.location = "/404";
         } else {
           dispatch(
             receivedDeploymentMetricsFailed(JSON.stringify(error.response.data))
@@ -272,4 +276,12 @@ export function fetchDeploymentMetrics(id) {
       }
     );
   };
+}
+
+export function resetDeploymentMetrics() {
+  return function (dispatch) {
+    dispatch({
+      type: 'RESET_METRICS_DEPLOYMENT'
+    });
+  }
 }

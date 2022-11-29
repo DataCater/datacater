@@ -116,10 +116,14 @@ const deployments = (state, action) => {
         fetchingLogMessages: false,
         logMessages: [],
       };
-    case "REQUEST_HEALTH_DEPLOYMENT":
+    case "RESET_HEALTH_DEPLOYMENT":
       return {
         ...state,
         health: undefined,
+      };
+    case "REQUEST_HEALTH_DEPLOYMENT":
+      return {
+        ...state,
       };
     case "RECEIVE_HEALTH_DEPLOYMENT":
       return {
@@ -129,13 +133,16 @@ const deployments = (state, action) => {
     case "RECEIVE_HEALTH_DEPLOYMENT_FAILED":
       return {
         ...state,
-        errorMessage: action.errorMessage,
         health: undefined,
+      };
+    case "RESET_METRICS_DEPLOYMENT":
+      return {
+        ...state,
+        metrics: undefined,
       };
     case "REQUEST_METRICS_DEPLOYMENT":
       return {
         ...state,
-        metrics: undefined,
       };
     case "RECEIVE_METRICS_DEPLOYMENT":
       return {
@@ -145,7 +152,6 @@ const deployments = (state, action) => {
     case "RECEIVE_METRICS_DEPLOYMENT_FAILED":
       return {
         ...state,
-        errorMessage: action.errorMessage,
         metrics: undefined,
       };
     default:

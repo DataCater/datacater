@@ -13,6 +13,8 @@ import {
   fetchDeployment,
   fetchDeploymentHealth,
   fetchDeploymentMetrics,
+  resetDeploymentHealth,
+  resetDeploymentMetrics,
 } from "../../actions/deployments";
 
 class ShowDeployment extends Component {
@@ -26,16 +28,29 @@ class ShowDeployment extends Component {
     this.handleDelete = this.handleDelete.bind(this);
     this.toggleHealthEndpoint = this.toggleHealthEndpoint.bind(this);
     this.toggleMetricsEndpoint = this.toggleMetricsEndpoint.bind(this);
+    this.fetchMetricsAndHealth = this.fetchMetricsAndHealth.bind(this);
   }
 
   componentDidMount() {
     this.props.fetchDeployment(this.getDeploymentId());
-    this.props.fetchDeploymentHealth(this.getDeploymentId());
-    this.props.fetchDeploymentMetrics(this.getDeploymentId());
+
+    this.props.resetDeploymentHealth();
+    this.props.resetDeploymentMetrics();
+    this.fetchMetricsAndHealth();
+    this.healthMetricsIntervalId = setInterval(this.fetchMetricsAndHealth, 5000);
+  }
+
+  componentWillUnmount() {
+    clearInterval(this.healthMetricsIntervalId);
   }
 
   getDeploymentId() {
     return this.props.match.params.id;
+  }
+
+  fetchMetricsAndHealth() {
+    this.props.fetchDeploymentHealth(this.getDeploymentId());
+    this.props.fetchDeploymentMetrics(this.getDeploymentId());
   }
 
   handleDelete(event) {
@@ -72,6 +87,11 @@ class ShowDeployment extends Component {
       .filter((line) =>
         metricsOfInterest.some((metric) => line.startsWith(metric.name))
       )
+      .map((line) => {
+        const lineElements = line.split(" ");
+        const parsedMetric = Number(lineElements[1]) + "";
+        return lineElements[0] + " " + parsedMetric;
+      })
       .join("\n");
   }
 
@@ -123,7 +143,7 @@ class ShowDeployment extends Component {
 
     const metricsOfInterest = [
       {
-        name: "kafka_consumer_fetch_manager_bytes_consumed_rate",
+        name: "kafka_consumer_incoming_byte_rate",
         label: "Bytes in",
         sublabel: "per sec",
       },
@@ -138,7 +158,7 @@ class ShowDeployment extends Component {
         sublabel: "per sec",
       },
       {
-        name: "kafka_producer_record_send_rate",
+        name: "kafka_producer_topic_record_send_rate",
         label: "Records out",
         sublabel: "per sec",
       },
@@ -316,6 +336,8 @@ const mapDispatchToProps = {
   fetchDeployment: fetchDeployment,
   fetchDeploymentHealth: fetchDeploymentHealth,
   fetchDeploymentMetrics: fetchDeploymentMetrics,
+  resetDeploymentHealth: resetDeploymentHealth,
+  resetDeploymentMetrics: resetDeploymentMetrics,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(ShowDeployment);
