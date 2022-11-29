@@ -202,14 +202,11 @@ class InspectStream extends Component {
       );
     }
 
-    const sampleRecords = this.props.streams.inspectionResult.map(
-      (record) => record.value
-    );
-
+    const sampleRecords = this.props.streams.inspectionResult;
     const profile = profileRecords(sampleRecords);
 
     const records = sampleRecords.map(function (sample, index) {
-      return Object.assign({}, sample, { id: index + 1 });
+      return Object.assign({}, sample["value"], { id: index + 1 });
     });
 
     // Adjust height of grid if API call is shown,
