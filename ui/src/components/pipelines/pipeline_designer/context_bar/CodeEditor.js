@@ -1,6 +1,5 @@
 import React, { Component } from "react";
 import AceEditor from "react-ace";
-import { Button } from "react-bootstrap";
 import { Play } from "react-feather";
 
 import "ace-builds/src-noconflict/mode-python";
@@ -15,6 +14,7 @@ class CodeEditor extends Component {
 
     this.state = {
       code: undefined,
+      unsavedChanges: false,
     };
 
     this.handleChange = this.handleChange.bind(this);
@@ -72,7 +72,11 @@ class CodeEditor extends Component {
   }
 
   handleChange(value, event) {
-    this.setState({ code: value });
+    const unsavedChanges = unsavedChanges || (value !== this.state.code);
+    this.setState({
+      code: value,
+      unsavedChanges: unsavedChanges
+    });
   }
 
   handleApply(event) {
@@ -86,9 +90,17 @@ class CodeEditor extends Component {
       this.state.code,
       this.props.funcType
     );
+
+    this.setState({
+      unsavedChanges: false
+    });
   }
 
   render() {
+    const buttonClassNames = this.state.unsavedChanges
+      ? "btn btn-sm d-flex align-items-center my-2 btn-primary text-white"
+      : "btn btn-sm d-flex align-items-center my-2 btn-outline-primary";
+
     return (
       <div className="datacater-code-editor border-start border-end border-top border-bottom border-grey">
         <div className="row py-2 px-3 border-bottom border-dark">
@@ -96,15 +108,13 @@ class CodeEditor extends Component {
             Python®
           </div>
           <div className="col-auto">
-            <Button
-              className="d-flex align-items-center my-2 text-white"
+            <button
+              className={buttonClassNames}
               onClick={this.handleApply}
-              size="sm"
-              variant="primary"
             >
               <Play className="feather-icon" />
               Save &amp; Run
-            </Button>
+            </button>
           </div>
         </div>
         <AceEditor

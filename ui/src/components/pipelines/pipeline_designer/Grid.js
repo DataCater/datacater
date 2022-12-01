@@ -254,7 +254,7 @@ class Grid extends Component {
       <div className="container-fluid">
         <div className="row">
           <div
-            className={`col-12 w-100 px-0 datacater-grid-container${gridTransformClassName}`}
+            className={`col-12 px-0 datacater-grid-container${gridTransformClassName}`}
             style={{ position: "relative" }}
           >
             <AutoResizer>
