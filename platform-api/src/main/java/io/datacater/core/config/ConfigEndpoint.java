@@ -12,7 +12,7 @@ import javax.ws.rs.core.Response;
 import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
 import org.hibernate.reactive.mutiny.Mutiny.SessionFactory;
 
-@Path("/config")
+@Path("/configs")
 @Produces(MediaType.APPLICATION_JSON)
 public class ConfigEndpoint {
   @Inject SessionFactory sf;
