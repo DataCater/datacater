@@ -64,7 +64,12 @@ public class ConfigEndpoint {
                 .find(ConfigEntity.class, uuid)
                 .onItem()
                 .ifNotNull()
-                .call(configEntity -> session.merge(configEntity.updateEntity(config)))));
+                .call(configEntity -> session.merge(configEntity.updateEntity(config)))
+                .onItem()
+                .ifNull()
+                .failWith(
+                    new ConfigNotFoundException(
+                        String.format("No config found for uuid %s", uuid.toString())))));
   }
 
   @DELETE
@@ -75,8 +80,13 @@ public class ConfigEndpoint {
             session
                 .find(ConfigEntity.class, uuid)
                 .onItem()
+                .ifNull()
+                .failWith(
+                    new ConfigNotFoundException(
+                        String.format("No config found for uuid %s", uuid.toString())))
+                .onItem()
                 .ifNotNull()
-                .call(configEntity -> session.remove(configEntity))
+                .call(session::remove)
                 .replaceWith(Response.ok().build())));
   }
 }
