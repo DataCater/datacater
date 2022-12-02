@@ -239,9 +239,9 @@ export function fetchDeploymentHealth(id) {
 export function resetDeploymentHealth() {
   return function (dispatch) {
     dispatch({
-      type: 'RESET_HEALTH_DEPLOYMENT'
+      type: "RESET_HEALTH_DEPLOYMENT",
     });
-  }
+  };
 }
 
 export function fetchDeploymentMetrics(id) {
@@ -281,7 +281,7 @@ export function fetchDeploymentMetrics(id) {
 export function resetDeploymentMetrics() {
   return function (dispatch) {
     dispatch({
-      type: 'RESET_METRICS_DEPLOYMENT'
+      type: "RESET_METRICS_DEPLOYMENT",
     });
-  }
+  };
 }

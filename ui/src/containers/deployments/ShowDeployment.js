@@ -37,7 +37,10 @@ class ShowDeployment extends Component {
     this.props.resetDeploymentHealth();
     this.props.resetDeploymentMetrics();
     this.fetchMetricsAndHealth();
-    this.healthMetricsIntervalId = setInterval(this.fetchMetricsAndHealth, 5000);
+    this.healthMetricsIntervalId = setInterval(
+      this.fetchMetricsAndHealth,
+      5000
+    );
   }
 
   componentWillUnmount() {
@@ -235,7 +238,7 @@ class ShowDeployment extends Component {
         </div>
         <div className="row mt-4">
           {health !== undefined && health.status === "UP" && (
-            <div className="col-12">
+            <div className="col-12 mb-4">
               <div className="alert alert-primary mb-0 rounded-0">
                 <div className="row align-items-center">
                   <div className="col">
@@ -254,7 +257,7 @@ class ShowDeployment extends Component {
             </div>
           )}
           {health !== undefined && health.status === "DOWN" && (
-            <div className="col-12">
+            <div className="col-12 mb-4">
               <div className="alert alert-danger mb-0 rounded-0">
                 <div className="row align-items-center">
                   <div className="col">
@@ -273,7 +276,7 @@ class ShowDeployment extends Component {
             </div>
           )}
           {this.state.showHealthEndpoint && (
-            <div className="mt-0">
+            <div className="mt-n4 mb-4">
               <ApiCall
                 apiDocs="https://docs.datacater.io/docs/api/deployments/"
                 apiPath={`/deployments/${deployment.uuid}/health`}
@@ -281,7 +284,7 @@ class ShowDeployment extends Component {
             </div>
           )}
           {Object.keys(metrics).length > 0 && (
-            <div className="col-12 mt-4">
+            <div className="col-12">
               <div className="row align-items-center">
                 {metricsOfInterest.map((metric) =>
                   this.renderMetric(metric, metrics)
