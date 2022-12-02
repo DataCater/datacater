@@ -14,7 +14,6 @@ import io.restassured.specification.RequestSpecification;
 import java.io.IOException;
 import java.net.URL;
 import java.util.UUID;
-import org.junit.Before;
 import org.junit.jupiter.api.*;
 
 @QuarkusTest
@@ -26,7 +25,7 @@ class ConfigEndpointTest {
   JsonNode postSecondConfigJson;
   JsonNode postThirdConfigJson;
 
-  @Before
+  @BeforeAll
   public void setUp() throws IOException {
     postFirstConfigJson = getJsonFromFile("configTestFiles/post/post-config-test1-valid.json");
     postSecondConfigJson = getJsonFromFile("configTestFiles/post/post-config-test2-valid.json");
@@ -41,7 +40,7 @@ class ConfigEndpointTest {
    */
 
   @Test
-  @Order(0)
+  @Order(1)
   void getEmptyConfigList() {
     Response response = given().get();
     Assertions.assertEquals(200, response.statusCode());
@@ -49,7 +48,7 @@ class ConfigEndpointTest {
   }
 
   @Test
-  @Order(1)
+  @Order(2)
   void testPostConfigs() {
     RequestSpecification request = RestAssured.given();
 
@@ -67,7 +66,7 @@ class ConfigEndpointTest {
   }
 
   @Test
-  @Order(2)
+  @Order(3)
   void getConfig() {
     given().pathParam("uuid", UUID.randomUUID()).get("/{uuid}").then().statusCode(404);
   }
