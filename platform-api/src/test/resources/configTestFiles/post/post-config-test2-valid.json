@@ -1,0 +1,14 @@
+{
+  "name": "config2",
+  "kind": "PIPELINE",
+  "config": {
+    "prop1": {
+      "subprop1" : "asdf",
+      "subprop2" : "eiouas"
+    },
+    "prop2": {
+      "subprop1" : "asdf",
+      "subprop2" : "eiouas"
+    }
+  }
+}
