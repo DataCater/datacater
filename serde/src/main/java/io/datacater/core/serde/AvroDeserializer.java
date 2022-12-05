@@ -3,6 +3,8 @@ package io.datacater.core.serde;
 import io.confluent.kafka.serializers.KafkaAvroDeserializer;
 import io.datacater.core.exceptions.AvroDeserializationException;
 import java.util.Map;
+
+import io.vertx.core.json.JsonObject;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericDatumReader;
 import org.apache.avro.generic.GenericRecord;
@@ -12,7 +14,7 @@ import org.apache.avro.io.DecoderFactory;
 import org.apache.kafka.common.serialization.Deserializer;
 
 @SuppressWarnings("unchecked")
-public class AvroDeserializer implements Deserializer<GenericRecord> {
+public class AvroDeserializer implements Deserializer<Map<String, Object>> {
   private String schemaString;
 
   private KafkaAvroDeserializer schemaDeserializer;
@@ -55,14 +57,23 @@ public class AvroDeserializer implements Deserializer<GenericRecord> {
   }
 
   @Override
-  public GenericRecord deserialize(String topic, byte[] data) {
+  public Map<String, Object> deserialize(String topic, byte[] data) {
     if (data == null) {
       return null;
     }
+
+    GenericRecord record = null;
     if (schemaString != null) {
-      return deserializeWithSchema(topic, data);
+      record = deserializeWithSchema(topic, data);
+    } else {
+      record = deserializeWithRegistry(topic, data);
     }
-    return deserializeWithRegistry(topic, data);
+
+    if (record == null) {
+      return null;
+    } else {
+      return new JsonObject(record.toString()).getMap();
+    }
   }
 
   private GenericRecord deserializeWithSchema(String topic, byte[] data) {
