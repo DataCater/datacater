@@ -39,12 +39,12 @@ public class Pipeline {
 
   @Inject
   @Channel(PipelineConfig.STREAM_OUT)
-  Emitter<Record<JsonObject, JsonObject>> producer;
+  Emitter<Record<Object, Object>> producer;
 
   @Incoming(PipelineConfig.STREAM_IN)
   @Blocking
   @Acknowledgment(Acknowledgment.Strategy.POST_PROCESSING)
-  public void processUUID(ConsumerRecords<JsonObject, JsonObject> messages) {
+  public void processUUID(ConsumerRecords<Object, Object> messages) {
     try {
       // This is deliberately blocking
       handleMessages(messages);
@@ -78,10 +78,15 @@ public class Pipeline {
     }
   }
 
-  private void handleMessages(ConsumerRecords<JsonObject, JsonObject> messages) throws ConnectException {
-    HttpRequest<Buffer> request = client.post(getPort(), getHost(), PipelineConfig.ENDPOINT)
+  private void handleMessages(ConsumerRecords<Object, Object> messages) throws ConnectException {
+    HttpRequest<Buffer> request = client
+            .post(getPort(), getHost(), PipelineConfig.ENDPOINT)
             .putHeader(PipelineConfig.HEADER, PipelineConfig.HEADER_TYPE);
-    HttpResponse<Buffer> response = request.sendJson(getMessages(messages)).await().atMost(Duration.ofSeconds(PipelineConfig.DATACATER_PYTHONRUNNER_TIMEOUT));
+
+    HttpResponse<Buffer> response = request
+            .sendJson(getMessages(messages))
+            .await()
+            .atMost(Duration.ofSeconds(PipelineConfig.DATACATER_PYTHONRUNNER_TIMEOUT));
 
     if(response.statusCode() != RestResponse.StatusCode.OK){
       LOGGER.error(response.bodyAsJsonObject().encodePrettily());
@@ -96,12 +101,17 @@ public class Pipeline {
         if(json.getJsonObject(PipelineConfig.METADATA).containsKey(PipelineConfig.ERROR)){
           logMessage(json.encodePrettily());
         }
-        sendRecord(Record.of(getKey(json), json.getJsonObject(PipelineConfig.VALUE)));
+        sendRecord(
+            Record.of(
+              json.getValue(PipelineConfig.KEY),
+              json.getValue(PipelineConfig.VALUE)
+              )
+            );
       }
     });
   }
 
-  private void sendRecord(Record<JsonObject, JsonObject> record){
+  private void sendRecord(Record<Object, Object> record){
     producer.send(record);
   }
 
@@ -110,17 +120,19 @@ public class Pipeline {
     LOGGER.error(errorMsg);
   }
 
-  private JsonObject getKey(JsonObject message){
-    if(message.getJsonObject(PipelineConfig.KEY) == null){
-      return null;
-    }
-    return message.getJsonObject(PipelineConfig.KEY);
-  }
-
-  private JsonArray getMessages(ConsumerRecords<JsonObject, JsonObject> messages){
+  private JsonArray getMessages(ConsumerRecords<Object, Object> messages){
     JsonArray jsonMessages = new JsonArray();
-    for (ConsumerRecord<JsonObject, JsonObject> message:messages) {
-      jsonMessages.add(new JsonObject().put(PipelineConfig.KEY, message.key()).put(PipelineConfig.VALUE, message.value()).put(PipelineConfig.METADATA, new JsonObject().put(PipelineConfig.OFFSET, message.offset()).put(PipelineConfig.PARTITION, message.partition())));
+    for (ConsumerRecord<Object, Object> message : messages) {
+      jsonMessages.add(
+            new JsonObject()
+              .put(PipelineConfig.KEY, message.key())
+              .put(PipelineConfig.VALUE, message.value())
+              .put(PipelineConfig.METADATA,
+                new JsonObject()
+                  .put(PipelineConfig.OFFSET, message.offset())
+                  .put(PipelineConfig.PARTITION, message.partition())
+                  )
+              );
     }
     return jsonMessages;
   }
