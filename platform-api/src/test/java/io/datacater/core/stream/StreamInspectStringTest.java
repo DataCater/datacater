@@ -47,14 +47,14 @@ class StreamInspectStringTest {
     for (int i = 0; i <= 300; i++) {
       producer.send(
           new ProducerRecord<>(
-              "testJsonDeserializer",
+              "testStringDeserializer",
               String.format("test %d", i),
               String.format("test %d", i)));
     }
     CompletionStage<Void> lastMessageToWaitOn =
         producer.send(
             new ProducerRecord<>(
-                "testJsonDeserializer", String.format("test %d", 1000), String.format("test %d", 2000)));
+                "testStringDeserializer", String.format("test %d", 1000), String.format("test %d", 2000)));
 
     lastMessageToWaitOn.toCompletableFuture().get(1000, TimeUnit.MILLISECONDS);
 

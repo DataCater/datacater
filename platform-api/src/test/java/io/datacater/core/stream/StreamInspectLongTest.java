@@ -44,14 +44,14 @@ class StreamInspectLongTest {
     for (long i = 0L; i <= 300L; i++) {
       producer.send(
           new ProducerRecord<>(
-              "testJsonDeserializer",
+              "testLongDeserializer",
               i,
               i));
     }
     CompletionStage<Void> lastMessageToWaitOn =
         producer.send(
             new ProducerRecord<>(
-                "testJsonDeserializer", 1000L, 2000L));
+                "testLongDeserializer", 1000L, 2000L));
 
     lastMessageToWaitOn.toCompletableFuture().get(1000, TimeUnit.MILLISECONDS);
 

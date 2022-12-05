@@ -1,5 +1,5 @@
 {
-  "name": "testJsonDeserializer",
+  "name": "testStringDeserializer",
   "spec": {
     "kafka": {
       "bootstrap.servers": "localhost:9092",
