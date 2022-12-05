@@ -5,7 +5,6 @@ import static org.apache.kafka.common.config.ConfigResource.Type.TOPIC;
 
 import io.datacater.core.exceptions.DatacaterException;
 import io.datacater.core.exceptions.KafkaConnectionException;
-import io.vertx.core.json.JsonObject;
 import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.*;
