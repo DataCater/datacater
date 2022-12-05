@@ -34,13 +34,13 @@ import static io.restassured.RestAssured.given;
 class StreamInspectStringTest {
 
   @Inject
-  @Channel("testStreamTopicOutJson")
+  @Channel("testStreamTopicOutString")
   Emitter<ProducerRecord<String, String>> producer;
 
   UUID uuid;
 
   @Test
-  void testJsonDeserializer()
+  void testStringDeserializer()
       throws IOException, InterruptedException, ExecutionException, TimeoutException {
     start();
 

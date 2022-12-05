@@ -31,13 +31,13 @@ import static io.restassured.RestAssured.given;
 class StreamInspectLongTest {
 
   @Inject
-  @Channel("testStreamTopicOutJson")
+  @Channel("testStreamTopicOutLong")
   Emitter<ProducerRecord<Long, Long>> producer;
 
   UUID uuid;
 
   @Test
-  void testJsonDeserializer()
+  void testLongDeserializer()
       throws IOException, InterruptedException, ExecutionException, TimeoutException {
     start();
 
