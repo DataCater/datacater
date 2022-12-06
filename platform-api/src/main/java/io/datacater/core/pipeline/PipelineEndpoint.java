@@ -2,7 +2,6 @@ package io.datacater.core.pipeline;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.json.JsonMapper;
 import io.datacater.core.exceptions.DatacaterException;
 import io.datacater.core.exceptions.PipelineNotFoundException;
 import io.datacater.core.kubernetes.DataCaterK8sConfig;
@@ -58,13 +57,20 @@ public class PipelineEndpoint {
     this.client = WebClient.create(vertx);
   }
 
-  JsonMapper mapper = new JsonMapper();
-
   @GET
   public Uni<List<PipelineEntity>> getPipelines() {
     return sf.withSession(
-        session ->
-            session.createQuery("from PipelineEntity", PipelineEntity.class).getResultList());
+        session -> {
+          var update =
+              session.createNativeQuery("SET datacater.tenant = datacater").executeUpdate();
+          return update
+              .onItem()
+              .transformToUni(
+                  (ignore) ->
+                      session
+                          .createQuery("from PipelineEntity", PipelineEntity.class)
+                          .getResultList());
+        });
   }
 
   @GET
