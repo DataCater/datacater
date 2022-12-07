@@ -2,6 +2,7 @@ package io.datacater.core.deployment;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.datacater.core.authentication.DataCaterSessionFactory;
 import io.datacater.core.exceptions.*;
 import io.datacater.core.pipeline.PipelineEntity;
 import io.datacater.core.stream.StreamEntity;
@@ -31,7 +32,6 @@ import javax.ws.rs.sse.OutboundSseEvent;
 import javax.ws.rs.sse.Sse;
 import javax.ws.rs.sse.SseEventSink;
 import org.eclipse.microprofile.openapi.annotations.security.SecurityRequirement;
-import org.hibernate.reactive.mutiny.Mutiny;
 
 @Path("/deployments")
 @RolesAllowed("dev")
@@ -39,14 +39,14 @@ import org.hibernate.reactive.mutiny.Mutiny;
 @SecurityRequirement(name = "apiToken")
 @RequestScoped
 public class DeploymentEndpoint {
-  @Inject Mutiny.SessionFactory sf;
+  @Inject DataCaterSessionFactory dsf;
 
   @Inject KubernetesClient client;
 
   @GET
   @Path("{uuid}")
   public Uni<DeploymentEntity> getDeployment(@PathParam("uuid") UUID deploymentId) {
-    return sf.withTransaction(
+    return dsf.withTransaction(
             ((session, transaction) -> session.find(DeploymentEntity.class, deploymentId)))
         .onItem()
         .ifNull()
@@ -60,7 +60,7 @@ public class DeploymentEndpoint {
   @Path("{uuid}/logs")
   @Produces(MediaType.APPLICATION_JSON)
   public Uni<String> getLogs(@PathParam("uuid") UUID deploymentId) {
-    return sf.withTransaction(
+    return dsf.withTransaction(
             ((session, transaction) -> session.find(DeploymentEntity.class, deploymentId)))
         .onItem()
         .ifNull()
@@ -74,7 +74,7 @@ public class DeploymentEndpoint {
   @Path("{uuid}/health")
   @Produces(MediaType.APPLICATION_JSON)
   public Uni<Response> getHealth(@PathParam("uuid") UUID deploymentId) {
-    return sf.withTransaction(
+    return dsf.withTransaction(
             ((session, transaction) -> session.find(DeploymentEntity.class, deploymentId)))
         .onItem()
         .ifNull()
@@ -98,7 +98,7 @@ public class DeploymentEndpoint {
   @Path("{uuid}/metrics")
   @Produces(MediaType.TEXT_PLAIN)
   public Uni<Response> getMetrics(@PathParam("uuid") UUID deploymentId) {
-    return sf.withTransaction(
+    return dsf.withTransaction(
             ((session, transaction) -> session.find(DeploymentEntity.class, deploymentId)))
         .onItem()
         .ifNull()
@@ -123,7 +123,7 @@ public class DeploymentEndpoint {
   @Produces(MediaType.SERVER_SENT_EVENTS)
   public Uni<Response> watchLogs(
       @PathParam("uuid") UUID deploymentId, @Context Sse sse, @Context SseEventSink eventSink) {
-    return sf.withTransaction(
+    return dsf.withTransaction(
             ((session, transaction) -> session.find(DeploymentEntity.class, deploymentId)))
         .onItem()
         .ifNull()
@@ -143,7 +143,7 @@ public class DeploymentEndpoint {
 
   @GET
   public Uni<List<DeploymentEntity>> getDeployments() {
-    return sf.withSession(
+    return dsf.withSession(
         session ->
             session
                 .createQuery("from DeploymentEntity", DeploymentEntity.class)
@@ -157,7 +157,7 @@ public class DeploymentEndpoint {
   public Uni<DeploymentEntity> createDeployment(DeploymentSpec spec) {
     DeploymentEntity de = new DeploymentEntity(spec);
     Uni<PipelineEntity> pipelineUni = getPipeline(spec);
-    return sf.withTransaction(
+    return dsf.withTransaction(
         (session, transaction) ->
             session
                 .persist(de)
@@ -191,7 +191,7 @@ public class DeploymentEndpoint {
   @DELETE
   @Path("{uuid}")
   public Uni<Response> deleteDeployment(@PathParam("uuid") UUID deploymentId) {
-    return sf.withTransaction(
+    return dsf.withTransaction(
         ((session, tx) ->
             session
                 .find(DeploymentEntity.class, deploymentId)
@@ -248,7 +248,7 @@ public class DeploymentEndpoint {
   }
 
   private Uni<PipelineEntity> getPipeline(DeploymentSpec deploymentSpec) {
-    return sf.withTransaction(
+    return dsf.withTransaction(
         (session, transaction) ->
             session
                 .find(PipelineEntity.class, getPipelineUUIDFromMap(deploymentSpec.deployment()))
@@ -259,7 +259,7 @@ public class DeploymentEndpoint {
   }
 
   private Uni<DeploymentEntity> getDeploymentUni(UUID deploymentUuid) {
-    return sf.withTransaction(
+    return dsf.withTransaction(
         (session, transaction) ->
             session
                 .find(DeploymentEntity.class, deploymentUuid)
@@ -272,7 +272,7 @@ public class DeploymentEndpoint {
 
   private Uni<StreamEntity> getStream(
       DeploymentSpec spec, String deploymentSpecKey, PipelineEntity pipeline, String key) {
-    return sf.withTransaction(
+    return dsf.withTransaction(
         (session, transaction) ->
             session
                 .find(

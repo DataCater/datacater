@@ -1,6 +1,7 @@
 package io.datacater.core.stream;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import io.datacater.core.authentication.DataCaterSessionFactory;
 import io.datacater.core.exceptions.*;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.unchecked.Unchecked;
@@ -15,7 +16,6 @@ import javax.ws.rs.core.Response;
 import org.eclipse.microprofile.config.ConfigProvider;
 import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
 import org.eclipse.microprofile.openapi.annotations.security.SecurityRequirement;
-import org.hibernate.reactive.mutiny.Mutiny;
 import org.jboss.logging.Logger;
 
 @Path("/streams")
@@ -28,13 +28,13 @@ public class StreamEndpoint {
       ConfigProvider.getConfig()
           .getOptionalValue("kafka.api.timeout.ms", Integer.class)
           .orElse(5000);
-  @Inject Mutiny.SessionFactory sf;
+  @Inject DataCaterSessionFactory dsf;
   @Inject StreamsUtilities streamsUtil;
 
   @GET
   @Path("{uuid}")
   public Uni<StreamEntity> getStream(@PathParam("uuid") UUID uuid) {
-    return sf.withTransaction(((session, transaction) -> session.find(StreamEntity.class, uuid)))
+    return dsf.withTransaction(((session, transaction) -> session.find(StreamEntity.class, uuid)))
         .onItem()
         .ifNull()
         .failWith(new StreamNotFoundException("Stream not found."));
@@ -49,7 +49,7 @@ public class StreamEndpoint {
 
   @GET
   public Uni<List<StreamEntity>> getStreams() {
-    return sf.withSession(
+    return dsf.withSession(
         session -> session.createQuery("from StreamEntity", StreamEntity.class).getResultList());
   }
 
@@ -59,7 +59,7 @@ public class StreamEndpoint {
   public Uni<Response> createStream(Stream stream) throws JsonProcessingException {
     StreamEntity se = new StreamEntity(stream.name(), stream.spec());
 
-    return sf.withTransaction(
+    return dsf.withTransaction(
             (session, transaction) ->
                 session
                     .persist(se)
@@ -80,7 +80,7 @@ public class StreamEndpoint {
   @RequestBody
   @Consumes(MediaType.APPLICATION_JSON)
   public Uni<StreamEntity> updateStream(@PathParam("uuid") UUID uuid, Stream stream) {
-    return sf.withTransaction(
+    return dsf.withTransaction(
             ((session, transaction) ->
                 session
                     .find(StreamEntity.class, uuid)
@@ -100,7 +100,7 @@ public class StreamEndpoint {
   @Path("{uuid}")
   public Uni<Response> deleteStream(
       @PathParam("uuid") UUID uuid, @HeaderParam("force") Boolean force) {
-    return sf.withTransaction(
+    return dsf.withTransaction(
         ((session, tx) ->
             session
                 .find(StreamEntity.class, uuid)

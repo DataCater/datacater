@@ -6,7 +6,7 @@ create table deployments
     name      varchar(255),
     spec      jsonb,
     updatedat timestamp,
-    tenant_id text
+    tenant_id TEXT default current_setting('datacater.tenant')::text not null
 );
 
 create table pipeline
@@ -18,7 +18,7 @@ create table pipeline
     name      varchar(255),
     spec      jsonb,
     updatedat timestamp,
-    tenant_id text
+    tenant_id TEXT default current_setting('datacater.tenant')::text not null
 );
 
 create table streams
@@ -29,7 +29,7 @@ create table streams
     name      varchar(255),
     spec      jsonb,
     updatedat timestamp,
-    tenant_id text
+    tenant_id TEXT default current_setting('datacater.tenant')::text not null
 );
 
 alter table deployments enable row level security;
