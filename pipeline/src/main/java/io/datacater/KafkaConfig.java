@@ -19,6 +19,16 @@ public class KafkaConfig {
                     .getOptionalValue("datacater.stream-in.config", String.class)
                     .orElse( "{\"key.deserializer\": \"io.datacater.core.serde.JsonDeserializer\", \"value.deserializer\": \"io.datacater.core.serde.JsonDeserializer\"}");
 
+    static final String DATACATER_STREAMIN_TOPIC =
+            ConfigProvider.getConfig()
+                    .getOptionalValue("mp.messaging.incoming.stream-in.topic", String.class)
+                    .orElse("stream-in");
+
+    static final String DATACATER_STREAMOUT_TOPIC =
+            ConfigProvider.getConfig()
+                    .getOptionalValue("mp.messaging.incoming.stream-out.topic", String.class)
+                    .orElse("stream-out");
+
     static final String DATACATER_STREAMOUT_CONFIG =
             ConfigProvider.getConfig()
                     .getOptionalValue("datacater.stream-out.config", String.class)

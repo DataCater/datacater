@@ -7,7 +7,6 @@ import io.vertx.core.json.JsonObject;
 import io.smallrye.reactive.messaging.kafka.Record;
 
 import java.time.Duration;
-import java.util.UUID;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import java.net.ConnectException;
@@ -32,6 +31,18 @@ public class Pipeline {
   private static final Logger LOGGER = Logger.getLogger(Pipeline.class);
   private String host;
   private Integer port;
+
+  private Deserializer keyDeserializer =
+          getDeserializerInstance(KafkaConfig.streamInConfig().get("key.deserializer").toString());
+
+  private Deserializer valueDeserializer =
+          getDeserializerInstance(KafkaConfig.streamInConfig().get("value.deserializer").toString());
+
+  private Serializer keySerializer =
+          getSerializerInstance(KafkaConfig.streamOutConfig().get("key.serializer").toString());
+
+  private Serializer valueSerializer =
+          getSerializerInstance(KafkaConfig.streamOutConfig().get("value.serializer").toString());
 
   WebClient client;
 
@@ -100,8 +111,6 @@ public class Pipeline {
 
   private void sendMessages(JsonArray messages) {
     Map<String, Object> streamOutConfig = KafkaConfig.streamOutConfig();
-    Serializer keySerializer = getSerializerInstance(streamOutConfig.get("key.serializer").toString());
-    Serializer valueSerializer = getSerializerInstance(streamOutConfig.get("value.serializer").toString());
     messages.stream().forEach(x -> {
       if(x instanceof JsonObject json){
         if(json.getJsonObject(PipelineConfig.METADATA).containsKey(PipelineConfig.ERROR)){
@@ -109,10 +118,14 @@ public class Pipeline {
         }
         sendRecord(
             Record.of(
-                    // TODO: Replace with actual stream-out topic name
-                    keySerializer.serialize("stream-out", json.getValue(PipelineConfig.KEY)),
-                    // TODO: Replace with actual stream-out topic name
-                    valueSerializer.serialize("stream-out", json.getValue(PipelineConfig.VALUE))
+                    keySerializer.serialize(
+                            KafkaConfig.DATACATER_STREAMOUT_TOPIC,
+                            json.getValue(PipelineConfig.KEY)
+                    ),
+                    valueSerializer.serialize(
+                            KafkaConfig.DATACATER_STREAMOUT_TOPIC,
+                            json.getValue(PipelineConfig.VALUE)
+                    )
               )
             );
       }
@@ -151,14 +164,8 @@ public class Pipeline {
   private JsonArray getMessages(ConsumerRecords<byte[], byte[]> messages){
     JsonArray jsonMessages = new JsonArray();
     for (ConsumerRecord<byte[], byte[]> message : messages) {
-      Map<String, Object> streamInConfig = KafkaConfig.streamInConfig();
-
-      Deserializer keyDeserializer = getDeserializerInstance(streamInConfig.get("key.deserializer").toString());
-      Deserializer valueDeserializer = getDeserializerInstance(streamInConfig.get("value.deserializer").toString());
-      // TODO: Replace with actual stream-in topic name
-      Object key = keyDeserializer.deserialize("stream-in", message.value());
-      // TODO: Replace with actual stream-in topic name
-      Object value = valueDeserializer.deserialize("stream-in", message.value());
+      Object key = keyDeserializer.deserialize(KafkaConfig.DATACATER_STREAMIN_TOPIC, message.value());
+      Object value = valueDeserializer.deserialize(KafkaConfig.DATACATER_STREAMIN_TOPIC, message.value());
 
       jsonMessages.add(
             new JsonObject()
