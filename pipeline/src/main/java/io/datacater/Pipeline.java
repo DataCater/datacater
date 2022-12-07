@@ -12,6 +12,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import java.net.ConnectException;
 import java.util.concurrent.CompletionException;
+import java.util.Map;
 
 import io.vertx.mutiny.core.Vertx;
 import io.vertx.mutiny.core.buffer.Buffer;
@@ -20,6 +21,8 @@ import io.vertx.mutiny.ext.web.client.HttpResponse;
 import io.vertx.mutiny.ext.web.client.WebClient;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
+import org.apache.kafka.common.serialization.Deserializer;
+import org.apache.kafka.common.serialization.Serializer;
 import org.eclipse.microprofile.reactive.messaging.*;
 import org.jboss.logging.Logger;
 import org.jboss.resteasy.reactive.RestResponse;
@@ -39,12 +42,12 @@ public class Pipeline {
 
   @Inject
   @Channel(PipelineConfig.STREAM_OUT)
-  Emitter<Record<Object, Object>> producer;
+  Emitter<Record<byte[], byte[]>> producer;
 
   @Incoming(PipelineConfig.STREAM_IN)
   @Blocking
   @Acknowledgment(Acknowledgment.Strategy.POST_PROCESSING)
-  public void processUUID(ConsumerRecords<Object, Object> messages) {
+  public void processUUID(ConsumerRecords<byte[], byte[]> messages) {
     try {
       // This is deliberately blocking
       handleMessages(messages);
@@ -78,7 +81,7 @@ public class Pipeline {
     }
   }
 
-  private void handleMessages(ConsumerRecords<Object, Object> messages) throws ConnectException {
+  private void handleMessages(ConsumerRecords<byte[], byte[]> messages) throws ConnectException {
     HttpRequest<Buffer> request = client
             .post(getPort(), getHost(), PipelineConfig.ENDPOINT)
             .putHeader(PipelineConfig.HEADER, PipelineConfig.HEADER_TYPE);
@@ -95,7 +98,10 @@ public class Pipeline {
     }
   }
 
-  private void sendMessages(JsonArray messages){
+  private void sendMessages(JsonArray messages) {
+    Map<String, Object> streamOutConfig = KafkaConfig.streamOutConfig();
+    Serializer keySerializer = getSerializerInstance(streamOutConfig.get("key.serializer").toString());
+    Serializer valueSerializer = getSerializerInstance(streamOutConfig.get("value.serializer").toString());
     messages.stream().forEach(x -> {
       if(x instanceof JsonObject json){
         if(json.getJsonObject(PipelineConfig.METADATA).containsKey(PipelineConfig.ERROR)){
@@ -103,15 +109,17 @@ public class Pipeline {
         }
         sendRecord(
             Record.of(
-              json.getValue(PipelineConfig.KEY),
-              json.getValue(PipelineConfig.VALUE)
+                    // TODO: Replace with actual stream-out topic name
+                    keySerializer.serialize("stream-out", json.getValue(PipelineConfig.KEY)),
+                    // TODO: Replace with actual stream-out topic name
+                    valueSerializer.serialize("stream-out", json.getValue(PipelineConfig.VALUE))
               )
             );
       }
     });
   }
 
-  private void sendRecord(Record<Object, Object> record){
+  private void sendRecord(Record<byte[], byte[]> record){
     producer.send(record);
   }
 
@@ -120,13 +128,42 @@ public class Pipeline {
     LOGGER.error(errorMsg);
   }
 
-  private JsonArray getMessages(ConsumerRecords<Object, Object> messages){
+  private Deserializer getDeserializerInstance(String className) throws TransformationException {
+    try {
+      Class deserializerClass = Class.forName(className);
+
+      return (Deserializer) deserializerClass.getConstructor().newInstance();
+    } catch (Exception e) {
+      throw new TransformationException(e.getMessage());
+    }
+  }
+
+  private Serializer getSerializerInstance(String className) throws TransformationException {
+    try {
+      Class serializerClass = Class.forName(className);
+
+      return (Serializer) serializerClass.getConstructor().newInstance();
+    } catch (Exception e) {
+      throw new TransformationException(e.getMessage());
+    }
+  }
+
+  private JsonArray getMessages(ConsumerRecords<byte[], byte[]> messages){
     JsonArray jsonMessages = new JsonArray();
-    for (ConsumerRecord<Object, Object> message : messages) {
+    for (ConsumerRecord<byte[], byte[]> message : messages) {
+      Map<String, Object> streamInConfig = KafkaConfig.streamInConfig();
+
+      Deserializer keyDeserializer = getDeserializerInstance(streamInConfig.get("key.deserializer").toString());
+      Deserializer valueDeserializer = getDeserializerInstance(streamInConfig.get("value.deserializer").toString());
+      // TODO: Replace with actual stream-in topic name
+      Object key = keyDeserializer.deserialize("stream-in", message.value());
+      // TODO: Replace with actual stream-in topic name
+      Object value = valueDeserializer.deserialize("stream-in", message.value());
+
       jsonMessages.add(
             new JsonObject()
-              .put(PipelineConfig.KEY, message.key())
-              .put(PipelineConfig.VALUE, message.value())
+              .put(PipelineConfig.KEY, key)
+              .put(PipelineConfig.VALUE, value)
               .put(PipelineConfig.METADATA,
                 new JsonObject()
                   .put(PipelineConfig.OFFSET, message.offset())

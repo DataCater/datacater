@@ -27,18 +27,18 @@ public class KafkaConfig {
     @Produces
     @ApplicationScoped
     @Identifier("stream-in-configuration")
-    Map<String, Object> streamInConfig() {
+    public static Map<String, Object> streamInConfig() {
         return mapConfig(DATACATER_STREAMIN_CONFIG);
     }
 
     @Produces
     @ApplicationScoped
     @Identifier("stream-out-configuration")
-    Map<String, Object> streamOutConfig() {
+    public static Map<String, Object> streamOutConfig() {
         return mapConfig(DATACATER_STREAMOUT_CONFIG);
     }
 
-    private Map<String, Object> mapConfig(String json){
+    private static Map<String, Object> mapConfig(String json){
         ObjectMapper mapper = new ObjectMapper();
         Map<String, Object> map;
         try{

@@ -11,6 +11,7 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 import org.eclipse.microprofile.config.ConfigProvider;
 import org.eclipse.microprofile.reactive.messaging.*;
 import org.jboss.logging.Logger;
+import org.junit.Ignore;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.GenericContainer;
@@ -78,7 +79,7 @@ class PipelineTest {
             message.put("name", "Max Mustermann");
             message.put("email", "max-mustermann@datacater.io");
             message.put("is_admin", "true");
-            producer.send( new ProducerRecord<>(
+            producer.send(new ProducerRecord<>(
                     "stream-in",
                     new JsonObject().put("value", UUID.randomUUID()),
                     message.put("number", i)));
@@ -87,14 +88,19 @@ class PipelineTest {
         message.put("name", "Max Mustermann");
         message.put("email", "max-mustermann@datacater.io");
         message.put("is_admin", "true");
-        CompletionStage<Void> messageToWaitOn = producer.send( new ProducerRecord<>(
+        CompletionStage<Void> messageToWaitOn = producer.send(new ProducerRecord<>(
                 "stream-in",
                 new JsonObject().put("value", UUID.randomUUID()),
                 message));
 
         messageToWaitOn.toCompletableFuture().get(1000, TimeUnit.MILLISECONDS);
 
-        ConsumerTask<Object, Object> messages = companion.consumeWithDeserializers(io.datacater.core.serde.JsonDeserializer.class, io.datacater.core.serde.JsonDeserializer.class).fromTopics(STREAM_OUT,1).awaitCompletion();
+        ConsumerTask<Object, Object> messages = companion
+                .consumeWithDeserializers(
+                        io.datacater.core.serde.JsonDeserializer.class,
+                        io.datacater.core.serde.JsonDeserializer.class)
+                .fromTopics(STREAM_OUT,1)
+                .awaitCompletion();
         assertTrue(messages.getFirstRecord().value().toString().contains("max-mustermann@datacater.io"));
         assertEquals(1, messages.count());
     }
