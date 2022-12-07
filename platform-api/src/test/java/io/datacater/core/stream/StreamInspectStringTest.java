@@ -1,5 +1,7 @@
 package io.datacater.core.stream;
 
+import static io.restassured.RestAssured.given;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
@@ -7,26 +9,20 @@ import io.quarkus.test.common.http.TestHTTPEndpoint;
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
-import io.vertx.core.json.JsonObject;
+import java.io.IOException;
+import java.net.URL;
+import java.util.UUID;
+import java.util.concurrent.CompletionStage;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import javax.inject.Inject;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.eclipse.microprofile.reactive.messaging.Channel;
 import org.eclipse.microprofile.reactive.messaging.Emitter;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
-
-import javax.inject.Inject;
-import java.io.IOException;
-import java.net.URL;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
-import java.util.concurrent.CompletionStage;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-
-import static io.restassured.RestAssured.given;
 
 @QuarkusTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -47,14 +43,14 @@ class StreamInspectStringTest {
     for (int i = 0; i <= 300; i++) {
       producer.send(
           new ProducerRecord<>(
-              "testStringDeserializer",
-              String.format("test %d", i),
-              String.format("test %d", i)));
+              "testStringDeserializer", String.format("test %d", i), String.format("test %d", i)));
     }
     CompletionStage<Void> lastMessageToWaitOn =
         producer.send(
             new ProducerRecord<>(
-                "testStringDeserializer", String.format("test %d", 1000), String.format("test %d", 2000)));
+                "testStringDeserializer",
+                String.format("test %d", 1000),
+                String.format("test %d", 2000)));
 
     lastMessageToWaitOn.toCompletableFuture().get(1000, TimeUnit.MILLISECONDS);
 
