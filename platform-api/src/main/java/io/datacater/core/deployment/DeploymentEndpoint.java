@@ -3,7 +3,6 @@ package io.datacater.core.deployment;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.datacater.core.exceptions.*;
-import io.datacater.core.pipeline.PipelineEndpoint;
 import io.datacater.core.pipeline.PipelineEntity;
 import io.datacater.core.stream.StreamEntity;
 import io.datacater.core.utilities.StringUtilities;
@@ -341,9 +340,8 @@ public class DeploymentEndpoint {
       k8Deployment.delete(deploymentId);
     } catch (DeploymentNotFoundException e) {
       LOGGER.error(
-              String.format("Could not find Kubernetes deployment with id %s", deploymentId.toString()),
-              e
-      );
+          String.format("Could not find Kubernetes deployment with id %s", deploymentId.toString()),
+          e);
     }
   }
 
