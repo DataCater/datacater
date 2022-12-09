@@ -7,7 +7,6 @@ import io.vertx.core.json.JsonObject;
 import io.smallrye.reactive.messaging.kafka.Record;
 
 import java.time.Duration;
-import java.util.UUID;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import java.net.ConnectException;
@@ -94,7 +93,7 @@ public class Pipeline {
     messages.stream().forEach(x -> {
       if(x instanceof JsonObject json){
         if(json.getJsonObject(PipelineConfig.METADATA).containsKey(PipelineConfig.ERROR)){
-          logMessage(json.encodePrettily());
+          logProcessingError(json);
         }
         sendRecord(Record.of(getKey(json), json.getJsonObject(PipelineConfig.VALUE)));
       }
@@ -105,8 +104,8 @@ public class Pipeline {
     producer.send(record);
   }
 
-  private void logMessage(String message){
-    String errorMsg = String.format(PipelineConfig.PIPELINE_ERROR_MSG, message);
+  private void logProcessingError(JsonObject record){
+    String errorMsg = String.format(PipelineConfig.PIPELINE_ERROR_MSG, record.encode());
     LOGGER.error(errorMsg);
   }
 
