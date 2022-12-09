@@ -1,7 +1,7 @@
 {
   "name": "config1",
   "kind": "STREAM",
-  "config": {
+  "spec": {
     "prop1": "asdf",
     "prop2": "qwert",
     "prop3": {

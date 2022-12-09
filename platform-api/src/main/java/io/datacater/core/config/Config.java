@@ -8,17 +8,17 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.datacater.core.config.enums.Kind;
 import java.util.Map;
 
-public record Config(String name, Kind kind, Map<String, Object> config) {
+public record Config(String name, Kind kind, Map<String, Object> spec) {
   @JsonCreator
   static Config from(
       @JsonProperty(value = "name", required = true) String name,
       @JsonProperty(value = "kind", required = true) Kind kind,
-      @JsonProperty(value = "config", required = true) Map<String, Object> config) {
-    return new Config(name, kind, config);
+      @JsonProperty(value = "spec", required = true) Map<String, Object> spec) {
+    return new Config(name, kind, spec);
   }
 
   public JsonNode serializeConfigSpec() throws JsonProcessingException {
     ObjectMapper objectMapper = new ObjectMapper();
-    return objectMapper.readTree(objectMapper.writeValueAsString(config));
+    return objectMapper.readTree(objectMapper.writeValueAsString(spec));
   }
 }

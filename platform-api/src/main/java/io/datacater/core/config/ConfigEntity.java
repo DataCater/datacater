@@ -42,16 +42,16 @@ public class ConfigEntity {
   private String kind;
 
   @Type(type = JsonTypes.JSON)
-  @JsonProperty("config")
-  @Column(name = "config", columnDefinition = JsonTypes.JSON_BIN)
-  private JsonNode config;
+  @JsonProperty("spec")
+  @Column(name = "spec", columnDefinition = JsonTypes.JSON_BIN)
+  private JsonNode spec;
 
   protected ConfigEntity() {}
 
-  protected ConfigEntity(String name, Kind kind, JsonNode config) {
+  protected ConfigEntity(String name, Kind kind, JsonNode spec) {
     this.name = name;
     this.kind = kind.toString();
-    this.config = config;
+    this.spec = spec;
   }
 
   public ConfigEntity updateEntity(Config config) {
@@ -59,7 +59,7 @@ public class ConfigEntity {
     this.kind = config.kind().toString();
 
     try {
-      this.config = config.serializeConfigSpec();
+      this.spec = config.serializeConfigSpec();
     } catch (JsonProcessingException e) {
       throw new JsonNotParsableException(e.getMessage());
     }
@@ -67,16 +67,16 @@ public class ConfigEntity {
     return this;
   }
 
-  public static ConfigEntity from(String name, Kind kind, Map<String, Object> config)
+  public static ConfigEntity from(String name, Kind kind, Map<String, Object> spec)
       throws JsonProcessingException {
     ObjectMapper objectMapper = new ObjectMapper();
-    JsonNode configAsJson = objectMapper.readTree(objectMapper.writeValueAsString(config));
+    JsonNode specAsJson = objectMapper.readTree(objectMapper.writeValueAsString(spec));
 
-    return new ConfigEntity(name, kind, configAsJson);
+    return new ConfigEntity(name, kind, specAsJson);
   }
 
-  public JsonNode getConfig() {
-    return config;
+  public JsonNode getSpec() {
+    return spec;
   }
 
   public String getName() {

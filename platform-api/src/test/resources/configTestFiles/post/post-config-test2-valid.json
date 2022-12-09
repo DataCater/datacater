@@ -1,7 +1,7 @@
 {
   "name": "config2",
   "kind": "PIPELINE",
-  "config": {
+  "spec": {
     "prop1": {
       "subprop1" : "asdf",
       "subprop2" : "eiouas"

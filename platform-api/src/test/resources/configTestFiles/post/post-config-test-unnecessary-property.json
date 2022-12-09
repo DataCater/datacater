@@ -2,7 +2,7 @@
   "name": "config1",
   "unnecessary-property" : "123456",
   "kind": "STREAM",
-  "config": {
+  "spec": {
     "prop1": "asdf",
     "prop2": "qwert",
     "prop3": {
