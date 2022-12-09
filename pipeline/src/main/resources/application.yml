@@ -35,7 +35,7 @@ datacater:
   python-runner:
     port: 50000
     host: localhost
-    version: alpha-20221101
+    version: alpha-20221129
   message:
     batch:
       size: 100
@@ -55,12 +55,12 @@ datacater:
     python-runner:
       port: 50000
       host: localhost
-      version: alpha-20221101
+      version: alpha-20221129
 
 '%test'  :
   datacater:
     python-runner:
-      version: alpha-20221101
+      version: alpha-20221129
   quarkus:
     log:
       level: INFO

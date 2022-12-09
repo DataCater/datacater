@@ -19,6 +19,16 @@ public class KafkaConfig {
                     .getOptionalValue("datacater.stream-in.config", String.class)
                     .orElse( "{\"key.deserializer\": \"io.datacater.core.serde.JsonDeserializer\", \"value.deserializer\": \"io.datacater.core.serde.JsonDeserializer\"}");
 
+    static final String DATACATER_STREAMIN_TOPIC =
+            ConfigProvider.getConfig()
+                    .getOptionalValue("mp.messaging.incoming.stream-in.topic", String.class)
+                    .orElse("stream-in");
+
+    static final String DATACATER_STREAMOUT_TOPIC =
+            ConfigProvider.getConfig()
+                    .getOptionalValue("mp.messaging.incoming.stream-out.topic", String.class)
+                    .orElse("stream-out");
+
     static final String DATACATER_STREAMOUT_CONFIG =
             ConfigProvider.getConfig()
                     .getOptionalValue("datacater.stream-out.config", String.class)
@@ -27,18 +37,18 @@ public class KafkaConfig {
     @Produces
     @ApplicationScoped
     @Identifier("stream-in-configuration")
-    Map<String, Object> streamInConfig() {
+    public static Map<String, Object> streamInConfig() {
         return mapConfig(DATACATER_STREAMIN_CONFIG);
     }
 
     @Produces
     @ApplicationScoped
     @Identifier("stream-out-configuration")
-    Map<String, Object> streamOutConfig() {
+    public static Map<String, Object> streamOutConfig() {
         return mapConfig(DATACATER_STREAMOUT_CONFIG);
     }
 
-    private Map<String, Object> mapConfig(String json){
+    private static Map<String, Object> mapConfig(String json){
         ObjectMapper mapper = new ObjectMapper();
         Map<String, Object> map;
         try{
