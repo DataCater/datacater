@@ -194,13 +194,12 @@ public class K8Deployment {
     String serviceName = StaticConfig.SERVICE_NAME_PREFIX + deploymentId;
     String configMapName = StaticConfig.CONFIGMAP_NAME_PREFIX + deploymentId;
     Boolean status =
-        !client
+        client
             .apps()
             .deployments()
             .inNamespace(StaticConfig.EnvironmentVariables.NAMESPACE)
             .withName(name)
-            .delete()
-            .isEmpty();
+            .delete();
 
     if (Boolean.TRUE.equals(status)) {
       k8Service.delete(serviceName);
