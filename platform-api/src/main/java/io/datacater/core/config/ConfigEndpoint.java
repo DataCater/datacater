@@ -15,6 +15,8 @@ import org.hibernate.reactive.mutiny.Mutiny.SessionFactory;
 @Path("/configs")
 @Produces(MediaType.APPLICATION_JSON)
 public class ConfigEndpoint {
+  private final String UUID_NOT_FOUND_ERROR_MESSAGE = "No config found for uuid %s";
+
   @Inject SessionFactory sf;
 
   @GET
@@ -40,7 +42,7 @@ public class ConfigEndpoint {
                 .ifNull()
                 .failWith(
                     new ConfigNotFoundException(
-                        String.format("No config found for uuid %s", uuid.toString()))));
+                        String.format(UUID_NOT_FOUND_ERROR_MESSAGE, uuid.toString()))));
   }
 
   @POST
@@ -69,7 +71,7 @@ public class ConfigEndpoint {
                 .ifNull()
                 .failWith(
                     new ConfigNotFoundException(
-                        String.format("No config found for uuid %s", uuid.toString())))));
+                        String.format(UUID_NOT_FOUND_ERROR_MESSAGE, uuid.toString())))));
   }
 
   @DELETE
@@ -83,7 +85,7 @@ public class ConfigEndpoint {
                 .ifNull()
                 .failWith(
                     new ConfigNotFoundException(
-                        String.format("No config found for uuid %s", uuid.toString())))
+                        String.format(UUID_NOT_FOUND_ERROR_MESSAGE, uuid.toString())))
                 .onItem()
                 .ifNotNull()
                 .call(session::remove)
