@@ -34,7 +34,7 @@ public class K8NameSpace {
               .withName(StaticConfig.EnvironmentVariables.NAMESPACE)
               .endMetadata()
               .build();
-      client.namespaces().createOrReplace(ns);
+      client.namespaces().resource(ns).createOrReplace();
     }
   }
 }

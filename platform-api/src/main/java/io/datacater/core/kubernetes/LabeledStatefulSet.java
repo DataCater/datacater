@@ -34,7 +34,8 @@ public class LabeledStatefulSet implements Shareable {
           .apps()
           .statefulSets()
           .inNamespace(DataCaterK8sConfig.NAMESPACE)
-          .createOrReplace(statefulSet);
+          .resource(statefulSet)
+          .create();
     } catch (KubernetesClientException e) {
       String message = StringUtilities.wrapString(e.getMessage());
       throw new DatacaterException(message);
@@ -58,7 +59,7 @@ public class LabeledStatefulSet implements Shareable {
               .withName(DataCaterK8sConfig.NAMESPACE)
               .endMetadata()
               .build();
-      client.namespaces().createOrReplace(ns);
+      client.namespaces().resource(ns).createOrReplace();
     }
   }
 
@@ -68,7 +69,11 @@ public class LabeledStatefulSet implements Shareable {
         String.format("Creating service with name %s .", service.getMetadata().getName());
     LOGGER.info(message);
 
-    client.services().inNamespace(DataCaterK8sConfig.NAMESPACE).createOrReplace(buildService());
+    client
+        .services()
+        .inNamespace(DataCaterK8sConfig.NAMESPACE)
+        .resource(buildService())
+        .createOrReplace();
   }
 
   void setClient(KubernetesClient client) {

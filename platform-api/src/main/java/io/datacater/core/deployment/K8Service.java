@@ -19,7 +19,11 @@ public class K8Service {
   }
 
   public void delete(String name) {
-    client.services().inNamespace(StaticConfig.EnvironmentVariables.NAMESPACE).delete(get(name));
+    client
+        .services()
+        .inNamespace(StaticConfig.EnvironmentVariables.NAMESPACE)
+        .resource(get(name))
+        .delete();
   }
 
   public String getClusterIp(String serviceName) {

@@ -47,7 +47,11 @@ public class K8ConfigMap {
             .withMetadata(getMetaData(name))
             .addToData(StaticConfig.SPEC, pe.getSpec().toString())
             .build();
-    return client.configMaps().inNamespace(StaticConfig.EnvironmentVariables.NAMESPACE).create(map);
+    return client
+        .configMaps()
+        .inNamespace(StaticConfig.EnvironmentVariables.NAMESPACE)
+        .resource(map)
+        .create();
   }
 
   public void delete(String name) {
