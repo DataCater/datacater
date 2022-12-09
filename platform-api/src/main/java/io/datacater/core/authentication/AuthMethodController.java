@@ -1,5 +1,6 @@
 package io.datacater.core.authentication;
 
+import io.datacater.core.ExcludeFromGeneratedCoverageReport;
 import io.quarkus.arc.Priority;
 import io.quarkus.security.spi.runtime.AuthorizationController;
 import javax.enterprise.context.ApplicationScoped;
@@ -12,6 +13,7 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 @Alternative
 @Priority(Interceptor.Priority.LIBRARY_AFTER)
 @ApplicationScoped
+@ExcludeFromGeneratedCoverageReport
 public class AuthMethodController extends AuthorizationController {
   @ConfigProperty(name = "datacater.authorization", defaultValue = "false")
   boolean authorization;
