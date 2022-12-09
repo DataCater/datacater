@@ -1,5 +1,7 @@
 package io.datacater;
 
+import io.datacater.core.serde.Deserializers;
+import io.datacater.core.serde.Serializers;
 import io.datacater.exceptions.TransformationException;
 import io.smallrye.common.annotation.Blocking;
 import io.vertx.core.json.JsonArray;
@@ -33,16 +35,16 @@ public class Pipeline {
   private Integer port;
 
   private Deserializer keyDeserializer =
-          getDeserializerInstance(KafkaConfig.streamInConfig().get("key.deserializer").toString());
+          Deserializers.deserializers.get(KafkaConfig.streamInConfig().get("key.deserializer").toString());
 
   private Deserializer valueDeserializer =
-          getDeserializerInstance(KafkaConfig.streamInConfig().get("value.deserializer").toString());
+          Deserializers.deserializers.get(KafkaConfig.streamInConfig().get("value.deserializer").toString());
 
   private Serializer keySerializer =
-          getSerializerInstance(KafkaConfig.streamOutConfig().get("key.serializer").toString());
+          Serializers.serializers.get(KafkaConfig.streamOutConfig().get("key.serializer").toString());
 
   private Serializer valueSerializer =
-          getSerializerInstance(KafkaConfig.streamOutConfig().get("value.serializer").toString());
+          Serializers.serializers.get(KafkaConfig.streamOutConfig().get("value.serializer").toString());
 
   WebClient client;
 
@@ -139,26 +141,6 @@ public class Pipeline {
   private void logMessage(String message){
     String errorMsg = String.format(PipelineConfig.PIPELINE_ERROR_MSG, message);
     LOGGER.error(errorMsg);
-  }
-
-  private Deserializer getDeserializerInstance(String className) throws TransformationException {
-    try {
-      Class deserializerClass = Class.forName(className);
-
-      return (Deserializer) deserializerClass.getConstructor().newInstance();
-    } catch (Exception e) {
-      throw new TransformationException(e.getMessage());
-    }
-  }
-
-  private Serializer getSerializerInstance(String className) throws TransformationException {
-    try {
-      Class serializerClass = Class.forName(className);
-
-      return (Serializer) serializerClass.getConstructor().newInstance();
-    } catch (Exception e) {
-      throw new TransformationException(e.getMessage());
-    }
   }
 
   private JsonArray getMessages(ConsumerRecords<byte[], byte[]> messages){
