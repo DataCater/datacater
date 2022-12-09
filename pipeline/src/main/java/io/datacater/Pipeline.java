@@ -107,8 +107,8 @@ public class Pipeline {
   private void logProcessingError(JsonObject record){
     String errorMsg = String.format(
             PipelineConfig.PIPELINE_ERROR_MSG,
-            record.getValue("key").toString(),
-            record.getValue("value").toString(),
+            record.getValue(PipelineConfig.KEY).toString(),
+            record.getValue(PipelineConfig.VALUE).toString(),
             record.getValue(PipelineConfig.METADATA),
             record.getJsonObject(PipelineConfig.METADATA)
                     .getJsonObject(PipelineConfig.ERROR)
