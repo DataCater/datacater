@@ -7,13 +7,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.Map;
 
-public record StreamMessage(
-    Map<String, Object> key, Map<String, Object> value, Map<String, Object> metadata) {
+public record StreamMessage(Object key, Object value, Map<String, Object> metadata) {
 
   @JsonCreator
   static StreamMessage from(
-      @JsonProperty(value = "key") Map<String, Object> key,
-      @JsonProperty(value = "value", required = true) Map<String, Object> value,
+      @JsonProperty(value = "key") Object key,
+      @JsonProperty(value = "value", required = true) Object value,
       @JsonProperty(value = "metadata", required = true) Map<String, Object> metadata) {
     return new StreamMessage(key, value, metadata);
   }

@@ -49,7 +49,7 @@ dependencies {
     testImplementation 'io.quarkus:quarkus-junit5'
     testImplementation 'io.quarkus:quarkus-test-kafka-companion'
 
-    implementation 'org.testcontainers:testcontainers:1.17.3'
+    implementation 'org.testcontainers:testcontainers:1.17.6'
 }
 
 group 'io.datacater'
