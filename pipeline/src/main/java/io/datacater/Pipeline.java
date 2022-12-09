@@ -146,7 +146,7 @@ public class Pipeline {
   private JsonArray getMessages(ConsumerRecords<byte[], byte[]> messages){
     JsonArray jsonMessages = new JsonArray();
     for (ConsumerRecord<byte[], byte[]> message : messages) {
-      Object key = keyDeserializer.deserialize(KafkaConfig.DATACATER_STREAMIN_TOPIC, message.value());
+      Object key = keyDeserializer.deserialize(KafkaConfig.DATACATER_STREAMIN_TOPIC, message.key());
       Object value = valueDeserializer.deserialize(KafkaConfig.DATACATER_STREAMIN_TOPIC, message.value());
 
       jsonMessages.add(
