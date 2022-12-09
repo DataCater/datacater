@@ -36,7 +36,7 @@ public class PipelineConfig {
     static final String OFFSET = "offset";
     static final String PARTITION = "partition";
     static final String PIPELINE_ERROR_MSG =
-            "Pipeline could not process record.\n Key: %s\n Value: %s\n Metadata: %s\n Error: %s";
+            "Pipeline could not process record: %s";
     /*
      * Number of retries in case of a failed connection attempt
      */
