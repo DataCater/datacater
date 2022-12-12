@@ -1,8 +1,10 @@
 package io.datacater.core.authentication;
 
+import io.quarkus.runtime.configuration.ProfileManager;
 import io.quarkus.security.identity.AuthenticationRequestContext;
 import io.quarkus.security.identity.SecurityIdentity;
 import io.quarkus.security.identity.SecurityIdentityAugmentor;
+import io.quarkus.security.runtime.QuarkusPrincipal;
 import io.quarkus.security.runtime.QuarkusSecurityIdentity;
 import io.smallrye.mutiny.Uni;
 import java.util.function.Supplier;
@@ -29,7 +31,12 @@ public class RolesAugmentor implements SecurityIdentityAugmentor {
       QuarkusSecurityIdentity.Builder builder = QuarkusSecurityIdentity.builder(identity);
 
       // add custom role source here
-      builder.addRole(Roles.DEV.role);
+      String profile = ProfileManager.getActiveProfile().toLowerCase();
+
+      if (profile.contains("dev") || profile.contains("test")) {
+        builder.addRole(Roles.DEV.role);
+        builder.setPrincipal(new QuarkusPrincipal("datacater"));
+      }
       return builder::build;
 
     } else {

@@ -1,5 +1,6 @@
 package io.datacater.core.authentication;
 
+import io.quarkus.security.UnauthorizedException;
 import io.quarkus.security.identity.SecurityIdentity;
 import io.smallrye.mutiny.Uni;
 import java.util.function.BiFunction;
@@ -16,7 +17,6 @@ import org.jboss.logging.Logger;
 @ApplicationScoped
 public class DataCaterSessionFactory {
   private static final Logger LOGGER = Logger.getLogger(DataCaterSessionFactory.class);
-  private static final String DEFAULT_PRINCIPAL = "datacater";
 
   @Inject Mutiny.SessionFactory sf;
 
@@ -24,13 +24,12 @@ public class DataCaterSessionFactory {
 
   private String getPrincipal() {
     String principalName = si.getPrincipal().getName();
-    String principal =
-        principalName == null || principalName.isEmpty()
-            ? DEFAULT_PRINCIPAL
-            : si.getPrincipal().getName();
+    if (principalName == null || principalName.isEmpty()) {
+      throw new UnauthorizedException();
+    }
 
-    LOGGER.info(String.format("Detected principal with name := %s", principal));
-    return principal;
+    LOGGER.info(String.format("Detected principal with name := %s.", principalName));
+    return principalName;
   }
 
   public <T> Uni<T> withSession(Function<Session, Uni<T>> work) {
