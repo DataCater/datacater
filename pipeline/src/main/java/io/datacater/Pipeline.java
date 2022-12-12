@@ -69,7 +69,7 @@ public class Pipeline {
     try {
       // This is deliberately blocking
       handleMessages(messages);
-    } catch (CompletionException | ConnectException e) {
+    } catch (CompletionException | IOException e) {
       LOGGER.warn("Connection to Python-Runner sidecar failed: %s. Attempt: 0".format(e.getMessage()), e);
 
       int retries = 0;
