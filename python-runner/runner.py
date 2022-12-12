@@ -1,4 +1,5 @@
 # Start app: $ python3 -m uvicorn runner:app --log-level critical
+import datetime
 
 import re
 import sys
@@ -10,7 +11,7 @@ from typing import List, Optional, Any
 
 import json
 import yaml
-from fastapi import FastAPI, Response, status
+from fastapi import FastAPI, Response, status, Request
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
@@ -55,14 +56,8 @@ print("✅ Loaded " + str(len(TRANSFORMS.keys())) + " transforms")
 INTERNAL_POST_TRANSFORMS = ["cast-data-type", "drop-field", "new-field", "rename-field"]
 
 
-class Record(BaseModel):
-    key: Optional[Any]
-    value: Any
-    metadata: dict
-
-
 class PreviewRequest(BaseModel):
-    records: List[Record]
+    records: List[dict]
     pipeline: dict
     previewStep: Optional[int]
 
@@ -82,7 +77,7 @@ if path.isfile(CONFIG_MAP_FILE):
     pipeline["spec"] = json.loads(config_map.read())
     config_map.close()
 
-def apply_pipeline(record: Record, pipeline: dict, preview_step=None):
+def apply_pipeline(record: dict, pipeline: dict, preview_step=None):
     location = {}
     try:
         step_index = 0
@@ -96,7 +91,7 @@ def apply_pipeline(record: Record, pipeline: dict, preview_step=None):
                 record_matches_filter = True
                 if record_filter is not None and record_filter.get("key") is not None:
                     record_matches_filter = FILTERS[record_filter["key"]](
-                        dict(record), record_filter.get("config", {})
+                        record, record_filter.get("config", {})
                     )
                     if record_matches_filter is False and (
                         record_transform is None or record_transform.get("key") is None
@@ -109,13 +104,11 @@ def apply_pipeline(record: Record, pipeline: dict, preview_step=None):
                     and record_transform is not None
                     and record_transform.get("key") is not None
                 ):
-                    record = Record.parse_obj(
-                        TRANSFORMS[record_transform["key"]](
-                            dict(record), record_transform.get("config", {})
-                        )
+                    record = TRANSFORMS[record_transform["key"]](
+                        record, record_transform.get("config", {})
                     )
             else:  # step["kind"] == "Field"
-                value = record.value
+                value = record["value"]
                 for field_name, field_config in step["fields"].items():
                     location["path"] = "steps[{}].fields[{}]".format(
                         step_index, field_name
@@ -196,7 +189,7 @@ def apply_pipeline(record: Record, pipeline: dict, preview_step=None):
                                     value,
                                     field_transform.get("config", {}),
                                 )
-                record.value = value
+                record["value"] = value
 
             if preview_step == step_index:
                 return record
@@ -220,7 +213,7 @@ def apply_pipeline(record: Record, pipeline: dict, preview_step=None):
             error_message = formatted_errors[-2]
 
         # inject error information into metadata
-        record.metadata["error"] = {
+        record["metadata"]["error"] = {
             "location": location,
             "exceptionMessage": error_message,
             "exceptionName": error_type.__name__,
@@ -233,14 +226,8 @@ def apply_pipeline(record: Record, pipeline: dict, preview_step=None):
 
         return record
 
-
-@app.post("/", response_model=Record)
-async def apply_to_single_record(record: Record):
-    return apply_pipeline(record, pipeline)
-
-
-@app.post("/batch", response_model=List[Record])
-async def apply_to_multiple_records(records: List[Record], response: Response):
+@app.post("/batch")
+async def apply_to_multiple_records(records: List[dict], response: Response):
     processed_records = []
     for record in records:
         processed_record = apply_pipeline(record, pipeline)
@@ -248,8 +235,22 @@ async def apply_to_multiple_records(records: List[Record], response: Response):
             processed_records.append(processed_record)
     return processed_records
 
+@app.post("/batch-file")
+async def apply_to_multiple_records_file(request: dict, response: Response):
+    temp_file = str(request["fileIn"])
+    with open(temp_file) as json_file:
+        records = json.load(json_file)
+        processed_records = []
+        for record in records:
+            processed_record = apply_pipeline(record, pipeline)
+            if processed_record is not None:
+                processed_records.append(processed_record)
+        with open(temp_file + ".out", 'w') as outfile:
+            json.dump(processed_records, outfile)
+    return { "fileOut": temp_file + ".out" }
 
-@app.post("/preview", response_model=List[Record])
+
+@app.post("/preview")
 async def preview(previewRequest: PreviewRequest, response: Response):
     processed_records = []
     for record in previewRequest.records:

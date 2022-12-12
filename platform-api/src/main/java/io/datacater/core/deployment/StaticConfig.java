@@ -19,13 +19,15 @@ public class StaticConfig {
   static final String UUID_TEXT = "datacater.io/uuid";
   static final String DEPLOYMENT_NAME_TEXT = "datacater.io/name";
   static final String DEPLOYMENT_SERVICE_TEXT = "datacater.io/service";
-  static final String MOUNT_PATH = "/usr/app/mounts";
+  static final String CONFIGMAP_MOUNT_PATH = "/usr/app/mounts";
+  static final String DATA_SHARE_MOUNT_PATH = "/usr/app/data-mounts";
   static final Map<String, Quantity> RESOURCE_REQUESTS =
       Map.of("cpu", new Quantity("0.1"), "memory", new Quantity("1.5Gi"));
   static final Map<String, Quantity> RESOURCE_LIMITS = Map.of("memory", new Quantity("4Gi"));
   static final String DEPLOYMENT_NAME_PREFIX = "datacater-deployment-";
   static final String CONFIGMAP_NAME_PREFIX = "datacater-configmap-";
-  static final String VOLUME_NAME_PREFIX = "datacater-volume-";
+  static final String CONFIGMAP_VOLUME_NAME_PREFIX = "datacater-volume-";
+  static final String DATA_SHARE_VOLUME_NAME_PREFIX = "datacater-volume-data-";
   static final String SERVICE_NAME_PREFIX = "datacater-service-";
   static final String NONE = "None";
   static final String TCP_TAG = "TCP";

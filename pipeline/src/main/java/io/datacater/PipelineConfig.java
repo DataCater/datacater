@@ -26,7 +26,7 @@ public class PipelineConfig {
 
     static final String STREAM_IN = "stream-in";
     static final String STREAM_OUT = "stream-out";
-    static final String ENDPOINT = "/batch";
+    static final String ENDPOINT = "/batch-file";
     static final String HEADER = "Content-Type";
     static final String HEADER_TYPE = "application/json";
     static final String KEY = "key";
@@ -45,4 +45,5 @@ public class PipelineConfig {
      * Number of milliseconds to wait between retrying to connect
      */
     static final Integer CONNECTION_RETRY_WAIT = 1000;
+    static final String DATA_SHARE_MOUNT_PATH = "/usr/app/data-mounts";
 }
