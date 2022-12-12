@@ -25,13 +25,12 @@ def test_batch_file_apply_transform():
         },
     )
     # Apply pipeline to records
-    raw_records = [{"key": {}, "value": {"company": " DataCater GmbH     "}, "metadata": {}}]
-    with open("records.json", 'w') as outfile:
+    raw_records = [
+        {"key": {}, "value": {"company": " DataCater GmbH     "}, "metadata": {}}
+    ]
+    with open("records.json", "w") as outfile:
         json.dump(raw_records, outfile)
-    response = client.post(
-        "/batch-file",
-        json = {"fileIn": "records.json"}
-    )
+    response = client.post("/batch-file", json={"fileIn": "records.json"})
     assert response.status_code == 200
     with open(response.json()["fileOut"]) as infile:
         assert json.load(infile) == [

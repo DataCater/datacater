@@ -77,6 +77,7 @@ if path.isfile(CONFIG_MAP_FILE):
     pipeline["spec"] = json.loads(config_map.read())
     config_map.close()
 
+
 def apply_pipeline(record: dict, pipeline: dict, preview_step=None):
     location = {}
     try:
@@ -226,6 +227,7 @@ def apply_pipeline(record: dict, pipeline: dict, preview_step=None):
 
         return record
 
+
 @app.post("/batch")
 async def apply_to_multiple_records(records: List[dict], response: Response):
     processed_records = []
@@ -234,6 +236,7 @@ async def apply_to_multiple_records(records: List[dict], response: Response):
         if processed_record is not None:
             processed_records.append(processed_record)
     return processed_records
+
 
 @app.post("/batch-file")
 async def apply_to_multiple_records_file(request: dict, response: Response):
@@ -245,9 +248,9 @@ async def apply_to_multiple_records_file(request: dict, response: Response):
             processed_record = apply_pipeline(record, pipeline)
             if processed_record is not None:
                 processed_records.append(processed_record)
-        with open(temp_file + ".out", 'w') as outfile:
+        with open(temp_file + ".out", "w") as outfile:
             json.dump(processed_records, outfile)
-    return { "fileOut": temp_file + ".out" }
+    return {"fileOut": temp_file + ".out"}
 
 
 @app.post("/preview")
