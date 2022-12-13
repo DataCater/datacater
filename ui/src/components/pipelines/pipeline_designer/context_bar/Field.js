@@ -38,7 +38,7 @@ class Attribute extends Component {
     } = this.props;
 
     const field = fields.find((attr) => attr === editColumn.fieldName);
-    const fieldProfile = profile[field];
+    const fieldProfile = profile[field] || {};
     const pipelineField = transformStep.fields[field];
 
     let transform = undefined;

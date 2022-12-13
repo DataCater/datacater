@@ -839,18 +839,14 @@ class EditPipeline extends Component {
       return Object.assign({}, sample, { id: index + 1 });
     });
 
-    let classNames = "create-pipeline-form pipeline-designer";
+    let classNames = "";
 
     if (this.state.contextBarActive && this.state.currentStep !== undefined) {
-      classNames += " datacater-context-bar-active";
-    }
-
-    if (this.state.currentStep !== undefined) {
-      classNames += " pipeline-designer-transformations";
+      classNames += "datacater-context-bar-active";
     }
 
     return (
-      <>
+      <div className={classNames}>
         <div className="container">{header}</div>
         {this.state.debugRecord !== undefined && (
           <DebugView
@@ -886,7 +882,7 @@ class EditPipeline extends Component {
             updateStepNameFunc={this.updateStepName}
           />
         )}
-      </>
+      </div>
     );
   }
 }

@@ -4,14 +4,16 @@ import io.datacater.core.exceptions.JsonDeserializationException;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonObject;
 import org.apache.kafka.common.serialization.Deserializer;
+import java.util.Map;
 
-public class JsonDeserializer implements Deserializer<JsonObject> {
+public class JsonDeserializer implements Deserializer<Map<String, Object>> {
 
   @Override
-  public JsonObject deserialize(String topic, byte[] data) {
+  public Map<String, Object> deserialize(String topic, byte[] data) {
     try {
       Buffer buffer = Buffer.buffer(data);
-      return new JsonObject(buffer);
+      JsonObject obj = new JsonObject(buffer);
+      return obj.getMap();
     } catch (Exception e) {
       throw new JsonDeserializationException(e.getMessage());
     }

@@ -1,5 +1,7 @@
 package io.datacater;
 
+import io.datacater.core.serde.Deserializers;
+import io.datacater.core.serde.Serializers;
 import io.datacater.exceptions.TransformationException;
 import io.smallrye.common.annotation.Blocking;
 import io.vertx.core.json.JsonArray;
@@ -7,11 +9,11 @@ import io.vertx.core.json.JsonObject;
 import io.smallrye.reactive.messaging.kafka.Record;
 
 import java.time.Duration;
-import java.util.UUID;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import java.net.ConnectException;
 import java.util.concurrent.CompletionException;
+import java.util.Map;
 
 import io.vertx.mutiny.core.Vertx;
 import io.vertx.mutiny.core.buffer.Buffer;
@@ -20,6 +22,8 @@ import io.vertx.mutiny.ext.web.client.HttpResponse;
 import io.vertx.mutiny.ext.web.client.WebClient;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
+import org.apache.kafka.common.serialization.Deserializer;
+import org.apache.kafka.common.serialization.Serializer;
 import org.eclipse.microprofile.reactive.messaging.*;
 import org.jboss.logging.Logger;
 import org.jboss.resteasy.reactive.RestResponse;
@@ -30,6 +34,18 @@ public class Pipeline {
   private String host;
   private Integer port;
 
+  private Deserializer keyDeserializer =
+          Deserializers.deserializers.get(KafkaConfig.streamInConfig().get("key.deserializer").toString());
+
+  private Deserializer valueDeserializer =
+          Deserializers.deserializers.get(KafkaConfig.streamInConfig().get("value.deserializer").toString());
+
+  private Serializer keySerializer =
+          Serializers.serializers.get(KafkaConfig.streamOutConfig().get("key.serializer").toString());
+
+  private Serializer valueSerializer =
+          Serializers.serializers.get(KafkaConfig.streamOutConfig().get("value.serializer").toString());
+
   WebClient client;
 
   @Inject
@@ -39,12 +55,12 @@ public class Pipeline {
 
   @Inject
   @Channel(PipelineConfig.STREAM_OUT)
-  Emitter<Record<JsonObject, JsonObject>> producer;
+  Emitter<Record<byte[], byte[]>> producer;
 
   @Incoming(PipelineConfig.STREAM_IN)
   @Blocking
   @Acknowledgment(Acknowledgment.Strategy.POST_PROCESSING)
-  public void processUUID(ConsumerRecords<JsonObject, JsonObject> messages) {
+  public void processUUID(ConsumerRecords<byte[], byte[]> messages) {
     try {
       // This is deliberately blocking
       handleMessages(messages);
@@ -78,10 +94,15 @@ public class Pipeline {
     }
   }
 
-  private void handleMessages(ConsumerRecords<JsonObject, JsonObject> messages) throws ConnectException {
-    HttpRequest<Buffer> request = client.post(getPort(), getHost(), PipelineConfig.ENDPOINT)
+  private void handleMessages(ConsumerRecords<byte[], byte[]> messages) throws ConnectException {
+    HttpRequest<Buffer> request = client
+            .post(getPort(), getHost(), PipelineConfig.ENDPOINT)
             .putHeader(PipelineConfig.HEADER, PipelineConfig.HEADER_TYPE);
-    HttpResponse<Buffer> response = request.sendJson(getMessages(messages)).await().atMost(Duration.ofSeconds(PipelineConfig.DATACATER_PYTHONRUNNER_TIMEOUT));
+
+    HttpResponse<Buffer> response = request
+            .sendJson(getMessages(messages))
+            .await()
+            .atMost(Duration.ofSeconds(PipelineConfig.DATACATER_PYTHONRUNNER_TIMEOUT));
 
     if(response.statusCode() != RestResponse.StatusCode.OK){
       LOGGER.error(response.bodyAsJsonObject().encodePrettily());
@@ -90,37 +111,54 @@ public class Pipeline {
     }
   }
 
-  private void sendMessages(JsonArray messages){
+  private void sendMessages(JsonArray messages) {
+    Map<String, Object> streamOutConfig = KafkaConfig.streamOutConfig();
     messages.stream().forEach(x -> {
       if(x instanceof JsonObject json){
         if(json.getJsonObject(PipelineConfig.METADATA).containsKey(PipelineConfig.ERROR)){
-          logMessage(json.encodePrettily());
+          logProcessingError(json);
         }
-        sendRecord(Record.of(getKey(json), json.getJsonObject(PipelineConfig.VALUE)));
+        sendRecord(
+            Record.of(
+                    keySerializer.serialize(
+                            KafkaConfig.DATACATER_STREAMOUT_TOPIC,
+                            json.getValue(PipelineConfig.KEY)
+                    ),
+                    valueSerializer.serialize(
+                            KafkaConfig.DATACATER_STREAMOUT_TOPIC,
+                            json.getValue(PipelineConfig.VALUE)
+                    )
+              )
+            );
       }
     });
   }
 
-  private void sendRecord(Record<JsonObject, JsonObject> record){
+  private void sendRecord(Record<byte[], byte[]> record){
     producer.send(record);
   }
 
-  private void logMessage(String message){
-    String errorMsg = String.format(PipelineConfig.PIPELINE_ERROR_MSG, message);
+  private void logProcessingError(JsonObject record){
+    String errorMsg = String.format(PipelineConfig.PIPELINE_ERROR_MSG, record.encode());
     LOGGER.error(errorMsg);
   }
 
-  private JsonObject getKey(JsonObject message){
-    if(message.getJsonObject(PipelineConfig.KEY) == null){
-      return null;
-    }
-    return message.getJsonObject(PipelineConfig.KEY);
-  }
-
-  private JsonArray getMessages(ConsumerRecords<JsonObject, JsonObject> messages){
+  private JsonArray getMessages(ConsumerRecords<byte[], byte[]> messages){
     JsonArray jsonMessages = new JsonArray();
-    for (ConsumerRecord<JsonObject, JsonObject> message:messages) {
-      jsonMessages.add(new JsonObject().put(PipelineConfig.KEY, message.key()).put(PipelineConfig.VALUE, message.value()).put(PipelineConfig.METADATA, new JsonObject().put(PipelineConfig.OFFSET, message.offset()).put(PipelineConfig.PARTITION, message.partition())));
+    for (ConsumerRecord<byte[], byte[]> message : messages) {
+      Object key = keyDeserializer.deserialize(KafkaConfig.DATACATER_STREAMIN_TOPIC, message.key());
+      Object value = valueDeserializer.deserialize(KafkaConfig.DATACATER_STREAMIN_TOPIC, message.value());
+
+      jsonMessages.add(
+            new JsonObject()
+              .put(PipelineConfig.KEY, key)
+              .put(PipelineConfig.VALUE, value)
+              .put(PipelineConfig.METADATA,
+                new JsonObject()
+                  .put(PipelineConfig.OFFSET, message.offset())
+                  .put(PipelineConfig.PARTITION, message.partition())
+                  )
+              );
     }
     return jsonMessages;
   }

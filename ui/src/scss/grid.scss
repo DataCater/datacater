@@ -15,8 +15,8 @@ $row-hovered-background-color: #f5f5f5;
 .datacater-context-bar-active {
   .#{$table-prefix} {
     &-container {
-      /* screen width - left sidebar width - context bar width + border */
-      width: calc(100vw - 66px - var(--datacater-context-bar-width));
+      /* screen width - context bar width + border */
+      width: calc(100vw - var(--datacater-context-bar-width));
     }
   }
 }
@@ -25,9 +25,9 @@ $row-hovered-background-color: #f5f5f5;
   .datacater-context-bar-active {
     .#{$table-prefix} {
       &-container {
-        /* screen width - left sidebar width - context bar width + border */
+        /* screen width - context bar width + border */
         width: calc(
-          100vw - 66px - var(--datacater-context-bar-width-large-screen)
+          100vw - var(--datacater-context-bar-width-large-screen)
         );
       }
     }

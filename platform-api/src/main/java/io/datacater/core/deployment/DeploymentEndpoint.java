@@ -33,13 +33,20 @@ import javax.ws.rs.sse.Sse;
 import javax.ws.rs.sse.SseEventSink;
 import org.eclipse.microprofile.openapi.annotations.security.SecurityRequirement;
 
+import org.jboss.logging.Logger;
+
+
 @Path("/deployments")
 @RolesAllowed("dev")
 @Produces(MediaType.APPLICATION_JSON)
 @SecurityRequirement(name = "apiToken")
 @RequestScoped
 public class DeploymentEndpoint {
+
   @Inject DataCaterSessionFactory dsf;
+
+
+  static final Logger LOGGER = Logger.getLogger(DeploymentEndpoint.class);
 
   @Inject KubernetesClient client;
 
@@ -331,8 +338,14 @@ public class DeploymentEndpoint {
   }
 
   private void deleteK8Deployment(UUID deploymentId) {
-    K8Deployment k8Deployment = new K8Deployment(client);
-    k8Deployment.delete(deploymentId);
+    try {
+      K8Deployment k8Deployment = new K8Deployment(client);
+      k8Deployment.delete(deploymentId);
+    } catch (DeploymentNotFoundException e) {
+      LOGGER.error(
+          String.format("Could not find Kubernetes deployment with id %s", deploymentId.toString()),
+          e);
+    }
   }
 
   private DeploymentEntity createDeployment(

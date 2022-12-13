@@ -5,7 +5,6 @@ import static org.apache.kafka.common.config.ConfigResource.Type.TOPIC;
 
 import io.datacater.core.exceptions.DatacaterException;
 import io.datacater.core.exceptions.KafkaConnectionException;
-import io.vertx.core.json.JsonObject;
 import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.*;
@@ -238,14 +237,7 @@ public class KafkaStreamsAdmin implements StreamService {
     metadata.put("partition", item.partition());
     metadata.put("offset", item.offset());
     metadata.put("timestamp", item.timestamp());
-    return new StreamMessage(objectToMap(item.key()), objectToMap(item.value()), metadata);
-  }
-
-  private Map<String, Object> objectToMap(Object obj) {
-    if (obj == null) {
-      return new JsonObject().getMap();
-    }
-    return new JsonObject(obj.toString()).getMap();
+    return new StreamMessage(item.key(), item.value(), metadata);
   }
 
   public CompletableFuture<Void> deleteStream() {
