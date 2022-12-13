@@ -32,9 +32,7 @@ import javax.ws.rs.sse.OutboundSseEvent;
 import javax.ws.rs.sse.Sse;
 import javax.ws.rs.sse.SseEventSink;
 import org.eclipse.microprofile.openapi.annotations.security.SecurityRequirement;
-
 import org.jboss.logging.Logger;
-
 
 @Path("/deployments")
 @RolesAllowed("dev")
@@ -44,7 +42,6 @@ import org.jboss.logging.Logger;
 public class DeploymentEndpoint {
 
   @Inject DataCaterSessionFactory dsf;
-
 
   static final Logger LOGGER = Logger.getLogger(DeploymentEndpoint.class);
 
