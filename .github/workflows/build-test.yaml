@@ -229,8 +229,7 @@ jobs:
         working-directory: python-runner
         if: github.event.action == 'released'
         run: |
-          docker buildx build --platform=linux/amd64,linux/arm64 -t datacater/python-runner:${RELEASE_VERSION} .
-          docker push datacater/python-runner:${RELEASE_VERSION}
+          docker buildx build --platform=linux/amd64,linux/arm64 -t datacater/python-runner:${RELEASE_VERSION} --push .
   build_and_push_ui:
     if: github.ref_name == 'main' || github.ref_type == 'tag'
     name: Build and push UI image
@@ -261,5 +260,4 @@ jobs:
         working-directory: ui
         if: github.event.action == 'released'
         run: |
-          docker buildx build --platform=linux/amd64,linux/arm64 -t datacater/ui:${RELEASE_VERSION} .
-          docker push datacater/ui:${RELEASE_VERSION}
+          docker buildx build --platform=linux/amd64,linux/arm64 -t datacater/ui:${RELEASE_VERSION} --push .
