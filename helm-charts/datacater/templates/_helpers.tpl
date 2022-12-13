@@ -26,6 +26,7 @@ Common labels
 */}}
 {{- define "datacater.labels" -}}
 helm.sh/chart: {{ include "datacater.chart" . }}
+{{ include "datacater.partOfLabel" . }}
 {{ include "datacater.selectorLabels" . }}
 {{- if .Chart.AppVersion }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
@@ -38,6 +39,34 @@ Selector labels
 */}}
 {{- define "datacater.selectorLabels" -}}
 app.kubernetes.io/name: {{ include "datacater.name" . }}
+app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end }}
+
+{{/*
+Part of label
+*/}}
+{{- define "datacater.partOfLabel" -}}
+app.kubernetes.io/part-of: {{ include "datacater.chart" . }}
+{{- end }}
+
+{{/*
+Common labels for ui
+*/}}
+{{- define "datacater.labelsUi" -}}
+helm.sh/chart: {{ include "datacater.chart" . }}
+{{ include "datacater.partOfLabel" . }}
+{{ include "datacater.selectorLabels" . }}
+{{- if .Chart.AppVersion }}
+app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
+{{- end }}
+app.kubernetes.io/managed-by: {{ .Release.Service }}
+{{- end }}
+
+{{/*
+Selector labels ui
+*/}}
+{{- define "datacater.selectorLabelsUi" -}}
+app.kubernetes.io/name: "datacater-ui"
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 

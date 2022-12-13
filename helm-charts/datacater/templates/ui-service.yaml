@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: datacater-ui
+  labels:
+    {{- include "datacater.labelsUi" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "datacater.selectorLabelsUi" . | nindent 6 }}
+  ports:
+    - protocol: "TCP"
+      port: 80
+      targetPort: 80
+  type: {{ .Values.datacater.ui.service | default "ClusterIp" }}

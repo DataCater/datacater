@@ -5,6 +5,15 @@
 
 replicaCount: 1
 
+datacater:
+  ui:
+    image:
+      repository: datacater/ui
+      pullPolicy: IfNotPresent
+      tag: '2022.12'
+    service:
+      type: ClusterIP
+
 image:
   repository: datacater/datacater
   pullPolicy: IfNotPresent
@@ -67,7 +76,7 @@ securityContext: {}
   # runAsUser: 1000
 
 postgres:
-  enabled: true
+  enabled: false
   username: ''   # postgres will be used by default
   password: ''   # datacater will be used by default
   pvc:
