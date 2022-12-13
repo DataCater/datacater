@@ -1,4 +1,4 @@
-FROM python:3.11.0-slim@sha256:244c0b0e6e7608a16f87382fc8a5ef3c330d042113a9a7b6fc15a95360181651 AS build
+FROM python:3.11.1-slim AS build
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
