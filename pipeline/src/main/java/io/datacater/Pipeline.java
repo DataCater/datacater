@@ -99,7 +99,7 @@ public class Pipeline {
     }
   }
 
-  private void handleMessages(ConsumerRecords<byte[], byte[]> messages) throws IOException {
+  private void handleMessagesViaFile(ConsumerRecords<byte[], byte[]> messages) throws IOException {
     HttpRequest<Buffer> request = client
             .post(getPort(), getHost(), PipelineConfig.ENDPOINT)
             .putHeader(PipelineConfig.HEADER, PipelineConfig.HEADER_TYPE);
@@ -132,6 +132,31 @@ public class Pipeline {
     }
 
     Files.deleteIfExists(tempFile);
+  }
+
+  private void handleMessagesViaHttp(ConsumerRecords<byte[], byte[]> messages) {
+    HttpRequest<Buffer> request = client
+            .post(getPort(), getHost(), PipelineConfig.ENDPOINT)
+            .putHeader(PipelineConfig.HEADER, PipelineConfig.HEADER_TYPE);
+
+    HttpResponse<Buffer> response = request
+            .sendJson(getMessages(messages))
+            .await()
+            .atMost(Duration.ofSeconds(PipelineConfig.DATACATER_PYTHONRUNNER_TIMEOUT));
+
+    if(response.statusCode() != RestResponse.StatusCode.OK){
+      LOGGER.error(response.bodyAsJsonObject().encodePrettily());
+    } else {
+      sendMessages(response.bodyAsJsonArray());
+    }
+  }
+
+  private void handleMessages(ConsumerRecords<byte[], byte[]> messages) throws IOException {
+    if (PipelineConfig.DATACATER_PYTHONRUNNER_PROTOCOL.equals("http")) {
+      handleMessagesViaHttp(messages);
+    } else {
+      handleMessagesViaFile(messages);
+    }
   }
 
   private void sendMessages(JsonArray messages) {

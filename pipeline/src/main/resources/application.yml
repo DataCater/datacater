@@ -41,6 +41,7 @@ datacater:
     port: 50000
     host: localhost
     version: alpha-20221129
+    protocol: file
   message:
     batch:
       size: 2500
@@ -61,10 +62,12 @@ datacater:
       port: 50000
       host: localhost
       version: alpha-20221129
+      protocol: http
 
 '%test'  :
   datacater:
     python-runner:
+      protocol: http
       version: alpha-20221129
   quarkus:
     log:
