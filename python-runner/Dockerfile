@@ -1,4 +1,4 @@
-FROM python:3.11.1-bullseye AS build
+FROM python:3.11.1-slim AS build
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
