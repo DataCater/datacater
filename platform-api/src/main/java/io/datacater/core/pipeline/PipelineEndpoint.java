@@ -2,7 +2,7 @@ package io.datacater.core.pipeline;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.json.JsonMapper;
+import io.datacater.core.authentication.DataCaterSessionFactory;
 import io.datacater.core.exceptions.DatacaterException;
 import io.datacater.core.exceptions.PipelineNotFoundException;
 import io.datacater.core.kubernetes.DataCaterK8sConfig;
@@ -38,7 +38,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
 import org.eclipse.microprofile.openapi.annotations.security.SecurityRequirement;
-import org.hibernate.reactive.mutiny.Mutiny;
 import org.jboss.logging.Logger;
 
 @Path("/pipelines")
@@ -48,21 +47,19 @@ import org.jboss.logging.Logger;
 public class PipelineEndpoint {
 
   static final Logger LOGGER = Logger.getLogger(PipelineEndpoint.class);
-  @Inject Mutiny.SessionFactory sf;
   @Inject StreamsUtilities streamsUtil;
   @Inject PythonRunnerPool runnerPool;
   @Inject KubernetesClient kubernetesClient;
+  @Inject DataCaterSessionFactory dsf;
   WebClient client;
 
   public PipelineEndpoint(Vertx vertx) {
     this.client = WebClient.create(vertx);
   }
 
-  JsonMapper mapper = new JsonMapper();
-
   @GET
   public Uni<List<PipelineEntity>> getPipelines() {
-    return sf.withSession(
+    return dsf.withSession(
         session ->
             session.createQuery("from PipelineEntity", PipelineEntity.class).getResultList());
   }
@@ -70,7 +67,7 @@ public class PipelineEndpoint {
   @GET
   @Path("{uuid}")
   public Uni<PipelineEntity> getPipeline(@PathParam("uuid") UUID uuid) {
-    return sf.withTransaction(((session, transaction) -> session.find(PipelineEntity.class, uuid)))
+    return dsf.withTransaction(((session, transaction) -> session.find(PipelineEntity.class, uuid)))
         .onItem()
         .ifNull()
         .failWith(new PipelineNotFoundException("Pipeline not found."));
@@ -85,7 +82,7 @@ public class PipelineEndpoint {
             pipeline.getName(),
             pipeline.getSerializedMetadata(),
             PipelineSpec.serializePipelineSpec(pipeline.getSpec().getSteps()));
-    return sf.withTransaction((session, transaction) -> session.persist(pe)).replaceWith(pe);
+    return dsf.withTransaction((session, transaction) -> session.persist(pe)).replaceWith(pe);
   }
 
   @PUT
@@ -93,7 +90,7 @@ public class PipelineEndpoint {
   @RequestBody
   @Consumes(MediaType.APPLICATION_JSON)
   public Uni<PipelineEntity> updatePipeline(@PathParam("uuid") UUID uuid, Pipeline pipeline) {
-    return sf.withTransaction(
+    return dsf.withTransaction(
         ((session, transaction) ->
             session
                 .find(PipelineEntity.class, uuid)
@@ -103,7 +100,7 @@ public class PipelineEndpoint {
   @DELETE
   @Path("{uuid}")
   public Uni<Response> deletePipeline(@PathParam("uuid") UUID uuid) {
-    return sf.withTransaction(
+    return dsf.withTransaction(
         ((session, tx) ->
             session
                 .find(PipelineEntity.class, uuid)
@@ -155,7 +152,7 @@ public class PipelineEndpoint {
   private Uni<String> transformMessages(UUID uuid) {
     HttpClient httpClient = HttpClient.newHttpClient();
 
-    Uni<PipelineEntity> pe = sf.withSession(session -> session.find(PipelineEntity.class, uuid));
+    Uni<PipelineEntity> pe = dsf.withSession(session -> session.find(PipelineEntity.class, uuid));
     Uni<List<StreamMessage>> messages =
         pe.flatMap(
             pipelineEntity -> {
