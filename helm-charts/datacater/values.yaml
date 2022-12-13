@@ -18,7 +18,7 @@ image:
   repository: datacater/datacater
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: 'alpha-20221213'
+  tag: 'nightly-20221213'
 
 # GitHub personal access tokens will be used until we publish to docker io
 # Follow instructions -> https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-container-registry#authenticating-to-the-container-registry
@@ -48,7 +48,7 @@ env:
   - name: DATACATER_DEPLOYMENT_NAMESPACE
     value: default
   - name: DATACATER_DEPLOYMENT_IMAGE
-    value: "datacater/pipeline:alpha-20221213"
+    value: "datacater/pipeline:nightly-20221213"
   - name: DATACATER_TRANSFORMS_PATH
     value: "/datacater/transforms"
   - name: DATACATER_FILTERS_PATH
@@ -58,7 +58,7 @@ env:
   - name: DATACATER_PYTHONRUNNER_IMAGE_NAME
     value: 'datacater/python-runner'
   - name: DATACATER_PYTHONRUNNER_IMAGE_VERSION
-    value: 'alpha-20221213'
+    value: 'nightly-20221213'
   - name: QUARKUS_LOG_CONSOLE_JSON
     value: "false"
 

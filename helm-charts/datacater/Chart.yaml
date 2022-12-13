@@ -25,4 +25,4 @@ maintainers:
   - name: DataCater
     url: https://datacater.io
 
-appVersion: "alpha-20221213"
+appVersion: "nightly-20221213"
