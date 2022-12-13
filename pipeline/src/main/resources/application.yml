@@ -36,9 +36,10 @@ datacater:
     port: 50000
     host: localhost
     version: alpha-20221129
+    protocol: file
   message:
     batch:
-      size: 100
+      size: 2500
   stream-in:
     config: '{"key.deserializer": "io.datacater.core.serde.JsonDeserializer", "value.deserializer": "io.datacater.core.serde.JsonDeserializer"}'
   stream-out:
@@ -56,10 +57,12 @@ datacater:
       port: 50000
       host: localhost
       version: alpha-20221129
+      protocol: http
 
 '%test'  :
   datacater:
     python-runner:
+      protocol: http
       version: alpha-20221129
   quarkus:
     log:

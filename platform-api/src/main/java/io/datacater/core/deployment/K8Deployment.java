@@ -42,7 +42,8 @@ public class K8Deployment {
       UUID deploymentId) {
     final String name = StaticConfig.DEPLOYMENT_NAME_PREFIX + deploymentId;
     final String configmapName = StaticConfig.CONFIGMAP_NAME_PREFIX + deploymentId;
-    final String volumeName = StaticConfig.VOLUME_NAME_PREFIX + deploymentId;
+    final String configmapVolumeName = StaticConfig.CONFIGMAP_VOLUME_NAME_PREFIX + deploymentId;
+    final String dataShareVolumeName = StaticConfig.DATA_SHARE_VOLUME_NAME_PREFIX + deploymentId;
     final String serviceName = StaticConfig.SERVICE_NAME_PREFIX + deploymentId;
     k8NameSpace.create();
 
@@ -69,9 +70,12 @@ public class K8Deployment {
               .withNewSpec()
               .addAllToContainers(
                   List.of(
-                      deploymentContainer(name, volumeName, variables),
-                      pythonRunnerContainer(volumeName)))
-              .withVolumes(getVolume(volumeName, configmapName))
+                      deploymentContainer(
+                          name, configmapVolumeName, dataShareVolumeName, variables),
+                      pythonRunnerContainer(configmapVolumeName, dataShareVolumeName)))
+              .withVolumes(
+                  getConfigMapVolume(configmapVolumeName, configmapName),
+                  getDataShareVolume(dataShareVolumeName))
               .endSpec()
               .endTemplate()
               .endSpec()
@@ -112,7 +116,7 @@ public class K8Deployment {
         serviceName);
   }
 
-  private Container pythonRunnerContainer(String volumeName) {
+  private Container pythonRunnerContainer(String configmapVolumeName, String dataShareVolumeName) {
     return new ContainerBuilder(true)
         .withName(StaticConfig.PYTHON_RUNNER_NAME)
         .withImage(
@@ -122,11 +126,14 @@ public class K8Deployment {
                 StaticConfig.EnvironmentVariables.PYTHON_RUNNER_IMAGE_TAG))
         .withPorts(
             this.containerPort(StaticConfig.EnvironmentVariables.PYTHON_RUNNER_CONTAINER_PORT))
-        .withVolumeMounts(getVolumeMount(volumeName))
+        .withVolumeMounts(
+            getVolumeMount(configmapVolumeName, StaticConfig.CONFIGMAP_MOUNT_PATH),
+            getVolumeMount(dataShareVolumeName, StaticConfig.DATA_SHARE_MOUNT_PATH))
         .build();
   }
 
-  private Container deploymentContainer(String name, String volumeName, List<EnvVar> variables) {
+  private Container deploymentContainer(
+      String name, String configmapVolumeName, String dataShareVolumeName, List<EnvVar> variables) {
     return new ContainerBuilder(true)
         .withName(name)
         .withImage(StaticConfig.EnvironmentVariables.FULL_IMAGE_NAME)
@@ -137,7 +144,9 @@ public class K8Deployment {
         .withLimits(StaticConfig.RESOURCE_LIMITS)
         .endResources()
         .withPorts(this.containerPort(StaticConfig.EnvironmentVariables.DEPLOYMENT_CONTAINER_PORT))
-        .withVolumeMounts(getVolumeMount(volumeName))
+        .withVolumeMounts(
+            getVolumeMount(configmapVolumeName, StaticConfig.CONFIGMAP_MOUNT_PATH),
+            getVolumeMount(dataShareVolumeName, StaticConfig.DATA_SHARE_MOUNT_PATH))
         .build();
   }
 
@@ -148,18 +157,19 @@ public class K8Deployment {
         .build();
   }
 
-  private static VolumeMount getVolumeMount(String volumeName) {
-    return new VolumeMountBuilder()
-        .withName(volumeName)
-        .withMountPath(StaticConfig.MOUNT_PATH)
-        .build();
+  private static VolumeMount getVolumeMount(String volumeName, String mountPath) {
+    return new VolumeMountBuilder().withName(volumeName).withMountPath(mountPath).build();
   }
 
-  private static Volume getVolume(String volumeName, String deploymentName) {
+  private static Volume getConfigMapVolume(String volumeName, String deploymentName) {
     return new VolumeBuilder()
         .withName(volumeName)
         .withConfigMap(configMapVolumeSource(deploymentName))
         .build();
+  }
+
+  private static Volume getDataShareVolume(String volumeName) {
+    return new VolumeBuilder().withName(volumeName).build();
   }
 
   private static ConfigMapVolumeSource configMapVolumeSource(String deploymentName) {

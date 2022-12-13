@@ -8,12 +8,16 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.smallrye.reactive.messaging.kafka.Record;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.attribute.PosixFilePermissions;
 import java.time.Duration;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import java.net.ConnectException;
+import java.util.UUID;
 import java.util.concurrent.CompletionException;
-import java.util.Map;
 
 import io.vertx.mutiny.core.Vertx;
 import io.vertx.mutiny.core.buffer.Buffer;
@@ -55,6 +59,7 @@ public class Pipeline {
 
   @Inject
   @Channel(PipelineConfig.STREAM_OUT)
+  @OnOverflow(value = OnOverflow.Strategy.UNBOUNDED_BUFFER)
   Emitter<Record<byte[], byte[]>> producer;
 
   @Incoming(PipelineConfig.STREAM_IN)
@@ -64,7 +69,7 @@ public class Pipeline {
     try {
       // This is deliberately blocking
       handleMessages(messages);
-    } catch (CompletionException | ConnectException e) {
+    } catch (CompletionException | IOException e) {
       LOGGER.warn("Connection to Python-Runner sidecar failed: %s. Attempt: 0".format(e.getMessage()), e);
 
       int retries = 0;
@@ -76,7 +81,7 @@ public class Pipeline {
           Thread.sleep(PipelineConfig.CONNECTION_RETRY_WAIT);
           handleMessages(messages);
           break;
-        } catch (CompletionException | ConnectException ce) {
+        } catch (CompletionException | IOException ce) {
           retries = retries + 1;
           LOGGER.warn(
                   "Connection to Python-Runner sidecar failed: %s. Attempt: %d".format(ce.getMessage(), retries),
@@ -94,9 +99,44 @@ public class Pipeline {
     }
   }
 
-  private void handleMessages(ConsumerRecords<byte[], byte[]> messages) throws ConnectException {
+  private void handleMessagesViaFile(ConsumerRecords<byte[], byte[]> messages) throws IOException {
     HttpRequest<Buffer> request = client
-            .post(getPort(), getHost(), PipelineConfig.ENDPOINT)
+            .post(getPort(), getHost(), PipelineConfig.FILE_ENDPOINT)
+            .putHeader(PipelineConfig.HEADER, PipelineConfig.HEADER_TYPE);
+
+    // Write deserialized messages to temporary file
+    JsonArray deserializedMessages = getMessages(messages);
+    Path tempFile = Files.createTempFile(
+            Path.of(PipelineConfig.DATA_SHARE_MOUNT_PATH),
+            UUID.randomUUID().toString(),
+            ".json");
+    Files.setPosixFilePermissions(tempFile, PosixFilePermissions.fromString("rwxrwxrwx"));
+    Files.writeString(tempFile, deserializedMessages.toString());
+
+    // Pass name of temporary file to Python Runner
+    JsonObject requestObj = new JsonObject();
+    requestObj.put("fileIn", tempFile.normalize().toString());
+    HttpResponse<Buffer> response = request
+            .sendJson(requestObj)
+            .await()
+            .atMost(Duration.ofSeconds(PipelineConfig.DATACATER_PYTHONRUNNER_TIMEOUT));
+
+    if (response.statusCode() != RestResponse.StatusCode.OK) {
+      LOGGER.error(response.bodyAsJsonObject().encodePrettily());
+    } else {
+      // Read in processed records
+      Path tempFileOut = Path.of(response.bodyAsJsonObject().getString("fileOut"));
+      JsonArray processedMessages = new JsonArray(Files.readString(tempFileOut));
+      sendMessages(processedMessages);
+      Files.deleteIfExists(tempFileOut);
+    }
+
+    Files.deleteIfExists(tempFile);
+  }
+
+  private void handleMessagesViaHttp(ConsumerRecords<byte[], byte[]> messages) {
+    HttpRequest<Buffer> request = client
+            .post(getPort(), getHost(), PipelineConfig.HTTP_ENDPOINT)
             .putHeader(PipelineConfig.HEADER, PipelineConfig.HEADER_TYPE);
 
     HttpResponse<Buffer> response = request
@@ -111,25 +151,33 @@ public class Pipeline {
     }
   }
 
+  private void handleMessages(ConsumerRecords<byte[], byte[]> messages) throws IOException {
+    if (PipelineConfig.DATACATER_PYTHONRUNNER_PROTOCOL.contains("http")) {
+      handleMessagesViaHttp(messages);
+    } else {
+      handleMessagesViaFile(messages);
+    }
+  }
+
   private void sendMessages(JsonArray messages) {
-    Map<String, Object> streamOutConfig = KafkaConfig.streamOutConfig();
     messages.stream().forEach(x -> {
-      if(x instanceof JsonObject json){
-        if(json.getJsonObject(PipelineConfig.METADATA).containsKey(PipelineConfig.ERROR)){
+      if (x instanceof JsonObject json) {
+        if (json.getJsonObject(PipelineConfig.METADATA).containsKey(PipelineConfig.ERROR)) {
           logProcessingError(json);
+        } else {
+          sendRecord(
+                  Record.of(
+                          keySerializer.serialize(
+                                  KafkaConfig.DATACATER_STREAMOUT_TOPIC,
+                                  json.getValue(PipelineConfig.KEY)
+                          ),
+                          valueSerializer.serialize(
+                                  KafkaConfig.DATACATER_STREAMOUT_TOPIC,
+                                  json.getValue(PipelineConfig.VALUE)
+                          )
+                  )
+          );
         }
-        sendRecord(
-            Record.of(
-                    keySerializer.serialize(
-                            KafkaConfig.DATACATER_STREAMOUT_TOPIC,
-                            json.getValue(PipelineConfig.KEY)
-                    ),
-                    valueSerializer.serialize(
-                            KafkaConfig.DATACATER_STREAMOUT_TOPIC,
-                            json.getValue(PipelineConfig.VALUE)
-                    )
-              )
-            );
       }
     });
   }
