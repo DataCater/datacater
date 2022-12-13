@@ -6,11 +6,26 @@
 replicaCount: 1
 
 datacater:
+  database:
+    host: ""
+    username: datacater
+    password: datacater
+  deployment:
+    image: "datacater/pipeline:nightly-20221213"
+  transforms:
+    path: "/datacater/transforms"
+  filters:
+    path: "/datacater/filters"
+  pythonrunner:
+    image:
+      name: "datacater/python-runner"
+      version: "nightly-20221213"
+    replicas: 10
   ui:
     image:
       repository: datacater/ui
       pullPolicy: IfNotPresent
-      tag: '2022.12'
+      tag: 'nightly-20221213'
     service:
       type: ClusterIP
 
@@ -40,27 +55,28 @@ serviceAccount:
   # If not set and create is true, a name is generated using the fullname template
   name: 'datacater'
 
-env:
-  - name: QUARKUS_DATASOURCE_USERNAME
-    value: postgres
-  - name: QUARKUS_DATASOURCE_PASSWORD
-    value: datacater
-  - name: DATACATER_DEPLOYMENT_NAMESPACE
-    value: default
-  - name: DATACATER_DEPLOYMENT_IMAGE
-    value: "datacater/pipeline:nightly-20221213"
-  - name: DATACATER_TRANSFORMS_PATH
-    value: "/datacater/transforms"
-  - name: DATACATER_FILTERS_PATH
-    value: "/datacater/filters"
-  - name: DATACATER_PYTHONRUNNER_REPLICAS
-    value: "10"
-  - name: DATACATER_PYTHONRUNNER_IMAGE_NAME
-    value: 'datacater/python-runner'
-  - name: DATACATER_PYTHONRUNNER_IMAGE_VERSION
-    value: 'nightly-20221213'
-  - name: QUARKUS_LOG_CONSOLE_JSON
-    value: "false"
+extraEnv: []
+  #env:
+  #  - name: QUARKUS_DATASOURCE_USERNAME
+  #    value: datacater
+  #  - name: QUARKUS_DATASOURCE_PASSWORD
+  #    value: datacater
+  #  - name: DATACATER_DEPLOYMENT_NAMESPACE
+  #    value: {{ .Release.Namespace }}
+  #  - name: DATACATER_DEPLOYMENT_IMAGE
+  #    value: "datacater/pipeline:nightly-20221213"
+  #  - name: DATACATER_TRANSFORMS_PATH
+  #    value: "/datacater/transforms"
+  #  - name: DATACATER_FILTERS_PATH
+  #    value: "/datacater/filters"
+  #  - name: DATACATER_PYTHONRUNNER_REPLICAS
+  #    value: "10"
+  #  - name: DATACATER_PYTHONRUNNER_IMAGE_NAME
+  #    value: 'datacater/python-runner'
+  #  - name: DATACATER_PYTHONRUNNER_IMAGE_VERSION
+  #    value: 'nightly-20221213'
+  #  - name: QUARKUS_LOG_CONSOLE_JSON
+  #    value: "false"
 
 podAnnotations: {}
 

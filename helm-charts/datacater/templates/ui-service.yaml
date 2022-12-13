@@ -6,10 +6,9 @@ metadata:
     {{- include "datacater.labelsUi" . | nindent 4 }}
 spec:
   selector:
-    matchLabels:
-      {{- include "datacater.selectorLabelsUi" . | nindent 6 }}
+      {{- include "datacater.selectorLabelsUi" . | nindent 4 }}
   ports:
     - protocol: "TCP"
       port: 80
-      targetPort: 80
-  type: {{ .Values.datacater.ui.service | default "ClusterIp" }}
+      targetPort: 8080
+  type: {{ .Values.datacater.ui.service.type | default "ClusterIp" }}

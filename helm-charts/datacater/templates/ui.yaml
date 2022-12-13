@@ -17,3 +17,7 @@ spec:
         - name: nginx
           image: "{{ .Values.datacater.ui.image.repository }}:{{ .Values.datacater.ui.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.datacater.ui.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP

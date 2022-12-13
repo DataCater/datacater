@@ -34,15 +34,33 @@ spec:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          {{- with .Values.env }}
           env:
-            {{- if $.Values.postgres.enabled }}
             - name: QUARKUS_DATASOURCE_REACTIVE_URL
-              value: "postgresql://postgres.{{ $.Release.Namespace | default "default" }}.svc.cluster.local:5432/postgres"
-            {{- end }}
+              value: "postgresql://{{ .Values.datacater.database.host  }}"
+            - name: QUARKUS_DATASOURCE_USERNAME
+              value: {{ .Values.datacater.database.username | quote }}
+            - name: QUARKUS_DATASOURCE_PASSWORD
+              value: {{ .Values.datacater.database.password | quote }}
+            - name: DATACATER_DEPLOYMENT_NAMESPACE
+              value: {{ .Release.Namespace }}
+            - name: DATACATER_DEPLOYMENT_IMAGE
+              value: {{ .Values.datacater.deployment.image | quote }}
+            - name: DATACATER_TRANSFORMS_PATH
+              value: {{ .Values.datacater.transforms.path | quote }}
+            - name: DATACATER_FILTERS_PATH
+              value: {{ .Values.datacater.filters.path | quote }}
+            - name: DATACATER_PYTHONRUNNER_REPLICAS
+              value: {{ .Values.datacater.pythonrunner.replicas | quote }}
+            - name: DATACATER_PYTHONRUNNER_IMAGE_NAME
+              value: {{ .Values.datacater.pythonrunner.image.name | quote }}
+            - name: DATACATER_PYTHONRUNNER_IMAGE_VERSION
+              value: {{ .Values.datacater.pythonrunner.image.version | quote }}
+            - name: QUARKUS_LOG_CONSOLE_JSON
+              value: "false"
             - name: DATACATER_PYTHONRUNNER_IMAGE_NAMESPACE
               value: {{ $.Release.Namespace | default "default" }}
-            {{- toYaml . | nindent 12 }}
+          {{- if .Values.extraEnvs }}
+{{ toYaml .Values.extraEnvs | indent 12 }}
           {{- end }}
           ports:
             - name: http
