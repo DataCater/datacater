@@ -27,11 +27,12 @@ public class PipelineConfig {
     static final String DATACATER_PYTHONRUNNER_PROTOCOL =
             ConfigProvider.getConfig()
                     .getOptionalValue("datacater.python-runner.protocol", String.class)
-                    .orElse("http");
+                    .orElse("file");
 
     static final String STREAM_IN = "stream-in";
     static final String STREAM_OUT = "stream-out";
-    static final String ENDPOINT = "/batch-file";
+    static final String FILE_ENDPOINT = "/batch-file";
+    static final String HTTP_ENDPOINT = "/batch";
     static final String HEADER = "Content-Type";
     static final String HEADER_TYPE = "application/json";
     static final String KEY = "key";

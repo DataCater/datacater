@@ -101,7 +101,7 @@ public class Pipeline {
 
   private void handleMessagesViaFile(ConsumerRecords<byte[], byte[]> messages) throws IOException {
     HttpRequest<Buffer> request = client
-            .post(getPort(), getHost(), PipelineConfig.ENDPOINT)
+            .post(getPort(), getHost(), PipelineConfig.FILE_ENDPOINT)
             .putHeader(PipelineConfig.HEADER, PipelineConfig.HEADER_TYPE);
 
     // Write deserialized messages to temporary file
@@ -136,7 +136,7 @@ public class Pipeline {
 
   private void handleMessagesViaHttp(ConsumerRecords<byte[], byte[]> messages) {
     HttpRequest<Buffer> request = client
-            .post(getPort(), getHost(), PipelineConfig.ENDPOINT)
+            .post(getPort(), getHost(), PipelineConfig.HTTP_ENDPOINT)
             .putHeader(PipelineConfig.HEADER, PipelineConfig.HEADER_TYPE);
 
     HttpResponse<Buffer> response = request
@@ -152,10 +152,10 @@ public class Pipeline {
   }
 
   private void handleMessages(ConsumerRecords<byte[], byte[]> messages) throws IOException {
-    if (PipelineConfig.DATACATER_PYTHONRUNNER_PROTOCOL.contains("file")) {
-      handleMessagesViaFile(messages);
-    } else {
+    if (PipelineConfig.DATACATER_PYTHONRUNNER_PROTOCOL.contains("http")) {
       handleMessagesViaHttp(messages);
+    } else {
+      handleMessagesViaFile(messages);
     }
   }
 

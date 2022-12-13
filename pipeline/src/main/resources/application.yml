@@ -21,16 +21,11 @@ mp       :
         merge: true
         connector: smallrye-kafka
         kafka-configuration: stream-out-configuration
-        max-inflight-messages: 0
         topic: stream-out
-        waitForWriteCompletion: false
     incoming:
       stream-in:
-        auto.commit.interval.ms: 10000
         batch: true
         connector: smallrye-kafka
-        commit-strategy: throttled
-        fetch.min.bytes: 102400
         max:
           poll:
             records: ${datacater.message.batch.size}
