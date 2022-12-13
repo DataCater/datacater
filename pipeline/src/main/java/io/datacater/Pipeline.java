@@ -152,10 +152,10 @@ public class Pipeline {
   }
 
   private void handleMessages(ConsumerRecords<byte[], byte[]> messages) throws IOException {
-    if (PipelineConfig.DATACATER_PYTHONRUNNER_PROTOCOL.equals("http")) {
-      handleMessagesViaHttp(messages);
-    } else {
+    if (PipelineConfig.DATACATER_PYTHONRUNNER_PROTOCOL.contains("file")) {
       handleMessagesViaFile(messages);
+    } else {
+      handleMessagesViaHttp(messages);
     }
   }
 

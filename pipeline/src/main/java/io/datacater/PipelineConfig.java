@@ -27,7 +27,7 @@ public class PipelineConfig {
     static final String DATACATER_PYTHONRUNNER_PROTOCOL =
             ConfigProvider.getConfig()
                     .getOptionalValue("datacater.python-runner.protocol", String.class)
-                    .orElse("file");
+                    .orElse("http");
 
     static final String STREAM_IN = "stream-in";
     static final String STREAM_OUT = "stream-out";
