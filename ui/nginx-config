@@ -1,3 +1,7 @@
+upstream Backend {
+    server datacater;
+}
+
 server {
    listen 8080 default_server;
    listen [::]:8080 default_server;
@@ -17,6 +21,6 @@ server {
    }
 
    location /api {
-      proxy_pass http://datacater.default.svc.cluster.local:80;
+      proxy_pass http://Backend;
    }
 }
