@@ -8,7 +8,6 @@ spec:
   selector:
     matchLabels:
       {{- include "datacater.selectorLabelsUi" . | nindent 6 }}
-  replicas: 1
   template:
     metadata:
       labels:
