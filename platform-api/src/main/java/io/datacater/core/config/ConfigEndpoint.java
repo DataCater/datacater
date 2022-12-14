@@ -15,7 +15,7 @@ import org.hibernate.reactive.mutiny.Mutiny.SessionFactory;
 @Path("/configs")
 @Produces(MediaType.APPLICATION_JSON)
 public class ConfigEndpoint {
-  private final String UUID_NOT_FOUND_ERROR_MESSAGE = "No config found for uuid %s";
+  private static final String UUID_NOT_FOUND_ERROR_MESSAGE = "No config found for uuid %s";
 
   @Inject SessionFactory sf;
 

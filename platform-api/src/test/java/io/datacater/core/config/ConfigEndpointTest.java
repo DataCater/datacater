@@ -23,6 +23,8 @@ import org.junit.jupiter.api.*;
 @TestHTTPEndpoint(ConfigEndpoint.class)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class ConfigEndpointTest {
+  private static final String INVALID_JSON = "{foo{bar42{};";
+
   JsonNode postFirstConfigJson;
   JsonNode postSecondConfigJson;
   JsonNode postThirdConfigJson;
@@ -201,6 +203,38 @@ class ConfigEndpointTest {
         .put("/{uuid}")
         .then()
         .statusCode(200);
+  }
+
+  @Test
+  @Order(12)
+  void testPostInvalidJson() {
+    given()
+        .header("Content-Type", "application/json")
+        .body(INVALID_JSON)
+        .post()
+        .then()
+        .statusCode(400);
+  }
+
+  @Test
+  @Order(13)
+  void testPutInvalidJson() throws JsonProcessingException {
+    ObjectMapper objectMapper = new ObjectMapper();
+
+    String responseJson = given().get().getBody().asString();
+    UUID configId =
+        objectMapper
+            .readValue(responseJson, new TypeReference<ArrayList<ConfigEntity>>() {})
+            .get(0)
+            .getId();
+
+    given()
+        .header("Content-Type", "application/json")
+        .body(INVALID_JSON)
+        .pathParam("uuid", configId)
+        .put("/{uuid}")
+        .then()
+        .statusCode(400);
   }
 
   private JsonNode getJsonFromFile(String path) throws IOException {
