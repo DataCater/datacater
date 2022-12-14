@@ -21,7 +21,6 @@ import org.hibernate.annotations.UpdateTimestamp;
 @Table(name = "configs")
 @Entity
 public class ConfigEntity {
-
   @Id
   @GeneratedValue
   @JsonProperty("uuid")

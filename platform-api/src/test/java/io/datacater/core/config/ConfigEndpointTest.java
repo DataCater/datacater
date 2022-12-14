@@ -2,7 +2,6 @@ package io.datacater.core.config;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.containsString;
-import static org.junit.jupiter.api.Assertions.*;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -25,11 +24,11 @@ import org.junit.jupiter.api.*;
 class ConfigEndpointTest {
   private static final String INVALID_JSON = "{foo{bar42{};";
 
-  JsonNode postFirstConfigJson;
-  JsonNode postSecondConfigJson;
-  JsonNode postThirdConfigJson;
-  JsonNode postConfigMissingNameJson;
-  JsonNode postConfigUnnecessaryPropertyJson;
+  private JsonNode postFirstConfigJson;
+  private JsonNode postSecondConfigJson;
+  private JsonNode postThirdConfigJson;
+  private JsonNode postConfigMissingNameJson;
+  private JsonNode postConfigUnnecessaryPropertyJson;
 
   @BeforeAll
   public void setUp() throws IOException {
@@ -45,14 +44,12 @@ class ConfigEndpointTest {
   @Test
   @Order(1)
   void testGetEmptyConfigList() {
-    // get an empty list of configs
     given().get().then().statusCode(200).and().body(containsString("[]"));
   }
 
   @Test
   @Order(2)
-  void testPostConfigs() throws JsonProcessingException {
-    // create three configs
+  void testPostConfigs() {
     for (var jsonNode :
         new JsonNode[] {postFirstConfigJson, postSecondConfigJson, postThirdConfigJson}) {
 
@@ -68,7 +65,6 @@ class ConfigEndpointTest {
   @Test
   @Order(3)
   void testPostFailMissingProperties() {
-    // request with body that is missing properties inside json
     given()
         .header("Content-Type", "application/json")
         .body(postConfigMissingNameJson.toString())
@@ -80,8 +76,6 @@ class ConfigEndpointTest {
   @Test
   @Order(4)
   void testPostFailUnnecessaryProperties() {
-    // post with body that contains unnecessary properties
-    // TODO change to return 400 if body contains properties which are not specified
     given()
         .header("Content-Type", "application/json")
         .body(postConfigUnnecessaryPropertyJson.toString())
@@ -93,38 +87,32 @@ class ConfigEndpointTest {
   @Test
   @Order(5)
   void testGetConfigFail() {
-    // get a non-existing config
     given().pathParam("uuid", UUID.randomUUID()).get("/{uuid}").then().statusCode(404);
   }
 
   @Test
   @Order(6)
   void testGetConfigList() throws JsonProcessingException {
-    // get all configs
     Response response = given().get();
 
     ObjectMapper objectMapper = new ObjectMapper();
 
     ArrayList<ConfigEntity> receivedConfigs =
-        objectMapper.readValue(
-            response.getBody().asString(), new TypeReference<ArrayList<ConfigEntity>>() {});
+        objectMapper.readValue(response.getBody().asString(), new TypeReference<>() {});
 
     Assertions.assertEquals(200, response.statusCode());
-    // TODO change to "3" when changing response for post with unnecessary properties inside body
     Assertions.assertEquals(4, receivedConfigs.size());
   }
 
   @Test
   @Order(7)
   void testDeleteConfigFail() {
-    // delete a non-existing config
     given().pathParam("uuid", UUID.randomUUID()).delete("/{uuid}").then().statusCode(404);
   }
 
   @Test
   @Order(8)
   void testDeleteConfig() throws JsonProcessingException {
-    // deletes an existing config
     ObjectMapper objectMapper = new ObjectMapper();
 
     String responseJson = given().get().getBody().asString();
@@ -141,7 +129,6 @@ class ConfigEndpointTest {
   @Test
   @Order(9)
   void testPut() throws JsonProcessingException {
-    // updates an existing config
     ObjectMapper objectMapper = new ObjectMapper();
 
     String responseJson = given().get().getBody().asString();
@@ -163,7 +150,6 @@ class ConfigEndpointTest {
   @Test
   @Order(10)
   void testPutFailMissingProperties() throws JsonProcessingException {
-    // updates an existing config with missing properties inside the request body
     ObjectMapper objectMapper = new ObjectMapper();
 
     String responseJson = given().get().getBody().asString();
@@ -185,8 +171,6 @@ class ConfigEndpointTest {
   @Test
   @Order(11)
   void testPutFailUnnecessaryProperties() throws JsonProcessingException {
-    // updates an existing config with unnecessary properties inside the request body
-    // TODO change to return 400 if body contains properties which are not specified
     ObjectMapper objectMapper = new ObjectMapper();
 
     String responseJson = given().get().getBody().asString();
