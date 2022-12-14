@@ -39,7 +39,7 @@ public class LabeledStatefulSet implements Shareable {
       throw new DatacaterException(message);
     }
   }
-  
+
   void createService() {
     Service service = buildService();
     String message =
