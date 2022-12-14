@@ -2,6 +2,7 @@ export function getDeserializerOptions(stream) {
   let options = [
     "io.datacater.core.serde.JsonDeserializer",
     "io.datacater.core.serde.AvroDeserializer",
+    "org.apache.kafka.common.serialization.StringDeserializer",
   ];
 
   // Add custom value.deserializer to list of options

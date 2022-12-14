@@ -2,6 +2,7 @@ export function getSerializerOptions(stream) {
   let options = [
     "io.datacater.core.serde.JsonSerializer",
     "io.datacater.core.serde.AvroSerializer",
+    "org.apache.kafka.common.serialization.StringSerializer",
   ];
 
   // Add custom value.serializer to list of options
