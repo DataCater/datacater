@@ -14,7 +14,7 @@ import org.junit.jupiter.api.TestInstance;
 
 @QuarkusTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class ConfigTest {
+class ConfigTest {
   Config config;
 
   @BeforeAll
@@ -30,9 +30,9 @@ public class ConfigTest {
   void test() {
     Map<String, Object> spec = config.spec();
 
-    Assertions.assertEquals(config.name(), "config1");
-    Assertions.assertEquals(config.kind(), Kind.STREAM);
-    Assertions.assertEquals(spec.get("prop1"), "asdf");
-    Assertions.assertEquals(spec.get("prop2"), "qwert");
+    Assertions.assertEquals("config1", config.name());
+    Assertions.assertEquals(Kind.STREAM, config.kind());
+    Assertions.assertEquals("asdf", spec.get("prop1"));
+    Assertions.assertEquals("qwert", spec.get("prop2"));
   }
 }
