@@ -2,6 +2,8 @@ import React, { Component } from "react";
 import { connect } from "react-redux";
 import Breadcrumb from "../../components/layout/Breadcrumb";
 import Header from "../../components/layout/Header";
+import TimeAgo from "javascript-time-ago";
+import en from "javascript-time-ago/locale/en";
 import { fetchPipelines } from "../../actions/pipelines";
 
 class ListPipelines extends Component {
@@ -10,8 +12,6 @@ class ListPipelines extends Component {
   }
 
   render() {
-    const pipelines = this.props.pipelines.pipelines;
-
     if (![undefined, ""].includes(this.props.pipelines.errorMessage)) {
       return (
         <div className="container">
@@ -24,6 +24,13 @@ class ListPipelines extends Component {
         </div>
       );
     }
+
+    const pipelines = this.props.pipelines.pipelines.sort(
+      (a, b) => Date.parse(b.updatedAt) - Date.parse(a.updatedAt)
+    );
+
+    TimeAgo.addDefaultLocale(en);
+    const timeAgo = new TimeAgo("en-US");
 
     return (
       <div className="container">
@@ -81,6 +88,15 @@ class ListPipelines extends Component {
                         {pipeline.uuid}
                       </small>
                     </div>
+                    {pipeline.updatedAt !== undefined &&
+                      !isNaN(Date.parse(pipeline.updatedAt)) && (
+                        <div className="d-flex w-100 justify-content-between mb-1">
+                          <small className="d-flex align-items-center text-muted">
+                            Last modified:{" "}
+                            {timeAgo.format(new Date(pipeline.updatedAt))}
+                          </small>
+                        </div>
+                      )}
                   </a>
                 ))}
               </div>

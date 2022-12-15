@@ -2,6 +2,8 @@ import React, { Component } from "react";
 import { connect } from "react-redux";
 import Breadcrumb from "../../components/layout/Breadcrumb";
 import Header from "../../components/layout/Header";
+import TimeAgo from "javascript-time-ago";
+import en from "javascript-time-ago/locale/en";
 import { fetchStreams } from "../../actions/streams";
 
 class ListStreams extends Component {
@@ -10,8 +12,6 @@ class ListStreams extends Component {
   }
 
   render() {
-    const streams = this.props.streams.streams;
-
     if (![undefined, ""].includes(this.props.streams.errorMessage)) {
       return (
         <div className="container">
@@ -24,6 +24,13 @@ class ListStreams extends Component {
         </div>
       );
     }
+
+    const streams = this.props.streams.streams.sort(
+      (a, b) => Date.parse(b.updatedAt) - Date.parse(a.updatedAt)
+    );
+
+    TimeAgo.addDefaultLocale(en);
+    const timeAgo = new TimeAgo("en-US");
 
     return (
       <div className="container">
@@ -81,7 +88,18 @@ class ListStreams extends Component {
                         {stream.uuid}
                       </small>
                     </div>
-                    <small>{stream.spec.kafka["bootstrap.servers"]}</small>
+                    <div className="d-flex w-100 justify-content-between mb-1">
+                      <small className="d-flex-align-items-center">
+                        {stream.spec.kafka["bootstrap.servers"]}
+                      </small>
+                      {stream.updatedAt !== undefined &&
+                        !isNaN(Date.parse(stream.updatedAt)) && (
+                          <small className="d-flex align-items-center text-muted">
+                            Last modified:{" "}
+                            {timeAgo.format(new Date(stream.updatedAt))}
+                          </small>
+                        )}
+                    </div>
                   </a>
                 ))}
               </div>

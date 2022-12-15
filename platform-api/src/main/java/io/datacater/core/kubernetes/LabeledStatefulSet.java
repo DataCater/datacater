@@ -23,7 +23,6 @@ public class LabeledStatefulSet implements Shareable {
 
   void createStatefulSet(StatefulSet statefulSet) {
     try {
-      createNamespace();
       String message =
           String.format(
               "Executing StatefulSet Request against context := %s",
@@ -38,27 +37,6 @@ public class LabeledStatefulSet implements Shareable {
     } catch (KubernetesClientException e) {
       String message = StringUtilities.wrapString(e.getMessage());
       throw new DatacaterException(message);
-    }
-  }
-
-  private boolean namespaceExists() {
-    try {
-      return client.namespaces().list().getItems().stream()
-          .anyMatch(ns -> ns.getMetadata().getNamespace().equals(DataCaterK8sConfig.NAMESPACE));
-    } catch (Exception e) {
-      return false;
-    }
-  }
-
-  protected void createNamespace() {
-    if (!namespaceExists()) {
-      Namespace ns =
-          new NamespaceBuilder()
-              .withNewMetadata()
-              .withName(DataCaterK8sConfig.NAMESPACE)
-              .endMetadata()
-              .build();
-      client.namespaces().createOrReplace(ns);
     }
   }
 
