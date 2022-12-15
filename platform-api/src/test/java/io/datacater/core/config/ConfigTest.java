@@ -32,6 +32,7 @@ class ConfigTest {
 
     Assertions.assertEquals("config1", config.name());
     Assertions.assertEquals(Kind.STREAM, config.kind());
+    Assertions.assertEquals(Map.of(), config.metadata());
     Assertions.assertEquals("asdf", spec.get("prop1"));
     Assertions.assertEquals("qwert", spec.get("prop2"));
   }

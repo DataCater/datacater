@@ -41,15 +41,21 @@ public class ConfigEntity {
   private String kind;
 
   @Type(type = JsonTypes.JSON)
+  @JsonProperty("metadata")
+  @Column(name = "metadata", columnDefinition = JsonTypes.JSON_BIN)
+  private JsonNode metadata;
+
+  @Type(type = JsonTypes.JSON)
   @JsonProperty("spec")
   @Column(name = "spec", columnDefinition = JsonTypes.JSON_BIN)
   private JsonNode spec;
 
   protected ConfigEntity() {}
 
-  protected ConfigEntity(String name, Kind kind, JsonNode spec) {
+  protected ConfigEntity(String name, Kind kind, JsonNode metadata, JsonNode spec) {
     this.name = name;
     this.kind = kind.toString();
+    this.metadata = metadata;
     this.spec = spec;
   }
 
@@ -59,6 +65,7 @@ public class ConfigEntity {
 
     try {
       this.spec = config.serializeConfigSpec();
+      this.metadata = config.serializeMetadata();
     } catch (JsonProcessingException e) {
       throw new JsonNotParsableException(e.getMessage());
     }
@@ -66,27 +73,33 @@ public class ConfigEntity {
     return this;
   }
 
-  public static ConfigEntity from(String name, Kind kind, Map<String, Object> spec)
+  public static ConfigEntity from(
+      String name, Kind kind, Map<String, Object> metadata, Map<String, Object> spec)
       throws JsonProcessingException {
     ObjectMapper objectMapper = new ObjectMapper();
-    JsonNode specAsJson = objectMapper.readTree(objectMapper.writeValueAsString(spec));
+    JsonNode specJson = objectMapper.readTree(objectMapper.writeValueAsString(spec));
+    JsonNode metadataJson = objectMapper.readTree(objectMapper.writeValueAsString(metadata));
 
-    return new ConfigEntity(name, kind, specAsJson);
-  }
-
-  public JsonNode getSpec() {
-    return spec;
-  }
-
-  public String getName() {
-    return name;
+    return new ConfigEntity(name, kind, metadataJson, specJson);
   }
 
   public UUID getId() {
     return id;
   }
 
+  public String getName() {
+    return name;
+  }
+
   public Kind getKind() {
     return Kind.valueOf(this.kind);
+  }
+
+  public JsonNode getMetadata() {
+    return metadata;
+  }
+
+  public JsonNode getSpec() {
+    return spec;
   }
 }

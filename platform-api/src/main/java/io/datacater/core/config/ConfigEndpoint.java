@@ -49,7 +49,8 @@ public class ConfigEndpoint {
   @RequestBody
   @Consumes(MediaType.APPLICATION_JSON)
   public Uni<ConfigEntity> createConfig(Config config) throws JsonProcessingException {
-    ConfigEntity configEntity = ConfigEntity.from(config.name(), config.kind(), config.spec());
+    ConfigEntity configEntity =
+        ConfigEntity.from(config.name(), config.kind(), config.metadata(), config.spec());
 
     return sf.withTransaction((session, transaction) -> session.persist(configEntity))
         .replaceWith(configEntity);
