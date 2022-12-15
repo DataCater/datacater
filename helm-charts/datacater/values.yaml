@@ -25,7 +25,7 @@ datacater:
     image:
       repository: datacater/ui
       pullPolicy: IfNotPresent
-      tag: {{ $.Chart.AppVersion }}
+      tag: 'nightly-20221215'
     service:
       type: ClusterIP
 
