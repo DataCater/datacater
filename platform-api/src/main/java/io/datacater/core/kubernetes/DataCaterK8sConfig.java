@@ -39,7 +39,7 @@ public class DataCaterK8sConfig {
   static final String NAMESPACE =
       ConfigProvider.getConfig()
           .getOptionalValue("datacater.pythonrunner.image.namespace", String.class)
-          .orElse("datacater");
+          .orElse("default");
   public static final long PYTHON_RUNNER_PREVIEW_TIMEOUT =
       ConfigProvider.getConfig()
           .getOptionalValue("datacater.pythonrunner.preview.timeout", Long.class)

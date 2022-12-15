@@ -24,12 +24,10 @@ public class K8Deployment {
   private static final Logger LOGGER = Logger.getLogger(K8Deployment.class);
   private final KubernetesClient client;
   private final K8ConfigMap k8ConfigMap;
-  private final K8NameSpace k8NameSpace;
   private final K8Service k8Service;
 
   public K8Deployment(KubernetesClient client) {
     this.client = client;
-    this.k8NameSpace = new K8NameSpace(client);
     this.k8ConfigMap = new K8ConfigMap(client);
     this.k8Service = new K8Service(client);
   }
@@ -45,7 +43,6 @@ public class K8Deployment {
     final String configmapVolumeName = StaticConfig.CONFIGMAP_VOLUME_NAME_PREFIX + deploymentId;
     final String dataShareVolumeName = StaticConfig.DATA_SHARE_VOLUME_NAME_PREFIX + deploymentId;
     final String serviceName = StaticConfig.SERVICE_NAME_PREFIX + deploymentId;
-    k8NameSpace.create();
 
     List<EnvVar> variables =
         getEnvironmentVariables(streamIn, streamOut, deploymentSpec, deploymentId);

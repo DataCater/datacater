@@ -11,31 +11,6 @@ metadata:
     app.kubernetes.io/version: "nightly-20221214"
     app.kubernetes.io/managed-by: Helm
 ---
-# Source: datacater/templates/clusterrole.yaml
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
-metadata:
-  name: datacater-cluster
-rules:
-  - apiGroups: [""] # "" indicates the core API group
-    resources: ["namespaces"]
-    verbs: [ "create", "patch", "update", "list", "watch", "get" ]
----
-# Source: datacater/templates/clusterrolebinding.yaml
-apiVersion: rbac.authorization.k8s.io/v1
-# This cluster role binding allows anyone in the "manager" group to read secrets in any namespace.
-kind: ClusterRoleBinding
-metadata:
-  name: datacater-cluster
-subjects:
-  - kind: ServiceAccount
-    name: datacater # Name is case sensitive
-    namespace: default
-roleRef:
-  kind: ClusterRole
-  name: datacater-cluster
-  apiGroup: rbac.authorization.k8s.io
----
 # Source: datacater/templates/role.yaml
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
