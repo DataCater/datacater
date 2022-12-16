@@ -1,0 +1,17 @@
+{
+  "name": "config1",
+  "unnecessary-property" : "123456",
+  "kind": "STREAM",
+  "metadata" : {
+    "meta1" : "foo",
+    "meta2" : "bar"
+  },
+  "spec": {
+    "prop1": "asdf",
+    "prop2": "qwert",
+    "prop3": {
+      "subprop1" : "asdf",
+      "subprop2" : "eiouas"
+    }
+  }
+}

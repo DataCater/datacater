@@ -1,0 +1,16 @@
+{
+  "name": "config3",
+  "kind": "DEPLOYMENT",
+  "metadata" : {
+    "meta1" : "foo",
+    "meta2" : "bar"
+  },
+  "spec": {
+    "prop1": {
+      "subprop1" : "asdf",
+      "subprop2" : "eiouaass",
+      "subprop3" : "asfdadf",
+      "subprop4" : "ee4iouas"
+    }
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "name": "config1",
+  "kind": "STREAM",
+  "metadata" : {
+  },
+  "spec": {
+    "prop1": "asdf",
+    "prop2": "qwert",
+    "prop3": {
+      "subprop1" : "asdf",
+      "subprop2" : "eiouas"
+    }
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "name": "config2",
+  "kind": "PIPELINE",
+  "metadata" : {
+    "meta1" : "foo"
+  },
+  "spec": {
+    "prop1": {
+      "subprop1" : "asdf",
+      "subprop2" : "eiouas"
+    },
+    "prop2": {
+      "subprop1" : "asdf",
+      "subprop2" : "eiouas"
+    }
+  }
+}
