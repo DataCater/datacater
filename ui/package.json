@@ -5,6 +5,7 @@
   "dependencies": {
     "axios": "^0.27.2",
     "bootstrap": "^5.2.1",
+    "javascript-time-ago": "^2.5.9",
     "json-to-pretty-yaml": "^1.2.2",
     "npm": "^8.19.2",
     "parse-prometheus-text-format": "^1.1.1",

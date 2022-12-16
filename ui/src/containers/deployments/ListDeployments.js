@@ -2,6 +2,8 @@ import React, { Component } from "react";
 import { connect } from "react-redux";
 import Breadcrumb from "../../components/layout/Breadcrumb";
 import Header from "../../components/layout/Header";
+import TimeAgo from "javascript-time-ago";
+import en from "javascript-time-ago/locale/en";
 import { fetchDeployments } from "../../actions/deployments";
 
 class ListDeployments extends Component {
@@ -10,8 +12,6 @@ class ListDeployments extends Component {
   }
 
   render() {
-    const deployments = this.props.deployments.deployments;
-
     if (![undefined, ""].includes(this.props.deployments.errorMessage)) {
       return (
         <div className="container">
@@ -24,6 +24,13 @@ class ListDeployments extends Component {
         </div>
       );
     }
+
+    const deployments = this.props.deployments.deployments.sort(
+      (a, b) => Date.parse(b.updatedAt) - Date.parse(a.updatedAt)
+    );
+
+    TimeAgo.addDefaultLocale(en);
+    const timeAgo = new TimeAgo("en-US");
 
     return (
       <div className="container">
@@ -81,6 +88,15 @@ class ListDeployments extends Component {
                         {deployment.uuid}
                       </small>
                     </div>
+                    {deployment.updatedAt !== undefined &&
+                      !isNaN(Date.parse(deployment.updatedAt)) && (
+                        <div className="d-flex w-100 justify-content-between mb-1">
+                          <small className="d-flex align-items-center text-muted">
+                            Last modified:{" "}
+                            {timeAgo.format(new Date(deployment.updatedAt))}
+                          </small>
+                        </div>
+                      )}
                   </a>
                 ))}
               </div>
