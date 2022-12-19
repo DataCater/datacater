@@ -72,10 +72,10 @@ class CodeEditor extends Component {
   }
 
   handleChange(value, event) {
-    const unsavedChanges = unsavedChanges || (value !== this.state.code);
+    const unsavedChanges = unsavedChanges || value !== this.state.code;
     this.setState({
       code: value,
-      unsavedChanges: unsavedChanges
+      unsavedChanges: unsavedChanges,
     });
   }
 
@@ -92,7 +92,7 @@ class CodeEditor extends Component {
     );
 
     this.setState({
-      unsavedChanges: false
+      unsavedChanges: false,
     });
   }
 
@@ -108,10 +108,7 @@ class CodeEditor extends Component {
             Python®
           </div>
           <div className="col-auto">
-            <button
-              className={buttonClassNames}
-              onClick={this.handleApply}
-            >
+            <button className={buttonClassNames} onClick={this.handleApply}>
               <Play className="feather-icon" />
               Save &amp; Run
             </button>
