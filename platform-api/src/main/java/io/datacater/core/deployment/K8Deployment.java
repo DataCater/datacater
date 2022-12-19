@@ -319,8 +319,23 @@ public class K8Deployment {
         getEnvVariableFromNode(streamOut.getSpec(), StaticConfig.VALUE_SERIALIZER));
 
     List<EnvVar> variables = new ArrayList<>();
-    variables.add(createEnvVariable(StaticConfig.STREAM_IN_CONFIG_NAME, streamIn.getName()));
-    variables.add(createEnvVariable(StaticConfig.STREAM_OUT_CONFIG_NAME, streamOut.getName()));
+    variables.add(createEnvVariable(StaticConfig.STREAMIN_CONFIG_NAME, streamIn.getName()));
+    variables.add(createEnvVariable(StaticConfig.STREAMOUT_CONFIG_NAME, streamOut.getName()));
+
+    variables.add(createEnvVariable("MP_MESSAGING_INCOMING_STREAMIN_CONNECTOR", "smallrye-kafka"));
+    variables.add(createEnvVariable("MP_MESSAGING_INCOMING_STREAMIN_TOPIC", streamIn.getName()));
+    variables.add(
+        createEnvVariable(
+            "MP_MESSAGING_INCOMING_STREAMIN_BOOTSTRAP_SERVERS",
+            "pkc-75m1o.europe-west3.gcp.confluent.cloud:9092"));
+    variables.add(
+        createEnvVariable(
+            "MP_MESSAGING_INCOMING_STREAMIN_VALUE_DESERIALIZER",
+            "org.apache.kafka.common.serialization.StringDeserializer"));
+    variables.add(
+        createEnvVariable(
+            "MP_MESSAGING_INCOMING_STREAMIN_KEY_DESERIALIZER",
+            "org.apache.kafka.common.serialization.StringDeserializer"));
 
     try {
       variables.add(

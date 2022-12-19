@@ -29,8 +29,8 @@ public class PipelineConfig {
                     .getOptionalValue("datacater.python-runner.protocol", String.class)
                     .orElse("file");
 
-    static final String STREAM_IN = "stream-in";
-    static final String STREAM_OUT = "stream-out";
+    static final String STREAMIN = "streamin";
+    static final String STREAMOUT = "streamout";
     static final String FILE_ENDPOINT = "/batch-file";
     static final String HTTP_ENDPOINT = "/batch";
     static final String HEADER = "Content-Type";

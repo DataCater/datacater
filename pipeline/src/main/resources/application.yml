@@ -17,20 +17,20 @@ quarkus  :
 mp       :
   messaging:
     outgoing:
-      stream-out:
+      streamout:
         merge: true
         connector: smallrye-kafka
-        kafka-configuration: stream-out-configuration
-        topic: stream-out
+        kafka-configuration: streamout-configuration
+        topic: streamout
     incoming:
-      stream-in:
+      streamin:
         batch: true
         connector: smallrye-kafka
         max:
           poll:
             records: ${datacater.message.batch.size}
-        kafka-configuration: stream-in-configuration
-        topic: stream-in
+        kafka-configuration: streamin-configuration
+        topic: streamin
 datacater:
   python-runner:
     port: 50000
@@ -40,9 +40,9 @@ datacater:
   message:
     batch:
       size: 2500
-  stream-in:
+  streamin:
     config: '{"key.deserializer": "io.datacater.core.serde.JsonDeserializer", "value.deserializer": "io.datacater.core.serde.JsonDeserializer"}'
-  stream-out:
+  streamout:
     config: '{"key.serializer": "io.datacater.core.serde.JsonSerializer", "value.serializer": "io.datacater.core.serde.JsonSerializer"}'
 
 

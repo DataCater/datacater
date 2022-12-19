@@ -15,7 +15,6 @@ import java.nio.file.attribute.PosixFilePermissions;
 import java.time.Duration;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import java.net.ConnectException;
 import java.util.UUID;
 import java.util.concurrent.CompletionException;
 
@@ -58,11 +57,11 @@ public class Pipeline {
   }
 
   @Inject
-  @Channel(PipelineConfig.STREAM_OUT)
+  @Channel(PipelineConfig.STREAMOUT)
   @OnOverflow(value = OnOverflow.Strategy.UNBOUNDED_BUFFER)
   Emitter<Record<byte[], byte[]>> producer;
 
-  @Incoming(PipelineConfig.STREAM_IN)
+  @Incoming(PipelineConfig.STREAMIN)
   @Blocking
   @Acknowledgment(Acknowledgment.Strategy.POST_PROCESSING)
   public void processUUID(ConsumerRecords<byte[], byte[]> messages) {
