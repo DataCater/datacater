@@ -72,13 +72,13 @@ datacater:
   mp:
     messaging:
       outgoing:
-        stream-in-test:
+        streamin-test:
           connector: smallrye-kafka
-          topic: stream-in
+          topic: streamin
       incoming:
-        stream-out-test:
+        streamout-test:
           connector: smallrye-kafka
-          topic: stream-out
+          topic: streamout
           key:
             deserializer: io.datacater.core.serde.JsonDeserializer
           value:
