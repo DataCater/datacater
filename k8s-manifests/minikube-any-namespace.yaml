@@ -1,0 +1,330 @@
+# Created by helm template helm-charts/datacater --set "postgres.enabled=true" --set "postgres.username=datacater" --set "datacater.database.host=postgres:5432/postgres" > k8s-manifests/minikube-any-namespace.yaml
+---
+# Source: datacater/templates/serviceaccount.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: datacater
+  labels:
+    helm.sh/chart: datacater-0.1.0
+    app.kubernetes.io/part-of: datacater-0.1.0
+    app.kubernetes.io/name: datacater
+    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/version: "nightly-20221215"
+    app.kubernetes.io/managed-by: Helm
+---
+# Source: datacater/templates/role.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: datacater-api
+rules:
+  - apiGroups: [""] # "" indicates the core API group
+    resources: ["pods", "pods/log", "services", "namespace", "configmaps"]
+    verbs: ["get", "watch", "list", "create", "delete", "patch", "update"]
+  - apiGroups: ["apps"]
+    resources: ["statefulsets", "deployments", "configmaps", "replicasets"]
+    verbs: ["get", "watch", "list", "create", "delete", "patch", "update"]
+---
+# Source: datacater/templates/rolebinding.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: udf-testing-view
+roleRef:
+  kind: Role
+  apiGroup: rbac.authorization.k8s.io
+  name: datacater-api
+subjects:
+  - kind: ServiceAccount
+    name: datacater
+---
+# Source: datacater/templates/postgres.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres
+  labels:
+    app.kubernetes.io/name: datacater-pg
+spec:
+  type: ClusterIP
+  ports:
+    - name: postgres
+      port: 5432
+      targetPort: 5432
+  selector:
+    app.kubernetes.io/name: datacater-pg
+---
+# Source: datacater/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: datacater
+  labels:
+    helm.sh/chart: datacater-0.1.0
+    app.kubernetes.io/part-of: datacater-0.1.0
+    app.kubernetes.io/name: datacater
+    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/version: "nightly-20221215"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app.kubernetes.io/name: datacater
+    app.kubernetes.io/instance: release-name
+---
+# Source: datacater/templates/ui-service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: datacater-ui
+  labels:
+    helm.sh/chart: datacater-0.1.0
+    app.kubernetes.io/part-of: datacater-0.1.0
+    app.kubernetes.io/name: datacater
+    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/version: "nightly-20221215"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  selector:
+    app.kubernetes.io/name: "datacater-ui"
+    app.kubernetes.io/instance: release-name
+  ports:
+    - protocol: "TCP"
+      port: 80
+      targetPort: 8080
+  type: ClusterIP
+---
+# Source: datacater/templates/ui.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "datacater-ui"
+  labels:
+    helm.sh/chart: datacater-0.1.0
+    app.kubernetes.io/part-of: datacater-0.1.0
+    app.kubernetes.io/name: datacater
+    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/version: "nightly-20221215"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: "datacater-ui"
+      app.kubernetes.io/instance: release-name
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: "datacater-ui"
+        app.kubernetes.io/instance: release-name
+    spec:
+      containers:
+        - name: nginx
+          image: "datacater/ui:nightly-20221215"
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+---
+# Source: datacater/templates/postgres.yaml
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: datacater-pg
+  labels:
+    app.kubernetes.io/name: datacater-pg
+spec:
+  serviceName: datacater-pg
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: datacater-pg
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: datacater-pg
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:14-alpine
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: postgres
+              containerPort: 5432
+              protocol: TCP
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 200m
+              memory: 512Mi
+          env:
+            - name: POSTGRES_USER
+              value: datacater
+            - name: POSTGRES_DB
+              value: postgres
+            - name: PG_USER
+              value: postgres
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
+            - name: POSTGRES_PASSWORD
+              value: datacater
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: status.podIP
+          livenessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - exec pg_isready --host $POD_IP -U $POSTGRES_USER
+            failureThreshold: 6
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 5
+          readinessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - exec pg_isready --host $POD_IP -U $POSTGRES_USER
+            failureThreshold: 3
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            successThreshold: 1
+            timeoutSeconds: 3
+          volumeMounts:
+            - mountPath: /var/lib/postgresql/data/pgdata
+              name: postgres
+  volumeClaimTemplates:
+    - metadata:
+        name: postgres
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        resources:
+          requests:
+            storage: 1Gi
+---
+# Source: datacater/templates/statefulset.yaml
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: datacater
+  labels:
+    helm.sh/chart: datacater-0.1.0
+    app.kubernetes.io/part-of: datacater-0.1.0
+    app.kubernetes.io/name: datacater
+    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/version: "nightly-20221215"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  serviceName: datacater
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: datacater
+      app.kubernetes.io/instance: release-name
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: datacater
+        app.kubernetes.io/instance: release-name
+    spec:
+      imagePullSecrets:
+        - name: github-pat
+      serviceAccountName: datacater
+      securityContext:
+        {}
+      containers:
+        - name: datacater
+          securityContext:
+            {}
+          image: "datacater/datacater:nightly-20221215"
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: QUARKUS_DATASOURCE_REACTIVE_URL
+              value: "postgresql://postgres:5432/postgres"
+            - name: QUARKUS_DATASOURCE_USERNAME
+              value: "datacater"
+            - name: QUARKUS_DATASOURCE_PASSWORD
+              value: "datacater"
+            - name: DATACATER_DEPLOYMENT_NAMESPACE
+              value: default
+            - name: DATACATER_DEPLOYMENT_IMAGE
+              value: "datacater/pipeline:nightly-20221215"
+            - name: DATACATER_TRANSFORMS_PATH
+              value: "/datacater/transforms"
+            - name: DATACATER_FILTERS_PATH
+              value: "/datacater/filters"
+            - name: DATACATER_PYTHONRUNNER_REPLICAS
+              value: "10"
+            - name: DATACATER_PYTHONRUNNER_IMAGE_NAME
+              value: "datacater/python-runner"
+            - name: DATACATER_PYTHONRUNNER_IMAGE_VERSION
+              value: "nightly-20221215"
+            - name: QUARKUS_LOG_CONSOLE_JSON
+              value: "false"
+            - name: DATACATER_PYTHONRUNNER_IMAGE_NAMESPACE
+              value: default
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /api/v1/q/health/live
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 10
+            periodSeconds: 30
+            successThreshold: 1
+            timeoutSeconds: 10
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /api/v1/q/health/ready
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 10
+            periodSeconds: 30
+            successThreshold: 1
+            timeoutSeconds: 10
+          resources:
+            limits:
+              memory: 2Gi
+            requests:
+              cpu: 500m
+              memory: 1Gi
+---
+# Source: datacater/templates/tests/test-connection.yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "datacater-test-connection"
+  labels:
+    helm.sh/chart: datacater-0.1.0
+    app.kubernetes.io/part-of: datacater-0.1.0
+    app.kubernetes.io/name: datacater
+    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/version: "nightly-20221215"
+    app.kubernetes.io/managed-by: Helm
+  annotations:
+    "helm.sh/hook": test
+spec:
+  containers:
+    - name: wget
+      image: busybox
+      command: ['wget']
+      args: ['-q', 'datacater:80/q/health/live']
+  restartPolicy: Never
