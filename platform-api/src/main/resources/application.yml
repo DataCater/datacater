@@ -60,6 +60,13 @@ mp       :
       publickey:
         location: cert.pem
 datacater:
+  deployment:
+    resources:
+      memory:
+        limit: 800Mi
+        request: 300Mi
+      cpu:
+        request: 0.1
   pythonrunner:
     image:
       name: datacater/python-runner

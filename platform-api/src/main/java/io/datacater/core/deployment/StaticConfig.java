@@ -22,8 +22,13 @@ public class StaticConfig {
   static final String CONFIGMAP_MOUNT_PATH = "/usr/app/mounts";
   static final String DATA_SHARE_MOUNT_PATH = "/usr/app/data-mounts";
   static final Map<String, Quantity> RESOURCE_REQUESTS =
-      Map.of("cpu", new Quantity("0.1"), "memory", new Quantity("1.5Gi"));
-  static final Map<String, Quantity> RESOURCE_LIMITS = Map.of("memory", new Quantity("4Gi"));
+      Map.of(
+          "cpu",
+          new Quantity(EnvironmentVariables.DEPLOYMENT_RESOURCES_CPU_REQUEST),
+          "memory",
+          new Quantity(EnvironmentVariables.DEPLOYMENT_RESOURCES_MEMORY_REQUEST));
+  static final Map<String, Quantity> RESOURCE_LIMITS =
+      Map.of("memory", new Quantity(EnvironmentVariables.DEPLOYMENT_RESOURCES_MEMORY_LIMIT));
   static final String DEPLOYMENT_NAME_PREFIX = "datacater-deployment-";
   static final String CONFIGMAP_NAME_PREFIX = "datacater-configmap-";
   static final String CONFIGMAP_VOLUME_NAME_PREFIX = "datacater-volume-";
@@ -112,6 +117,19 @@ public class StaticConfig {
         ConfigProvider.getConfig()
             .getOptionalValue("datacater.pythonrunner.image.containerPort", Integer.class)
             .orElse(50000);
+
+    static final String DEPLOYMENT_RESOURCES_MEMORY_REQUEST =
+        ConfigProvider.getConfig()
+            .getOptionalValue("datacater.deployment.resources.memory.request", String.class)
+            .orElse("300Mi");
+    static final String DEPLOYMENT_RESOURCES_MEMORY_LIMIT =
+        ConfigProvider.getConfig()
+            .getOptionalValue("datacater.deployment.resources.memory.limit", String.class)
+            .orElse("800Mi");
+    static final String DEPLOYMENT_RESOURCES_CPU_REQUEST =
+        ConfigProvider.getConfig()
+            .getOptionalValue("datacater.deployment.resources.cpu.request", String.class)
+            .orElse("0.1");
   }
 
   static class LoggerMessages {
