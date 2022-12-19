@@ -79,7 +79,7 @@ class PipelineTest {
             message.put("email", "max-mustermann@datacater.io");
             message.put("is_admin", "true");
             producer.send(new ProducerRecord<>(
-                    "stream-in",
+                    "streamin",
                     new JsonObject().put("value", UUID.randomUUID()),
                     message.put("number", i)));
         }
@@ -88,7 +88,7 @@ class PipelineTest {
         message.put("email", "max-mustermann@datacater.io");
         message.put("is_admin", "true");
         CompletionStage<Void> messageToWaitOn = producer.send(new ProducerRecord<>(
-                "stream-in",
+                "streamin",
                 new JsonObject().put("value", UUID.randomUUID()),
                 message));
 
