@@ -120,6 +120,17 @@ jobs:
           rm -fr $DEST/*
           cp -R $FILTERS_SRC $DEST
           cp -R $TRANSFORM_SRC $DEST
+    -   name: Push datacater/datacater:latest to Docker Hub
+        if: github.ref_name == 'main'
+        run: |
+          ./gradlew :platform-api:build --no-daemon -x test \
+                -Dquarkus.jib.platforms=linux/amd64,linux/arm64 \
+                -Dquarkus.container-image.tag=latest \
+                -Dquarkus.container-image.build=true \
+                -Dquarkus.container-image.push=true \
+                -Dquarkus.container-image.registry=docker.io \
+                -Dquarkus.container-image.username=datacater \
+                -Dquarkus.container-image.password=${{ secrets.DOCKERHUB_TOKEN }}
     -   name: Push datacater/datacater to Docker Hub
         if: github.event.action == 'released'
         run: |
@@ -155,6 +166,17 @@ jobs:
           rm -fr $DEST/*
           cp -R $FILTERS_SRC $DEST
           cp -R $TRANSFORM_SRC $DEST
+    -   name: Push datacater/pipeline:latest to Docker Hub
+        if: github.ref_name == 'main'
+        run: |
+          ./gradlew :pipeline:build --no-daemon -x test \
+                -Dquarkus.jib.platforms=linux/amd64,linux/arm64 \
+                -Dquarkus.container-image.tag=latest \
+                -Dquarkus.container-image.build=true \
+                -Dquarkus.container-image.push=true \
+                -Dquarkus.container-image.registry=docker.io \
+                -Dquarkus.container-image.username=datacater \
+                -Dquarkus.container-image.password=${{ secrets.DOCKERHUB_TOKEN }}
     -   name: Push datacater/pipeline to Docker Hub
         if: github.event.action == 'released'
         run: |
@@ -190,6 +212,19 @@ jobs:
           rm -fr $DEST/*
           cp -R $FILTERS_SRC $DEST
           cp -R $TRANSFORM_SRC $DEST
+    -   name: Push datacater/pipeline:native-latest to Docker Hub
+        if: github.ref_name == 'main'
+        run: |
+          ./gradlew :pipeline:build --no-daemon -x test \
+                -Dquarkus.jib.platforms=linux/amd64 \
+                -Dquarkus.native.container-build=true \
+                -Dquarkus.package.type=native \
+                -Dquarkus.container-image.tag=native-latest \
+                -Dquarkus.container-image.build=true \
+                -Dquarkus.container-image.push=true \
+                -Dquarkus.container-image.registry=docker.io \
+                -Dquarkus.container-image.username=datacater \
+                -Dquarkus.container-image.password=${{ secrets.DOCKERHUB_TOKEN }}
     -   name: Push datacater/pipeline to Docker Hub
         if: github.event.action == 'released'
         run: |
@@ -223,6 +258,12 @@ jobs:
         with:
           username: datacater
           password: ${{ secrets.DOCKERHUB_TOKEN }}
+    -   name: Build datacater/python-runner:latest and push it to DockerHub
+        working-directory: python-runner
+        if: github.ref_name == 'main'
+        run: |
+          docker build -t datacater/python-runner:latest .
+          docker push datacater/python-runner:latest
     -   name: Build image and push it to DockerHub
         working-directory: python-runner
         if: github.event.action == 'released'
@@ -255,6 +296,11 @@ jobs:
     -   name: Build the UI
         working-directory: ui
         run: npm run build --if-present
+    -   name: Build datacater/ui:latest and push it to DockerHub
+        working-directory: ui
+        if: github.ref_name == 'main'
+        run: |
+          docker buildx build --platform=linux/amd64,linux/arm64 -t datacater/ui:latest --push .
     -   name: Build image and push it to DockerHub
         working-directory: ui
         if: github.event.action == 'released'
