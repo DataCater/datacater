@@ -90,8 +90,8 @@ class ListDeployments extends Component {
                     </div>
                     {deployment.updatedAt !== undefined &&
                       !isNaN(Date.parse(deployment.updatedAt)) && (
-                        <div className="d-flex w-100 justify-content-between mb-1">
-                          <small className="d-flex align-items-center text-muted">
+                        <div className="d-flex w-100 justify-content-end">
+                          <small className="text-muted">
                             Last modified:{" "}
                             {timeAgo.format(new Date(deployment.updatedAt))}
                           </small>

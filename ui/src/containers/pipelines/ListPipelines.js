@@ -90,8 +90,8 @@ class ListPipelines extends Component {
                     </div>
                     {pipeline.updatedAt !== undefined &&
                       !isNaN(Date.parse(pipeline.updatedAt)) && (
-                        <div className="d-flex w-100 justify-content-between mb-1">
-                          <small className="d-flex align-items-center text-muted">
+                        <div className="d-flex w-100 justify-content-end">
+                          <small className="text-muted">
                             Last modified:{" "}
                             {timeAgo.format(new Date(pipeline.updatedAt))}
                           </small>
