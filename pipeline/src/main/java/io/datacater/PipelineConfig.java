@@ -1,12 +1,10 @@
 package io.datacater;
 
-import io.quarkus.runtime.annotations.RegisterForReflection;
 import org.eclipse.microprofile.config.ConfigProvider;
 
 import javax.enterprise.context.ApplicationScoped;
 
 @ApplicationScoped
-@RegisterForReflection
 public class PipelineConfig {
 
     private PipelineConfig() {}

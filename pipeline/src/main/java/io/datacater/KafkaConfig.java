@@ -5,7 +5,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.datacater.exceptions.KafkaConfigurationException;
 import io.quarkus.kafka.client.serialization.ObjectMapperSerializer;
-import io.quarkus.runtime.annotations.RegisterForReflection;
 import io.smallrye.common.annotation.Identifier;
 import org.eclipse.microprofile.config.ConfigProvider;
 
@@ -13,7 +12,6 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.ws.rs.Produces;
 import java.util.Map;
 
-@RegisterForReflection
 public class KafkaConfig {
     static private final String errorMsg= "The given Kafka Configuration could not be mapped: %s";
     static final String DATACATER_STREAMIN_CONFIG =
