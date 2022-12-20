@@ -131,6 +131,7 @@ class PipelineDesigner extends Component {
           hideStepNameFormFunc={this.props.hideStepNameFormFunc}
           pipeline={pipeline}
           editColumnFunc={this.props.editColumnFunc}
+          filters={this.props.filters}
           sampleRecords={this.props.sampleRecords}
           showGrid={this.state.showGrid}
           showStepNameForm={this.props.showStepNameForm}
