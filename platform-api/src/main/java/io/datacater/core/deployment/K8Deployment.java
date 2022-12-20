@@ -324,15 +324,12 @@ public class K8Deployment {
         getEnvVariableFromNode(streamOut.getSpec(), StaticConfig.VALUE_SERIALIZER));
 
     // Store Serde-related information
-    Map<String, Object> dataCaterConfig = new HashMap<>();
-    dataCaterConfig.put(
-        StaticConfig.KEY_DESERIALIZER, streamInConfig.get(StaticConfig.KEY_DESERIALIZER));
-    dataCaterConfig.put(
-        StaticConfig.VALUE_DESERIALIZER, streamInConfig.get(StaticConfig.VALUE_DESERIALIZER));
-    dataCaterConfig.put(
-        StaticConfig.KEY_SERIALIZER, streamOutConfig.get(StaticConfig.KEY_SERIALIZER));
-    dataCaterConfig.put(
-        StaticConfig.VALUE_SERIALIZER, streamOutConfig.get(StaticConfig.VALUE_SERIALIZER));
+    Map<String, Object> dataCaterConfig =
+        Map.of(
+            StaticConfig.KEY_DESERIALIZER, streamInConfig.get(StaticConfig.KEY_DESERIALIZER),
+            StaticConfig.VALUE_DESERIALIZER, streamInConfig.get(StaticConfig.VALUE_DESERIALIZER),
+            StaticConfig.KEY_SERIALIZER, streamOutConfig.get(StaticConfig.KEY_SERIALIZER),
+            StaticConfig.VALUE_SERIALIZER, streamOutConfig.get(StaticConfig.VALUE_SERIALIZER));
 
     // Remove Serde-related information from channel configs
     streamInConfig.remove(StaticConfig.KEY_DESERIALIZER);
