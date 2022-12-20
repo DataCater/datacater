@@ -37,17 +37,13 @@ public class Pipeline {
   private String host;
   private Integer port;
 
-  private Deserializer keyDeserializer =
-          Deserializers.deserializers.get(KafkaConfig.streamInConfig().get("key.deserializer").toString());
+  private Deserializer keyDeserializer = Deserializers.deserializers.get(KafkaConfig.KEY_DESERIALIZER);
 
-  private Deserializer valueDeserializer =
-          Deserializers.deserializers.get(KafkaConfig.streamInConfig().get("value.deserializer").toString());
+  private Deserializer valueDeserializer = Deserializers.deserializers.get(KafkaConfig.VALUE_DESERIALIZER);
 
-  private Serializer keySerializer =
-          Serializers.serializers.get(KafkaConfig.streamOutConfig().get("key.serializer").toString());
+  private Serializer keySerializer = Serializers.serializers.get(KafkaConfig.KEY_SERIALIZER);
 
-  private Serializer valueSerializer =
-          Serializers.serializers.get(KafkaConfig.streamOutConfig().get("value.serializer").toString());
+  private Serializer valueSerializer = Serializers.serializers.get(KafkaConfig.VALUE_SERIALIZER);
 
   WebClient client;
 

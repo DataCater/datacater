@@ -323,6 +323,23 @@ public class K8Deployment {
         StaticConfig.VALUE_SERIALIZER,
         getEnvVariableFromNode(streamOut.getSpec(), StaticConfig.VALUE_SERIALIZER));
 
+    // Store Serde-related information
+    Map<String, Object> dataCaterConfig = new HashMap<>();
+    dataCaterConfig.put(
+        StaticConfig.KEY_DESERIALIZER, streamInConfig.get(StaticConfig.KEY_DESERIALIZER));
+    dataCaterConfig.put(
+        StaticConfig.VALUE_DESERIALIZER, streamInConfig.get(StaticConfig.VALUE_DESERIALIZER));
+    dataCaterConfig.put(
+        StaticConfig.KEY_SERIALIZER, streamOutConfig.get(StaticConfig.KEY_SERIALIZER));
+    dataCaterConfig.put(
+        StaticConfig.VALUE_SERIALIZER, streamOutConfig.get(StaticConfig.VALUE_SERIALIZER));
+
+    // Remove Serde-related information from channel configs
+    streamInConfig.remove(StaticConfig.KEY_DESERIALIZER);
+    streamInConfig.remove(StaticConfig.VALUE_DESERIALIZER);
+    streamOutConfig.remove(StaticConfig.KEY_SERIALIZER);
+    streamOutConfig.remove(StaticConfig.VALUE_SERIALIZER);
+
     /**
      * Set `group.id` to the UUID of the deployment, such that deployments with more than one
      * replica can make use of Apache Kafka's consumer group protocol.
@@ -330,6 +347,16 @@ public class K8Deployment {
     streamInConfig.put(StaticConfig.GROUP_ID, uuid);
 
     List<EnvVar> environmentVariables = new ArrayList<>();
+
+    // Pass serde config as environment variables
+    for (String configOption : dataCaterConfig.keySet()) {
+      String configOptionAsEnvVariable = transformConfigOptionToEnvVariable(configOption);
+      environmentVariables.add(
+          createEnvVariable(
+              StaticConfig.DATACATER_SERDE_ENV_PREFIX,
+              configOptionAsEnvVariable,
+              dataCaterConfig.get(configOption).toString()));
+    }
 
     // Pass stream in config as environment variables
     for (String configOption : streamInConfig.keySet()) {
@@ -341,10 +368,6 @@ public class K8Deployment {
               streamInConfig.get(configOption).toString()));
     }
 
-    // Set topic name of stream in
-    environmentVariables.add(
-        createEnvVariable(StaticConfig.STREAMIN_ENV_PREFIX, "TOPIC", streamIn.getName()));
-
     // Pass stream out config as environment variables
     for (String configOption : streamOutConfig.keySet()) {
       String configOptionAsEnvVariable = transformConfigOptionToEnvVariable(configOption);
@@ -355,7 +378,9 @@ public class K8Deployment {
               streamOutConfig.get(configOption).toString()));
     }
 
-    // Set topic name of stream out
+    // Set topic name of stream in and stream out
+    environmentVariables.add(
+        createEnvVariable(StaticConfig.STREAMIN_ENV_PREFIX, "TOPIC", streamIn.getName()));
     environmentVariables.add(
         createEnvVariable(StaticConfig.STREAMOUT_ENV_PREFIX, "TOPIC", streamOut.getName()));
 
