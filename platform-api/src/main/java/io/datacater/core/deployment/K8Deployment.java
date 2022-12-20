@@ -308,7 +308,8 @@ public class K8Deployment {
         getEnvVariableFromNode(streamIn.getSpec(), StaticConfig.VALUE_DESERIALIZER));
 
     // Set consumer group id to UUID of deployment, if absent
-    // This makes sure that multiple instances of the same deployment end up in the same consumer group
+    // This makes sure that multiple instances of the same deployment end up in the same consumer
+    // group
     streamInConfig.putIfAbsent(StaticConfig.GROUP_ID, uuid);
 
     streamOutConfig.putIfAbsent(
