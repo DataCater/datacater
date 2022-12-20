@@ -1,6 +1,5 @@
 package io.datacater.core.deployment;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -288,15 +287,21 @@ public class K8Deployment {
 
   private List<EnvVar> getEnvironmentVariables(
       StreamEntity streamIn, StreamEntity streamOut, DeploymentSpec deploymentSpec, UUID uuid) {
-    ObjectMapper objectMapper = new ObjectMapper();
+
+    // Get Apache Kafka-related configs from stream in and stream out
     Map<String, Object> streamInConfig = nodeToMap(streamIn.getSpec().get(StaticConfig.KAFKA_TAG));
     Map<String, Object> streamOutConfig =
         nodeToMap(streamOut.getSpec().get(StaticConfig.KAFKA_TAG));
+
+    // Let deployment overwrite config of stream in and stream out
     streamInConfig.putAll(getNode(StaticConfig.STREAMIN_CONFIG_TEXT, deploymentSpec));
     streamOutConfig.putAll(getNode(StaticConfig.STREAMOUT_CONFIG_TEXT, deploymentSpec));
+
+    // Remove topic-related configs from stream in and stream out
     streamInConfig.remove(StaticConfig.TOPIC_TAG);
     streamOutConfig.remove(StaticConfig.TOPIC_TAG);
 
+    // Initialize stream in with default values, if needed
     streamInConfig.putIfAbsent(
         StaticConfig.BOOTSTRAP_SERVERS,
         getEnvVariableFromNode(streamIn.getSpec(), StaticConfig.BOOTSTRAP_SERVERS));
@@ -306,8 +311,8 @@ public class K8Deployment {
     streamInConfig.putIfAbsent(
         StaticConfig.VALUE_DESERIALIZER,
         getEnvVariableFromNode(streamIn.getSpec(), StaticConfig.VALUE_DESERIALIZER));
-    streamInConfig.put(StaticConfig.GROUP_ID, uuid);
 
+    // Initialize stream out with default values, if needed
     streamOutConfig.putIfAbsent(
         StaticConfig.BOOTSTRAP_SERVERS,
         getEnvVariableFromNode(streamOut.getSpec(), StaticConfig.BOOTSTRAP_SERVERS));
@@ -318,24 +323,60 @@ public class K8Deployment {
         StaticConfig.VALUE_SERIALIZER,
         getEnvVariableFromNode(streamOut.getSpec(), StaticConfig.VALUE_SERIALIZER));
 
-    List<EnvVar> variables = new ArrayList<>();
-    variables.add(createEnvVariable(StaticConfig.STREAMIN_CONFIG_NAME, streamIn.getName()));
-    variables.add(createEnvVariable(StaticConfig.STREAMOUT_CONFIG_NAME, streamOut.getName()));
+    /**
+     * Set `group.id` to the UUID of the deployment, such that deployments with more than one
+     * replica can make use of Apache Kafka's consumer group protocol.
+     */
+    streamInConfig.put(StaticConfig.GROUP_ID, uuid);
 
-    try {
-      variables.add(
+    List<EnvVar> environmentVariables = new ArrayList<>();
+
+    // Pass stream in config as environment variables
+    for (String configOption : streamInConfig.keySet()) {
+      String configOptionAsEnvVariable = transformConfigOptionToEnvVariable(configOption);
+      environmentVariables.add(
           createEnvVariable(
-              StaticConfig.DC_STREAMIN_CONFIG_TEXT,
-              objectMapper.writeValueAsString(streamInConfig)));
-      variables.add(
-          createEnvVariable(
-              StaticConfig.DC_STREAMOUT_CONFIG_TEXT,
-              objectMapper.writeValueAsString(streamOutConfig)));
-    } catch (JsonProcessingException e) {
-      throw new CreateDeploymentException(StringUtilities.wrapString(e.getMessage()));
+              StaticConfig.STREAMIN_ENV_PREFIX,
+              configOptionAsEnvVariable,
+              streamInConfig.get(configOption).toString()));
     }
 
-    return variables;
+    // Set topic name of stream in
+    environmentVariables.add(
+        createEnvVariable(StaticConfig.STREAMIN_ENV_PREFIX, "TOPIC", streamIn.getName()));
+
+    // Pass stream out config as environment variables
+    for (String configOption : streamOutConfig.keySet()) {
+      String configOptionAsEnvVariable = transformConfigOptionToEnvVariable(configOption);
+      environmentVariables.add(
+          createEnvVariable(
+              StaticConfig.STREAMOUT_ENV_PREFIX,
+              configOptionAsEnvVariable,
+              streamOutConfig.get(configOption).toString()));
+    }
+
+    // Set topic name of stream out
+    environmentVariables.add(
+        createEnvVariable(StaticConfig.STREAMOUT_ENV_PREFIX, "TOPIC", streamOut.getName()));
+
+    return environmentVariables;
+  }
+
+  /**
+   * Transforms a configuration name to an environment variable.
+   *
+   * <p>Examples: - `datacater.name` becomes `DATACATER_NAME` - `datacater.middle-level.name`
+   * becomes `DATACATER_MIDDLE_LEVEL_NAME`
+   *
+   * @param configName
+   * @return config name as valid environment variable
+   */
+  private String transformConfigOptionToEnvVariable(String configName) {
+    return configName
+        // Replace all characters, except a-z A-Z and underscores, with an underscore
+        .replaceAll("[^a-zA-Z_]", "_")
+        // Transform entire string to upper case notation
+        .toUpperCase();
   }
 
   private Map<String, Object> getNode(String node, DeploymentSpec spec) {
@@ -357,8 +398,8 @@ public class K8Deployment {
     return config;
   }
 
-  private EnvVar createEnvVariable(String name, String value) {
-    return new EnvVarBuilder().withName(name).withValue(value).build();
+  private EnvVar createEnvVariable(String prefix, String name, String value) {
+    return new EnvVarBuilder().withName(prefix.concat(name)).withValue(value).build();
   }
 
   private String getEnvVariableFromNode(JsonNode node, String field) {

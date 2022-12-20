@@ -20,7 +20,6 @@ mp       :
       streamout:
         merge: true
         connector: smallrye-kafka
-        kafka-configuration: streamout-configuration
         topic: streamout
     incoming:
       streamin:
@@ -29,7 +28,6 @@ mp       :
         max:
           poll:
             records: ${datacater.message.batch.size}
-        kafka-configuration: streamin-configuration
         topic: streamin
 datacater:
   python-runner:

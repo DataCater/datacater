@@ -7,8 +7,8 @@ import org.eclipse.microprofile.config.ConfigProvider;
 public class StaticConfig {
   private StaticConfig() {}
 
-  static final String STREAMIN_CONFIG_NAME = "MP_MESSAGING_INCOMING_STREAMIN_TOPIC";
-  static final String STREAMOUT_CONFIG_NAME = "MP_MESSAGING_OUTGOING_STREAMOUT_TOPIC";
+  static final String STREAMIN_ENV_PREFIX = "MP_MESSAGING_INCOMING_STREAMIN_";
+  static final String STREAMOUT_ENV_PREFIX = "MP_MESSAGING_OUTGOING_STREAMOUT_";
   static final String DATACATER_PIPELINE = "datacater-pipeline";
   static final String PYTHON_RUNNER_NAME = "python-runner";
   static final String APP = "datacater.io/app";
