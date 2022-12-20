@@ -8,7 +8,7 @@ metadata:
     helm.sh/chart: datacater-0.1.0
     app.kubernetes.io/name: datacater
     app.kubernetes.io/instance: release-name
-    app.kubernetes.io/version: "nightly-20221214"
+    app.kubernetes.io/version: "nightly-20221215"
     app.kubernetes.io/managed-by: Helm
 ---
 # Source: datacater/templates/role.yaml
@@ -63,7 +63,7 @@ metadata:
     helm.sh/chart: datacater-0.1.0
     app.kubernetes.io/name: datacater
     app.kubernetes.io/instance: release-name
-    app.kubernetes.io/version: "nightly-20221214"
+    app.kubernetes.io/version: "nightly-20221215"
     app.kubernetes.io/managed-by: Helm
 spec:
   type: ClusterIP
@@ -86,7 +86,7 @@ metadata:
   namespace: default
 spec:
   containers:
-    - image: datacater/ui:nightly-20221214
+    - image: datacater/ui:nightly-20221215
       imagePullPolicy: IfNotPresent
       name: ui
       ports:
@@ -186,7 +186,7 @@ metadata:
     helm.sh/chart: datacater-0.1.0
     app.kubernetes.io/name: datacater
     app.kubernetes.io/instance: release-name
-    app.kubernetes.io/version: "nightly-20221214"
+    app.kubernetes.io/version: "nightly-20221215"
     app.kubernetes.io/managed-by: Helm
 spec:
   serviceName: datacater
@@ -210,7 +210,7 @@ spec:
         - name: datacater
           securityContext:
             {}
-          image: "datacater/datacater:nightly-20221214"
+          image: "datacater/datacater:nightly-20221215"
           imagePullPolicy: IfNotPresent
           env:
             - name: QUARKUS_DATASOURCE_REACTIVE_URL
@@ -224,7 +224,7 @@ spec:
             - name: DATACATER_DEPLOYMENT_NAMESPACE
               value: default
             - name: DATACATER_DEPLOYMENT_IMAGE
-              value: datacater/pipeline:nightly-20221214
+              value: datacater/pipeline:nightly-20221215
             - name: DATACATER_TRANSFORMS_PATH
               value: /datacater/transforms
             - name: DATACATER_FILTERS_PATH
@@ -234,7 +234,7 @@ spec:
             - name: DATACATER_PYTHONRUNNER_IMAGE_NAME
               value: datacater/python-runner
             - name: DATACATER_PYTHONRUNNER_IMAGE_VERSION
-              value: nightly-20221214
+              value: nightly-20221215
             - name: QUARKUS_LOG_CONSOLE_JSON
               value: "false"
           ports:
