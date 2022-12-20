@@ -265,12 +265,15 @@ jobs:
         working-directory: python-runner
         if: github.ref_name == 'main'
         run: |
-          docker build -t datacater/python-runner:nightly -t datacater/python-runner:${GITHUB_SHA} --push .
+          docker build -t datacater/python-runner:nightly -t datacater/python-runner:${GITHUB_SHA} .
+          docker push datacater/python-runner:nightly
+          docker push datacater/python-runner:${GITHUB_SHA}
     -   name: Build image and push it to DockerHub
         working-directory: python-runner
         if: github.event.action == 'released' || github.event.action == 'prereleased'
         run: |
-          docker build -t datacater/python-runner:${RELEASE_VERSION} --push .
+          docker build -t datacater/python-runner:${RELEASE_VERSION} .
+          docker push datacater/python-runner:${RELEASE_VERSION}
   build_and_push_ui:
     if: github.ref_name == 'main' || github.ref_type == 'tag'
     name: Build and push UI image
