@@ -24,11 +24,11 @@ public class StaticConfig {
   static final Map<String, Quantity> RESOURCE_REQUESTS =
       Map.of(
           "cpu",
-          new Quantity(EnvironmentVariables.DEPLOYMENT_RESOURCES_CPU_REQUEST),
+          new Quantity(EnvironmentVariables.DEPLOYMENT_RESOURCES_REQUEST_CPU),
           "memory",
-          new Quantity(EnvironmentVariables.DEPLOYMENT_RESOURCES_MEMORY_REQUEST));
+          new Quantity(EnvironmentVariables.DEPLOYMENT_RESOURCES_REQUEST_MEMORY));
   static final Map<String, Quantity> RESOURCE_LIMITS =
-      Map.of("memory", new Quantity(EnvironmentVariables.DEPLOYMENT_RESOURCES_MEMORY_LIMIT));
+      Map.of("memory", new Quantity(EnvironmentVariables.DEPLOYMENT_RESOURCES_LIMITS_MEMORY));
   static final String DEPLOYMENT_NAME_PREFIX = "datacater-deployment-";
   static final String CONFIGMAP_NAME_PREFIX = "datacater-configmap-";
   static final String CONFIGMAP_VOLUME_NAME_PREFIX = "datacater-volume-";
@@ -118,17 +118,17 @@ public class StaticConfig {
             .getOptionalValue("datacater.pythonrunner.image.containerPort", Integer.class)
             .orElse(50000);
 
-    static final String DEPLOYMENT_RESOURCES_MEMORY_REQUEST =
+    static final String DEPLOYMENT_RESOURCES_REQUEST_MEMORY =
         ConfigProvider.getConfig()
-            .getOptionalValue("datacater.deployment.resources.memory.request", String.class)
+            .getOptionalValue("datacater.deployment.resources.request.memory", String.class)
             .orElse("300Mi");
-    static final String DEPLOYMENT_RESOURCES_MEMORY_LIMIT =
+    static final String DEPLOYMENT_RESOURCES_LIMITS_MEMORY =
         ConfigProvider.getConfig()
-            .getOptionalValue("datacater.deployment.resources.memory.limit", String.class)
+            .getOptionalValue("datacater.deployment.resources.limits.memory", String.class)
             .orElse("800Mi");
-    static final String DEPLOYMENT_RESOURCES_CPU_REQUEST =
+    static final String DEPLOYMENT_RESOURCES_REQUEST_CPU =
         ConfigProvider.getConfig()
-            .getOptionalValue("datacater.deployment.resources.cpu.request", String.class)
+            .getOptionalValue("datacater.deployment.resources.request.cpu", String.class)
             .orElse("0.1");
   }
 

@@ -62,11 +62,11 @@ mp       :
 datacater:
   deployment:
     resources:
-      memory:
-        limit: 800Mi
-        request: 300Mi
-      cpu:
-        request: 0.1
+      requests:
+        memory: 300Mi
+        cpu: 0.1
+      limits:
+        memory: 800Mi
   pythonrunner:
     image:
       name: datacater/python-runner
