@@ -120,12 +120,13 @@ jobs:
           rm -fr $DEST/*
           cp -R $FILTERS_SRC $DEST
           cp -R $TRANSFORM_SRC $DEST
-    -   name: Push datacater/datacater:latest to Docker Hub
+    -   name: Push datacater/datacater:nightly to Docker Hub
         if: github.ref_name == 'main'
         run: |
           ./gradlew :platform-api:build --no-daemon -x test \
                 -Dquarkus.jib.platforms=linux/amd64,linux/arm64 \
-                -Dquarkus.container-image.tag=latest \
+                -Dquarkus.container-image.tag=nightly \
+                -Dquarkus.container-image.additional-tags=${GITHUB_SHA} \
                 -Dquarkus.container-image.build=true \
                 -Dquarkus.container-image.push=true \
                 -Dquarkus.container-image.registry=docker.io \
@@ -166,12 +167,13 @@ jobs:
           rm -fr $DEST/*
           cp -R $FILTERS_SRC $DEST
           cp -R $TRANSFORM_SRC $DEST
-    -   name: Push datacater/pipeline:latest to Docker Hub
+    -   name: Push datacater/pipeline:nightly to Docker Hub
         if: github.ref_name == 'main'
         run: |
           ./gradlew :pipeline:build --no-daemon -x test \
                 -Dquarkus.jib.platforms=linux/amd64,linux/arm64 \
-                -Dquarkus.container-image.tag=latest \
+                -Dquarkus.container-image.tag=nightly \
+                -Dquarkus.container-image.additional-tags=${GITHUB_SHA} \
                 -Dquarkus.container-image.build=true \
                 -Dquarkus.container-image.push=true \
                 -Dquarkus.container-image.registry=docker.io \
@@ -212,14 +214,15 @@ jobs:
           rm -fr $DEST/*
           cp -R $FILTERS_SRC $DEST
           cp -R $TRANSFORM_SRC $DEST
-    -   name: Push datacater/pipeline:native-latest to Docker Hub
+    -   name: Push datacater/pipeline:native-nightly to Docker Hub
         if: github.ref_name == 'main'
         run: |
           ./gradlew :pipeline:build --no-daemon -x test \
                 -Dquarkus.jib.platforms=linux/amd64 \
                 -Dquarkus.native.container-build=true \
                 -Dquarkus.package.type=native \
-                -Dquarkus.container-image.tag=native-latest \
+                -Dquarkus.container-image.tag=native-nightly \
+                -Dquarkus.container-image.additional-tags=${GITHUB_SHA} \
                 -Dquarkus.container-image.build=true \
                 -Dquarkus.container-image.push=true \
                 -Dquarkus.container-image.registry=docker.io \
@@ -258,18 +261,16 @@ jobs:
         with:
           username: datacater
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-    -   name: Build datacater/python-runner:latest and push it to DockerHub
+    -   name: Build datacater/python-runner:nightly and push it to DockerHub
         working-directory: python-runner
         if: github.ref_name == 'main'
         run: |
-          docker build -t datacater/python-runner:latest .
-          docker push datacater/python-runner:latest
+          docker build -t datacater/python-runner:nightly -t datacater/python-runner:${GITHUB_SHA} --push .
     -   name: Build image and push it to DockerHub
         working-directory: python-runner
         if: github.event.action == 'released' || github.event.action == 'prereleased'
         run: |
-          docker build -t datacater/python-runner:${RELEASE_VERSION} .
-          docker push datacater/python-runner:${RELEASE_VERSION}
+          docker build -t datacater/python-runner:${RELEASE_VERSION} --push .
   build_and_push_ui:
     if: github.ref_name == 'main' || github.ref_type == 'tag'
     name: Build and push UI image
@@ -296,11 +297,11 @@ jobs:
     -   name: Build the UI
         working-directory: ui
         run: npm run build --if-present
-    -   name: Build datacater/ui:latest and push it to DockerHub
+    -   name: Build datacater/ui:nightly and push it to DockerHub
         working-directory: ui
         if: github.ref_name == 'main'
         run: |
-          docker buildx build --platform=linux/amd64,linux/arm64 -t datacater/ui:latest --push .
+          docker buildx build --platform=linux/amd64,linux/arm64 -t datacater/ui:nightly -t datacater/ui:${GITHUB_SHA} --push .
     -   name: Build image and push it to DockerHub
         working-directory: ui
         if: github.event.action == 'released' || github.event.action == 'prereleased'
