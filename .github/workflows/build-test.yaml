@@ -132,7 +132,7 @@ jobs:
                 -Dquarkus.container-image.username=datacater \
                 -Dquarkus.container-image.password=${{ secrets.DOCKERHUB_TOKEN }}
     -   name: Push datacater/datacater to Docker Hub
-        if: github.event.action == 'released'
+        if: github.event.action == 'released' || github.event.action == 'prereleased'
         run: |
           ./gradlew :platform-api:build --no-daemon -x test \
                 -Dquarkus.jib.platforms=linux/amd64,linux/arm64 \
@@ -178,7 +178,7 @@ jobs:
                 -Dquarkus.container-image.username=datacater \
                 -Dquarkus.container-image.password=${{ secrets.DOCKERHUB_TOKEN }}
     -   name: Push datacater/pipeline to Docker Hub
-        if: github.event.action == 'released'
+        if: github.event.action == 'released' || github.event.action == 'prereleased'
         run: |
           ./gradlew :pipeline:build --no-daemon -x test \
                 -Dquarkus.jib.platforms=linux/amd64,linux/arm64 \
@@ -226,10 +226,10 @@ jobs:
                 -Dquarkus.container-image.username=datacater \
                 -Dquarkus.container-image.password=${{ secrets.DOCKERHUB_TOKEN }}
     -   name: Push datacater/pipeline to Docker Hub
-        if: github.event.action == 'released'
+        if: github.event.action == 'released' || github.event.action == 'prereleased'
         run: |
           ./gradlew :pipeline:build --no-daemon -x test \
-                -Dquarkus.jib.platforms=linux/amd64 \
+                -Dquarkus.jib.platforms=linux/amd64,linux/arm64 \
                 -Dquarkus.native.container-build=true \
                 -Dquarkus.package.type=native \
                 -Dquarkus.container-image.tag=native-${RELEASE_VERSION} \
@@ -266,7 +266,7 @@ jobs:
           docker push datacater/python-runner:latest
     -   name: Build image and push it to DockerHub
         working-directory: python-runner
-        if: github.event.action == 'released'
+        if: github.event.action == 'released' || github.event.action == 'prereleased'
         run: |
           docker build -t datacater/python-runner:${RELEASE_VERSION} .
           docker push datacater/python-runner:${RELEASE_VERSION}
@@ -303,6 +303,6 @@ jobs:
           docker buildx build --platform=linux/amd64,linux/arm64 -t datacater/ui:latest --push .
     -   name: Build image and push it to DockerHub
         working-directory: ui
-        if: github.event.action == 'released'
+        if: github.event.action == 'released' || github.event.action == 'prereleased'
         run: |
           docker buildx build --platform=linux/amd64,linux/arm64 -t datacater/ui:${RELEASE_VERSION} --push .
