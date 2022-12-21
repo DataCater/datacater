@@ -837,10 +837,12 @@ class EditPipeline extends Component {
       );
     }
 
+    // Get all fields that define a filter or transform
     const fields =
       this.state.currentStep !== undefined
         ? pipeline.spec.steps[this.state.currentStep - 1].fields || {}
         : {};
+    // Get only the names of the fields
     const fieldNames = Object.keys(fields);
     const profile = profileRecords(sampleRecords, fieldNames);
 
