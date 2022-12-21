@@ -32,7 +32,7 @@ function getDataType(value) {
  * Determine metrics, such as the number of distinct values, the
  * number of  missing values, and the most frequent values.
  */
-export function profileRecords(records) {
+export function profileRecords(records, transformedFields) {
   if (records === undefined) {
     return {};
   }
@@ -47,6 +47,12 @@ export function profileRecords(records) {
   };
 
   const profile = {};
+
+  transformedFields.forEach((field) => {
+    profile[field] = {};
+    profile[field].frequencies = new Map();
+    profile[field].mostFrequentValues = [];
+  });
 
   records.forEach(function (record) {
     const recordValue = record["value"];

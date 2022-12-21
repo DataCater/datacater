@@ -837,7 +837,12 @@ class EditPipeline extends Component {
       );
     }
 
-    const profile = profileRecords(sampleRecords);
+    const fields =
+      this.state.currentStep !== undefined
+        ? pipeline.spec.steps[this.state.currentStep - 1].fields || {}
+        : {};
+    const fieldNames = Object.keys(fields);
+    const profile = profileRecords(sampleRecords, fieldNames);
 
     const records = sampleRecords.map(function (sample, index) {
       return Object.assign({}, sample, { id: index + 1 });
