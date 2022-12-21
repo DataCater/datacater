@@ -48,6 +48,7 @@ export function profileRecords(records, transformedFields) {
 
   const profile = {};
 
+  // Initialize the profile of fields that define a transform
   transformedFields.forEach((field) => {
     profile[field] = {};
     profile[field].frequencies = new Map();
