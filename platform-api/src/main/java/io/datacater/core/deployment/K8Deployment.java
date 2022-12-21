@@ -338,10 +338,10 @@ public class K8Deployment {
     streamOutConfig.remove(StaticConfig.VALUE_SERIALIZER);
 
     /**
-     * Set `group.id` to the UUID of the deployment, such that deployments with more than one
+     * Set `group.id` to the UUID of the deployment, if absent, such that deployments with more than one
      * replica can make use of Apache Kafka's consumer group protocol.
      */
-    streamInConfig.put(StaticConfig.GROUP_ID, uuid);
+    streamInConfig.putIfAbsent(StaticConfig.GROUP_ID, uuid);
 
     List<EnvVar> environmentVariables = new ArrayList<>();
 
