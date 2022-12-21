@@ -5,6 +5,7 @@ class Toolbar extends Component {
   render() {
     const {
       hideStepNameFormFunc,
+      inspectLimit,
       pipeline,
       sampleRecords,
       showGrid,
@@ -12,6 +13,7 @@ class Toolbar extends Component {
       showStepNameFormFunc,
       step,
       toggleShowGridFunc,
+      updateInspectLimitFunc,
       updateStepNameFunc,
     } = this.props;
 
@@ -124,6 +126,16 @@ class Toolbar extends Component {
               </a>
             </div>
             <span className="ms-4">{sampleRecords.length} records</span>
+            <label className="ms-4 me-2 col-form-label">Limit:</label>
+            <input
+              type="text"
+              className="form-control form-control-sm"
+              onChange={updateInspectLimitFunc}
+              aria-describedby="passwordHelpInline"
+              placeholder="100"
+              value={inspectLimit}
+              style={{ width: "75px" }}
+            />
           </div>
         </div>
       </div>
