@@ -7,7 +7,6 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Alternative;
 import javax.interceptor.Interceptor;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
-import org.jboss.logging.Logger;
 
 // example taken from
 // https://quarkus.io/guides/security-customization
@@ -22,8 +21,6 @@ public class AuthMethodController extends AuthorizationController {
 
   @ConfigProperty(name = "datacater.authorization.oidc", defaultValue = "false")
   boolean oidc;
-
-  private static final Logger LOGGER = Logger.getLogger(AuthMethodController.class);
 
   @Override
   public boolean isAuthorizationEnabled() {
