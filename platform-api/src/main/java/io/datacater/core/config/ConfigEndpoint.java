@@ -2,6 +2,7 @@ package io.datacater.core.config;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.datacater.core.exceptions.ConfigNotFoundException;
+import io.quarkus.security.Authenticated;
 import io.smallrye.mutiny.Uni;
 import java.util.List;
 import java.util.UUID;
@@ -13,6 +14,7 @@ import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
 import org.hibernate.reactive.mutiny.Mutiny.SessionFactory;
 
 @Path("/configs")
+@Authenticated
 @Produces(MediaType.APPLICATION_JSON)
 public class ConfigEndpoint {
   private static final String UUID_NOT_FOUND_ERROR_MESSAGE = "No config found for uuid %s";

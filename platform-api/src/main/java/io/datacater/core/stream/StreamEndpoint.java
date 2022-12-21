@@ -3,12 +3,12 @@ package io.datacater.core.stream;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.datacater.core.authentication.DataCaterSessionFactory;
 import io.datacater.core.exceptions.*;
+import io.quarkus.security.Authenticated;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.unchecked.Unchecked;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.*;
-import javax.annotation.security.RolesAllowed;
 import javax.inject.Inject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -19,7 +19,7 @@ import org.eclipse.microprofile.openapi.annotations.security.SecurityRequirement
 import org.jboss.logging.Logger;
 
 @Path("/streams")
-@RolesAllowed("dev")
+@Authenticated
 @Produces(MediaType.APPLICATION_JSON)
 @SecurityRequirement(name = "apiToken")
 public class StreamEndpoint {

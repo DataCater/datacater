@@ -11,6 +11,7 @@ import io.fabric8.kubernetes.api.model.apps.Deployment;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.dsl.LogWatch;
 import io.fabric8.kubernetes.client.dsl.RollableScalableResource;
+import io.quarkus.security.Authenticated;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.unchecked.Unchecked;
 import java.io.*;
@@ -21,7 +22,6 @@ import java.net.http.HttpResponse;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import javax.annotation.security.RolesAllowed;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.ws.rs.*;
@@ -35,7 +35,7 @@ import org.eclipse.microprofile.openapi.annotations.security.SecurityRequirement
 import org.jboss.logging.Logger;
 
 @Path("/deployments")
-@RolesAllowed("dev")
+@Authenticated
 @Produces(MediaType.APPLICATION_JSON)
 @SecurityRequirement(name = "apiToken")
 @RequestScoped
