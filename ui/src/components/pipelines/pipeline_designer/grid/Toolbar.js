@@ -35,6 +35,16 @@ class Toolbar extends Component {
       );
     }
 
+    let filter = undefined;
+    if (
+      step !== undefined &&
+      step.kind === "Record" &&
+      step.filter !== undefined
+    ) {
+      const filterKey = step.filter.key;
+      filter = this.props.filters.find((filter) => filter.key === filterKey);
+    }
+
     return (
       <div className="container mb-2">
         <div className="row align-items-center">
@@ -75,7 +85,8 @@ class Toolbar extends Component {
           <div className="col d-flex align-items-center justify-content-end">
             {step !== undefined &&
               step.kind === "Record" &&
-              transformation === undefined && (
+              transformation === undefined &&
+              filter === undefined && (
                 <button
                   onClick={(e) => {
                     this.props.editColumnFunc();
@@ -88,7 +99,7 @@ class Toolbar extends Component {
               )}
             {step !== undefined &&
               step.kind === "Record" &&
-              transformation !== undefined && (
+              (transformation !== undefined || filter !== undefined) && (
                 <button
                   onClick={(e) => {
                     this.props.editColumnFunc();
@@ -96,7 +107,8 @@ class Toolbar extends Component {
                   className="btn btn-primary text-white btn-sm me-4"
                 >
                   <Package className="feather-icon me-2" />
-                  {transformation.name}
+                  {transformation !== undefined && transformation.name}
+                  {transformation === undefined && filter.name}
                 </button>
               )}
             {step !== undefined && (
