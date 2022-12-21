@@ -203,7 +203,7 @@ class InspectStream extends Component {
     }
 
     const sampleRecords = this.props.streams.inspectionResult;
-    const profile = profileRecords(sampleRecords);
+    const profile = profileRecords(sampleRecords, []);
 
     const records = sampleRecords.map(function (sample, index) {
       return Object.assign({}, sample["value"], { id: index + 1 });
