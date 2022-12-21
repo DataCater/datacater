@@ -222,7 +222,7 @@ jobs:
                 -Dquarkus.native.container-build=true \
                 -Dquarkus.package.type=native \
                 -Dquarkus.container-image.tag=native-nightly \
-                -Dquarkus.container-image.additional-tags=${GITHUB_SHA} \
+                -Dquarkus.container-image.additional-tags=native-${GITHUB_SHA} \
                 -Dquarkus.container-image.build=true \
                 -Dquarkus.container-image.push=true \
                 -Dquarkus.container-image.registry=docker.io \
