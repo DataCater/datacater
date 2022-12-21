@@ -2,6 +2,23 @@ import React, { Component } from "react";
 import { Code, Package, Table } from "react-feather";
 
 class Toolbar extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      tempInspectLimit: undefined,
+    };
+
+    this.updateTempInspectLimit = this.updateTempInspectLimit.bind(this);
+  }
+
+  updateTempInspectLimit(event) {
+    if (!isNaN(event.target.value)) {
+      this.setState({
+        tempInspectLimit: event.target.value,
+      });
+    }
+  }
+
   render() {
     const {
       hideStepNameFormFunc,
@@ -130,10 +147,20 @@ class Toolbar extends Component {
             <input
               type="text"
               className="form-control form-control-sm"
-              onChange={updateInspectLimitFunc}
+              onChange={this.updateTempInspectLimit}
               aria-describedby="passwordHelpInline"
+              onBlur={updateInspectLimitFunc}
+              onKeyDown={(e) => {
+                if (e.which === 13) {
+                  e.target.blur();
+                }
+              }}
               placeholder="100"
-              value={inspectLimit}
+              value={
+                this.state.tempInspectLimit !== undefined
+                  ? this.state.tempInspectLimit
+                  : inspectLimit
+              }
               style={{ width: "75px" }}
             />
           </div>
