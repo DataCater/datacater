@@ -500,13 +500,6 @@ class NewStream extends Component {
                 />
               </div>
             ))}
-            {this.state.stream.spec.kafka["group.id"] !== undefined && (
-              <div className="col-12 mt-4 alert alert-warning">
-                Setting the consumer property <i>group.id</i> does not have any
-                impact because DataCater overwrites it with the Deployment's
-                UUID.
-              </div>
-            )}
             <div className="col-12 mt-3">
               <h6 className="d-inline me-2">Add config</h6>
               <span className="text-muted fs-7">
