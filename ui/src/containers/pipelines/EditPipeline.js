@@ -268,6 +268,7 @@ class EditPipeline extends Component {
           delete step.transform;
           pipeline.spec.steps[currentStep - 1] = step;
           editColumn = undefined;
+          contextBarActive = false;
         } else {
           pipeline.spec.steps[currentStep - 1]["transform"] = {
             key: value,
@@ -279,6 +280,7 @@ class EditPipeline extends Component {
           delete step.filter;
           pipeline.spec.steps[currentStep - 1] = step;
           editColumn = undefined;
+          contextBarActive = false;
         } else {
           pipeline.spec.steps[currentStep - 1]["filter"] = {
             key: value,
@@ -310,6 +312,7 @@ class EditPipeline extends Component {
           }
           pipeline.spec.steps[currentStep - 1] = step;
           editColumn = undefined;
+          contextBarActive = false;
         } else {
           pipeline.spec.steps[currentStep - 1].fields[fieldName]["transform"] =
             {
@@ -326,6 +329,7 @@ class EditPipeline extends Component {
           }
           pipeline.spec.steps[currentStep - 1] = step;
           editColumn = undefined;
+          contextBarActive = false;
         } else {
           pipeline.spec.steps[currentStep - 1].fields[fieldName]["filter"] = {
             key: value,
