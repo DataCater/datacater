@@ -14,48 +14,28 @@ import java.util.Map;
 
 public class KafkaConfig {
     static private final String errorMsg= "The given Kafka Configuration could not be mapped: %s";
-    static final String DATACATER_STREAMIN_CONFIG =
+    static final String KEY_DESERIALIZER =
             ConfigProvider.getConfig()
-                    .getOptionalValue("datacater.stream-in.config", String.class)
-                    .orElse( "{\"key.deserializer\": \"io.datacater.core.serde.JsonDeserializer\", \"value.deserializer\": \"io.datacater.core.serde.JsonDeserializer\"}");
-
+                    .getOptionalValue("datacater.serde.key.deserializer", String.class)
+                    .orElse("io.datacater.core.serde.JsonDeserializer");
+    static final String VALUE_DESERIALIZER =
+            ConfigProvider.getConfig()
+                    .getOptionalValue("datacater.serde.value.deserializer", String.class)
+                    .orElse("io.datacater.core.serde.JsonDeserializer");
+    static final String KEY_SERIALIZER =
+            ConfigProvider.getConfig()
+                    .getOptionalValue("datacater.serde.key.serializer", String.class)
+                    .orElse("io.datacater.core.serde.JsonSerializer");
+    static final String VALUE_SERIALIZER =
+            ConfigProvider.getConfig()
+                    .getOptionalValue("datacater.serde.value.serializer", String.class)
+                    .orElse("io.datacater.core.serde.JsonSerializer");
     static final String DATACATER_STREAMIN_TOPIC =
             ConfigProvider.getConfig()
-                    .getOptionalValue("mp.messaging.incoming.stream-in.topic", String.class)
-                    .orElse("stream-in");
-
+                    .getOptionalValue("mp.messaging.incoming.streamin.topic", String.class)
+                    .orElse("streamin");
     static final String DATACATER_STREAMOUT_TOPIC =
             ConfigProvider.getConfig()
-                    .getOptionalValue("mp.messaging.incoming.stream-out.topic", String.class)
-                    .orElse("stream-out");
-
-    static final String DATACATER_STREAMOUT_CONFIG =
-            ConfigProvider.getConfig()
-                    .getOptionalValue("datacater.stream-out.config", String.class)
-                    .orElse("{\"key.serializer\": \"io.datacater.core.serde.JsonSerializer\", \"value.serializer\": \"io.datacater.core.serde.JsonSerializer\"}");
-
-    @Produces
-    @ApplicationScoped
-    @Identifier("stream-in-configuration")
-    public static Map<String, Object> streamInConfig() {
-        return mapConfig(DATACATER_STREAMIN_CONFIG);
-    }
-
-    @Produces
-    @ApplicationScoped
-    @Identifier("stream-out-configuration")
-    public static Map<String, Object> streamOutConfig() {
-        return mapConfig(DATACATER_STREAMOUT_CONFIG);
-    }
-
-    private static Map<String, Object> mapConfig(String json){
-        ObjectMapper mapper = new ObjectMapper();
-        Map<String, Object> map;
-        try{
-            map = mapper.readValue(json, new TypeReference<>(){});
-        } catch (JsonProcessingException e){
-            throw new KafkaConfigurationException(String.format(errorMsg, e.getMessage()));
-        }
-        return map;
-    }
+                    .getOptionalValue("mp.messaging.incoming.streamout.topic", String.class)
+                    .orElse("streamout");
 }

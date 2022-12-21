@@ -11,7 +11,6 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 import org.eclipse.microprofile.config.ConfigProvider;
 import org.eclipse.microprofile.reactive.messaging.*;
 import org.jboss.logging.Logger;
-import org.junit.Ignore;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.GenericContainer;
@@ -31,13 +30,13 @@ import static org.junit.jupiter.api.Assertions.*;
 @QuarkusTestResource(KafkaCompanionResource.class)
 class PipelineTest {
     private static final Logger LOGGER = Logger.getLogger(PipelineTest.class);
-    private static final String STREAM_IN = "stream-in-test";
-    private static final String STREAM_OUT = "stream-out";
+    private static final String STREAMIN = "streamin-test";
+    private static final String STREAMOUT = "streamout";
     @Inject
     Pipeline application;
 
     @Inject
-    @Channel(STREAM_IN)
+    @Channel(STREAMIN)
     Emitter<ProducerRecord<JsonObject, JsonObject>> producer;
 
     @InjectKafkaCompanion
@@ -80,7 +79,7 @@ class PipelineTest {
             message.put("email", "max-mustermann@datacater.io");
             message.put("is_admin", "true");
             producer.send(new ProducerRecord<>(
-                    "stream-in",
+                    "streamin",
                     new JsonObject().put("value", UUID.randomUUID()),
                     message.put("number", i)));
         }
@@ -89,7 +88,7 @@ class PipelineTest {
         message.put("email", "max-mustermann@datacater.io");
         message.put("is_admin", "true");
         CompletionStage<Void> messageToWaitOn = producer.send(new ProducerRecord<>(
-                "stream-in",
+                "streamin",
                 new JsonObject().put("value", UUID.randomUUID()),
                 message));
 
@@ -99,7 +98,7 @@ class PipelineTest {
                 .consumeWithDeserializers(
                         io.datacater.core.serde.JsonDeserializer.class,
                         io.datacater.core.serde.JsonDeserializer.class)
-                .fromTopics(STREAM_OUT,1)
+                .fromTopics(STREAMOUT,1)
                 .awaitCompletion();
         assertTrue(messages.getFirstRecord().value().toString().contains("max-mustermann@datacater.io"));
         assertEquals(1, messages.count());

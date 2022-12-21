@@ -15,7 +15,6 @@ import java.nio.file.attribute.PosixFilePermissions;
 import java.time.Duration;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import java.net.ConnectException;
 import java.util.UUID;
 import java.util.concurrent.CompletionException;
 
@@ -38,17 +37,13 @@ public class Pipeline {
   private String host;
   private Integer port;
 
-  private Deserializer keyDeserializer =
-          Deserializers.deserializers.get(KafkaConfig.streamInConfig().get("key.deserializer").toString());
+  private Deserializer keyDeserializer = Deserializers.deserializers.get(KafkaConfig.KEY_DESERIALIZER);
 
-  private Deserializer valueDeserializer =
-          Deserializers.deserializers.get(KafkaConfig.streamInConfig().get("value.deserializer").toString());
+  private Deserializer valueDeserializer = Deserializers.deserializers.get(KafkaConfig.VALUE_DESERIALIZER);
 
-  private Serializer keySerializer =
-          Serializers.serializers.get(KafkaConfig.streamOutConfig().get("key.serializer").toString());
+  private Serializer keySerializer = Serializers.serializers.get(KafkaConfig.KEY_SERIALIZER);
 
-  private Serializer valueSerializer =
-          Serializers.serializers.get(KafkaConfig.streamOutConfig().get("value.serializer").toString());
+  private Serializer valueSerializer = Serializers.serializers.get(KafkaConfig.VALUE_SERIALIZER);
 
   WebClient client;
 
@@ -58,11 +53,11 @@ public class Pipeline {
   }
 
   @Inject
-  @Channel(PipelineConfig.STREAM_OUT)
+  @Channel(PipelineConfig.STREAMOUT)
   @OnOverflow(value = OnOverflow.Strategy.UNBOUNDED_BUFFER)
   Emitter<Record<byte[], byte[]>> producer;
 
-  @Incoming(PipelineConfig.STREAM_IN)
+  @Incoming(PipelineConfig.STREAMIN)
   @Blocking
   @Acknowledgment(Acknowledgment.Strategy.POST_PROCESSING)
   public void processUUID(ConsumerRecords<byte[], byte[]> messages) {

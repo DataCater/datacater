@@ -7,8 +7,9 @@ import org.eclipse.microprofile.config.ConfigProvider;
 public class StaticConfig {
   private StaticConfig() {}
 
-  static final String STREAM_IN_CONFIG_NAME = "MP_MESSAGING_INCOMING_STREAM_IN_TOPIC";
-  static final String STREAM_OUT_CONFIG_NAME = "MP_MESSAGING_OUTGOING_STREAM_OUT_TOPIC";
+  static final String STREAMIN_ENV_PREFIX = "MP_MESSAGING_INCOMING_STREAMIN_";
+  static final String STREAMOUT_ENV_PREFIX = "MP_MESSAGING_OUTGOING_STREAMOUT_";
+  static final String DATACATER_SERDE_ENV_PREFIX = "DATACATER_SERDE_";
   static final String DATACATER_PIPELINE = "datacater-pipeline";
   static final String PYTHON_RUNNER_NAME = "python-runner";
   static final String APP = "datacater.io/app";
@@ -51,8 +52,8 @@ public class StaticConfig {
   static final String VALUE_SERIALIZER = "value.serializer";
   static final String STREAMIN_CONFIG_TEXT = "stream-in-config";
   static final String STREAMOUT_CONFIG_TEXT = "stream-out-config";
-  static final String DC_STREAMIN_CONFIG_TEXT = "DATACATER_STREAM_IN_CONFIG";
-  static final String DC_STREAMOUT_CONFIG_TEXT = "DATACATER_STREAM_OUT_CONFIG";
+  static final String DC_STREAMIN_CONFIG_TEXT = "DATACATER_STREAMIN_CONFIG";
+  static final String DC_STREAMOUT_CONFIG_TEXT = "DATACATER_STREAM_OUTCONFIG";
   static final String HTTP = "http";
   static final String CONDITIONS = "Conditions";
   static final String ERROR_TAG = "error";
@@ -117,8 +118,8 @@ public class StaticConfig {
   static class LoggerMessages {
     private LoggerMessages() {}
 
-    static final String DEPLOYMENT_DELETED = "DatacaterDeployment deleted successfully: %s";
-    static final String DEPLOYMENT_NOT_DELETED = "DatacaterDeployment could not be deleted: %s";
+    static final String DEPLOYMENT_DELETED = "Datacater Deployment deleted successfully: %s";
+    static final String DEPLOYMENT_NOT_DELETED = "Datacater Deployment could not be deleted: %s";
     static final String PIPELINE_NOT_FOUND = "The referenced Pipeline UUID could not be found";
     static final String STREAM_NOT_FOUND = "The referenced %s UUID could not be found";
     static final String DEPLOYMENT_NOT_FOUND = "The referenced Deployment could not be found.";
