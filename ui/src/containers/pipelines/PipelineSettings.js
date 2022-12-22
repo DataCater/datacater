@@ -25,9 +25,14 @@ class PipelineSettings extends Component {
 
   componentDidMount() {
     this.props
-      .fetchPipeline(this.getPipelineId())
-      .then(() => this.setState({ pipeline: this.props.pipelines.pipeline }));
-    this.props.fetchStreams();
+      .fetchStreams()
+      .then(() =>
+        this.props
+          .fetchPipeline(this.getPipelineId())
+          .then(() =>
+            this.setState({ pipeline: this.props.pipelines.pipeline })
+          )
+      );
   }
 
   getPipelineId() {
