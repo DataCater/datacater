@@ -27,6 +27,7 @@ quarkus  :
   http:
     root-path: /api/${datacater.api.version}
     cors: true
+    auth:
       basic: true
       proactive: false
   native:
@@ -146,15 +147,13 @@ datacater:
     filters:
       path: /home/runner/work/cloud-platform/cloud-platform/filters
     authorization:
-      basic: true
+      basic: false
       oidc: false
     pythonrunner:
       image:
         name: datacater/python-runner
         version: alpha-20221117
   quarkus:
-    oidc:
-      enabled: false
     log:
       level: INFO
       console:
@@ -179,6 +178,7 @@ datacater:
       port: 8081
       auth:
         basic: true
+        proactive: true
     kafka:
       devservices:
         port: 9092
