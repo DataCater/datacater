@@ -47,6 +47,7 @@ class EditPipeline extends Component {
       currentStep: undefined,
       debugRecord: undefined,
       errorMessage: "",
+      inspectLimit: 100,
       pipeline: {},
       pipelineUpdated: false,
       pipelineUpdatedAt: undefined,
@@ -75,6 +76,7 @@ class EditPipeline extends Component {
     this.hideStepNameForm = this.hideStepNameForm.bind(this);
     this.openDebugView = this.openDebugView.bind(this);
     this.closeDebugView = this.closeDebugView.bind(this);
+    this.updateInspectLimit = this.updateInspectLimit.bind(this);
   }
 
   componentDidMount() {
@@ -676,6 +678,20 @@ class EditPipeline extends Component {
     });
   }
 
+  updateInspectLimit(event) {
+    const limit = isNaN(parseInt(event.target.value))
+      ? 100
+      : parseInt(event.target.value);
+    this.setState({ inspectLimit: limit });
+    this.props
+      .inspectStream(this.state.pipeline.metadata["stream-in"], limit)
+      .then(() => {
+        if (this.state.currentStep !== undefined) {
+          this.updateSampleRecords(this.state.pipeline, this.state.currentStep);
+        }
+      });
+  }
+
   render() {
     const pipeline = this.state.pipeline;
 
@@ -879,6 +895,7 @@ class EditPipeline extends Component {
             handleStepChangeFunc={this.handleStepChange}
             hideContextBarFunc={this.hideContextBar}
             hideStepNameFormFunc={this.hideStepNameForm}
+            inspectLimit={this.state.inspectLimit}
             moveToStepFunc={this.moveToStep}
             moveStepFunc={this.moveStep}
             openDebugViewFunc={this.openDebugView}
@@ -890,6 +907,7 @@ class EditPipeline extends Component {
             showStepNameForm={this.state.showStepNameForm}
             showStepNameFormFunc={this.showStepNameForm}
             transforms={this.props.transforms.transforms}
+            updateInspectLimitFunc={this.updateInspectLimit}
             updateStepNameFunc={this.updateStepName}
           />
         )}

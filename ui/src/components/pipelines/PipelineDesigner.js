@@ -131,6 +131,7 @@ class PipelineDesigner extends Component {
           hideStepNameFormFunc={this.props.hideStepNameFormFunc}
           pipeline={pipeline}
           editColumnFunc={this.props.editColumnFunc}
+          inspectLimit={this.props.inspectLimit}
           filters={this.props.filters}
           sampleRecords={this.props.sampleRecords}
           showGrid={this.state.showGrid}
@@ -139,6 +140,7 @@ class PipelineDesigner extends Component {
           step={step}
           toggleShowGridFunc={this.toggleShowGrid}
           transforms={this.props.transforms}
+          updateInspectLimitFunc={this.props.updateInspectLimitFunc}
           updateStepNameFunc={this.props.updateStepNameFunc}
         />
         {this.state.showGrid && (
