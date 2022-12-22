@@ -14,6 +14,7 @@ import java.nio.file.Path;
 import java.nio.file.attribute.PosixFilePermissions;
 import java.time.Duration;
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 import java.util.UUID;
 import java.util.concurrent.CompletionException;
@@ -23,6 +24,7 @@ import io.vertx.mutiny.core.buffer.Buffer;
 import io.vertx.mutiny.ext.web.client.HttpRequest;
 import io.vertx.mutiny.ext.web.client.HttpResponse;
 import io.vertx.mutiny.ext.web.client.WebClient;
+import io.quarkus.runtime.StartupEvent;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.common.serialization.Deserializer;
@@ -56,6 +58,13 @@ public class Pipeline {
   @Channel(PipelineConfig.STREAMOUT)
   @OnOverflow(value = OnOverflow.Strategy.UNBOUNDED_BUFFER)
   Emitter<Record<byte[], byte[]>> producer;
+
+  void onStart(@Observes StartupEvent ev) {
+    keyDeserializer.configure(KafkaConfig.mapConfig(KafkaConfig.DATACATER_STREAMIN_CONFIG), true);
+    valueDeserializer.configure(KafkaConfig.mapConfig(KafkaConfig.DATACATER_STREAMIN_CONFIG), false);
+    keySerializer.configure(KafkaConfig.mapConfig(KafkaConfig.DATACATER_STREAMOUT_CONFIG), true);
+    valueSerializer.configure(KafkaConfig.mapConfig(KafkaConfig.DATACATER_STREAMOUT_CONFIG), false);
+  }
 
   @Incoming(PipelineConfig.STREAMIN)
   @Blocking

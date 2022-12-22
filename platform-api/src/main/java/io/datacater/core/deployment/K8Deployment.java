@@ -1,5 +1,6 @@
 package io.datacater.core.deployment;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -373,6 +374,22 @@ public class K8Deployment {
               StaticConfig.STREAMOUT_ENV_PREFIX,
               configOptionAsEnvVariable,
               streamOutConfig.get(configOption).toString()));
+    }
+
+    ObjectMapper objectMapper = new ObjectMapper();
+    try {
+      environmentVariables.add(
+          createEnvVariable(
+              StaticConfig.DATACATER_STREAMIN_CONFIG,
+              "",
+              objectMapper.writeValueAsString(streamInConfig)));
+      environmentVariables.add(
+          createEnvVariable(
+              StaticConfig.DATACATER_STREAMOUT_CONFIG,
+              "",
+              objectMapper.writeValueAsString(streamOutConfig)));
+    } catch (JsonProcessingException e) {
+      throw new CreateDeploymentException(StringUtilities.wrapString(e.getMessage()));
     }
 
     // Set topic name of stream in and stream out
