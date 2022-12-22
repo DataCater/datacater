@@ -13,7 +13,7 @@ import javax.ws.rs.Produces;
 import java.util.Map;
 
 public class KafkaConfig {
-    static private final String errorMsg= "The given Kafka Configuration could not be mapped: %s";
+    static private final String errorMsg = "The given Kafka Configuration could not be mapped: %s";
     static final String KEY_DESERIALIZER =
             ConfigProvider.getConfig()
                     .getOptionalValue("datacater.serde.key.deserializer", String.class)
@@ -30,6 +30,7 @@ public class KafkaConfig {
             ConfigProvider.getConfig()
                     .getOptionalValue("datacater.serde.value.serializer", String.class)
                     .orElse("io.datacater.core.serde.JsonSerializer");
+
     static final String DATACATER_STREAMIN_TOPIC =
             ConfigProvider.getConfig()
                     .getOptionalValue("mp.messaging.incoming.streamin.topic", String.class)
@@ -38,4 +39,24 @@ public class KafkaConfig {
             ConfigProvider.getConfig()
                     .getOptionalValue("mp.messaging.incoming.streamout.topic", String.class)
                     .orElse("streamout");
+
+    static final String DATACATER_STREAMIN_CONFIG =
+            ConfigProvider.getConfig()
+                    .getOptionalValue("datacater.streamin.config", String.class)
+                    .orElse( "{}");
+    static final String DATACATER_STREAMOUT_CONFIG =
+            ConfigProvider.getConfig()
+                    .getOptionalValue("datacater.streamout.config", String.class)
+                    .orElse( "{}");
+
+    public static Map<String, Object> mapConfig(String json){
+        ObjectMapper mapper = new ObjectMapper();
+        Map<String, Object> map;
+        try{
+            map = mapper.readValue(json, new TypeReference<>(){});
+        } catch (JsonProcessingException e){
+            throw new KafkaConfigurationException(String.format(errorMsg, e.getMessage()));
+        }
+        return map;
+    }
 }

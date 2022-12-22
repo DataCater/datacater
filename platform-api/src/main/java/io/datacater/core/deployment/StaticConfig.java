@@ -10,6 +10,8 @@ public class StaticConfig {
   static final String STREAMIN_ENV_PREFIX = "MP_MESSAGING_INCOMING_STREAMIN_";
   static final String STREAMOUT_ENV_PREFIX = "MP_MESSAGING_OUTGOING_STREAMOUT_";
   static final String DATACATER_SERDE_ENV_PREFIX = "DATACATER_SERDE_";
+  static final String DATACATER_STREAMIN_CONFIG = "DATACATER_STREAMIN_CONFIG";
+  static final String DATACATER_STREAMOUT_CONFIG = "DATACATER_STREAMOUT_CONFIG";
   static final String DATACATER_PIPELINE = "datacater-pipeline";
   static final String PYTHON_RUNNER_NAME = "python-runner";
   static final String APP = "datacater.io/app";
