@@ -101,7 +101,11 @@ const deployments = (state, action) => {
         .split("\n")
         .slice(-101, -1)
         .map((logLine) => {
-          return JSON.parse(logLine);
+          try {
+            return JSON.parse(logLine);
+          } catch (e) {
+            return logLine;
+          }
         });
       return {
         ...state,
