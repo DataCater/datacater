@@ -16,10 +16,10 @@ public class StreamsUtilities {
   @Inject DataCaterSessionFactory dsf;
 
   public Uni<List<StreamMessage>> getStreamMessages(UUID uuid) {
-    return getStreamMessages(uuid, 100);
+    return getStreamMessages(uuid, 100L);
   }
 
-  public Uni<List<StreamMessage>> getStreamMessages(UUID uuid, long limit) {
+  public Uni<List<StreamMessage>> getStreamMessages(UUID uuid, Long limit) {
     return dsf.withTransaction(
         ((session, transaction) ->
             session
@@ -31,6 +31,9 @@ public class StreamsUtilities {
                         e -> {
                           try {
                             Stream stream = Stream.from(e);
+                            // Overwrite Kafka Consumer property `max.poll.records` with the
+                            // parameter `limit`
+                            stream.spec().getKafka().put("max.poll.records", limit.intValue());
                             StreamService kafkaAdmin = KafkaStreamsAdmin.from(stream);
                             List<StreamMessage> messages = kafkaAdmin.inspect(stream, limit);
                             kafkaAdmin.close();
