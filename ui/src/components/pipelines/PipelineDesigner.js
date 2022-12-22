@@ -132,6 +132,7 @@ class PipelineDesigner extends Component {
           pipeline={pipeline}
           editColumnFunc={this.props.editColumnFunc}
           inspectLimit={this.props.inspectLimit}
+          filters={this.props.filters}
           sampleRecords={this.props.sampleRecords}
           showGrid={this.state.showGrid}
           showStepNameForm={this.props.showStepNameForm}

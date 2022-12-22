@@ -59,8 +59,8 @@ class TableHeaderCell extends Component {
     } = this.props.column;
 
     let sampleCellClassNames = "sample-cell py-2 ps-0";
-    let transformation = undefined;
 
+    let transformation = undefined;
     if (
       currentStep >= 0 &&
       step.fields !== undefined &&
@@ -70,6 +70,19 @@ class TableHeaderCell extends Component {
       const transformationKey = step.fields[field.name].transform.key;
       transformation = this.props.column.transforms.find(
         (transformation) => transformation.key === transformationKey
+      );
+    }
+
+    let filter = undefined;
+    if (
+      currentStep >= 0 &&
+      step.fields !== undefined &&
+      step.fields[field.name] !== undefined &&
+      step.fields[field.name].filter !== undefined
+    ) {
+      const filterKey = step.fields[field.name].filter.key;
+      filter = this.props.column.filters.find(
+        (filter) => filter.key === filterKey
       );
     }
 
@@ -93,7 +106,8 @@ class TableHeaderCell extends Component {
           </div>
           {step !== undefined &&
             step.kind === "Field" &&
-            transformation == null && (
+            transformation === undefined &&
+            filter === undefined && (
               <Button
                 variant="white"
                 size="sm"
@@ -106,7 +120,7 @@ class TableHeaderCell extends Component {
             )}
           {step !== undefined &&
             step.kind === "Field" &&
-            transformation != null && (
+            (transformation !== undefined || filter !== undefined) && (
               <Button
                 variant="primary"
                 size="sm"
@@ -114,7 +128,9 @@ class TableHeaderCell extends Component {
                 onClick={(event) => this.openContextBar(field)}
               >
                 <Package className="feather-icon me-2" />
-                {transformation.name}
+                {transformation !== undefined &&
+                  `Transform: ${transformation.name}`}
+                {transformation === undefined && `Filter: ${filter.name}`}
               </Button>
             )}
         </div>
