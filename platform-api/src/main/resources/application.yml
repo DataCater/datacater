@@ -29,7 +29,7 @@ quarkus  :
     cors: true
     auth:
       basic: true
-      proactive: false
+      proactive: true
   native:
     additional-build-args: --initialize-at-run-time=org.apache.kafka.common.security.authenticator.SaslClientAuthenticator
   smallrye-openapi:
@@ -93,7 +93,7 @@ datacater:
     http:
       auth:
         basic: true
-        proactive: false
+        proactive: true
     security:
       users:
         embedded:
