@@ -101,6 +101,7 @@ public class LabeledStatefulSet implements Shareable {
         .withPorts(this.containerPort())
         .withReadinessProbe(ready())
         .withLivenessProbe(ready())
+        .withResources(DataCaterK8sConfig.getResources())
         .build();
   }
 
