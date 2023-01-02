@@ -26,6 +26,7 @@ quarkus  :
           admin: admin,dev,user
   http:
     root-path: /api/${datacater.api.version}
+    non-application-root-path: /q
     cors: true
     auth:
       basic: true
