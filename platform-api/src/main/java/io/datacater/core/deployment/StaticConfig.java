@@ -2,6 +2,7 @@ package io.datacater.core.deployment;
 
 import io.fabric8.kubernetes.api.model.Quantity;
 import java.util.Map;
+import java.util.Optional;
 import org.eclipse.microprofile.config.ConfigProvider;
 
 public class StaticConfig {
@@ -24,14 +25,28 @@ public class StaticConfig {
   static final String DEPLOYMENT_SERVICE_TEXT = "datacater.io/service";
   static final String CONFIGMAP_MOUNT_PATH = "/usr/app/mounts";
   static final String DATA_SHARE_MOUNT_PATH = "/usr/app/data-mounts";
+  public static final String MEMORY = "memory";
+  public static final String CPU = "cpu";
   static final Map<String, Quantity> RESOURCE_REQUESTS =
       Map.of(
-          "cpu",
+          CPU,
           new Quantity(EnvironmentVariables.DEPLOYMENT_RESOURCES_REQUESTS_CPU),
-          "memory",
+          MEMORY,
           new Quantity(EnvironmentVariables.DEPLOYMENT_RESOURCES_REQUESTS_MEMORY));
-  static final Map<String, Quantity> RESOURCE_LIMITS =
-      Map.of("memory", new Quantity(EnvironmentVariables.DEPLOYMENT_RESOURCES_LIMITS_MEMORY));
+  static final Map<String, Quantity> RESOURCE_LIMITS = getLimits();
+
+  static Map<String, Quantity> getLimits() {
+    if (EnvironmentVariables.DEPLOYMENT_RESOURCES_LIMITS_CPU.isPresent()
+        && !EnvironmentVariables.DEPLOYMENT_RESOURCES_LIMITS_CPU.get().isEmpty()) {
+      return Map.of(
+          CPU,
+          new Quantity(EnvironmentVariables.DEPLOYMENT_RESOURCES_LIMITS_CPU.get()),
+          MEMORY,
+          new Quantity(EnvironmentVariables.DEPLOYMENT_RESOURCES_LIMITS_MEMORY));
+    }
+    return Map.of(MEMORY, new Quantity(EnvironmentVariables.DEPLOYMENT_RESOURCES_LIMITS_MEMORY));
+  }
+
   static final String DEPLOYMENT_NAME_PREFIX = "datacater-deployment-";
   static final String CONFIGMAP_NAME_PREFIX = "datacater-configmap-";
   static final String CONFIGMAP_VOLUME_NAME_PREFIX = "datacater-volume-";
@@ -133,6 +148,9 @@ public class StaticConfig {
         ConfigProvider.getConfig()
             .getOptionalValue("datacater.deployment.resources.requests.cpu", String.class)
             .orElse("0.1");
+    static final Optional<String> DEPLOYMENT_RESOURCES_LIMITS_CPU =
+        ConfigProvider.getConfig()
+            .getOptionalValue("datacater.deployment.resources.limits.cpu", String.class);
   }
 
   static class LoggerMessages {
