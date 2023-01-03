@@ -61,14 +61,14 @@ public class DataCaterK8sConfig {
   static final String PYTHONRUNNER_RESOURCES_REQUESTS_MEMORY =
       ConfigProvider.getConfig()
           .getOptionalValue("datacater.pythonrunner.resources.requests.memory", String.class)
-          .orElse("200Mi");
+          .orElse("100Mi");
   static final Optional<String> PYTHONRUNNER_RESOURCES_LIMITS_CPU =
       ConfigProvider.getConfig()
           .getOptionalValue("datacater.pythonrunner.resources.limits.cpu", String.class);
   static final String PYTHONRUNNER_RESOURCES_LIMITS_MEMORY =
       ConfigProvider.getConfig()
-          .getOptionalValue("datacater.pythonrunner.resources.requests.memory", String.class)
-          .orElse("0.5");
+          .getOptionalValue("datacater.pythonrunner.resources.limits.memory", String.class)
+          .orElse("100Mi");
 
   static ResourceRequirements getResources() {
     Map<String, Quantity> requests =
@@ -80,12 +80,12 @@ public class DataCaterK8sConfig {
     Map<String, Quantity> limits =
         PYTHONRUNNER_RESOURCES_LIMITS_CPU
             .map(
-                s ->
+                cpuLimits ->
                     Map.of(
                         MEMORY,
                         new Quantity(PYTHONRUNNER_RESOURCES_LIMITS_MEMORY),
                         CPU,
-                        new Quantity(s)))
+                        new Quantity(cpuLimits)))
             .orElseGet(() -> Map.of(MEMORY, new Quantity(PYTHONRUNNER_RESOURCES_LIMITS_MEMORY)));
     return new ResourceRequirementsBuilder().withRequests(requests).withLimits(limits).build();
   }
