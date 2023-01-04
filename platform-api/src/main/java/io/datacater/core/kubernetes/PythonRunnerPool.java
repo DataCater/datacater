@@ -2,9 +2,7 @@ package io.datacater.core.kubernetes;
 
 import io.fabric8.kubernetes.api.model.ContainerPort;
 import io.fabric8.kubernetes.api.model.Pod;
-import io.fabric8.kubernetes.api.model.apps.StatefulSet;
 import io.fabric8.kubernetes.client.KubernetesClient;
-import io.quarkus.runtime.StartupEvent;
 import io.smallrye.mutiny.Uni;
 import io.vertx.mutiny.core.shareddata.AsyncMap;
 import io.vertx.mutiny.core.shareddata.SharedData;
@@ -17,9 +15,7 @@ import java.util.Deque;
 import java.util.List;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 import org.jboss.logging.Logger;
 
@@ -34,8 +30,6 @@ public class PythonRunnerPool {
   }
 
   @Inject KubernetesClient kubernetesClient;
-
-  @Inject LabeledStatefulSet labeledStatefulSet;
 
   private static final Logger LOGGER = Logger.getLogger(PythonRunnerPool.class);
   private static final String POOL_NAME = "python-runner";
@@ -84,18 +78,6 @@ public class PythonRunnerPool {
       }
       return path;
     }
-  }
-
-  @PostConstruct
-  void initialize(@Observes StartupEvent event) {
-    LOGGER.info(
-        String.format(
-            "Initialising StatefulSet with replicas := %d",
-            DataCaterK8sConfig.PYTHON_RUNNER_REPLICAS));
-    labeledStatefulSet.setClient(kubernetesClient);
-    StatefulSet statefulSet = labeledStatefulSet.blueprint();
-    labeledStatefulSet.createStatefulSet(statefulSet);
-    labeledStatefulSet.createService();
   }
 
   public Uni<NamedPod> getPod() {
