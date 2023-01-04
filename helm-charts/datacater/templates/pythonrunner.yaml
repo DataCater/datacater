@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ .Values.datacater.pythonrunner.name }}
+  labels:
+    {{- include "datacater.labelsPythonRunner" . | nindent 4 }}
+spec:
+  serviceName: {{ .Values.datacater.pythonrunner.serviceName }}
+  replicas: {{ .Values.datacater.pythonrunner.replicas }}
+  selector:
+    matchLabels:
+      {{- include "datacater.selectorLabelsPythonRunner" . | nindent 6 }}
+  template:
+    metadata:
+      name: {{ .Values.datacater.pythonrunner.name }}
+      labels:
+        {{- include "datacater.labelsPythonRunner" . | nindent 8 }}
+    spec:
+      containers:
+        - name: {{ .Values.datacater.pythonrunner.name }}
+          image: "{{ .Values.datacater.pythonrunner.image.repository }}:{{ .Values.datacater.pythonrunner.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.datacater.pythonrunner.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 50000
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /health
+              port: 50000
+              scheme: HTTP
+            initialDelaySeconds: 0
+            periodSeconds: 1
+            successThreshold: 1
+            timeoutSeconds: 10
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /health
+              port: 50000
+              scheme: HTTP
+            initialDelaySeconds: 0
+            periodSeconds: 1
+            successThreshold: 1
+            timeoutSeconds: 10

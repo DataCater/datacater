@@ -17,10 +17,13 @@ datacater:
   filters:
     path: "/datacater/filters"
   pythonrunner:
+    name: "python-runner"
     image:
       name: "datacater/python-runner"
+      pullPolicy: IfNotPresent
       version: "nightly-20230102"
     replicas: 10
+    serviceName: "pythonrunner"
   ui:
     image:
       repository: datacater/ui
