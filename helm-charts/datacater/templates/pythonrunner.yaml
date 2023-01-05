@@ -43,3 +43,5 @@ spec:
             periodSeconds: 1
             successThreshold: 1
             timeoutSeconds: 10
+          resources:
+            { { - toYaml .Values.datacater.pythonrunner.resources | nindent 12 } }

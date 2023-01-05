@@ -24,6 +24,12 @@ datacater:
       version: "nightly-20230102"
     replicas: 10
     serviceName: "pythonrunner"
+    resources:
+      requests:
+        cpu: 0.1
+        memory: 100Mi
+      limits:
+        memory: 100Mi
   ui:
     image:
       repository: datacater/ui
