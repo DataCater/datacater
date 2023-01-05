@@ -4,6 +4,7 @@ import io.fabric8.kubernetes.api.model.Quantity;
 import io.fabric8.kubernetes.api.model.ResourceRequirements;
 import io.fabric8.kubernetes.api.model.ResourceRequirementsBuilder;
 import java.util.Map;
+import java.util.Optional;
 import javax.enterprise.context.ApplicationScoped;
 import org.eclipse.microprofile.config.ConfigProvider;
 
