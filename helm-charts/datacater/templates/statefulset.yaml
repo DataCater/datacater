@@ -59,6 +59,8 @@ spec:
               value: "false"
             - name: DATACATER_PYTHONRUNNER_IMAGE_NAMESPACE
               value: {{ $.Release.Namespace | default "default" }}
+            - name: DATACATER_PYTHONRUNNER_SERVICENAME
+              value: {{ .Values.datacater.pythonrunner.serviceName | quote }}
           {{- if .Values.extraEnvs }}
 {{ toYaml .Values.extraEnvs | indent 12 }}
           {{- end }}
