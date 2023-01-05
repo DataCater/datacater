@@ -26,10 +26,12 @@ class InspectStream extends Component {
       inspectLimit: 100,
       showApiCall: false,
       showGrid: true,
+      tempInspectLimit: undefined,
     };
     this.toggleShowGrid = this.toggleShowGrid.bind(this);
     this.getColumns = this.getColumns.bind(this);
     this.updateInspectLimit = this.updateInspectLimit.bind(this);
+    this.updateTempInspectLimit = this.updateTempInspectLimit.bind(this);
     this.updateShowApiCall = this.updateShowApiCall.bind(this);
   }
 
@@ -116,6 +118,14 @@ class InspectStream extends Component {
       : parseInt(event.target.value);
     this.setState({ inspectLimit: limit });
     this.props.inspectStream(this.getStreamId(), limit);
+  }
+
+  updateTempInspectLimit(event) {
+    if (!isNaN(event.target.value)) {
+      this.setState({
+        tempInspectLimit: event.target.value,
+      });
+    }
   }
 
   updateShowApiCall(showApiCall) {
@@ -252,13 +262,23 @@ class InspectStream extends Component {
             </div>
             <div className="col-auto">
               <input
-                type="text"
-                className="form-control form-control-sm"
-                onChange={this.updateInspectLimit}
                 aria-describedby="passwordHelpInline"
+                className="form-control form-control-sm"
+                onBlur={this.updateInspectLimit}
+                onChange={this.updateTempInspectLimit}
+                onKeyDown={(e) => {
+                  if (e.which === 13) {
+                    e.target.blur();
+                  }
+                }}
                 placeholder="100"
-                value={this.state.inspectLimit}
                 style={{ width: "75px" }}
+                type="text"
+                value={
+                  this.state.tempInspectLimit !== undefined
+                    ? this.state.tempInspectLimit
+                    : this.state.inspectLimit
+                }
               />
             </div>
           </div>

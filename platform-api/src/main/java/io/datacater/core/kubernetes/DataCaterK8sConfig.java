@@ -1,5 +1,8 @@
 package io.datacater.core.kubernetes;
 
+import io.fabric8.kubernetes.api.model.Quantity;
+import io.fabric8.kubernetes.api.model.ResourceRequirements;
+import io.fabric8.kubernetes.api.model.ResourceRequirementsBuilder;
 import java.util.Map;
 import javax.enterprise.context.ApplicationScoped;
 import org.eclipse.microprofile.config.ConfigProvider;
@@ -28,4 +31,42 @@ public class DataCaterK8sConfig {
       ConfigProvider.getConfig()
           .getOptionalValue("datacater.pythonrunner.replicas", Integer.class)
           .orElse(1);
+
+  private static final String CPU = "cpu";
+  private static final String MEMORY = "memory";
+  static final String PYTHONRUNNER_RESOURCES_REQUESTS_CPU =
+      ConfigProvider.getConfig()
+          .getOptionalValue("datacater.pythonrunner.resources.requests.cpu", String.class)
+          .orElse("0.1");
+  static final String PYTHONRUNNER_RESOURCES_REQUESTS_MEMORY =
+      ConfigProvider.getConfig()
+          .getOptionalValue("datacater.pythonrunner.resources.requests.memory", String.class)
+          .orElse("100Mi");
+  static final Optional<String> PYTHONRUNNER_RESOURCES_LIMITS_CPU =
+      ConfigProvider.getConfig()
+          .getOptionalValue("datacater.pythonrunner.resources.limits.cpu", String.class);
+  static final String PYTHONRUNNER_RESOURCES_LIMITS_MEMORY =
+      ConfigProvider.getConfig()
+          .getOptionalValue("datacater.pythonrunner.resources.limits.memory", String.class)
+          .orElse("100Mi");
+
+  static ResourceRequirements getResources() {
+    Map<String, Quantity> requests =
+        Map.of(
+            MEMORY,
+            new Quantity(PYTHONRUNNER_RESOURCES_REQUESTS_MEMORY),
+            CPU,
+            new Quantity(PYTHONRUNNER_RESOURCES_REQUESTS_CPU));
+    Map<String, Quantity> limits =
+        PYTHONRUNNER_RESOURCES_LIMITS_CPU
+            .map(
+                cpuLimits ->
+                    Map.of(
+                        MEMORY,
+                        new Quantity(PYTHONRUNNER_RESOURCES_LIMITS_MEMORY),
+                        CPU,
+                        new Quantity(cpuLimits)))
+            .orElseGet(() -> Map.of(MEMORY, new Quantity(PYTHONRUNNER_RESOURCES_LIMITS_MEMORY)));
+    return new ResourceRequirementsBuilder().withRequests(requests).withLimits(limits).build();
+  }
 }
