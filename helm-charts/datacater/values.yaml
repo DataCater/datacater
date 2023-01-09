@@ -7,7 +7,7 @@ replicaCount: 1
 
 datacater:
   database:
-    host: ""
+    host: "postgres-postgresql:5432"
     username: datacater
     password: datacater
   deployment:
@@ -19,9 +19,9 @@ datacater:
   pythonrunner:
     name: "python-runner"
     image:
-      name: "datacater/python-runner"
+      repository: "datacater/python-runner"
       pullPolicy: IfNotPresent
-      version: "nightly-20230105"
+      version: "nightly"
     replicas: 10
     serviceName: "pythonrunner"
     resources:
