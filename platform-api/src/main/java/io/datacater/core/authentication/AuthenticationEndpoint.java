@@ -15,7 +15,7 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.jwt.JsonWebToken;
 import org.eclipse.microprofile.openapi.annotations.security.SecurityRequirement;
 
-@UnlessBuildProperty(name = "datacater.authorization", stringValue = "false")
+@UnlessBuildProperty(name = "datacater.authorization.basic", stringValue = "false")
 @Path("/authentication")
 public class AuthenticationEndpoint {
   private static final String BEARER = "Bearer";

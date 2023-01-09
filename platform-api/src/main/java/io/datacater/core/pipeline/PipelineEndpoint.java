@@ -11,6 +11,7 @@ import io.datacater.core.kubernetes.PythonRunnerPool.NamedPod;
 import io.datacater.core.stream.StreamMessage;
 import io.datacater.core.stream.StreamsUtilities;
 import io.fabric8.kubernetes.client.KubernetesClient;
+import io.quarkus.security.Authenticated;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.tuples.Tuple3;
 import io.smallrye.mutiny.unchecked.Unchecked;
@@ -24,7 +25,6 @@ import java.time.Duration;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
-import javax.annotation.security.RolesAllowed;
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -41,7 +41,7 @@ import org.eclipse.microprofile.openapi.annotations.security.SecurityRequirement
 import org.jboss.logging.Logger;
 
 @Path("/pipelines")
-@RolesAllowed("dev")
+@Authenticated
 @Produces(MediaType.APPLICATION_JSON)
 @SecurityRequirement(name = "apiToken")
 public class PipelineEndpoint {

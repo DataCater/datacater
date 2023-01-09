@@ -1,14 +1,14 @@
 package io.datacater.core.filter;
 
 import io.datacater.core.lifecycle.FiltersRepository;
+import io.quarkus.security.Authenticated;
 import java.util.List;
 import java.util.Optional;
-import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import org.eclipse.microprofile.openapi.annotations.security.SecurityRequirement;
 
-@RolesAllowed("dev")
+@Authenticated
 @Path("/filters")
 @SecurityRequirement(name = "apiToken")
 public class FilterEndpoint {
