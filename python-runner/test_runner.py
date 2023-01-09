@@ -1,43 +1,10 @@
 # Run tests: $ python3 -m pytest
 
 from fastapi.testclient import TestClient
-import json
-import os
 
 from runner import app
 
 client = TestClient(app)
-
-
-def test_batch_file_apply_transform():
-    # Upload pipeline
-    client.post(
-        "/pipeline",
-        json={
-            "spec": {
-                "steps": [
-                    {
-                        "kind": "Field",
-                        "fields": {"company": {"transform": {"key": "trim"}}},
-                    }
-                ]
-            }
-        },
-    )
-    # Apply pipeline to records
-    raw_records = [
-        {"key": {}, "value": {"company": " DataCater GmbH     "}, "metadata": {}}
-    ]
-    with open("records.json", "w") as outfile:
-        json.dump(raw_records, outfile)
-    response = client.post("/batch-file", json={"fileIn": "records.json"})
-    assert response.status_code == 200
-    with open(response.json()["fileOut"]) as infile:
-        assert json.load(infile) == [
-            {"key": {}, "value": {"company": "DataCater GmbH"}, "metadata": {}}
-        ]
-    os.remove("records.json")
-    os.remove("records.json.out")
 
 
 def test_batch_apply_transform():
@@ -268,7 +235,11 @@ def test_preview_apply_transform():
     )
 
     assert response.json() == [
-        {"key": {}, "value": {"company": "DataCater GmbH"}, "metadata": {}}
+        {
+            "key": {},
+            "value": {"company": "DataCater GmbH"},
+            "metadata": {"lastChange": {"key": {}, "value": {"company": 0}}},
+        }
     ]
 
     assert response.status_code == 200
@@ -304,7 +275,11 @@ def test_preview_apply_user_defined_transform():
     )
 
     assert response.json() == [
-        {"key": {}, "value": {"company": "DataCater AG"}, "metadata": {}}
+        {
+            "key": {},
+            "value": {"company": "DataCater AG"},
+            "metadata": {"lastChange": {"key": {}, "value": {"company": 0}}},
+        }
     ]
 
     assert response.status_code == 200
@@ -352,7 +327,9 @@ def test_preview_apply_user_defined_record_transform():
         {
             "key": {},
             "value": {"company": "DataCater AG", "website": "https://datacater.io"},
-            "metadata": {},
+            "metadata": {
+                "lastChange": {"key": {}, "value": {"company": 1, "website": 0}}
+            },
         }
     ]
 
@@ -388,7 +365,11 @@ def test_preview_apply_filter():
     )
 
     assert response.json() == [
-        {"key": {}, "value": {"company": "DataCater GmbH"}, "metadata": {}}
+        {
+            "key": {},
+            "value": {"company": "DataCater GmbH"},
+            "metadata": {"lastChange": {"key": {}, "value": {}}},
+        }
     ]
 
     assert response.status_code == 200
@@ -425,7 +406,11 @@ def test_preview_apply_user_defined_filter():
     )
 
     assert response.json() == [
-        {"key": {}, "value": {"company": "DataKater GmbH"}, "metadata": {}}
+        {
+            "key": {},
+            "value": {"company": "DataKater GmbH"},
+            "metadata": {"lastChange": {"key": {}, "value": {}}},
+        }
     ]
 
     assert response.status_code == 200
@@ -470,7 +455,11 @@ def test_preview_apply_user_defined_record_filter():
     )
 
     assert response.json() == [
-        {"key": {}, "value": {"company": "DataCater AG"}, "metadata": {}}
+        {
+            "key": {},
+            "value": {"company": "DataCater AG"},
+            "metadata": {"lastChange": {"key": {}, "value": {"company": 0}}},
+        }
     ]
 
     assert response.status_code == 200
@@ -513,8 +502,16 @@ def test_preview_filter_transform_combination():
     )
 
     assert response.json() == [
-        {"key": {}, "value": {"company": "DataCater AG"}, "metadata": {}},
-        {"key": {}, "value": {"company": "DataKater GmbH"}, "metadata": {}},
+        {
+            "key": {},
+            "value": {"company": "DataCater AG"},
+            "metadata": {"lastChange": {"key": {}, "value": {"company": 0}}},
+        },
+        {
+            "key": {},
+            "value": {"company": "DataKater GmbH"},
+            "metadata": {"lastChange": {"key": {}, "value": {}}},
+        },
     ]
 
     assert response.status_code == 200

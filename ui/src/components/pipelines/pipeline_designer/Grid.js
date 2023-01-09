@@ -22,11 +22,12 @@ class Grid extends Component {
     let classNames = "sample-cell w-100 text-nowrap";
 
     const field = column.field;
-    const rawValue = sample["value"][field.name];
-    const error = sample["metadata"]["error"];
+    const fieldName = field.name;
+    const rawValue = sample["value"][fieldName];
 
     // Check whether an error has occured when applying the pipeline spec
     // in the current or a previous step
+    const error = sample["metadata"]["error"];
     if (error !== undefined) {
       const myRegexp = /steps\[(\d+)\].*/g;
       const match = myRegexp.exec(error["location"]["path"]);
@@ -42,7 +43,7 @@ class Grid extends Component {
         return (
           <div
             className={classNames}
-            key={field.name}
+            key={fieldName}
             onClick={() => {
               column.openDebugViewFunc(sample);
             }}
@@ -53,18 +54,19 @@ class Grid extends Component {
       }
     }
 
-    /*
+    // Check whether the field has been changed in the current or a previous step
+    const lastChange = sample["metadata"]["lastChange"];
     if (
-      sample.lastChange !== undefined &&
-      sample.lastChange[field] !== undefined
+      lastChange !== undefined &&
+      lastChange["value"] !== undefined &&
+      lastChange["value"][fieldName] !== undefined
     ) {
-      if (sample.lastChange[field] === this.props.currentStep) {
+      if (lastChange["value"][fieldName] + 1 === column.currentStep) {
         classNames += " changed-in-current-step";
-      } else {
+      } else if (lastChange["value"][fieldName] + 1 < column.currentStep) {
         classNames += " changed-in-previous-step";
       }
     }
-    */
 
     if (
       this.props.editColumnField !== undefined &&
@@ -74,7 +76,7 @@ class Grid extends Component {
     }
 
     return (
-      <div className={classNames} key={field.name} title={"" + rawValue}>
+      <div className={classNames} key={fieldName} title={"" + rawValue}>
         {renderTableCellContent(rawValue)}
       </div>
     );
