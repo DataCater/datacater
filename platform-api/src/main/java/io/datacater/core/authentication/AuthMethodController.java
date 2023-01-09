@@ -15,10 +15,11 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 @ApplicationScoped
 @ExcludeFromGeneratedCoverageReport
 public class AuthMethodController extends AuthorizationController {
-  @ConfigProperty(name = "datacater.authorization", defaultValue = "false")
+
+  @ConfigProperty(name = "datacater.authorization.basic", defaultValue = "false")
   boolean authorization;
 
-  @ConfigProperty(name = "quarkus.oidc.enabled", defaultValue = "false")
+  @ConfigProperty(name = "datacater.authorization.oidc", defaultValue = "false")
   boolean oidc;
 
   @Override

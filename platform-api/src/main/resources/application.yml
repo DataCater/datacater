@@ -30,7 +30,7 @@ quarkus  :
     cors: true
     auth:
       basic: true
-      proactive: false
+      proactive: true
   native:
     additional-build-args: --initialize-at-run-time=org.apache.kafka.common.security.authenticator.SaslClientAuthenticator
   smallrye-openapi:
@@ -46,7 +46,7 @@ quarkus  :
     database:
       generation: update
   oidc:
-    enabled: false
+    enabled: true
 smallrye :
   jwt:
     sign:
@@ -72,7 +72,9 @@ datacater:
     image:
       name: datacater/python-runner
       version: alpha-20221101
-  authorization: true
+  authorization:
+    basic: true
+    oidc: false
   api:
     version: v1
   kafka:
@@ -82,7 +84,9 @@ datacater:
 
 '%dev'   :
   datacater:
-    authorization: true
+    authorization:
+      basic: true
+      oidc: false
     transforms:
       path: /home/runner/work/cloud-platform/cloud-platform/transforms
     filters:
@@ -92,10 +96,12 @@ datacater:
         name: datacater/python-runner
         version: alpha-20221117
   quarkus:
+    oidc:
+      enabled: true
     http:
       auth:
         basic: true
-        proactive: false
+        proactive: true
     security:
       users:
         embedded:
@@ -148,7 +154,9 @@ datacater:
       path: /home/runner/work/cloud-platform/cloud-platform/transforms
     filters:
       path: /home/runner/work/cloud-platform/cloud-platform/filters
-    authorization: true
+    authorization:
+      basic: false
+      oidc: false
     pythonrunner:
       image:
         name: datacater/python-runner
@@ -178,6 +186,7 @@ datacater:
       port: 8081
       auth:
         basic: true
+        proactive: true
     kafka:
       devservices:
         port: 9092
