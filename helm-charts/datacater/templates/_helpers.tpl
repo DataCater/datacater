@@ -71,6 +71,27 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
 {{/*
+Common labels for python-runner
+*/}}
+{{- define "datacater.labelsPythonRunner" -}}
+helm.sh/chart: {{ include "datacater.chart" . }}
+{{ include "datacater.partOfLabel" . }}
+{{ include "datacater.selectorLabelsPythonRunner" . }}
+{{- if .Chart.AppVersion }}
+app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
+{{- end }}
+app.kubernetes.io/managed-by: {{ .Release.Service }}
+{{- end }}
+
+{{/*
+Selector labels python-runner
+*/}}
+{{- define "datacater.selectorLabelsPythonRunner" -}}
+app.kubernetes.io/name: "python-runner"
+app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end }}
+
+{{/*
 Create the name of the service account to use
 */}}
 {{- define "datacater.serviceAccountName" -}}
