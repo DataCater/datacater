@@ -7,8 +7,18 @@ import FilterConfig from "./FilterConfig";
 class Record extends Component {
   constructor(props) {
     super(props);
+
+    // If the step defines a filter but no transform, open the filter by default
+    // If not, open the transform by default
+    const currentTab =
+      props.transformStep !== undefined &&
+      props.transformStep.transform === undefined &&
+      props.transformStep.filter !== undefined
+        ? "filter"
+        : "transform";
+
     this.state = {
-      currentTab: "transform",
+      currentTab: currentTab,
     };
 
     this.selectTab = this.selectTab.bind(this);
