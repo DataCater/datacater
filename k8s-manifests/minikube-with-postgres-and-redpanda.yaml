@@ -270,10 +270,10 @@ spec:
 ---
 # Source: redpanda/templates/statefulset.yaml
 # Access the cluster from within datacater through:
-# bootstrap.servers: "redpanda-0.redpanda.default.svc.cluster.local.:9093"
+# bootstrap.servers: redpanda-0.redpanda.default.svc.cluster.local.:9093
 #
 # Produce to topic with following command:
-# kubectl exec -it -n default redpanda-0 -- rpk topic produce test-redpanda-stream --brokers='redpanda-0.redpanda.default.svc.cluster.local.:9093'
+# kubectl exec -it -n default redpanda-0 -- rpk topic produce topicName --brokers='redpanda-0.redpanda.default.svc.cluster.local.:9093'
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
@@ -283,7 +283,6 @@ metadata:
     helm.sh/chart: redpanda-2.4.2
     app.kubernetes.io/name: redpanda
     app.kubernetes.io/instance: "redpanda"
-    app.kubernetes.io/managed-by: "Helm"
     app.kubernetes.io/component: redpanda
 spec:
   selector:
@@ -292,21 +291,14 @@ spec:
       app.kubernetes.io/instance: redpanda
   serviceName: redpanda
   replicas: 1
-  updateStrategy:
-    type: RollingUpdate
-  podManagementPolicy: Parallel
   template:
     metadata:
       labels:
         app.kubernetes.io/name: redpanda
         app.kubernetes.io/instance: "redpanda"
         app.kubernetes.io/component: redpanda
-      annotations:
-        checksum/config: d43de077ece76d792c8ee47ed8f0b624542f3dc056a374fc7f93f8df7f771c63
     spec:
-      securityContext:
-        fsGroup: 101
-      serviceAccountName: default
+      serviceAccountName: datacater
       initContainers:
         - name: set-datadir-ownership
           image: busybox:latest
@@ -347,16 +339,11 @@ spec:
               rpk redpanda --config "$CONFIG" config set redpanda.advertised_kafka_api[1].address $(SERVICE_NAME).local
               rpk redpanda --config "$CONFIG" config set redpanda.advertised_kafka_api[1].name default
               rpk redpanda --config "$CONFIG" config set redpanda.advertised_kafka_api[1].port 31092
-          securityContext:
-            runAsUser: 101
-            runAsGroup: 101
           volumeMounts:
             - name: redpanda
               mountPath: /tmp/base-config
             - name: config
               mountPath: /etc/redpanda
-          resources:
-            null
       containers:
         - name: redpanda
           image: vectorized/redpanda:v22.3.9
@@ -425,8 +412,8 @@ spec:
             - redpanda
             - start
             - --smp=1
-            - --memory=2048M
-            - --reserve-memory=205
+            - --memory=1024M
+            - --reserve-memory=0M
             - --default-log-level=info
             - --advertise-rpc-addr=$(SERVICE_NAME).redpanda.default.svc.cluster.local.:33145
             - --advertise-pandaproxy-addr=internal://$(SERVICE_NAME).redpanda.default.svc.cluster.local.:8082,default://$(SERVICE_NAME).redpanda.default.svc.cluster.local.:30082,
@@ -447,9 +434,6 @@ spec:
               containerPort: 8081
             - name: schema-default
               containerPort: 8080
-          securityContext:
-            runAsUser: 101
-            runAsGroup: 101
           volumeMounts:
             - name: datadir
               mountPath: /var/lib/redpanda/data
@@ -457,8 +441,8 @@ spec:
               mountPath: /etc/redpanda
           resources:
             limits:
-              cpu: 1
-              memory: 2.5Gi
+              cpu: 0.3
+              memory: 1Gi
       volumes:
         - name: datadir
           persistentVolumeClaim:
@@ -468,24 +452,6 @@ spec:
             name: redpanda
         - name: config
           emptyDir: {}
-      affinity:
-        podAntiAffinity:
-          preferredDuringSchedulingIgnoredDuringExecution:
-            - weight: 100
-              podAffinityTerm:
-                topologyKey: kubernetes.io/hostname
-                labelSelector:
-                  matchLabels:
-                    app.kubernetes.io/name: redpanda
-                    app.kubernetes.io/instance: "redpanda"
-      topologySpreadConstraints:
-        - labelSelector:
-            matchLabels:
-              app.kubernetes.io/name: redpanda
-              app.kubernetes.io/instance: "redpanda"
-          maxSkew: 1
-          topologyKey: topology.kubernetes.io/zone
-          whenUnsatisfiable: ScheduleAnyway
   volumeClaimTemplates:
     - metadata:
         name: datadir
@@ -497,7 +463,7 @@ spec:
         accessModes: ["ReadWriteOnce"]
         resources:
           requests:
-            storage: "20Gi"
+            storage: "5Gi"
 ---
 # Source: redpanda/templates/configmap.yaml
 apiVersion: v1
