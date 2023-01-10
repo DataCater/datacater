@@ -19,6 +19,7 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -63,7 +64,7 @@ public class DeploymentEndpoint {
   @GET
   @Path("{uuid}/logs")
   @Produces(MediaType.APPLICATION_JSON)
-  public Uni<String> getLogs(@PathParam("uuid") UUID deploymentId) {
+  public Uni<List<String>> getLogs(@PathParam("uuid") UUID deploymentId) {
     return dsf.withTransaction(
             ((session, transaction) -> session.find(DeploymentEntity.class, deploymentId)))
         .onItem()
@@ -71,7 +72,7 @@ public class DeploymentEndpoint {
         .failWith(new DeploymentNotFoundException(StaticConfig.LoggerMessages.DEPLOYMENT_NOT_FOUND))
         .onItem()
         .ifNotNull()
-        .transform(Unchecked.function(deployment -> getDeploymentLogs(deployment.getId())));
+        .transform(Unchecked.function(deployment -> getDeploymentLogsAsList(deployment.getId())));
   }
 
   @GET
@@ -289,9 +290,9 @@ public class DeploymentEndpoint {
                         String.format(StaticConfig.LoggerMessages.STREAM_NOT_FOUND, key))));
   }
 
-  private String getDeploymentLogs(UUID deploymentId) {
+  private List<String> getDeploymentLogsAsList(UUID deploymentId) {
     K8Deployment k8Deployment = new K8Deployment(client);
-    return k8Deployment.getLogs(deploymentId);
+    return Arrays.stream(k8Deployment.getLogs(deploymentId).split("\n")).toList();
   }
 
   private HttpRequest buildDeploymentServiceRequest(UUID deploymentId, String path) {
