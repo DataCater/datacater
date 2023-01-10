@@ -292,7 +292,7 @@ public class DeploymentEndpoint {
 
   private List<String> getDeploymentLogsAsList(UUID deploymentId) {
     K8Deployment k8Deployment = new K8Deployment(client);
-    return Arrays.stream(k8Deployment.getLogs(deploymentId).split("\n")).toList();
+    return Arrays.asList(k8Deployment.getLogs(deploymentId).split("\n"));
   }
 
   private HttpRequest buildDeploymentServiceRequest(UUID deploymentId, String path) {
