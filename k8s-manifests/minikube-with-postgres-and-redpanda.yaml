@@ -1,0 +1,622 @@
+---
+# Source: datacater/templates/serviceaccount.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: datacater
+  labels:
+    helm.sh/chart: datacater-0.1.0
+    app.kubernetes.io/name: datacater
+    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/version: "nightly-20230105"
+    app.kubernetes.io/managed-by: Helm
+---
+# Source: datacater/templates/role.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: datacater-api
+rules:
+  - apiGroups: [""] # "" indicates the core API group
+    resources: ["pods", "pods/log", "services", "namespace", "configmaps"]
+    verbs: ["get", "watch", "list", "create", "delete", "patch", "update"]
+  - apiGroups: ["apps"]
+    resources: ["statefulsets", "deployments", "configmaps", "replicasets"]
+    verbs: ["get", "watch", "list", "create", "delete", "patch", "update"]
+---
+# Source: datacater/templates/rolebinding.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: udf-testing-view
+  namespace: default
+roleRef:
+  kind: Role
+  apiGroup: rbac.authorization.k8s.io
+  name: datacater-api
+subjects:
+  - kind: ServiceAccount
+    name: datacater
+---
+# Source: datacater/templates/postgres.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres
+  labels:
+    app.kubernetes.io/name: datacater-pg
+spec:
+  type: ClusterIP
+  ports:
+    - name: postgres
+      port: 5432
+      targetPort: 5432
+  selector:
+    app.kubernetes.io/name: datacater-pg
+---
+# Source: datacater/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: datacater
+  labels:
+    helm.sh/chart: datacater-0.1.0
+    app.kubernetes.io/name: datacater
+    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/version: "nightly-20230105"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app.kubernetes.io/name: datacater
+    app.kubernetes.io/instance: release-name
+---
+# Source: datacater/templates/ui.yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    run: ui
+  name: ui
+  namespace: default
+spec:
+  containers:
+    - image: datacater/ui:nightly-20230105
+      imagePullPolicy: IfNotPresent
+      name: ui
+      ports:
+        - containerPort: 8080
+          protocol: TCP
+          name: http
+---
+# Source: datacater/templates/postgres.yaml
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: datacater-pg
+  labels:
+    app.kubernetes.io/name: datacater-pg
+spec:
+  serviceName: datacater-pg
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: datacater-pg
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: datacater-pg
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:14-alpine
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: postgres
+              containerPort: 5432
+              protocol: TCP
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 200m
+              memory: 512Mi
+          env:
+            - name: POSTGRES_USER
+              value: postgres
+            - name: POSTGRES_DB
+              value: postgres
+            - name: PG_USER
+              value: postgres
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
+            - name: POSTGRES_PASSWORD
+              value: datacater
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: status.podIP
+          livenessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - exec pg_isready --host $POD_IP -U $POSTGRES_USER
+            failureThreshold: 6
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 5
+          readinessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - exec pg_isready --host $POD_IP -U $POSTGRES_USER
+            failureThreshold: 3
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            successThreshold: 1
+            timeoutSeconds: 3
+          volumeMounts:
+            - mountPath: /var/lib/postgresql/data/pgdata
+              name: postgres
+  volumeClaimTemplates:
+    - metadata:
+        name: postgres
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        resources:
+          requests:
+            storage: 1Gi
+---
+# Source: datacater/templates/statefulset.yaml
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: datacater
+  labels:
+    helm.sh/chart: datacater-0.1.0
+    app.kubernetes.io/name: datacater
+    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/version: "nightly-20230105"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  serviceName: datacater
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: datacater
+      app.kubernetes.io/instance: release-name
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: datacater
+        app.kubernetes.io/instance: release-name
+    spec:
+      imagePullSecrets:
+        - name: github-pat
+      serviceAccountName: datacater
+      securityContext:
+        {}
+      containers:
+        - name: datacater
+          securityContext:
+            {}
+          image: "datacater/datacater:nightly-20230105"
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: QUARKUS_DATASOURCE_REACTIVE_URL
+              value: "postgresql://postgres.default.svc.cluster.local:5432/postgres"
+            - name: DATACATER_PYTHONRUNNER_IMAGE_NAMESPACE
+              value: default
+            - name: QUARKUS_DATASOURCE_USERNAME
+              value: postgres
+            - name: QUARKUS_DATASOURCE_PASSWORD
+              value: datacater
+            - name: DATACATER_DEPLOYMENT_NAMESPACE
+              value: default
+            - name: DATACATER_DEPLOYMENT_IMAGE
+              value: datacater/pipeline:nightly-20230105
+            - name: DATACATER_TRANSFORMS_PATH
+              value: /datacater/transforms
+            - name: DATACATER_FILTERS_PATH
+              value: /datacater/filters
+            - name: DATACATER_PYTHONRUNNER_REPLICAS
+              value: "10"
+            - name: DATACATER_PYTHONRUNNER_IMAGE_NAME
+              value: datacater/python-runner
+            - name: DATACATER_PYTHONRUNNER_IMAGE_VERSION
+              value: nightly-20230105
+            - name: QUARKUS_LOG_CONSOLE_JSON
+              value: "false"
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /q/health/live
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 10
+            periodSeconds: 30
+            successThreshold: 1
+            timeoutSeconds: 10
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /q/health/ready
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 10
+            periodSeconds: 30
+            successThreshold: 1
+            timeoutSeconds: 10
+          resources:
+            limits:
+              memory: 2Gi
+            requests:
+              cpu: 500m
+              memory: 1Gi
+---
+# Source: redpanda/templates/statefulset.yaml
+# Access the cluster from within datacater through:
+# bootstrap.servers: "redpanda-0.redpanda.default.svc.cluster.local.:9093"
+#
+# Produce to topic with following command:
+# kubectl exec -it -n default redpanda-0 -- rpk topic produce test-redpanda-stream --brokers='redpanda-0.redpanda.default.svc.cluster.local.:9093'
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: redpanda
+  namespace: "default"
+  labels:
+    helm.sh/chart: redpanda-2.4.2
+    app.kubernetes.io/name: redpanda
+    app.kubernetes.io/instance: "redpanda"
+    app.kubernetes.io/managed-by: "Helm"
+    app.kubernetes.io/component: redpanda
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: redpanda
+      app.kubernetes.io/instance: redpanda
+  serviceName: redpanda
+  replicas: 1
+  updateStrategy:
+    type: RollingUpdate
+  podManagementPolicy: Parallel
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: redpanda
+        app.kubernetes.io/instance: "redpanda"
+        app.kubernetes.io/component: redpanda
+      annotations:
+        checksum/config: d43de077ece76d792c8ee47ed8f0b624542f3dc056a374fc7f93f8df7f771c63
+    spec:
+      securityContext:
+        fsGroup: 101
+      serviceAccountName: default
+      initContainers:
+        - name: set-datadir-ownership
+          image: busybox:latest
+          command: ["/bin/sh", "-c", "chown 101:101 -R /var/lib/redpanda/data"]
+          volumeMounts:
+            - name: datadir
+              mountPath: /var/lib/redpanda/data
+        - name: redpanda-configurator
+          image: vectorized/redpanda:v22.3.9
+          command: ["/bin/sh", "-c"]
+          env:
+            - name: SERVICE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: EXTERNAL_ADDRESSES
+              value:
+            - name: KUBERNETES_NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+          args:
+            - |
+              set -xe
+              CONFIG=/etc/redpanda/redpanda.yaml
+              POD_ORDINAL=${SERVICE_NAME##*-}
+
+              # Setup config files
+              cp /tmp/base-config/redpanda.yaml "${CONFIG}"
+              cp /tmp/base-config/bootstrap.yaml /etc/redpanda/.bootstrap.yaml
+
+              # Configure internal kafka listeners
+              rpk redpanda --config "$CONFIG" config set redpanda.advertised_kafka_api[0].name internal
+              rpk redpanda --config "$CONFIG" config set redpanda.advertised_kafka_api[0].address $(SERVICE_NAME).redpanda.default.svc.cluster.local.
+              rpk redpanda --config "$CONFIG" config set redpanda.advertised_kafka_api[0].port 9093
+
+              # Configure external kafka listeners
+              rpk redpanda --config "$CONFIG" config set redpanda.advertised_kafka_api[1].address $(SERVICE_NAME).local
+              rpk redpanda --config "$CONFIG" config set redpanda.advertised_kafka_api[1].name default
+              rpk redpanda --config "$CONFIG" config set redpanda.advertised_kafka_api[1].port 31092
+          securityContext:
+            runAsUser: 101
+            runAsGroup: 101
+          volumeMounts:
+            - name: redpanda
+              mountPath: /tmp/base-config
+            - name: config
+              mountPath: /etc/redpanda
+          resources:
+            null
+      containers:
+        - name: redpanda
+          image: vectorized/redpanda:v22.3.9
+          env:
+            - name: SERVICE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+            - name: HOST_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.hostIP
+          startupProbe:
+            exec:
+              command:
+                - /bin/sh
+                - -c
+                - >
+                  curl -sv http://localhost:9644/v1/cluster/health_overview |
+                  awk '{
+                    id = $0; gsub(/.*"controller_id": /, "", id); gsub(/,.*/, "", id)
+                    nd_str = $0; gsub(/.*"nodes_down": \[/, "", nd_str); gsub(/\].*/, "", nd_str)
+                    FS=","
+                    split(nd_str, nd_list)
+                    for (i in nd_list) nodes_down[nd_list[i]]=""
+                    exit (id in nodes_down)
+                  }'
+            initialDelaySeconds: 1
+            failureThreshold: 120
+            periodSeconds: 10
+          livenessProbe:
+            exec:
+              command:
+                - /bin/sh
+                - -c
+                - >
+                  curl -sv http://localhost:9644/v1/cluster/health_overview
+            initialDelaySeconds: 10
+            failureThreshold: 3
+            periodSeconds: 10
+          readinessProbe:
+            exec:
+              command:
+                - /bin/sh
+                - -c
+                - >
+                  curl -sv http://localhost:9644/v1/cluster/health_overview |
+                  awk '{
+                    id = $0; gsub(/.*"controller_id": /, "", id); gsub(/,.*/, "", id)
+                    nd_str = $0; gsub(/.*"nodes_down": \[/, "", nd_str); gsub(/\].*/, "", nd_str)
+                    FS=","
+                    split(nd_str, nd_list)
+                    for (i in nd_list) nodes_down[nd_list[i]]=""
+                    exit (id in nodes_down)
+                  }'
+            initialDelaySeconds: 1
+            failureThreshold: 3
+            periodSeconds: 10
+            successThreshold: 1
+          command:
+            - rpk
+            - redpanda
+            - start
+            - --smp=1
+            - --memory=2048M
+            - --reserve-memory=205
+            - --default-log-level=info
+            - --advertise-rpc-addr=$(SERVICE_NAME).redpanda.default.svc.cluster.local.:33145
+            - --advertise-pandaproxy-addr=internal://$(SERVICE_NAME).redpanda.default.svc.cluster.local.:8082,default://$(SERVICE_NAME).redpanda.default.svc.cluster.local.:30082,
+          ports:
+            - name: admin
+              containerPort: 9644
+            - name: http
+              containerPort: 8082
+            - name: http-default
+              containerPort: 8083
+            - name: kafka
+              containerPort: 9093
+            - name: kafka-default
+              containerPort: 9094
+            - name: rpc
+              containerPort: 33145
+            - name: schemaregistry
+              containerPort: 8081
+            - name: schema-default
+              containerPort: 8080
+          securityContext:
+            runAsUser: 101
+            runAsGroup: 101
+          volumeMounts:
+            - name: datadir
+              mountPath: /var/lib/redpanda/data
+            - name: config
+              mountPath: /etc/redpanda
+          resources:
+            limits:
+              cpu: 1
+              memory: 2.5Gi
+      volumes:
+        - name: datadir
+          persistentVolumeClaim:
+            claimName: datadir
+        - name: redpanda
+          configMap:
+            name: redpanda
+        - name: config
+          emptyDir: {}
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                topologyKey: kubernetes.io/hostname
+                labelSelector:
+                  matchLabels:
+                    app.kubernetes.io/name: redpanda
+                    app.kubernetes.io/instance: "redpanda"
+      topologySpreadConstraints:
+        - labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: redpanda
+              app.kubernetes.io/instance: "redpanda"
+          maxSkew: 1
+          topologyKey: topology.kubernetes.io/zone
+          whenUnsatisfiable: ScheduleAnyway
+  volumeClaimTemplates:
+    - metadata:
+        name: datadir
+        labels:
+          app.kubernetes.io/name: redpanda
+          app.kubernetes.io/instance: "redpanda"
+          app.kubernetes.io/component: redpanda
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: "20Gi"
+---
+# Source: redpanda/templates/configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: redpanda
+  namespace: "default"
+  labels:
+    helm.sh/chart: redpanda-2.4.2
+    app.kubernetes.io/name: redpanda
+    app.kubernetes.io/instance: "redpanda"
+    app.kubernetes.io/managed-by: "Helm"
+    app.kubernetes.io/component: redpanda
+data:
+  bootstrap.yaml: |
+    enable_sasl: false
+    storage_min_free_bytes: 1073741824
+  redpanda.yaml: |
+    config_file: /etc/redpanda/redpanda.yaml
+    redpanda:
+      empty_seed_starts_cluster: false
+      admin:
+        name: admin
+        address: 0.0.0.0
+        port: 9644
+      kafka_api:
+        - name: internal
+          address: 0.0.0.0
+          port: 9093
+        - name: default
+          address: 0.0.0.0
+          port: 9094
+      kafka_api_tls:
+      rpc_server:
+        address: 0.0.0.0
+        port: 33145
+      seed_servers:
+        - host:
+            address: "redpanda-0.redpanda.default.svc.cluster.local."
+            port: 33145
+    schema_registry:
+      schema_registry:
+        - name: internal
+          address: 0.0.0.0
+          port: 8081
+        - name: default
+          address: 0.0.0.0
+          port: 8080
+      schema_registry_api_tls:
+    pandaproxy:
+      pandaproxy_api:
+        - name: internal
+          address: 0.0.0.0
+          port: 8082
+        - name: default
+          address: 0.0.0.0
+          port: 8083
+      pandaproxy_api_tls:
+    rpk:
+      enable_usage_stats: true
+      overprovisioned: false
+      enable_memory_locking: false
+---
+# Source: redpanda/templates/service.internal.yaml
+# This service is only used to create the DNS enteries for each pod in
+# the stateful set. This service should not be used by any client
+# application
+apiVersion: v1
+kind: Service
+metadata:
+  name: redpanda
+  namespace: "default"
+  labels:
+    helm.sh/chart: redpanda-2.4.2
+    app.kubernetes.io/name: redpanda
+    app.kubernetes.io/instance: "redpanda"
+    app.kubernetes.io/managed-by: "Helm"
+    app.kubernetes.io/component: redpanda
+spec:
+  publishNotReadyAddresses: true
+  type: ClusterIP
+  clusterIP: None
+  selector:
+    app.kubernetes.io/name: redpanda
+    app.kubernetes.io/instance: "redpanda"
+---
+# Source: redpanda/templates/services.nodeport.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: redpanda-external
+  namespace: "default"
+  labels:
+    helm.sh/chart: redpanda-2.4.2
+    app.kubernetes.io/name: redpanda
+    app.kubernetes.io/instance: "redpanda"
+    app.kubernetes.io/managed-by: "Helm"
+    app.kubernetes.io/component: redpanda
+spec:
+  type: NodePort
+  externalTrafficPolicy: Local
+  sessionAffinity: None
+  ports:
+    - name: admin-default
+      protocol: TCP
+      port: 9644
+      nodePort: 31644
+    - name: kafka-default
+      protocol: TCP
+      port: 9094
+      nodePort: 31092
+    - name: http-default
+      protocol: TCP
+      port: 8083
+      nodePort: 30082
+    - name: schema-default
+      protocol: TCP
+      port: 8080
+      nodePort: 30081
+  selector:
+    app.kubernetes.io/name: redpanda
+    app.kubernetes.io/instance: "redpanda"
