@@ -38,7 +38,7 @@ class InspectStream extends Component {
   getColumns(profile) {
     let columnConfigs = [];
 
-    const fieldNames = Object.keys(profile);
+    const fieldNames = Object.keys(profile).sort();
 
     columnConfigs.unshift({ id: 0, name: "#" });
 

@@ -141,7 +141,9 @@ class Grid extends Component {
 
   getColumns() {
     const filters = [];
-    let columnsConfig = [...this.props.fields];
+    // Sort fields by their name in ascending order
+    const sortedFields = this.props.fields.sort();
+    let columnsConfig = [...sortedFields];
     let columns = [];
 
     const firstColumnWidth = 50;
