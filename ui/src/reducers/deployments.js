@@ -97,8 +97,6 @@ const deployments = (state, action) => {
       };
     case "RECEIVE_LOGS_DEPLOYMENT":
       const logMessages = action.logMessages
-        // TODO: Remove once API returns valid JSON not ND-JSON
-        .split("\n")
         .slice(-101, -1)
         .map((logLine) => {
           return JSON.parse(logLine);
