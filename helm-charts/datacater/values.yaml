@@ -22,7 +22,7 @@ datacater:
       repository: "datacater/python-runner"
       pullPolicy: IfNotPresent
       version: "nightly"
-    replicas: 10
+    replicas: 5
     serviceName: "pythonrunner"
     resources:
       requests:
@@ -134,7 +134,7 @@ resources:
   # resources, such as Minikube. If you do want to specify resources, uncomment the following
   # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
   requests:
-    cpu: 500m
+    cpu: 200m
     memory: 1Gi
   limits:
     memory: 2Gi
