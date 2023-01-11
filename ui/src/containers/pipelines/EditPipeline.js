@@ -51,6 +51,7 @@ class EditPipeline extends Component {
       pipeline: {},
       pipelineUpdated: false,
       pipelineUpdatedAt: undefined,
+      showSettings: false,
       showStepNameForm: false,
       unpersistedChanges: false,
     };
@@ -77,6 +78,7 @@ class EditPipeline extends Component {
     this.openDebugView = this.openDebugView.bind(this);
     this.closeDebugView = this.closeDebugView.bind(this);
     this.updateInspectLimit = this.updateInspectLimit.bind(this);
+    this.toggleShowSettings = this.toggleShowSettings.bind(this);
   }
 
   componentDidMount() {
@@ -602,6 +604,7 @@ class EditPipeline extends Component {
 
     this.setState({
       editColumn: editColumn,
+      showSettings: false,
     });
   }
 
@@ -615,6 +618,7 @@ class EditPipeline extends Component {
     this.setState({
       contextBarActive: false,
       editColumn: undefined,
+      showSettings: false,
     });
   }
 
@@ -678,10 +682,8 @@ class EditPipeline extends Component {
     });
   }
 
-  updateInspectLimit(event) {
-    const limit = isNaN(parseInt(event.target.value))
-      ? 100
-      : parseInt(event.target.value);
+  updateInspectLimit(newLimit) {
+    const limit = isNaN(parseInt(newLimit)) ? 100 : parseInt(newLimit);
     this.setState({ inspectLimit: limit });
     this.props
       .inspectStream(this.state.pipeline.metadata["stream-in"], limit)
@@ -690,6 +692,21 @@ class EditPipeline extends Component {
           this.updateSampleRecords(this.state.pipeline, this.state.currentStep);
         }
       });
+  }
+
+  toggleShowSettings() {
+    if (!this.state.showSettings) {
+      this.setState({
+        contextBarActive: true,
+        editColumn: undefined,
+        showSettings: true,
+      });
+    } else {
+      this.setState({
+        contextBarActive: false,
+        showSettings: false,
+      });
+    }
   }
 
   render() {
@@ -721,7 +738,7 @@ class EditPipeline extends Component {
                     {this.props.pipelines.inspectingPipelineFailed ===
                       false && (
                       <button
-                        className="btn btn-sm btn-primary text-white btn-pill me-2"
+                        className="btn btn-sm btn-primary text-white btn-pill me-3"
                         onClick={(e) => e.preventDefault()}
                       >
                         <span className="d-flex align-items-center">
@@ -732,7 +749,7 @@ class EditPipeline extends Component {
                     )}
                     {this.props.pipelines.inspectingPipelineFailed === true && (
                       <button
-                        className="btn btn-sm btn-danger btn-pill me-2"
+                        className="btn btn-sm btn-danger btn-pill me-3"
                         onClick={(e) => {
                           e.preventDefault();
                           this.updateSampleRecords(
@@ -749,7 +766,7 @@ class EditPipeline extends Component {
                     )}
                     <button
                       className="btn btn-sm btn-light btn-pill"
-                      onClick={(e) => e.preventDefault()}
+                      disabled={true}
                     >
                       {this.props.pipelines.updatingPipeline ||
                       this.state.unpersistedChanges
@@ -841,6 +858,11 @@ class EditPipeline extends Component {
         ? deepCopy(this.props.streams.inspectionResult)
         : deepCopy(this.props.pipelines.inspectionResult);
 
+    const streamInspectLength =
+      this.props.streams.inspectionResult !== undefined
+        ? this.props.streams.inspectionResult.length
+        : undefined;
+
     if (this.state.currentStep === undefined && sampleRecords.length === 0) {
       return (
         <div className="container">
@@ -904,8 +926,11 @@ class EditPipeline extends Component {
             profile={profile}
             removeStepFunc={this.removeStep}
             sampleRecords={sampleRecords}
+            showSettings={this.state.showSettings}
             showStepNameForm={this.state.showStepNameForm}
             showStepNameFormFunc={this.showStepNameForm}
+            streamInspectLength={streamInspectLength}
+            toggleShowSettingsFunc={this.toggleShowSettings}
             transforms={this.props.transforms.transforms}
             updateInspectLimitFunc={this.updateInspectLimit}
             updateStepNameFunc={this.updateStepName}

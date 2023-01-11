@@ -90,11 +90,7 @@ class StepsList extends Component {
 
     const draggingItem = this.state.draggingItem;
     if (draggingItem !== undefined) {
-      if (
-        window.confirm(
-          "Are you sure that you want to delete the transform step?"
-        )
-      ) {
+      if (window.confirm("Are you sure that you want to delete the step?")) {
         this.props.removeStepFunc(draggingItem);
         this.setState({
           draggingItem: undefined,

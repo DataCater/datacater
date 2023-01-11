@@ -65,9 +65,9 @@ class Record extends Component {
       <React.Fragment>
         <div className="row py-4">
           <div className="col">
-            <h3 className="mb-0 overflow-hidden text-nowrap d-flex align-items-center fw-bold">
+            <h4 className="mb-0 overflow-hidden text-nowrap d-flex align-items-center fw-bold">
               Record
-            </h3>
+            </h4>
           </div>
         </div>
         <ul className="nav nav-tabs">

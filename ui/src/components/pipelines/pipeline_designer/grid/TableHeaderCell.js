@@ -114,8 +114,8 @@ class TableHeaderCell extends Component {
                 className="w-100 text-left mt-2 d-flex align-items-center text-nowrap btn-outline-primary"
                 onClick={(event) => this.openContextBar(field)}
               >
-                <Package className="feather-icon me-2" />
-                Apply transform
+                <Package className="feather-icon me-1" />
+                Apply transform or filter
               </Button>
             )}
           {step !== undefined &&
@@ -127,7 +127,7 @@ class TableHeaderCell extends Component {
                 className="w-100 text-left mt-2 d-flex align-items-center text-nowrap text-white"
                 onClick={(event) => this.openContextBar(field)}
               >
-                <Package className="feather-icon me-2" />
+                <Package className="feather-icon me-1" />
                 {transformation !== undefined &&
                   `Transform: ${transformation.name}`}
                 {transformation === undefined && `Filter: ${filter.name}`}

@@ -76,10 +76,10 @@ class Attribute extends Component {
       <React.Fragment>
         <div className="row py-4">
           <div className="col">
-            <h3 className="mb-0 overflow-hidden text-nowrap d-flex align-items-center fw-bold">
+            <h4 className="mb-0 overflow-hidden text-nowrap d-flex align-items-center fw-bold">
               <DataTypeIcon dataType={fieldProfile.dataType} />{" "}
               <span className="ms-2">{field}</span>
-            </h3>
+            </h4>
           </div>
         </div>
         <ul className="nav nav-tabs">

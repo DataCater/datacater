@@ -50,7 +50,7 @@ class Header extends Component {
                 <div>
                   <a
                     href="#"
-                    className="btn btn-light btn-pill"
+                    className="btn btn-light"
                     onClick={this.toggleShowApiCall}
                   >
                     {this.state.showApiCall ? "Hide" : "Show"} API call
