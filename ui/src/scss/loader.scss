@@ -1,0 +1,116 @@
+$rightFace: #b5e0ec;
+$topFace: #ae75e6;
+$leftFace: #b0a3e9;
+$scale: 1;
+$duration: 3s;
+$timingFunction: ease;
+
+.pipeline-designer-loader {
+  height: 100px;
+  left: calc(50% - 43px);
+  position: absolute;
+  top: calc(50% - 50px);
+  transform: scale(#{$scale * 0.5});
+  width: 86px;
+}
+
+.cube {
+  position: absolute;
+  width: 86px;
+  height: 100px;
+}
+
+.right {
+  background: $rightFace;
+  transform: rotate(-30deg) skewX(-30deg) translate(49px, 65px) scaleY(0.86);
+}
+
+.left {
+  background: $leftFace;
+  transform: rotate(90deg) skewX(-30deg) scaleY(0.86) translate(25px, -50px);
+}
+
+.top {
+  background: $topFace;
+  transform: rotate(210deg) skew(-30deg) translate(-75px, -22px) scaleY(0.86);
+  z-index: 2;
+}
+
+.face {
+  height: 50px;
+  width: 50px;
+  position: absolute;
+  transform-origin: 0 0;
+}
+
+@mixin slice($h, $w, $l) {
+  .h#{$h}.w#{$w}.l#{$l} {
+    z-index: (-#{$h});
+    animation-name: h#{$h}w#{$w}l#{$l};
+    animation-timing-function: $timingFunction;
+    animation-duration: $duration;
+    animation-iteration-count: infinite;
+  }
+  @keyframes h#{$h}w#{$w}l#{$l} {
+    0% {
+      transform: translate(
+        ($w * -50% - 50%) + ($l * 50% + 50%),
+        ($h * 50 - 200%) + ($w * 25% - 25%) + ($l * 25 + 25%)
+      );
+    }
+    14% {
+      transform: translate(
+        ($w * -50% - 50%) + ($l * 100% - 50%),
+        ($h * 50 - 200%) + ($w * 25% - 25%) + ($l * 50 - 25%)
+      );
+    }
+    28% {
+      transform: translate(
+        ($w * -100% + 50%) + ($l * 100% - 50%),
+        ($h * 50 - 200%) + ($w * 50% - 75%) + ($l * 50 - 25%)
+      );
+    }
+    43% {
+      transform: translate(
+        ($w * -100% - 100%) + ($l * 100% + 100%),
+        ($h * 100 - 400%) + ($w * 50% - 50%) + ($l * 50 + 50%)
+      );
+    }
+    57% {
+      transform: translate(
+        ($w * -100% - 100%) + ($l * 50% + 200%),
+        ($h * 100 - 400%) + ($w * 50% - 50%) + ($l * 25 + 100%)
+      );
+    }
+    71% {
+      transform: translate(
+        ($w * -50% - 200%) + ($l * 50% + 200%),
+        ($h * 100 - 375%) + ($w * 25% - 25%) + ($l * 25 + 100%)
+      );
+    }
+    85% {
+      transform: translate(
+        ($w * -50% - 50%) + ($l * 50% + 50%),
+        ($h * 50 - 200%) + ($w * 25% - 25%) + ($l * 25 + 25%)
+      );
+    }
+    100% {
+      transform: translate(
+        ($w * -50% - 50%) + ($l * 50% + 50%),
+        ($h * 50 - 200%) + ($w * 25% - 25%) + ($l * 25 + 25%)
+      );
+    }
+  }
+}
+
+@mixin generateSlice() {
+  @for $i from 1 to 4 {
+    @for $j from 1 to 4 {
+      @for $k from 1 to 4 {
+        @include slice($i, $j, $k);
+      }
+    }
+  }
+}
+
+@include generateSlice();

@@ -19,6 +19,7 @@ import {
 import { Modal } from "react-bootstrap";
 import BaseTable, { AutoResizer } from "react-base-table";
 import PipelineDesigner from "../../components/pipelines/PipelineDesigner";
+import Loader from "../../components/pipelines/pipeline_designer/Loader";
 import DebugView from "../../components/pipelines/pipeline_designer/grid/DebugView";
 import Breadcrumb from "../../components/layout/Breadcrumb";
 import { getApiPathPrefix } from "../../helpers/getApiPathPrefix";
@@ -782,25 +783,6 @@ class EditPipeline extends Component {
       </div>
     );
 
-    const loader = (
-      <div className="row">
-        <div className="col-12 justify-content-center d-flex pt-5 mt-5">
-          <button
-            className="btn btn-primary d-flex align-items-center"
-            type="button"
-            disabled
-          >
-            <span
-              className="spinner-border spinner-border-sm me-2"
-              role="status"
-              aria-hidden="true"
-            ></span>
-            Loading sample records...
-          </button>
-        </div>
-      </div>
-    );
-
     if (
       pipeline !== undefined &&
       pipeline.metadata !== undefined &&
@@ -847,7 +829,7 @@ class EditPipeline extends Component {
       return (
         <div className="container">
           {header}
-          {loader}
+          <Loader />
         </div>
       );
     }
