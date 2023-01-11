@@ -140,7 +140,7 @@ class Toolbar extends Component {
                   onClick={(e) => {
                     this.props.editColumnFunc();
                   }}
-                  className="btn btn-primary-soft btn-sm btn-pill btn-preview-settings fw-bold"
+                  className="btn btn-primary-soft btn-sm btn-pill btn-preview-settings fw-semibold"
                 >
                   <Package className="feather-icon me-1" />
                   Apply transform or filter to records
@@ -153,7 +153,7 @@ class Toolbar extends Component {
                   onClick={(e) => {
                     this.props.editColumnFunc();
                   }}
-                  className="btn btn-primary text-white btn-sm btn-pill btn-preview-settings"
+                  className="btn btn-primary text-white btn-sm btn-pill btn-preview-settings fw-semibold"
                 >
                   <Package className="feather-icon me-1" />
                   {transformation !== undefined &&
