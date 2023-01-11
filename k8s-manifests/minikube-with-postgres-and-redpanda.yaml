@@ -237,6 +237,11 @@ spec:
               value: nightly-20230105
             - name: QUARKUS_LOG_CONSOLE_JSON
               value: "false"
+              #these thresholds should be raised if your deployments are getting `Java heap Out of memory` exceptions
+            - name: DATACATER_DEPLOYMENT_RESOURCES_REQUESTS_MEMORY
+              value: "300Mi"
+            - name: DATACATER_DEPLOYMENT_RESOURCES_LIMITS_MEMORY
+              value: "800Mi"
           ports:
             - name: http
               containerPort: 8080
@@ -274,6 +279,11 @@ spec:
 #
 # Produce to topic with following command:
 # kubectl exec -it -n default redpanda-0 -- rpk topic produce topicName --brokers='redpanda-0.redpanda.default.svc.cluster.local.:9093'
+#
+# If you would like to access the broker locally, to produce test data for example
+# you must edit /etc/hosts and add the line 127.0.0.1 redpanda-0.redpanda.default.svc.cluster.local.
+# After that, the port can be forwarded with kubectl port-forward redpanda-0 9093:9093
+# The broker is then accessible locally through localhost
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
