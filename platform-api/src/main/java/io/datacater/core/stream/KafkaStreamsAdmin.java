@@ -30,7 +30,7 @@ import org.eclipse.microprofile.config.ConfigProvider;
  * href="https://kafka.apache.org/documentation/#topicconfigs">https://kafka.apache.org/documentation/#topicconfigs</a>).
  */
 public class KafkaStreamsAdmin implements StreamService {
-  private static final String PARTITION_COUNT = "partition.count";
+  private static final String PARTITION_COUNT = "num.partitions";
   private static final String REPLICATION_FACTOR = "replication.factor";
   private final Admin admin;
   private final KafkaConsumer<Object, Object> consumer;
