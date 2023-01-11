@@ -50,7 +50,7 @@ export function profileRecords(records, transformedFields) {
 
   // Initialize the profile of fields that define a transform
   transformedFields.forEach((field) => {
-    profile[field] = {};
+    profile[field] = Object.assign({}, profileTemplate);
     profile[field].frequencies = new Map();
     profile[field].mostFrequentValues = [];
   });
