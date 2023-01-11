@@ -186,6 +186,7 @@ class Attribute extends Component {
                 pipelineField={pipelineField}
                 previewState={this.props.previewState}
                 sortPosition={sortPosition}
+                transform={transform}
                 transformStep={transformStep}
               />
             )}

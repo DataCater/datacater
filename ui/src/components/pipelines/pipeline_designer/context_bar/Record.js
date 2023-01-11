@@ -161,6 +161,7 @@ class Record extends Component {
                 filters={filters}
                 handleChangeFunc={handleChangeFunc}
                 sortPosition={sortPosition}
+                transform={transform}
                 transformStep={transformStep}
               />
             )}
