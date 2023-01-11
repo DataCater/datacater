@@ -20,7 +20,6 @@ import { Modal } from "react-bootstrap";
 import BaseTable, { AutoResizer } from "react-base-table";
 import PipelineDesigner from "../../components/pipelines/PipelineDesigner";
 import Loader from "../../components/pipelines/pipeline_designer/Loader";
-import DebugView from "../../components/pipelines/pipeline_designer/grid/DebugView";
 import Breadcrumb from "../../components/layout/Breadcrumb";
 import { getApiPathPrefix } from "../../helpers/getApiPathPrefix";
 import { deepCopy } from "../../helpers/deepCopy";
@@ -604,6 +603,7 @@ class EditPipeline extends Component {
     }
 
     this.setState({
+      debugRecord: undefined,
       editColumn: editColumn,
       showSettings: false,
     });
@@ -618,6 +618,7 @@ class EditPipeline extends Component {
   hideContextBar() {
     this.setState({
       contextBarActive: false,
+      debugRecord: undefined,
       editColumn: undefined,
       showSettings: false,
     });
@@ -671,9 +672,13 @@ class EditPipeline extends Component {
       showStepNameForm: false,
     });
   }
+
   openDebugView(record) {
     this.setState({
+      contextBarActive: true,
       debugRecord: record,
+      editColumn: undefined,
+      showSettings: false,
     });
   }
 
@@ -699,6 +704,7 @@ class EditPipeline extends Component {
     if (!this.state.showSettings) {
       this.setState({
         contextBarActive: true,
+        debugRecord: undefined,
         editColumn: undefined,
         showSettings: true,
       });
@@ -879,19 +885,13 @@ class EditPipeline extends Component {
     return (
       <div className={classNames}>
         <div className="container">{header}</div>
-        {this.state.debugRecord !== undefined && (
-          <DebugView
-            closeDebugViewFunc={this.closeDebugView}
-            pipeline={this.state.pipeline}
-            record={this.state.debugRecord}
-          />
-        )}
         {sampleRecords !== undefined && (
           <PipelineDesigner
             addStepFunc={this.addStep}
             fields={Object.keys(profile)}
             contextBarActive={this.state.contextBarActive}
             currentStep={this.state.currentStep}
+            debugRecord={this.state.debugRecord}
             editColumn={this.state.editColumn}
             editColumnFunc={this.editColumn}
             filters={this.props.filters.filters}

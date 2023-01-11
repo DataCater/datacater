@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import ContextSidebar from "./pipeline_designer/ContextSidebar";
 import Edit from "./pipeline_designer/context_bar/Edit";
 import PreviewSettings from "./pipeline_designer/context_bar/PreviewSettings";
+import DebugView from "./pipeline_designer/context_bar/DebugView";
 import StepsList from "./pipeline_designer/grid/StepsList";
 import Toolbar from "./pipeline_designer/grid/Toolbar";
 import Grid from "./pipeline_designer/Grid";
@@ -191,7 +192,8 @@ class PipelineDesigner extends Component {
         {this.props.contextBarActive &&
           this.props.currentStep !== undefined &&
           this.props.editColumn !== undefined &&
-          !this.props.showSettings && (
+          !this.props.showSettings &&
+          this.props.debugRecord === undefined && (
             <ContextSidebar>
               <Edit
                 field={this.props.editColumn.field}
@@ -217,6 +219,15 @@ class PipelineDesigner extends Component {
               showGrid={this.state.showGrid}
               toggleShowGridFunc={this.toggleShowGrid}
               updateInspectLimitFunc={this.props.updateInspectLimitFunc}
+            />
+          </ContextSidebar>
+        )}
+        {this.props.contextBarActive && this.props.debugRecord !== undefined && (
+          <ContextSidebar>
+            <DebugView
+              hideContextBarFunc={this.props.hideContextBarFunc}
+              pipeline={this.props.pipeline}
+              record={this.props.debugRecord}
             />
           </ContextSidebar>
         )}
