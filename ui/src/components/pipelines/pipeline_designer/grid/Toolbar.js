@@ -168,6 +168,15 @@ class Toolbar extends Component {
                     )}`}
                 </button>
               )}
+            {step !== undefined && (
+              <button
+                className="btn btn-sm btn-pill btn-preview-settings btn-danger-soft ms-4"
+                onClick={this.removeStep}
+              >
+                <Trash2 className="feather-icon me-1" />
+                Delete step
+              </button>
+            )}
             <span className="mx-4">
               {streamInspectLength !== undefined &&
                 sampleRecords.length < streamInspectLength && (
@@ -182,19 +191,6 @@ class Toolbar extends Component {
               <Settings className="feather-icon me-1" />
               Preview settings
             </button>
-            {step !== undefined && (
-              <div
-                className="avatar avatar-sm clickable d-flex align-items-center justify-content-center avatar-btn avatar-btn-delete ms-2"
-                onClick={this.removeStep}
-              >
-                <div
-                  className="avatar-title bg-primary-soft rounded-circle text-primary"
-                  onClick={this.removeStep}
-                >
-                  <Trash2 className="feather-icon" onClick={this.removeStep} />
-                </div>
-              </div>
-            )}
           </div>
         </div>
       </div>

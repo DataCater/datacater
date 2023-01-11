@@ -474,6 +474,21 @@ body {
   color: #fff !important;
 }
 
+.btn-danger-soft {
+  background-color: #fce7eb;
+  color: #cc3a38;
+}
+
+.btn-danger-soft:focus {
+  background-color: #fce7eb !important;
+  color: #cc3a38;
+}
+
+.btn-danger-soft:hover {
+  background-color: #cc3a38 !important;
+  color: #fff !important;
+}
+
 .btn-outline-primary-soft {
   border-color: #eaf6ec;
   color: #000;
