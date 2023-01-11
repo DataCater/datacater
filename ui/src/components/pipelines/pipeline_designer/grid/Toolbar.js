@@ -169,11 +169,11 @@ class Toolbar extends Component {
                 </button>
               )}
             <span className="mx-4">
-              {inspectLimit !== undefined &&
-                sampleRecords.length < inspectLimit && (
+              {streamInspectLength !== undefined &&
+                sampleRecords.length < streamInspectLength && (
                   <>{sampleRecords.length} of </>
                 )}
-              {inspectLimit} records
+              {streamInspectLength} records
             </span>
             <button
               className="btn btn-sm btn-pill btn-primary-soft btn-preview-settings"
