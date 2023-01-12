@@ -53,7 +53,7 @@ smallrye :
       key:
         location: key.pem
     new-token:
-      lifespan: 7200
+      lifespan: 604800
 mp       :
   jwt:
     verify:
@@ -146,7 +146,7 @@ datacater:
         key:
           location: key.pem
       new-token:
-        lifespan: 7200
+        lifespan: 604800
 
 '%test'  :
   datacater:
@@ -226,4 +226,4 @@ datacater:
         key:
           location: privateKey.pem
       new-token:
-        lifespan: 7200
+        lifespan: 604800

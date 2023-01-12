@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import { connect } from "react-redux";
 import { Trash2 } from "react-feather";
 import { Redirect } from "react-router-dom";
-import * as YAML from "json-to-pretty-yaml";
+import yaml from "js-yaml";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import parsePrometheusTextFormat from "parse-prometheus-text-format";
 import Breadcrumb from "../../components/layout/Breadcrumb";
@@ -317,7 +317,7 @@ class ShowDeployment extends Component {
                   showInlineLineNumbers={true}
                   customStyle={{ marginBottom: "0px", background: "none" }}
                 >
-                  {YAML.stringify(deployment)}
+                  {yaml.dump(deployment)}
                 </SyntaxHighlighter>
               </div>
             </div>

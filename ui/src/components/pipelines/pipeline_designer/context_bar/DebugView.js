@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { LifeBuoy } from "react-feather";
-import * as YAML from "json-to-pretty-yaml";
+import yaml from "js-yaml";
 import { Button } from "react-bootstrap";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 
@@ -42,14 +42,12 @@ class DebugView extends Component {
       if (match != null && match.length == 3) {
         const step = parseInt(match[1]);
         const fieldName = match[2];
-        debugContent = YAML.stringify(
-          pipeline.spec.steps[step].fields[fieldName]
-        );
+        debugContent = yaml.dump(pipeline.spec.steps[step].fields[fieldName]);
       } else {
         const match = /steps\[(\d+)\].*/g.exec(error["location"]["path"]);
         if (match != null && match.length == 2) {
           const step = parseInt(match[1]);
-          debugContent = YAML.stringify(pipeline.spec.steps[step]);
+          debugContent = yaml.dump(pipeline.spec.steps[step]);
         }
       }
     }
@@ -135,10 +133,9 @@ class DebugView extends Component {
             showLineNumbers={true}
             showInlineLineNumbers={true}
             customStyle={{
-              fontSize: "10px",
-              marginBottom: "0px",
-              background: "none",
-              border: "1px solid #dee2e6",
+              fontSize: "0.8rem",
+              margin: "0",
+              background: "#f7fbf8",
             }}
           >
             {debugContent}
