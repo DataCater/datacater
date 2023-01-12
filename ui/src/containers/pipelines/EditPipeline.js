@@ -840,11 +840,15 @@ class EditPipeline extends Component {
       );
     }
 
-    const sampleRecords =
+    let sampleRecords =
       this.state.currentStep === undefined ||
       this.props.pipelines.inspectionResult === undefined
         ? deepCopy(this.props.streams.inspectionResult)
         : deepCopy(this.props.pipelines.inspectionResult);
+
+    if (!Array.isArray(sampleRecords)) {
+      sampleRecords = [];
+    }
 
     const streamInspectLength =
       this.props.streams.inspectionResult !== undefined
