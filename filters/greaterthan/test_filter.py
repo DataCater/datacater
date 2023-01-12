@@ -19,10 +19,17 @@ def test_int_is_greater_than_float():
     assert filter.filter(5, {}, {"value": 4.0})
 
 
+def test_int_is_greater_than_int_string():
+    assert filter.filter(5, {}, {"value": "4"})
+
+
 def test_float_is_greater_than_int():
     assert filter.filter(5.0, {}, {"value": 4})
 
 
+def null_config():
+    assert filter.filter(42, {}, {"value": None}) is False
+
+
 def no_config():
-    with pytest.raises(KeyError):
-        filter.filter(42, {}, {})
+    assert filter.filter(42, {}, {}) is False

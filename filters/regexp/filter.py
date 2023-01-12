@@ -1,4 +1,4 @@
 def filter(value, row: dict, config: dict) -> bool:
     import re
 
-    return bool(re.match(config["value"], value))
+    return config.get("value") is None or bool(re.match(config["value"], value))

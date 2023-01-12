@@ -21,10 +21,23 @@ def test_string_does_not_contain_substring():
     )
 
 
+def test_null_config():
+    assert (
+        filter.filter(
+            "DataCater is the developer-friendly ETL platform for transforming data in motion.",
+            {},
+            {"value": None},
+        )
+        is True
+    )
+
+
 def test_no_config():
-    with pytest.raises(KeyError):
+    assert (
         filter.filter(
             "DataCater is the developer-friendly ETL platform for transforming data in motion.",
             {},
             {},
         )
+        is True
+    )
