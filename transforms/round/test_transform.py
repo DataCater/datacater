@@ -22,6 +22,9 @@ def test_round_precision_passed_as_string():
     assert transform.transform(8.13472, {}, {"precision": "3"}) == 8.135
 
 
+def test_null_config():
+    assert transform.transform(8.14, {}, {"precision": None}) == 8.14
+
+
 def test_no_config():
-    with pytest.raises(KeyError):
-        assert transform.transform(8.14, {}, {})
+    assert transform.transform(8.14, {}, {}) == 8.14

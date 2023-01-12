@@ -27,6 +27,9 @@ def test_subtract_string_from_int():
         transform.transform(15, {"magicNumber": "2"}, {"fieldName": "magicNumber"})
 
 
+def test_null_config():
+    assert transform.transform(15, {"magicNumber": "2"}, {"fieldName": None}) == 15
+
+
 def test_no_config():
-    with pytest.raises(KeyError):
-        transform.transform(15, {"magicNumber": "2"}, {})
+    assert transform.transform(15, {"magicNumber": "2"}, {}) == 15

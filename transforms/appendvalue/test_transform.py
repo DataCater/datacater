@@ -21,6 +21,12 @@ def test_append_empty_string():
     )
 
 
+def test_null_config():
+    assert (
+        transform.transform("Data streaming with ", {}, {"value": None})
+        == "Data streaming with "
+    )
+
+
 def test_no_config():
-    with pytest.raises(KeyError):
-        transform.transform("Data streaming with ", {}, {})
+    assert transform.transform("Data streaming with ", {}, {}) == "Data streaming with "

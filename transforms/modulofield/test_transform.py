@@ -29,6 +29,9 @@ def test_no_field():
         transform.transform(15, {}, {"fieldName": "number"})
 
 
+def test_null_config():
+    assert transform.transform(15, {}, {"fieldName": None}) == 15
+
+
 def test_no_config():
-    with pytest.raises(KeyError):
-        transform.transform(15, {}, {})
+    assert transform.transform(15, {}, {}) == 15

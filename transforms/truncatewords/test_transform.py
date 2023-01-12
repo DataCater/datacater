@@ -53,6 +53,9 @@ def test_truncate_words_empty_string():
     assert transform.transform("", {}, {"words": 1000}) == ""
 
 
+def test_null_config():
+    assert transform.transform("", {}, {"words": None}) == ""
+
+
 def test_no_config():
-    with pytest.raises(KeyError):
-        transform.transform("", {}, {})
+    assert transform.transform("", {}, {}) == ""

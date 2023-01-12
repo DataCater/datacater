@@ -18,6 +18,11 @@ def test_prepend_empty_string():
     assert transform.transform("data streaming", {}, {"value": ""}) == "data streaming"
 
 
+def test_null_config():
+    assert (
+        transform.transform("data streaming", {}, {"value": None}) == "data streaming"
+    )
+
+
 def test_no_config():
-    with pytest.raises(KeyError):
-        transform.transform("data streaming", {}, {})
+    assert transform.transform("data streaming", {}, {}) == "data streaming"
