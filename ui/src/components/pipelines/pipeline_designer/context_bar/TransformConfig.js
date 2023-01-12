@@ -66,6 +66,7 @@ class TransformConfig extends Component {
 
       // Does the field-level transform support the detected data type?
       if (
+        fieldDataType !== undefined &&
         transform !== undefined &&
         transform.labels !== undefined &&
         transform.labels["input-types"] !== undefined
