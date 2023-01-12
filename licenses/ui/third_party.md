@@ -4,7 +4,10 @@
 | :----------                    | :------ | :------------                              |
 | axios                          | 0.27.2  | [MIT](https://opensource.org/licenses/MIT) |
 | bootstrap                      | 5.2.1   | [MIT](https://opensource.org/licenses/MIT) |
+| javascript-time-ago            | 2.5.9   | [MIT](https://opensource.org/licenses/MIT) |
+| js-yaml                        | 4.1.0   | [MIT](https://opensource.org/licenses/MIT) |
 | npm                            | 8.19.2  | [MIT](https://opensource.org/licenses/MIT) |
+| parse-prometheus-text-format   | 1.1.1   | [Apache 2.0](https://www.apache.org/licenses/LICENSE-2.0) |
 | react                          | 16.14.0 | [MIT](https://opensource.org/licenses/MIT) |
 | react-ace                      | 10.1.0  | [MIT](https://opensource.org/licenses/MIT) |
 | react-base-table               | 1.13.2  | [MIT](https://opensource.org/licenses/MIT) |
