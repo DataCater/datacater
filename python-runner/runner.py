@@ -220,7 +220,7 @@ def preview_pipeline(record: dict, pipeline: dict, preview_step=None):
                     if record_matches_filter is False and (
                         record_transform is None or record_transform.get("key") is None
                     ):
-                        return add_filtered_out_at_step(record, step_index)
+                        return add_filtered_out_at_step(record, step_index, preview_step)
 
                 # Apply transform only if no filter is defined or record matches filter
                 if (
@@ -259,7 +259,7 @@ def preview_pipeline(record: dict, pipeline: dict, preview_step=None):
                                 field_transform is None
                                 or field_transform.get("key") is None
                             ):
-                                return add_filtered_out_at_step(record, step_index)
+                                return add_filtered_out_at_step(record, step_index, preview_step)
 
                         # Apply transform only if no filter is defined or field matches filter
                         if (
@@ -368,11 +368,14 @@ def add_error_to_metadata(record, location, error_type, traceback):
     return record
 
 
-def add_filtered_out_at_step(record, step_index):
-    record["metadata"] = {
-        "filteredOutAtStep": step_index
-    }
-    return record
+def add_filtered_out_at_step(record, step_index, preview_step):
+    if preview_step is None or step_index == preview_step:
+        record["metadata"] = {
+            "filteredOutAtStep": step_index
+        }
+        return record
+    else:
+        return None
 
 
 @app.post("/batch")
@@ -407,7 +410,8 @@ async def preview(previewRequest: PreviewRequest, response: Response):
         processed_record = preview_pipeline(
             record, previewRequest.pipeline, previewRequest.previewStep
         )
-        processed_records.append(processed_record)
+        if processed_record is not None:
+            processed_records.append(processed_record)
     return processed_records
 
 
