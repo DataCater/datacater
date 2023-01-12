@@ -10,6 +10,9 @@ public class JsonDeserializer implements Deserializer<Map<String, Object>> {
 
   @Override
   public Map<String, Object> deserialize(String topic, byte[] data) {
+    if (data == null){
+      return null;
+    }
     try {
       Buffer buffer = Buffer.buffer(data);
       JsonObject obj = new JsonObject(buffer);
