@@ -2,7 +2,6 @@ import React, { Component } from "react";
 import { connect } from "react-redux";
 import { Trash2 } from "react-feather";
 import { Redirect } from "react-router-dom";
-import yaml from "js-yaml";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import parsePrometheusTextFormat from "parse-prometheus-text-format";
 import Breadcrumb from "../../components/layout/Breadcrumb";
@@ -16,6 +15,7 @@ import {
   resetDeploymentHealth,
   resetDeploymentMetrics,
 } from "../../actions/deployments";
+import { jsonToYaml } from "../../helpers/jsonToYaml";
 
 class ShowDeployment extends Component {
   constructor(props) {
@@ -317,7 +317,7 @@ class ShowDeployment extends Component {
                   showInlineLineNumbers={true}
                   customStyle={{ marginBottom: "0px", background: "none" }}
                 >
-                  {yaml.dump(deployment)}
+                  {jsonToYaml(deployment)}
                 </SyntaxHighlighter>
               </div>
             </div>

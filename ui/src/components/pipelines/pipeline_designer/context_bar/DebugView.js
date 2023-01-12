@@ -1,8 +1,8 @@
 import React, { Component } from "react";
 import { LifeBuoy } from "react-feather";
-import yaml from "js-yaml";
 import { Button } from "react-bootstrap";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import { jsonToYaml } from "../../../../helpers/jsonToYaml";
 
 class DebugView extends Component {
   constructor(props) {
@@ -47,7 +47,7 @@ class DebugView extends Component {
       if (match != null && match.length == 3) {
         const step = parseInt(match[1]);
         const fieldName = match[2];
-        debugContent = yaml.dump(pipeline.spec.steps[step].fields[fieldName]);
+        debugContent = jsonToYaml(pipeline.spec.steps[step].fields[fieldName]);
       } else {
         // If we fail reading the step index and the field name from the
         // location path, we should try only getting the step index.
@@ -59,7 +59,7 @@ class DebugView extends Component {
         const match = /steps\[(\d+)\].*/g.exec(error["location"]["path"]);
         if (match != null && match.length == 2) {
           const step = parseInt(match[1]);
-          debugContent = yaml.dump(pipeline.spec.steps[step]);
+          debugContent = jsonToYaml(pipeline.spec.steps[step]);
         }
       }
     }

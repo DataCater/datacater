@@ -2,11 +2,11 @@ import React, { Component } from "react";
 import { connect } from "react-redux";
 import { Trash2 } from "react-feather";
 import { Redirect } from "react-router-dom";
-import yaml from "js-yaml";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import Breadcrumb from "../../components/layout/Breadcrumb";
 import Header from "../../components/layout/Header";
 import { deleteStream, fetchStream } from "../../actions/streams";
+import { jsonToYaml } from "../../helpers/jsonToYaml";
 
 class ShowStream extends Component {
   constructor(props) {
@@ -107,7 +107,7 @@ class ShowStream extends Component {
                   showInlineLineNumbers={true}
                   customStyle={{ marginBottom: "0px", background: "none" }}
                 >
-                  {yaml.dump(stream)}
+                  {jsonToYaml(stream)}
                 </SyntaxHighlighter>
               </div>
             </div>

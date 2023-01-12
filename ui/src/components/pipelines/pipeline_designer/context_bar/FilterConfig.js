@@ -1,9 +1,9 @@
 import React, { Component } from "react";
 import { Button, OverlayTrigger, Tooltip } from "react-bootstrap";
 import { Filter as FilterIcon, HelpCircle } from "react-feather";
-import yaml from "js-yaml";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import CodeEditor from "./CodeEditor";
+import { jsonToYaml } from "../../../../helpers/jsonToYaml";
 
 class FilterConfig extends Component {
   constructor(props) {
@@ -275,7 +275,7 @@ class FilterConfig extends Component {
                   background: "#f7fbf8",
                 }}
               >
-                {yaml.dump(filter)}
+                {jsonToYaml(filter)}
               </SyntaxHighlighter>
             </div>
           )}
