@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import { Button, OverlayTrigger, Tooltip } from "react-bootstrap";
 import { HelpCircle, Package } from "react-feather";
-import * as YAML from "json-to-pretty-yaml";
+import yaml from "js-yaml";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import NewFieldForm from "./NewFieldForm";
 import CodeEditor from "./CodeEditor";
@@ -285,7 +285,7 @@ class TransformConfig extends Component {
                   background: "#f7fbf8",
                 }}
               >
-                {YAML.stringify(transform)}
+                {yaml.dump(transform)}
               </SyntaxHighlighter>
             </div>
           )}
