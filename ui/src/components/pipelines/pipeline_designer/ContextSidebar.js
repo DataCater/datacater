@@ -6,7 +6,7 @@ class ContextSidebar extends Component {
     return (
       <nav className="datacater-context-bar navbar navbar-vertical fixed-right navbar-expand-md navbar-light p-0">
         <div className="container-fluid">
-          <div className="collapse navbar-collapse mx-0">
+          <div className="collapse navbar-collapse mx-0 w-100">
             {this.props.children}
           </div>
         </div>

@@ -9,8 +9,22 @@ import FilterConfig from "./FilterConfig";
 class Attribute extends Component {
   constructor(props) {
     super(props);
+
+    // If the step defines a filter but no transfor, open the filter by default
+    // If not, open the transform by default
+    const field = props.fields.find(
+      (attr) => attr === props.editColumn.fieldName
+    );
+    const pipelineField = props.transformStep.fields[field];
+    const currentTab =
+      pipelineField !== undefined &&
+      pipelineField.transform === undefined &&
+      pipelineField.filter !== undefined
+        ? "filter"
+        : "transform";
+
     this.state = {
-      currentTab: "transform",
+      currentTab: currentTab,
     };
 
     this.selectTab = this.selectTab.bind(this);
@@ -62,10 +76,10 @@ class Attribute extends Component {
       <React.Fragment>
         <div className="row py-4">
           <div className="col">
-            <h3 className="mb-0 overflow-hidden text-nowrap d-flex align-items-center fw-bold">
+            <h4 className="mb-0 overflow-hidden text-nowrap d-flex align-items-center fw-bold">
               <DataTypeIcon dataType={fieldProfile.dataType} />{" "}
               <span className="ms-2">{field}</span>
-            </h3>
+            </h4>
           </div>
         </div>
         <ul className="nav nav-tabs">
@@ -172,6 +186,7 @@ class Attribute extends Component {
                 pipelineField={pipelineField}
                 previewState={this.props.previewState}
                 sortPosition={sortPosition}
+                transform={transform}
                 transformStep={transformStep}
               />
             )}

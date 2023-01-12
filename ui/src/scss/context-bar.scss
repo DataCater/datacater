@@ -28,6 +28,11 @@
     overflow-x: hidden;
   }
 
+  &-content {
+    height: calc(100vh - 9rem);
+    overflow-x: hidden;
+  }
+
   &-flex-list {
     height: calc(100vh - 15.6rem);
     overflow-x: hidden;

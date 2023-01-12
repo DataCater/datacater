@@ -7,8 +7,18 @@ import FilterConfig from "./FilterConfig";
 class Record extends Component {
   constructor(props) {
     super(props);
+
+    // If the step defines a filter but no transform, open the filter by default
+    // If not, open the transform by default
+    const currentTab =
+      props.transformStep !== undefined &&
+      props.transformStep.transform === undefined &&
+      props.transformStep.filter !== undefined
+        ? "filter"
+        : "transform";
+
     this.state = {
-      currentTab: "transform",
+      currentTab: currentTab,
     };
 
     this.selectTab = this.selectTab.bind(this);
@@ -55,9 +65,9 @@ class Record extends Component {
       <React.Fragment>
         <div className="row py-4">
           <div className="col">
-            <h3 className="mb-0 overflow-hidden text-nowrap d-flex align-items-center fw-bold">
+            <h4 className="mb-0 overflow-hidden text-nowrap d-flex align-items-center fw-bold">
               Record
-            </h3>
+            </h4>
           </div>
         </div>
         <ul className="nav nav-tabs">
@@ -151,6 +161,7 @@ class Record extends Component {
                 filters={filters}
                 handleChangeFunc={handleChangeFunc}
                 sortPosition={sortPosition}
+                transform={transform}
                 transformStep={transformStep}
               />
             )}

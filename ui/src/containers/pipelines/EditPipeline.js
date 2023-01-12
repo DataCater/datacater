@@ -19,7 +19,7 @@ import {
 import { Modal } from "react-bootstrap";
 import BaseTable, { AutoResizer } from "react-base-table";
 import PipelineDesigner from "../../components/pipelines/PipelineDesigner";
-import DebugView from "../../components/pipelines/pipeline_designer/grid/DebugView";
+import Loader from "../../components/pipelines/pipeline_designer/Loader";
 import Breadcrumb from "../../components/layout/Breadcrumb";
 import { getApiPathPrefix } from "../../helpers/getApiPathPrefix";
 import { deepCopy } from "../../helpers/deepCopy";
@@ -51,6 +51,7 @@ class EditPipeline extends Component {
       pipeline: {},
       pipelineUpdated: false,
       pipelineUpdatedAt: undefined,
+      showSettings: false,
       showStepNameForm: false,
       unpersistedChanges: false,
     };
@@ -77,6 +78,7 @@ class EditPipeline extends Component {
     this.openDebugView = this.openDebugView.bind(this);
     this.closeDebugView = this.closeDebugView.bind(this);
     this.updateInspectLimit = this.updateInspectLimit.bind(this);
+    this.toggleShowSettings = this.toggleShowSettings.bind(this);
   }
 
   componentDidMount() {
@@ -601,7 +603,9 @@ class EditPipeline extends Component {
     }
 
     this.setState({
+      debugRecord: undefined,
       editColumn: editColumn,
+      showSettings: false,
     });
   }
 
@@ -614,7 +618,9 @@ class EditPipeline extends Component {
   hideContextBar() {
     this.setState({
       contextBarActive: false,
+      debugRecord: undefined,
       editColumn: undefined,
+      showSettings: false,
     });
   }
 
@@ -666,9 +672,13 @@ class EditPipeline extends Component {
       showStepNameForm: false,
     });
   }
+
   openDebugView(record) {
     this.setState({
+      contextBarActive: true,
       debugRecord: record,
+      editColumn: undefined,
+      showSettings: false,
     });
   }
 
@@ -678,10 +688,8 @@ class EditPipeline extends Component {
     });
   }
 
-  updateInspectLimit(event) {
-    const limit = isNaN(parseInt(event.target.value))
-      ? 100
-      : parseInt(event.target.value);
+  updateInspectLimit(newLimit) {
+    const limit = isNaN(parseInt(newLimit)) ? 100 : parseInt(newLimit);
     this.setState({ inspectLimit: limit });
     this.props
       .inspectStream(this.state.pipeline.metadata["stream-in"], limit)
@@ -690,6 +698,22 @@ class EditPipeline extends Component {
           this.updateSampleRecords(this.state.pipeline, this.state.currentStep);
         }
       });
+  }
+
+  toggleShowSettings() {
+    if (!this.state.showSettings) {
+      this.setState({
+        contextBarActive: true,
+        debugRecord: undefined,
+        editColumn: undefined,
+        showSettings: true,
+      });
+    } else {
+      this.setState({
+        contextBarActive: false,
+        showSettings: false,
+      });
+    }
   }
 
   render() {
@@ -721,7 +745,7 @@ class EditPipeline extends Component {
                     {this.props.pipelines.inspectingPipelineFailed ===
                       false && (
                       <button
-                        className="btn btn-sm btn-primary text-white btn-pill me-2"
+                        className="btn btn-sm btn-primary text-white btn-pill me-3"
                         onClick={(e) => e.preventDefault()}
                       >
                         <span className="d-flex align-items-center">
@@ -732,7 +756,7 @@ class EditPipeline extends Component {
                     )}
                     {this.props.pipelines.inspectingPipelineFailed === true && (
                       <button
-                        className="btn btn-sm btn-danger btn-pill me-2"
+                        className="btn btn-sm btn-danger btn-pill me-3"
                         onClick={(e) => {
                           e.preventDefault();
                           this.updateSampleRecords(
@@ -749,7 +773,7 @@ class EditPipeline extends Component {
                     )}
                     <button
                       className="btn btn-sm btn-light btn-pill"
-                      onClick={(e) => e.preventDefault()}
+                      disabled={true}
                     >
                       {this.props.pipelines.updatingPipeline ||
                       this.state.unpersistedChanges
@@ -761,25 +785,6 @@ class EditPipeline extends Component {
               </div>
             </div>
           </div>
-        </div>
-      </div>
-    );
-
-    const loader = (
-      <div className="row">
-        <div className="col-12 justify-content-center d-flex pt-5 mt-5">
-          <button
-            className="btn btn-primary d-flex align-items-center"
-            type="button"
-            disabled
-          >
-            <span
-              className="spinner-border spinner-border-sm me-2"
-              role="status"
-              aria-hidden="true"
-            ></span>
-            Loading sample records...
-          </button>
         </div>
       </div>
     );
@@ -830,7 +835,7 @@ class EditPipeline extends Component {
       return (
         <div className="container">
           {header}
-          {loader}
+          <Loader />
         </div>
       );
     }
@@ -840,6 +845,11 @@ class EditPipeline extends Component {
       this.props.pipelines.inspectionResult === undefined
         ? deepCopy(this.props.streams.inspectionResult)
         : deepCopy(this.props.pipelines.inspectionResult);
+
+    const streamInspectLength =
+      this.props.streams.inspectionResult !== undefined
+        ? this.props.streams.inspectionResult.length
+        : undefined;
 
     if (this.state.currentStep === undefined && sampleRecords.length === 0) {
       return (
@@ -875,19 +885,13 @@ class EditPipeline extends Component {
     return (
       <div className={classNames}>
         <div className="container">{header}</div>
-        {this.state.debugRecord !== undefined && (
-          <DebugView
-            closeDebugViewFunc={this.closeDebugView}
-            pipeline={this.state.pipeline}
-            record={this.state.debugRecord}
-          />
-        )}
         {sampleRecords !== undefined && (
           <PipelineDesigner
             addStepFunc={this.addStep}
             fields={Object.keys(profile)}
             contextBarActive={this.state.contextBarActive}
             currentStep={this.state.currentStep}
+            debugRecord={this.state.debugRecord}
             editColumn={this.state.editColumn}
             editColumnFunc={this.editColumn}
             filters={this.props.filters.filters}
@@ -904,8 +908,11 @@ class EditPipeline extends Component {
             profile={profile}
             removeStepFunc={this.removeStep}
             sampleRecords={sampleRecords}
+            showSettings={this.state.showSettings}
             showStepNameForm={this.state.showStepNameForm}
             showStepNameFormFunc={this.showStepNameForm}
+            streamInspectLength={streamInspectLength}
+            toggleShowSettingsFunc={this.toggleShowSettings}
             transforms={this.props.transforms.transforms}
             updateInspectLimitFunc={this.updateInspectLimit}
             updateStepNameFunc={this.updateStepName}

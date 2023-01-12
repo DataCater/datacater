@@ -37,6 +37,7 @@ class FilterConfig extends Component {
       pipelineField,
       pipelineStep,
       sortPosition,
+      transform,
       transformStep,
     } = this.props;
 
@@ -192,6 +193,13 @@ class FilterConfig extends Component {
                 Object.keys(filter.config).length === 0) && (
                 <div className="alert alert-primary">
                   This filter does not require any configuration.
+                </div>
+              )}
+              {transform === undefined && (
+                <div className="alert alert-warning">
+                  If you do not combine this filter with a transform, the
+                  pipeline will ignore all records that do not pass the filter
+                  for further processing.
                 </div>
               )}
               {filter.config !== undefined &&

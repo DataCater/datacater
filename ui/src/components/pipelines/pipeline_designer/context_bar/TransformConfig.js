@@ -212,6 +212,12 @@ class TransformConfig extends Component {
                   This transform does not require any configuration.
                 </div>
               )}
+              {filter !== undefined && (
+                <div className="alert alert-warning">
+                  This transform is only applied if the configured filter
+                  returns <code>True</code>.
+                </div>
+              )}
               {transform.config !== undefined &&
                 transform.config.map((configOption, idx) => (
                   <div key={idx}>

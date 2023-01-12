@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { Code, Package, Table } from "react-feather";
+import { Edit2, Code, Package, Settings, Table, Trash2 } from "react-feather";
 
 class Toolbar extends Component {
   constructor(props) {
@@ -9,6 +9,7 @@ class Toolbar extends Component {
     };
 
     this.updateTempInspectLimit = this.updateTempInspectLimit.bind(this);
+    this.removeStep = this.removeStep.bind(this);
   }
 
   updateTempInspectLimit(event) {
@@ -16,6 +17,32 @@ class Toolbar extends Component {
       this.setState({
         tempInspectLimit: event.target.value,
       });
+    }
+  }
+
+  truncateText(text, characterLimit) {
+    if (text !== undefined) {
+      let truncatedText = text.substring(
+        0,
+        Math.min(characterLimit, text.length)
+      );
+
+      if (truncatedText.length < text.length) {
+        truncatedText = truncatedText + "...";
+      }
+
+      return truncatedText;
+    } else {
+      return text;
+    }
+  }
+
+  removeStep(event) {
+    event.preventDefault();
+    event.stopPropagation(); // stops the browser from redirecting.
+
+    if (window.confirm("Are you sure that you want to delete this step?")) {
+      this.props.removeStepFunc(this.props.currentStep);
     }
   }
 
@@ -29,7 +56,9 @@ class Toolbar extends Component {
       showStepNameForm,
       showStepNameFormFunc,
       step,
+      streamInspectLength,
       toggleShowGridFunc,
+      toggleShowSettingsFunc,
       updateInspectLimitFunc,
       updateStepNameFunc,
     } = this.props;
@@ -68,18 +97,19 @@ class Toolbar extends Component {
       <div className="container mb-2">
         <div className="row align-items-center">
           {step !== undefined && (
-            <div className="col">
+            <div className="col-auto d-flex align-items-center">
               {!showStepNameForm && (
                 <>
-                  <span className="ms-1 fw-semibold">
-                    {step.name || <i>Untitled step</i>}
-                  </span>
-                  <button
-                    className="btn btn-sm btn-outline-primary ms-3"
+                  <span
+                    className="ms-1 fw-semibold clickable"
                     onClick={showStepNameFormFunc}
                   >
-                    Edit
-                  </button>
+                    {this.truncateText(step.name, 35) || <i>Untitled step</i>}
+                  </span>
+                  <Edit2
+                    className="feather-icon clickable ms-2"
+                    onClick={showStepNameFormFunc}
+                  />
                 </>
               )}
               {showStepNameForm && (
@@ -110,10 +140,10 @@ class Toolbar extends Component {
                   onClick={(e) => {
                     this.props.editColumnFunc();
                   }}
-                  className="btn btn-outline-primary btn-sm me-4"
+                  className="btn btn-primary-soft btn-sm btn-pill btn-preview-settings fw-semibold"
                 >
-                  <Package className="feather-icon me-2" />
-                  Apply transform
+                  <Package className="feather-icon me-1" />
+                  Apply transform or filter to records
                 </button>
               )}
             {step !== undefined &&
@@ -123,58 +153,44 @@ class Toolbar extends Component {
                   onClick={(e) => {
                     this.props.editColumnFunc();
                   }}
-                  className="btn btn-primary text-white btn-sm me-4"
+                  className="btn btn-primary text-white btn-sm btn-pill btn-preview-settings fw-semibold"
                 >
-                  <Package className="feather-icon me-2" />
-                  {transformation !== undefined && transformation.name}
-                  {transformation === undefined && filter.name}
+                  <Package className="feather-icon me-1" />
+                  {transformation !== undefined &&
+                    `Record-level transform: ${this.truncateText(
+                      transformation.name,
+                      25
+                    )}`}
+                  {transformation === undefined &&
+                    `Record-level filter: ${this.truncateText(
+                      filter.name,
+                      25
+                    )}`}
                 </button>
               )}
             {step !== undefined && (
-              <span
-                className="badge text-primary fw-semibold me-4"
-                style={{ backgroundColor: "#eaf6ec" }}
+              <button
+                className="btn btn-sm btn-pill btn-preview-settings btn-danger-soft ms-4"
+                onClick={this.removeStep}
               >
-                Kind: {step.kind}
-              </span>
+                <Trash2 className="feather-icon me-1" />
+                Delete step
+              </button>
             )}
-            <div className="btn-group">
-              <a
-                href={`/pipelines/${pipeline.uuid}/edit`}
-                onClick={toggleShowGridFunc}
-                className={gridButtonClassNames}
-              >
-                <Table className="feather-icon" /> Grid
-              </a>
-              <a
-                href={`/pipelines/${pipeline.uuid}/edit`}
-                onClick={toggleShowGridFunc}
-                className={rawButtonClassNames}
-              >
-                <Code className="feather-icon" /> Raw
-              </a>
-            </div>
-            <span className="ms-4">{sampleRecords.length} records</span>
-            <label className="ms-4 me-2 col-form-label">Limit:</label>
-            <input
-              type="text"
-              className="form-control form-control-sm"
-              onChange={this.updateTempInspectLimit}
-              aria-describedby="passwordHelpInline"
-              onBlur={updateInspectLimitFunc}
-              onKeyDown={(e) => {
-                if (e.which === 13) {
-                  e.target.blur();
-                }
-              }}
-              placeholder="100"
-              value={
-                this.state.tempInspectLimit !== undefined
-                  ? this.state.tempInspectLimit
-                  : inspectLimit
-              }
-              style={{ width: "75px" }}
-            />
+            <span className="mx-4">
+              {streamInspectLength !== undefined &&
+                sampleRecords.length < streamInspectLength && (
+                  <>{sampleRecords.length} of </>
+                )}
+              {streamInspectLength} records
+            </span>
+            <button
+              className="btn btn-sm btn-pill btn-primary-soft btn-preview-settings"
+              onClick={toggleShowSettingsFunc}
+            >
+              <Settings className="feather-icon me-1" />
+              Preview settings
+            </button>
           </div>
         </div>
       </div>

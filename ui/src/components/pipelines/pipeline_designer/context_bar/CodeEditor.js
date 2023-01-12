@@ -98,8 +98,8 @@ class CodeEditor extends Component {
 
   render() {
     const buttonClassNames = this.state.unsavedChanges
-      ? "btn btn-sm d-flex align-items-center my-2 btn-primary text-white"
-      : "btn btn-sm d-flex align-items-center my-2 btn-outline-primary";
+      ? "btn btn-sm d-flex align-items-center my-2 btn-primary-soft"
+      : "btn btn-sm d-flex align-items-center my-2 btn-outline-primary-soft";
 
     return (
       <div className="datacater-code-editor border-start border-end border-top border-bottom border-grey">
@@ -110,7 +110,7 @@ class CodeEditor extends Component {
           <div className="col-auto">
             <button className={buttonClassNames} onClick={this.handleApply}>
               <Play className="feather-icon" />
-              Save &amp; Run
+              Save &amp; run
             </button>
           </div>
         </div>
