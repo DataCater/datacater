@@ -36,6 +36,11 @@ class DebugView extends Component {
       delete originalRecord.id;
       debugContent = JSON.stringify(originalRecord, null, 2);
     } else if (this.state.tab === "transform") {
+      // Get the step index and the field name from the location path of the
+      // error object.
+      //
+      // Example location path: steps[1].fields[email]
+      // In the example, the step index is `1` and the field name is `email`
       const match = /steps\[(\d+)\]\.fields\[(.+)\]/g.exec(
         error["location"]["path"]
       );
@@ -44,6 +49,13 @@ class DebugView extends Component {
         const fieldName = match[2];
         debugContent = yaml.dump(pipeline.spec.steps[step].fields[fieldName]);
       } else {
+        // If we fail reading the step index and the field name from the
+        // location path, we should try only getting the step index.
+        // This might be relevant for record-level transforms/filters
+        // that are not applied to fields.
+        //
+        // Example location path: steps[1]
+        // In the example, the step index is `1`
         const match = /steps\[(\d+)\].*/g.exec(error["location"]["path"]);
         if (match != null && match.length == 2) {
           const step = parseInt(match[1]);
