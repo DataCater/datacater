@@ -4,7 +4,7 @@ name       : Remove punctuation
 key        : remove-punctuation
 description: Remove punctuation characters from the field
 license    : Apache2
-website    : https://github.com/DataCater/datacater/transforms/remove-punctuation
+website    : https://github.com/DataCater/datacater/tree/main/transforms/removepunctuation
 author     :
   email: info@datacater.io
   name: DataCater GmbH

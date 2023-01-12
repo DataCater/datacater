@@ -8,7 +8,7 @@ config     :
     type: text
 description: Replaces the value of the field with a provided constant value
 license    : Apache2
-website    : https://github.com/DataCater/datacater/transforms/replace-constant
+website    : https://github.com/DataCater/datacater/tree/main/transforms/replaceconstant
 author     :
   email: info@datacater.io
   name: DataCater GmbH

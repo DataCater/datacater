@@ -8,7 +8,7 @@ config     :
     type: text
 description: Add the field to a constant value
 license    : Apache2
-website    : https://github.com/DataCater/datacater/transforms/add
+website    : https://github.com/DataCater/datacater/tree/main/transforms/add
 author     :
   email: info@datacater.io
   name: DataCater GmbH

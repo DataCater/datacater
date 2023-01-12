@@ -4,7 +4,7 @@ name       : Rename key in JSON structure
 key        : rename-key-json-structure
 description: Renames a given key in a JSON structure stored in a string
 license    : Apache2
-website    : https://github.com/DataCater/datacater/transforms/rename-key-json-structure
+website    : https://github.com/DataCater/datacater/tree/main/transforms/renamekeyjsonstructure
 author     :
   email: info@datacater.io
   name: DataCater GmbH
