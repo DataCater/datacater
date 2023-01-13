@@ -42,7 +42,9 @@ spec:
             - name: QUARKUS_DATASOURCE_PASSWORD
               value: {{ .Values.datacater.database.password | quote }}
             - name: DATACATER_DEPLOYMENT_NAMESPACE
-              value: {{ .Release.Namespace }}
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
             - name: DATACATER_DEPLOYMENT_IMAGE
               value: {{ .Values.datacater.deployment.image | quote }}
             - name: DATACATER_TRANSFORMS_PATH
