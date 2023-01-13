@@ -93,6 +93,13 @@ class Toolbar extends Component {
       filter = this.props.filters.find((filter) => filter.key === filterKey);
     }
 
+    // Do not include filtered out records in the size of the sample set
+    const sampleRecordsLength = sampleRecords.filter(
+      (record) =>
+        record["metadata"] === undefined ||
+        record["metadata"]["filteredOutAtStep"] === undefined
+    ).length;
+
     return (
       <div className="container mb-2">
         <div className="row align-items-center">
@@ -179,8 +186,8 @@ class Toolbar extends Component {
             )}
             <span className="mx-4">
               {streamInspectLength !== undefined &&
-                sampleRecords.length < streamInspectLength && (
-                  <>{sampleRecords.length} of </>
+                sampleRecordsLength < streamInspectLength && (
+                  <>{sampleRecordsLength} of </>
                 )}
               {streamInspectLength} records
             </span>

@@ -186,6 +186,10 @@ $row-hovered-background-color: #f5f5f5;
     .sample-cell.error-in-previous-step {
       background-color: #f5b7b1;
     }
+
+    .sample-cell.filtered-out-in-current-step {
+      background-color: #ddd;
+    }
   }
 
   &-filters &__table-main &__row-cell,

@@ -54,6 +54,8 @@ class Grid extends Component {
       }
     }
 
+    let title = "" + rawValue;
+
     // Check whether the field has been changed in the current or a previous step
     const lastChange = sample["metadata"]["lastChange"];
     if (
@@ -68,6 +70,15 @@ class Grid extends Component {
       }
     }
 
+    // Check whether the record has been changed in the current or a previous step
+    const filteredOutAtStep = sample["metadata"]["filteredOutAtStep"];
+    if (filteredOutAtStep !== undefined) {
+      if (filteredOutAtStep + 1 === column.currentStep) {
+        classNames += " filtered-out-in-current-step text-black-50";
+        title = "This record does not pass one of the filters of this step.";
+      }
+    }
+
     if (
       this.props.editColumnField !== undefined &&
       this.props.editColumnField.name === field
@@ -76,7 +87,7 @@ class Grid extends Component {
     }
 
     return (
-      <div className={classNames} key={fieldName} title={"" + rawValue}>
+      <div className={classNames} key={fieldName} title={title}>
         {renderTableCellContent(rawValue)}
       </div>
     );

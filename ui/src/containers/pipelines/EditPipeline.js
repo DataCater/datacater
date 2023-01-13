@@ -47,6 +47,7 @@ class EditPipeline extends Component {
       currentStep: undefined,
       debugRecord: undefined,
       errorMessage: "",
+      hideFilteredOutRecords: true,
       inspectLimit: 100,
       pipeline: {},
       pipelineUpdated: false,
@@ -79,6 +80,8 @@ class EditPipeline extends Component {
     this.closeDebugView = this.closeDebugView.bind(this);
     this.updateInspectLimit = this.updateInspectLimit.bind(this);
     this.toggleShowSettings = this.toggleShowSettings.bind(this);
+    this.toggleHideFilteredOutRecords =
+      this.toggleHideFilteredOutRecords.bind(this);
   }
 
   componentDidMount() {
@@ -716,6 +719,14 @@ class EditPipeline extends Component {
     }
   }
 
+  toggleHideFilteredOutRecords(event) {
+    event.preventDefault();
+
+    this.setState({
+      hideFilteredOutRecords: !this.state.hideFilteredOutRecords,
+    });
+  }
+
   render() {
     const pipeline = this.state.pipeline;
 
@@ -840,14 +851,30 @@ class EditPipeline extends Component {
       );
     }
 
-    let sampleRecords =
+    let sampleRecords = [];
+
+    if (
       this.state.currentStep === undefined ||
       this.props.pipelines.inspectionResult === undefined
-        ? deepCopy(this.props.streams.inspectionResult)
-        : deepCopy(this.props.pipelines.inspectionResult);
+    ) {
+      if (Array.isArray(this.props.streams.inspectionResult)) {
+        sampleRecords = deepCopy(this.props.streams.inspectionResult);
+      }
+    } else {
+      if (Array.isArray(this.props.pipelines.inspectionResult)) {
+        sampleRecords = deepCopy(this.props.pipelines.inspectionResult);
 
-    if (!Array.isArray(sampleRecords)) {
-      sampleRecords = [];
+        // If the user wants to hide filtered out records (which is the default),
+        // we should exclude them from the sample records
+        if (this.state.hideFilteredOutRecords) {
+          sampleRecords = sampleRecords.filter(
+            (record) =>
+              record.metadata === undefined ||
+              (record.metadata !== undefined &&
+                record.metadata["filteredOutAtStep"] === undefined)
+          );
+        }
+      }
     }
 
     const streamInspectLength =
@@ -902,6 +929,7 @@ class EditPipeline extends Component {
             handleFilterChangeFunc={this.handleFilterChange}
             handleStepChangeFunc={this.handleStepChange}
             hideContextBarFunc={this.hideContextBar}
+            hideFilteredOutRecords={this.state.hideFilteredOutRecords}
             hideStepNameFormFunc={this.hideStepNameForm}
             inspectLimit={this.state.inspectLimit}
             moveToStepFunc={this.moveToStep}
@@ -916,6 +944,7 @@ class EditPipeline extends Component {
             showStepNameForm={this.state.showStepNameForm}
             showStepNameFormFunc={this.showStepNameForm}
             streamInspectLength={streamInspectLength}
+            toggleHideFilteredOutRecordsFunc={this.toggleHideFilteredOutRecords}
             toggleShowSettingsFunc={this.toggleShowSettings}
             transforms={this.props.transforms.transforms}
             updateInspectLimitFunc={this.updateInspectLimit}

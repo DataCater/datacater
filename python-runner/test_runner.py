@@ -369,6 +369,11 @@ def test_preview_apply_filter():
             "key": {},
             "value": {"company": "DataCater GmbH"},
             "metadata": {"lastChange": {"key": {}, "value": {}}},
+        },
+        {
+            "key": {},
+            "value": {"company": "DataKater GmbH"},
+            "metadata": {"filteredOutAtStep": 0},
         }
     ]
 
@@ -382,6 +387,9 @@ def test_preview_apply_user_defined_filter():
             "pipeline": {
                 "spec": {
                     "steps": [
+                        {
+                            "kind": "Record"
+                        },
                         {
                             "kind": "Field",
                             "fields": {
@@ -406,6 +414,11 @@ def test_preview_apply_user_defined_filter():
     )
 
     assert response.json() == [
+        {
+            "key": {},
+            "value": {"company": "DataCater GmbH"},
+            "metadata": {"filteredOutAtStep": 1},
+        },
         {
             "key": {},
             "value": {"company": "DataKater GmbH"},
@@ -512,6 +525,31 @@ def test_preview_filter_transform_combination():
             "value": {"company": "DataKater GmbH"},
             "metadata": {"lastChange": {"key": {}, "value": {}}},
         },
+    ]
+
+    assert response.status_code == 200
+
+
+def test_preview_empty_pipeline():
+    response = client.post(
+        "/preview",
+        json={
+            "pipeline": {
+                "spec": {
+                    "steps": [
+                    ]
+                }
+            },
+            "records": [
+                {"key": {}, "value": {"company": "DataCater GmbH"}, "metadata": {}},
+                {"key": {}, "value": {"company": "DataKater GmbH"}, "metadata": {}},
+            ],
+        },
+    )
+
+    assert response.json() == [
+            {"key": {}, "value": {"company": "DataCater GmbH"}, "metadata": {}},
+            {"key": {}, "value": {"company": "DataKater GmbH"}, "metadata": {}},
     ]
 
     assert response.status_code == 200
