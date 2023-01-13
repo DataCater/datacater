@@ -228,7 +228,7 @@ spec:
             - name: http
               containerPort: 50000
           livenessProbe:
-            failureThreshold: 3
+            failureThreshold: 10
             httpGet:
               path: /health
               port: 50000
@@ -238,7 +238,7 @@ spec:
             successThreshold: 1
             timeoutSeconds: 10
           readinessProbe:
-            failureThreshold: 3
+            failureThreshold: 10
             httpGet:
               path: /health
               port: 50000
