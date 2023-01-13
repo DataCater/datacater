@@ -22,5 +22,4 @@ def test_returns_value_field_does_not_exist():
 
 
 def test_no_config():
-    with pytest.raises(KeyError):
-        assert transform.transform(None, {}, {})
+    assert transform.transform(None, {}, {}) == None

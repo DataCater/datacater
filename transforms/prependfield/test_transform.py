@@ -28,6 +28,15 @@ def test_prepend_empty_field():
         transform.transform("data streaming", {}, {"fieldName": "prefix"})
 
 
+def test_null_config():
+    assert (
+        transform.transform("data streaming", {"prefix": "Python"}, {"fieldName": None})
+        == "data streaming"
+    )
+
+
 def test_no_config():
-    with pytest.raises(KeyError):
+    assert (
         transform.transform("data streaming", {"prefix": "Python"}, {})
+        == "data streaming"
+    )

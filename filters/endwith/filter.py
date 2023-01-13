@@ -1,2 +1,2 @@
 def filter(value, row: dict, config: dict) -> bool:
-    return value.endswith(config["value"])
+    return config.get("value") is None or value.endswith(config["value"])

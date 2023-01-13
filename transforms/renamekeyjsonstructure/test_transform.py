@@ -24,9 +24,12 @@ def test_rename_key_in_nested_structure():
 
 
 def test_no_config():
-    with pytest.raises(KeyError):
+    json_obj = '{"info": { "name": "DataCater GmbH" }, "url": "https://datacater.io"}'
+    assert (
         transform.transform(
-            '{"info": { "name": "DataCater GmbH" }, "url": "https://datacater.io"}',
+            json_obj,
             {},
             {},
         )
+        == json_obj
+    )

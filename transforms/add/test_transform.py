@@ -15,10 +15,12 @@ def test_add_float_to_int():
 
 
 def test_add_string_to_int():
-    with pytest.raises(TypeError):
-        transform.transform(15, {}, {"value": "2022"})
+    assert transform.transform(15, {}, {"value": "2022"}) == 2037
+
+
+def test_null_config():
+    assert transform.transform(15, {}, {"value": None}) == 15
 
 
 def test_no_config():
-    with pytest.raises(KeyError):
-        transform.transform(15, {}, {})
+    assert transform.transform(15, {}, {}) == 15

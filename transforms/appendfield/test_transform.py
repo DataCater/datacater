@@ -40,8 +40,21 @@ def test_append_empty_field():
         )
 
 
+def test_null_config():
+    assert (
+        transform.transform(
+            "Data streaming with ",
+            {"programmingLanguage": "Python"},
+            {"fieldName": None},
+        )
+        == "Data streaming with "
+    )
+
+
 def test_no_config():
-    with pytest.raises(KeyError):
+    assert (
         transform.transform(
             "Data streaming with ", {"programmingLanguage": "Python"}, {}
         )
+        == "Data streaming with "
+    )

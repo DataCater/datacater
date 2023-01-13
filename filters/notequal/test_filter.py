@@ -32,12 +32,12 @@ def test_string_does_not_equal_number():
     assert filter.filter("42", {}, {"value": 42}) is True
 
 
-def test_number_does_not_equal_string():
-    assert filter.filter(42, {}, {"value": "42"}) is True
+def test_number_does_not_equal_number_string():
+    assert filter.filter(42, {}, {"value": "42"}) is False
 
 
-def test_boolean_does_not_equal_string():
-    assert filter.filter(True, {}, {"value": "True"}) is True
+def test_boolean_does_not_equal_string_bool():
+    assert filter.filter(True, {}, {"value": "True"}) is False
 
 
 def test_float_equals_int():
@@ -53,5 +53,4 @@ def test_empty_string_does_not_equal_none():
 
 
 def no_config():
-    with pytest.raises(KeyError):
-        filter.filter(42, {}, {})
+    assert filter.filter(42, {}, {}) is False

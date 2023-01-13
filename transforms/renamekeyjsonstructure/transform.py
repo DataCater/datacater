@@ -1,6 +1,9 @@
 def transform(value: str, row: dict, config: dict) -> str:
     import json
 
+    if config.get("oldKeyName") in [None, ""] or config.get("newKeyName") in [None, ""]:
+        return value
+
     def rename_hook(obj):
         for key in list(obj):
             new_key = key.replace(config["oldKeyName"], config["newKeyName"])

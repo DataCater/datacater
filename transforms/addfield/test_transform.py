@@ -19,6 +19,9 @@ def test_add_string_to_int():
         transform.transform(15, {"year": "2022"}, {"fieldName": "year"})
 
 
+def test_null_config():
+    assert transform.transform(15, {"year": "2022"}, {"fieldName": None}) == 15
+
+
 def test_no_config():
-    with pytest.raises(KeyError):
-        transform.transform(15, {"year": "2022"}, {})
+    assert transform.transform(15, {"year": "2022"}, {}) == 15

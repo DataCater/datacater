@@ -15,5 +15,4 @@ def test_returns_value_none():
 
 
 def test_no_config():
-    with pytest.raises(KeyError):
-        assert transform.transform(None, {}, {})
+    assert transform.transform(None, {}, {}) == None

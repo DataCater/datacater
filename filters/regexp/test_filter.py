@@ -22,3 +22,19 @@ def test_string_regexp_does_not_match():
         )
         is False
     )
+
+
+def test_string_regexp_null_config():
+    assert filter.filter(
+        "DataCater is the developer-friendly ETL platform for transforming data in motion.",
+        {},
+        {"value": None},
+    )
+
+
+def test_string_regexp_no_config():
+    assert filter.filter(
+        "DataCater is the developer-friendly ETL platform for transforming data in motion.",
+        {},
+        {},
+    )
