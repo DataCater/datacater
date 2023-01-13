@@ -7,7 +7,7 @@ replicaCount: 1
 
 datacater:
   database:
-    host: ""
+    host: "postgres-postgresql:5432"
     username: datacater
     password: datacater
   deployment:
@@ -19,14 +19,14 @@ datacater:
   pythonrunner:
     name: "python-runner"
     image:
-      name: "datacater/python-runner"
+      repository: "datacater/python-runner"
       pullPolicy: IfNotPresent
       version: "nightly-20230105"
     replicas: 10
     serviceName: "pythonrunner"
     resources:
       requests:
-        cpu: 0.1
+        cpu: 0.05
         memory: 100Mi
       limits:
         memory: 100Mi
@@ -134,10 +134,10 @@ resources:
   # resources, such as Minikube. If you do want to specify resources, uncomment the following
   # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
   requests:
-    cpu: 500m
+    cpu: 200m
     memory: 1Gi
   limits:
-    memory: 2Gi
+    memory: 1Gi
 
 autoscaling:
   enabled: false
