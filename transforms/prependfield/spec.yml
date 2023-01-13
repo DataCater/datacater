@@ -8,7 +8,7 @@ config     :
     type: field
 description: Prepend this field with another field
 license    : Apache2
-website    : https://github.com/DataCater/datacater/transforms/prepend-field
+website    : https://github.com/DataCater/datacater/tree/main/transforms/prependfield
 author     :
   email: info@datacater.io
   name: DataCater GmbH

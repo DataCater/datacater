@@ -8,7 +8,7 @@ config     :
     type: text
 description: Custom record-level transform defined in Python
 license    : Apache2
-website    : https://github.com/DataCater/datacater/transforms/user-defined-record-transformation
+website    : https://github.com/DataCater/datacater/tree/main/transforms/userdefinedrecordtransformation
 author     :
   email: info@datacater.io
   name: DataCater GmbH

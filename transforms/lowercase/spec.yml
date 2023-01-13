@@ -4,7 +4,7 @@ name       : Lowercase
 key        : lowercase
 description: Transform the field to lowercase notation
 license    : Apache2
-website    : https://github.com/DataCater/datacater/transforms/lowercase
+website    : https://github.com/DataCater/datacater/tree/main/transforms/lowercase
 author     :
   email: info@datacater.io
   name: DataCater GmbH

@@ -4,7 +4,7 @@ name       : Drop field
 key        : drop-field
 description: Removes a field from the record
 license    : Apache2
-website    : https://github.com/DataCater/datacater/transforms/drop-field
+website    : https://github.com/DataCater/datacater/tree/main/transforms/dropfield
 author     :
   email: info@datacater.io
   name: DataCater GmbH

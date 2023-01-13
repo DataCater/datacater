@@ -8,7 +8,7 @@ config     :
     type: text
 description: Divides the field by a constant value and returns the remainder
 license    : Apache2
-website    : https://github.com/DataCater/datacater/transforms/modulo
+website    : https://github.com/DataCater/datacater/tree/main/transforms/modulo
 author     :
   email: info@datacater.io
   name: DataCater GmbH

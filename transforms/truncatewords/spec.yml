@@ -11,7 +11,7 @@ config     :
     type: text
 description: Truncate the field after the given number of words
 license    : Apache2
-website    : https://github.com/DataCater/datacater/transforms/truncate-words
+website    : https://github.com/DataCater/datacater/tree/main/transforms/truncatewords
 author     :
   email: info@datacater.io
   name: DataCater GmbH

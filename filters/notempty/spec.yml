@@ -4,7 +4,7 @@ name       : Is not empty
 key        : not-empty
 description: Returns whether the field is not empty.
 license    : Apache2
-website    : https://github.com/DataCater/datacater/filters/not-empty
+website    : https://github.com/DataCater/datacater/tree/main/filters/notempty
 author     :
   email: info@datacater.io
   name: DataCater GmbH

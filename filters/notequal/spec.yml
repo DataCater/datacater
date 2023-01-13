@@ -8,7 +8,7 @@ config     :
     type: text
 description: Returns whether the field does not equal a specific value.
 license    : Apache2
-website    : https://github.com/DataCater/datacater/filters/not-equal
+website    : https://github.com/DataCater/datacater/tree/main/filters/notequal
 author     :
   name: DataCater GmbH
   email: info@datacater.io

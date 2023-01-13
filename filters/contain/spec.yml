@@ -8,7 +8,7 @@ config     :
     type: text
 description: Returns whether the field contains a provided substring.
 license    : Apache2
-website    : https://github.com/DataCater/datacater/filters/contain
+website    : https://github.com/DataCater/datacater/tree/main/filters/contain
 author     :
   email: info@datacater.io
   name: DataCater GmbH

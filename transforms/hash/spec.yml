@@ -12,7 +12,7 @@ config     :
     type: text
 description: Hash the field
 license    : Apache2
-website    : https://github.com/DataCater/datacater/transforms/hash
+website    : https://github.com/DataCater/datacater/tree/main/transforms/hash
 author     :
   email: info@datacater.io
   name: DataCater GmbH

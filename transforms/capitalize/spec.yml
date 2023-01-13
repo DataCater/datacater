@@ -4,7 +4,7 @@ name       : Capitalize
 key        : capitalize
 description: Capitalize the field
 license    : Apache2
-website    : https://github.com/DataCater/datacater/transforms/capitalize
+website    : https://github.com/DataCater/datacater/tree/main/transforms/capitalize
 author     :
   email: info@datacater.io
   name: DataCater GmbH

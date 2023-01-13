@@ -4,7 +4,7 @@ name       : Uppercase
 key        : uppercase
 description: Transform the field to uppercase notation
 license    : Apache2
-website    : https://github.com/DataCater/datacater/transforms/uppercase
+website    : https://github.com/DataCater/datacater/tree/main/transforms/uppercase
 author     :
   email: info@datacater.io
   name: DataCater GmbH
