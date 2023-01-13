@@ -1,5 +1,16 @@
 [<p align="center"><img src="logo.png" alt="DataCater logo" width="400"/></p>](https://datacater.io)
 
+[
+<center>
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="/logo.png" width="400">
+      <source media="(prefers-color-scheme: light)" srcset="/logo.png" width="400">
+      <img alt="DataCater logo" src="logo.png">
+    </picture>
+</center>
+](https://datacater.io)
+
+
 [![Documentation](https://img.shields.io/badge/documentation-black)](https://docs.datacater.io)
 [![Slack](https://img.shields.io/badge/slack-purple)](https://join.slack.com/t/datacater/shared_invite/zt-17cga6jg3-rGdgQZU6iX~mJGC8j~UNlw)
 [![Build & Test](https://github.com/DataCater/datacater/actions/workflows/build-test.yaml/badge.svg)](https://github.com/DataCater/datacater/actions/workflows/build-test.yaml)
