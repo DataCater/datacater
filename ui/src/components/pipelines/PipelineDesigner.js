@@ -214,9 +214,13 @@ class PipelineDesigner extends Component {
           <ContextSidebar>
             <PreviewSettings
               hideContextBarFunc={this.props.hideContextBarFunc}
+              hideFilteredOutRecords={this.props.hideFilteredOutRecords}
               inspectLimit={this.props.inspectLimit}
               pipeline={this.props.pipeline}
               showGrid={this.state.showGrid}
+              toggleHideFilteredOutRecordsFunc={
+                this.props.toggleHideFilteredOutRecordsFunc
+              }
               toggleShowGridFunc={this.toggleShowGrid}
               updateInspectLimitFunc={this.props.updateInspectLimitFunc}
             />

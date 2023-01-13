@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { Button } from "react-bootstrap";
-import { Check, Code, Settings, Table } from "react-feather";
+import { Check, Code, Eye, EyeOff, Settings, Table } from "react-feather";
 
 class PreviewSettings extends Component {
   constructor(props) {
@@ -22,9 +22,11 @@ class PreviewSettings extends Component {
 
   render() {
     const {
+      hideFilteredOutRecords,
       inspectLimit,
       pipeline,
       showGrid,
+      toggleHideFilteredOutRecordsFunc,
       toggleShowGridFunc,
       updateInspectLimitFunc,
     } = this.props;
@@ -34,6 +36,14 @@ class PreviewSettings extends Component {
       : "btn btn-sm w-50 btn-outline-primary-soft";
 
     const rawButtonClassNames = !showGrid
+      ? "btn btn-sm w-50 btn-primary-soft"
+      : "btn btn-sm w-50 btn-outline-primary-soft";
+
+    const hideFilteredOutRecordsButtonClassNames = hideFilteredOutRecords
+      ? "btn btn-sm w-50 btn-primary-soft"
+      : "btn btn-sm w-50 btn-outline-primary-soft";
+
+    const showFilteredOutRecordsButtonClassNames = !hideFilteredOutRecords
       ? "btn btn-sm w-50 btn-primary-soft"
       : "btn btn-sm w-50 btn-outline-primary-soft";
 
@@ -124,6 +134,50 @@ class PreviewSettings extends Component {
                 <p className="text-start">
                   Shows the complete sample records, including their values,
                   their keys, and their metadata, in a text view.
+                </p>
+              </a>
+            </div>
+          </div>
+          <div className="mb-4">
+            <h6 className="fw-bold">Filtered out records</h6>
+            <div className="btn-group w-100 mt-2">
+              <a
+                href={`/pipelines/${pipeline.uuid}/edit`}
+                onClick={toggleHideFilteredOutRecordsFunc}
+                className={hideFilteredOutRecordsButtonClassNames}
+              >
+                <h6 className="mt-2 clearfix">
+                  <span className="float-start d-flex align-items-center ms-n1">
+                    <EyeOff className="feather-icon me-1" /> Hide
+                  </span>
+                  {hideFilteredOutRecords && (
+                    <span className="float-end">
+                      <Check className="feather-icon" />
+                    </span>
+                  )}
+                </h6>
+                <p className="text-start">
+                  Hide records that have been filtered out by the pipeline.
+                </p>
+              </a>
+              <a
+                href={`/pipelines/${pipeline.uuid}/edit`}
+                onClick={toggleHideFilteredOutRecordsFunc}
+                className={showFilteredOutRecordsButtonClassNames}
+              >
+                <h6 className="mt-2 clearfix">
+                  <span className="float-start d-flex align-items-center ms-n1">
+                    <Eye className="feather-icon me-1" /> Show
+                  </span>
+                  {!hideFilteredOutRecords && (
+                    <span className="float-end">
+                      <Check className="feather-icon" />
+                    </span>
+                  )}
+                </h6>
+                <p className="text-start">
+                  Show records that have been filtered out by the previewed step
+                  and highlight them in gray.
                 </p>
               </a>
             </div>

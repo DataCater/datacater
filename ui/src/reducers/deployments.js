@@ -96,11 +96,9 @@ const deployments = (state, action) => {
         logMessages: [],
       };
     case "RECEIVE_LOGS_DEPLOYMENT":
-      const logMessages = action.logMessages
-        .slice(-101, -1)
-        .map((logLine) => {
-          return JSON.parse(logLine);
-        });
+      const logMessages = action.logMessages.slice(-101, -1).map((logLine) => {
+        return JSON.parse(logLine);
+      });
       return {
         ...state,
         errorMessage: undefined,

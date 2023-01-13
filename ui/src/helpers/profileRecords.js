@@ -55,7 +55,15 @@ export function profileRecords(records, transformedFields) {
     profile[field].mostFrequentValues = [];
   });
 
-  records.forEach(function (record) {
+  records.forEach((record) => {
+    // Ignore records that have been filtered out for profiling
+    if (
+      record["metadata"] !== undefined &&
+      record["metadata"]["filteredOutAtStep"] !== undefined
+    ) {
+      return;
+    }
+
     const recordValue = record["value"];
     Object.keys(recordValue).forEach(function (fieldName) {
       const value = recordValue[fieldName];
