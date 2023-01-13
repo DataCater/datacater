@@ -290,7 +290,7 @@ spec:
             - name: QUARKUS_DATASOURCE_REACTIVE_URL
               value: "postgresql://postgres.default.svc.cluster.local:5432/postgres"
             - name: DATACATER_PYTHONRUNNER_IMAGE_NAMESPACE
-              value: default
+              value: datacater
             - name: QUARKUS_DATASOURCE_USERNAME
               value: postgres
             - name: QUARKUS_DATASOURCE_PASSWORD
