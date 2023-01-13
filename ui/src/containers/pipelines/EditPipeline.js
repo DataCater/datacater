@@ -739,13 +739,22 @@ class EditPipeline extends Component {
                   <h4 className="fw-semibold mb-0">
                     {pipeline.name || "Untitled pipeline"}
                   </h4>
+                  <button
+                    className="btn btn-sm btn-light btn-pill ms-2"
+                    disabled={true}
+                  >
+                    {this.props.pipelines.updatingPipeline ||
+                    this.state.unpersistedChanges
+                      ? "Syncing pipeline spec..."
+                      : "Synced"}
+                  </button>
                 </div>
                 <div className="col-4 d-flex align-items-center justify-content-end">
                   <div>
                     {this.props.pipelines.inspectingPipelineFailed ===
                       false && (
                       <button
-                        className="btn btn-sm btn-primary text-white btn-pill me-3"
+                        className="btn btn-sm btn-primary text-white btn-pill"
                         onClick={(e) => e.preventDefault()}
                       >
                         <span className="d-flex align-items-center">
@@ -756,7 +765,7 @@ class EditPipeline extends Component {
                     )}
                     {this.props.pipelines.inspectingPipelineFailed === true && (
                       <button
-                        className="btn btn-sm btn-danger btn-pill me-3"
+                        className="btn btn-sm btn-danger btn-pill"
                         onClick={(e) => {
                           e.preventDefault();
                           this.updateSampleRecords(
@@ -771,15 +780,6 @@ class EditPipeline extends Component {
                         </span>
                       </button>
                     )}
-                    <button
-                      className="btn btn-sm btn-light btn-pill"
-                      disabled={true}
-                    >
-                      {this.props.pipelines.updatingPipeline ||
-                      this.state.unpersistedChanges
-                        ? "Syncing..."
-                        : "Synced"}
-                    </button>
                   </div>
                 </div>
               </div>
