@@ -103,7 +103,7 @@ metadata:
   namespace: default
 spec:
   containers:
-    - image: datacater/ui:nightly-20230105
+    - image: datacater/ui:a835f7248af45f92427180f69652d656b92f8ba0
       imagePullPolicy: IfNotPresent
       name: ui
       ports:
@@ -222,7 +222,7 @@ spec:
     spec:
       containers:
         - name: python-runner
-          image: "datacater/python-runner:nightly-20230105"
+          image: "datacater/python-runner:a835f7248af45f92427180f69652d656b92f8ba0"
           imagePullPolicy: IfNotPresent
           ports:
             - name: http
@@ -285,7 +285,7 @@ spec:
         - name: datacater
           securityContext:
             {}
-          image: "datacater/datacater:nightly-20230105"
+          image: "datacater/datacater:a835f7248af45f92427180f69652d656b92f8ba0"
           imagePullPolicy: IfNotPresent
           env:
             - name: QUARKUS_DATASOURCE_REACTIVE_URL
@@ -299,7 +299,7 @@ spec:
             - name: DATACATER_DEPLOYMENT_NAMESPACE
               value: default
             - name: DATACATER_DEPLOYMENT_IMAGE
-              value: datacater/pipeline:nightly-20230105
+              value: datacater/pipeline:a835f7248af45f92427180f69652d656b92f8ba0
             - name: DATACATER_TRANSFORMS_PATH
               value: /datacater/transforms
             - name: DATACATER_FILTERS_PATH
@@ -307,7 +307,7 @@ spec:
             - name: DATACATER_PYTHONRUNNER_REPLICAS
               value: "5"
             - name: DATACATER_PYTHONRUNNER_IMAGE_VERSION
-              value: nightly-20230105
+              value: a835f7248af45f92427180f69652d656b92f8ba0
             - name: QUARKUS_LOG_CONSOLE_JSON
               value: "false"
           ports:

@@ -11,7 +11,7 @@ datacater:
     username: datacater
     password: datacater
   deployment:
-    image: "datacater/pipeline:e11e94645673caa06a102ebbb42cb46803657d6a"
+    image: "datacater/pipeline:a835f7248af45f92427180f69652d656b92f8ba0"
   transforms:
     path: "/datacater/transforms"
   filters:
@@ -21,7 +21,7 @@ datacater:
     image:
       repository: "datacater/python-runner"
       pullPolicy: IfNotPresent
-      version: "e11e94645673caa06a102ebbb42cb46803657d6a"
+      tag: "a835f7248af45f92427180f69652d656b92f8ba0"
     replicas: 10
     serviceName: "pythonrunner"
     resources:
@@ -34,7 +34,7 @@ datacater:
     image:
       repository: datacater/ui
       pullPolicy: IfNotPresent
-      tag: 'e11e94645673caa06a102ebbb42cb46803657d6a'
+      tag: 'a835f7248af45f92427180f69652d656b92f8ba0'
     service:
       type: ClusterIP
 
@@ -42,7 +42,7 @@ image:
   repository: datacater/datacater
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: 'e11e94645673caa06a102ebbb42cb46803657d6a'
+  tag: 'a835f7248af45f92427180f69652d656b92f8ba0'
 
 # GitHub personal access tokens will be used until we publish to docker io
 # Follow instructions -> https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-container-registry#authenticating-to-the-container-registry
@@ -73,7 +73,7 @@ extraEnv: []
   #  - name: DATACATER_DEPLOYMENT_NAMESPACE
   #    value: {{ .Release.Namespace }}
   #  - name: DATACATER_DEPLOYMENT_IMAGE
-  #    value: "datacater/pipeline:e11e94645673caa06a102ebbb42cb46803657d6a"
+  #    value: "datacater/pipeline:a835f7248af45f92427180f69652d656b92f8ba0"
   #  - name: DATACATER_TRANSFORMS_PATH
   #    value: "/datacater/transforms"
   #  - name: DATACATER_FILTERS_PATH
@@ -83,7 +83,7 @@ extraEnv: []
   #  - name: DATACATER_PYTHONRUNNER_IMAGE_NAME
   #    value: 'datacater/python-runner'
   #  - name: DATACATER_PYTHONRUNNER_IMAGE_VERSION
-  #    value: 'e11e94645673caa06a102ebbb42cb46803657d6a'
+  #    value: 'a835f7248af45f92427180f69652d656b92f8ba0'
   #  - name: QUARKUS_LOG_CONSOLE_JSON
   #    value: "false"
 
