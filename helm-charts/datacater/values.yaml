@@ -21,12 +21,12 @@ datacater:
     image:
       repository: "datacater/python-runner"
       pullPolicy: IfNotPresent
-      version: "nightly"
-    replicas: 5
+      version: "nightly-20230105"
+    replicas: 10
     serviceName: "pythonrunner"
     resources:
       requests:
-        cpu: 0.1
+        cpu: 0.05
         memory: 100Mi
       limits:
         memory: 100Mi
