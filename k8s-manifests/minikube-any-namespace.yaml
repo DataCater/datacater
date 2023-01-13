@@ -9,7 +9,7 @@ metadata:
     app.kubernetes.io/part-of: datacater-0.1.0
     app.kubernetes.io/name: datacater
     app.kubernetes.io/instance: release-name
-    app.kubernetes.io/version: "nightly-20230105"
+    app.kubernetes.io/version: "e11e94645673caa06a102ebbb42cb46803657d6a"
     app.kubernetes.io/managed-by: Helm
 ---
 # Source: datacater/templates/role.yaml
@@ -48,7 +48,7 @@ metadata:
     app.kubernetes.io/part-of: datacater-0.1.0
     app.kubernetes.io/name: "python-runner"
     app.kubernetes.io/instance: release-name
-    app.kubernetes.io/version: "nightly-20230105"
+    app.kubernetes.io/version: "e11e94645673caa06a102ebbb42cb46803657d6a"
     app.kubernetes.io/managed-by: Helm
 spec:
   selector:
@@ -70,7 +70,7 @@ metadata:
     app.kubernetes.io/part-of: datacater-0.1.0
     app.kubernetes.io/name: datacater
     app.kubernetes.io/instance: release-name
-    app.kubernetes.io/version: "nightly-20230105"
+    app.kubernetes.io/version: "e11e94645673caa06a102ebbb42cb46803657d6a"
     app.kubernetes.io/managed-by: Helm
 spec:
   type: ClusterIP
@@ -93,7 +93,7 @@ metadata:
     app.kubernetes.io/part-of: datacater-0.1.0
     app.kubernetes.io/name: datacater
     app.kubernetes.io/instance: release-name
-    app.kubernetes.io/version: "nightly-20230105"
+    app.kubernetes.io/version: "e11e94645673caa06a102ebbb42cb46803657d6a"
     app.kubernetes.io/managed-by: Helm
 spec:
   selector:
@@ -115,7 +115,7 @@ metadata:
     app.kubernetes.io/part-of: datacater-0.1.0
     app.kubernetes.io/name: datacater
     app.kubernetes.io/instance: release-name
-    app.kubernetes.io/version: "nightly-20230105"
+    app.kubernetes.io/version: "e11e94645673caa06a102ebbb42cb46803657d6a"
     app.kubernetes.io/managed-by: Helm
 spec:
   selector:
@@ -147,7 +147,7 @@ metadata:
     app.kubernetes.io/part-of: datacater-0.1.0
     app.kubernetes.io/name: "python-runner"
     app.kubernetes.io/instance: release-name
-    app.kubernetes.io/version: "nightly-20230105"
+    app.kubernetes.io/version: "e11e94645673caa06a102ebbb42cb46803657d6a"
     app.kubernetes.io/managed-by: Helm
 spec:
   serviceName: pythonrunner
@@ -164,12 +164,12 @@ spec:
         app.kubernetes.io/part-of: datacater-0.1.0
         app.kubernetes.io/name: "python-runner"
         app.kubernetes.io/instance: release-name
-        app.kubernetes.io/version: "nightly-20230105"
+        app.kubernetes.io/version: "e11e94645673caa06a102ebbb42cb46803657d6a"
         app.kubernetes.io/managed-by: Helm
     spec:
       containers:
         - name: python-runner
-          image: "datacater/python-runner:nightly-20230105"
+          image: "datacater/python-runner:e11e94645673caa06a102ebbb42cb46803657d6a"
           imagePullPolicy: IfNotPresent
           ports:
             - name: http
@@ -211,7 +211,7 @@ metadata:
     app.kubernetes.io/part-of: datacater-0.1.0
     app.kubernetes.io/name: datacater
     app.kubernetes.io/instance: release-name
-    app.kubernetes.io/version: "nightly-20230105"
+    app.kubernetes.io/version: "e11e94645673caa06a102ebbb42cb46803657d6a"
     app.kubernetes.io/managed-by: Helm
 spec:
   serviceName: datacater
@@ -263,7 +263,7 @@ spec:
             - name: QUARKUS_LOG_CONSOLE_JSON
               value: "false"
             - name: DATACATER_PYTHONRUNNER_IMAGE_NAMESPACE
-              value: redpanda
+              value: datacater
             - name: DATACATER_PYTHONRUNNER_SERVICENAME
               value: "pythonrunner"
           ports:
