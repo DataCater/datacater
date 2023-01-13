@@ -64,6 +64,7 @@ class FilterConfig extends Component {
 
       // Does the field-level filter support the detected data type?
       if (
+        fieldDataType !== undefined &&
         filter !== undefined &&
         filter.labels !== undefined &&
         filter.labels["input-types"] !== undefined
