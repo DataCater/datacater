@@ -205,7 +205,7 @@ metadata:
     app.kubernetes.io/version: "nightly-20230105"
 spec:
   serviceName: pythonrunner
-  replicas: 10
+  replicas: 5
   selector:
     matchLabels:
       app.kubernetes.io/name: "python-runner"
@@ -304,7 +304,7 @@ spec:
             - name: DATACATER_FILTERS_PATH
               value: /datacater/filters
             - name: DATACATER_PYTHONRUNNER_REPLICAS
-              value: "10"
+              value: "5"
             - name: DATACATER_PYTHONRUNNER_IMAGE_VERSION
               value: nightly-20230105
             - name: QUARKUS_LOG_CONSOLE_JSON
