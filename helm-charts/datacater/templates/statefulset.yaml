@@ -42,7 +42,9 @@ spec:
             - name: QUARKUS_DATASOURCE_PASSWORD
               value: {{ .Values.datacater.database.password | quote }}
             - name: DATACATER_DEPLOYMENT_NAMESPACE
-              value: {{ .Release.Namespace }}
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
             - name: DATACATER_DEPLOYMENT_IMAGE
               value: {{ .Values.datacater.deployment.image | quote }}
             - name: DATACATER_TRANSFORMS_PATH
@@ -52,7 +54,7 @@ spec:
             - name: DATACATER_PYTHONRUNNER_REPLICAS
               value: {{ .Values.datacater.pythonrunner.replicas | quote }}
             - name: DATACATER_PYTHONRUNNER_IMAGE_NAME
-              value: {{ .Values.datacater.pythonrunner.image.name | quote }}
+              value: {{ .Values.datacater.pythonrunner.image.repository | quote }}
             - name: DATACATER_PYTHONRUNNER_IMAGE_VERSION
               value: {{ .Values.datacater.pythonrunner.image.version | quote }}
             - name: QUARKUS_LOG_CONSOLE_JSON

@@ -1,3 +1,12 @@
+# Create Plain DataCater Minikube Manifest
+
+```shell
+helm template helm-charts/datacater \
+  --skip-tests \
+  --set "postgres.enabled=false" \
+  --set "postgres.username=datacater" > k8s-manifests/minikube-any-namespace.yaml
+```
+
 # Create and working with Redpanda manifest
 Redpanda offers a Helm chart for a quick and easy installation.
 We convert this helm chart to a Kubernetes Manifest to provide a quick and easy 
