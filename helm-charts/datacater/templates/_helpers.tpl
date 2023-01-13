@@ -25,13 +25,15 @@ Create chart name and version as used by the chart label.
 Common labels
 */}}
 {{- define "datacater.labels" -}}
-helm.sh/chart: {{ include "datacater.chart" . }}
 {{ include "datacater.partOfLabel" . }}
 {{ include "datacater.selectorLabels" . }}
 {{- if .Chart.AppVersion }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
+{{- if .Values.helmLabels.enabled }}
+helm.sh/chart: {{ include "datacater.chart" . }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
+{{- end }}
 {{- end }}
 
 {{/*
@@ -53,13 +55,15 @@ app.kubernetes.io/part-of: {{ include "datacater.chart" . }}
 Common labels for ui
 */}}
 {{- define "datacater.labelsUi" -}}
-helm.sh/chart: {{ include "datacater.chart" . }}
 {{ include "datacater.partOfLabel" . }}
 {{ include "datacater.selectorLabels" . }}
 {{- if .Chart.AppVersion }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
+{{- if .Values.helmLabels.enabled }}
+helm.sh/chart: {{ include "datacater.chart" . }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
+{{- end }}
 {{- end }}
 
 {{/*
@@ -74,13 +78,15 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 Common labels for python-runner
 */}}
 {{- define "datacater.labelsPythonRunner" -}}
-helm.sh/chart: {{ include "datacater.chart" . }}
 {{ include "datacater.partOfLabel" . }}
 {{ include "datacater.selectorLabelsPythonRunner" . }}
 {{- if .Chart.AppVersion }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
+{{- if .Values.helmLabels.enabled }}
+helm.sh/chart: {{ include "datacater.chart" . }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
+{{- end }}
 {{- end }}
 
 {{/*

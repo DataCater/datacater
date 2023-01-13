@@ -150,3 +150,6 @@ nodeSelector: {}
 tolerations: []
 
 affinity: {}
+
+helmLabels:
+  enabled: true
