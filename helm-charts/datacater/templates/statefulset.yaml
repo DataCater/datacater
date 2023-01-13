@@ -52,8 +52,6 @@ spec:
             - name: DATACATER_PYTHONRUNNER_REPLICAS
               value: {{ .Values.datacater.pythonrunner.replicas | quote }}
             - name: DATACATER_PYTHONRUNNER_IMAGE_NAME
-              value: {{ .Values.datacater.pythonrunner.image.name | quote }}
-            - name: DATACATER_PYTHONRUNNER_IMAGE_VERSION
               value: {{ .Values.datacater.pythonrunner.image.version | quote }}
             - name: QUARKUS_LOG_CONSOLE_JSON
               value: "false"
