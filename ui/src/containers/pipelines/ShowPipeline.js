@@ -7,6 +7,7 @@ import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import Breadcrumb from "../../components/layout/Breadcrumb";
 import Header from "../../components/layout/Header";
 import { deletePipeline, fetchPipeline } from "../../actions/pipelines";
+import { jsonToYaml } from "../../helpers/jsonToYaml";
 
 class ShowPipeline extends Component {
   constructor(props) {
@@ -107,7 +108,7 @@ class ShowPipeline extends Component {
                   showInlineLineNumbers={true}
                   customStyle={{ marginBottom: "0px", background: "none" }}
                 >
-                  {yaml.dump(pipeline)}
+                  {jsonToYaml(pipeline)}
                 </SyntaxHighlighter>
               </div>
             </div>
