@@ -321,12 +321,12 @@ def preview_pipeline(record: dict, pipeline: dict, preview_step=None):
             # Check which fields of the key have been changed by this step
             if type(record["key"]) is dict:
                 for key in record["key"].keys():
-                    if record["key"].get(key) != old_record["key"].get(key):
+                    if old_record["key"] is None or record["key"].get(key) != old_record["key"].get(key):
                         record["metadata"]["lastChange"]["key"][key] = step_index
             # Check which fields of the value have been changed by this step
             if type(record["value"]) is dict:
                 for key in record["value"].keys():
-                    if record["value"].get(key) != old_record["value"].get(key):
+                    if old_record["value"] is None or record["value"].get(key) != old_record["value"].get(key):
                         record["metadata"]["lastChange"]["value"][key] = step_index
 
             if preview_step == step_index:
