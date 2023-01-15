@@ -1,3 +1,4 @@
+# Created by helm template helm-charts/datacater --set "postgres.enabled=true" --set "postgres.username=datacater" --set "datacater.database.host=postgres:5432/postgres" --set "helmLabels.enabled=false" --set "datacater.pythonrunner.replicas=5" > k8s-manifests/minikube-any-namespace.yaml
 ---
 # Source: datacater/templates/serviceaccount.yaml
 apiVersion: v1
@@ -9,7 +10,7 @@ metadata:
     app.kubernetes.io/part-of: datacater-0.1.0
     app.kubernetes.io/name: datacater
     app.kubernetes.io/instance: release-name
-    app.kubernetes.io/version: "e11e94645673caa06a102ebbb42cb46803657d6a"
+    app.kubernetes.io/version: "a835f7248af45f92427180f69652d656b92f8ba0"
     app.kubernetes.io/managed-by: Helm
 ---
 # Source: datacater/templates/role.yaml
@@ -48,8 +49,28 @@ metadata:
     app.kubernetes.io/part-of: datacater-0.1.0
     app.kubernetes.io/name: "python-runner"
     app.kubernetes.io/instance: release-name
-    app.kubernetes.io/version: "e11e94645673caa06a102ebbb42cb46803657d6a"
+    app.kubernetes.io/version: "a835f7248af45f92427180f69652d656b92f8ba0"
     app.kubernetes.io/managed-by: Helm
+spec:
+  selector:
+    app.kubernetes.io/name: "python-runner"
+    app.kubernetes.io/instance: release-name
+  ports:
+    - name: "http"
+      protocol: "TCP"
+      port: 50000
+      targetPort: 50000
+---
+# Source: datacater/templates/pythonrunner-service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: pythonrunner
+  labels:
+    app.kubernetes.io/part-of: datacater-0.1.0
+    app.kubernetes.io/name: "python-runner"
+    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/version: "nightly-20230105"
 spec:
   selector:
     app.kubernetes.io/name: "python-runner"
@@ -70,7 +91,7 @@ metadata:
     app.kubernetes.io/part-of: datacater-0.1.0
     app.kubernetes.io/name: datacater
     app.kubernetes.io/instance: release-name
-    app.kubernetes.io/version: "e11e94645673caa06a102ebbb42cb46803657d6a"
+    app.kubernetes.io/version: "a835f7248af45f92427180f69652d656b92f8ba0"
     app.kubernetes.io/managed-by: Helm
 spec:
   type: ClusterIP
@@ -93,7 +114,7 @@ metadata:
     app.kubernetes.io/part-of: datacater-0.1.0
     app.kubernetes.io/name: datacater
     app.kubernetes.io/instance: release-name
-    app.kubernetes.io/version: "e11e94645673caa06a102ebbb42cb46803657d6a"
+    app.kubernetes.io/version: "a835f7248af45f92427180f69652d656b92f8ba0"
     app.kubernetes.io/managed-by: Helm
 spec:
   selector:
@@ -115,7 +136,7 @@ metadata:
     app.kubernetes.io/part-of: datacater-0.1.0
     app.kubernetes.io/name: datacater
     app.kubernetes.io/instance: release-name
-    app.kubernetes.io/version: "e11e94645673caa06a102ebbb42cb46803657d6a"
+    app.kubernetes.io/version: "a835f7248af45f92427180f69652d656b92f8ba0"
     app.kubernetes.io/managed-by: Helm
 spec:
   selector:
@@ -130,7 +151,7 @@ spec:
     spec:
       containers:
         - name: nginx
-          image: "datacater/ui:e11e94645673caa06a102ebbb42cb46803657d6a"
+          image: "datacater/ui:a835f7248af45f92427180f69652d656b92f8ba0"
           imagePullPolicy: IfNotPresent
           ports:
             - name: http
@@ -147,7 +168,7 @@ metadata:
     app.kubernetes.io/part-of: datacater-0.1.0
     app.kubernetes.io/name: "python-runner"
     app.kubernetes.io/instance: release-name
-    app.kubernetes.io/version: "e11e94645673caa06a102ebbb42cb46803657d6a"
+    app.kubernetes.io/version: "a835f7248af45f92427180f69652d656b92f8ba0"
     app.kubernetes.io/managed-by: Helm
 spec:
   serviceName: pythonrunner
@@ -164,12 +185,12 @@ spec:
         app.kubernetes.io/part-of: datacater-0.1.0
         app.kubernetes.io/name: "python-runner"
         app.kubernetes.io/instance: release-name
-        app.kubernetes.io/version: "e11e94645673caa06a102ebbb42cb46803657d6a"
+        app.kubernetes.io/version: "a835f7248af45f92427180f69652d656b92f8ba0"
         app.kubernetes.io/managed-by: Helm
     spec:
       containers:
         - name: python-runner
-          image: "datacater/python-runner:e11e94645673caa06a102ebbb42cb46803657d6a"
+          image: "datacater/python-runner:a835f7248af45f92427180f69652d656b92f8ba0"
           imagePullPolicy: IfNotPresent
           ports:
             - name: http
@@ -201,6 +222,66 @@ spec:
               cpu: 0.05
               memory: 100Mi
 ---
+# Source: datacater/templates/pythonrunner.yaml
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: python-runner
+  labels:
+    app.kubernetes.io/part-of: datacater-0.1.0
+    app.kubernetes.io/name: "python-runner"
+    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/version: "nightly-20230105"
+spec:
+  serviceName: pythonrunner
+  replicas: 5
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: "python-runner"
+      app.kubernetes.io/instance: release-name
+  template:
+    metadata:
+      name: python-runner
+      labels:
+        app.kubernetes.io/part-of: datacater-0.1.0
+        app.kubernetes.io/name: "python-runner"
+        app.kubernetes.io/instance: release-name
+        app.kubernetes.io/version: "nightly-20230105"
+    spec:
+      containers:
+        - name: python-runner
+          image: "datacater/python-runner:a835f7248af45f92427180f69652d656b92f8ba0"
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 50000
+          livenessProbe:
+            failureThreshold: 10
+            httpGet:
+              path: /health
+              port: 50000
+              scheme: HTTP
+            initialDelaySeconds: 0
+            periodSeconds: 1
+            successThreshold: 1
+            timeoutSeconds: 10
+          readinessProbe:
+            failureThreshold: 10
+            httpGet:
+              path: /health
+              port: 50000
+              scheme: HTTP
+            initialDelaySeconds: 0
+            periodSeconds: 1
+            successThreshold: 1
+            timeoutSeconds: 10
+          resources:
+            limits:
+              memory: 100Mi
+            requests:
+              cpu: 0.05
+              memory: 100Mi
+---
 # Source: datacater/templates/statefulset.yaml
 apiVersion: apps/v1
 kind: StatefulSet
@@ -211,7 +292,7 @@ metadata:
     app.kubernetes.io/part-of: datacater-0.1.0
     app.kubernetes.io/name: datacater
     app.kubernetes.io/instance: release-name
-    app.kubernetes.io/version: "e11e94645673caa06a102ebbb42cb46803657d6a"
+    app.kubernetes.io/version: "a835f7248af45f92427180f69652d656b92f8ba0"
     app.kubernetes.io/managed-by: Helm
 spec:
   serviceName: datacater
@@ -235,7 +316,7 @@ spec:
         - name: datacater
           securityContext:
             {}
-          image: "datacater/datacater:e11e94645673caa06a102ebbb42cb46803657d6a"
+          image: "datacater/datacater:a835f7248af45f92427180f69652d656b92f8ba0"
           imagePullPolicy: IfNotPresent
           env:
             - name: QUARKUS_DATASOURCE_REACTIVE_URL
@@ -249,17 +330,15 @@ spec:
                 fieldRef:
                   fieldPath: metadata.namespace
             - name: DATACATER_DEPLOYMENT_IMAGE
-              value: "datacater/pipeline:e11e94645673caa06a102ebbb42cb46803657d6a"
+              value: "datacater/pipeline:a835f7248af45f92427180f69652d656b92f8ba0"
             - name: DATACATER_TRANSFORMS_PATH
               value: "/datacater/transforms"
             - name: DATACATER_FILTERS_PATH
               value: "/datacater/filters"
             - name: DATACATER_PYTHONRUNNER_REPLICAS
-              value: "10"
-            - name: DATACATER_PYTHONRUNNER_IMAGE_NAME
-              value: "datacater/python-runner"
+              value: "5"
             - name: DATACATER_PYTHONRUNNER_IMAGE_VERSION
-              value: "e11e94645673caa06a102ebbb42cb46803657d6a"
+              value: "a835f7248af45f92427180f69652d656b92f8ba0"
             - name: QUARKUS_LOG_CONSOLE_JSON
               value: "false"
             - name: DATACATER_PYTHONRUNNER_IMAGE_NAMESPACE
