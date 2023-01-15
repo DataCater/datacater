@@ -65,6 +65,12 @@ export function profileRecords(records, transformedFields) {
     }
 
     const recordValue = record["value"];
+
+    // Ignore records with null values (tombstone records)
+    if (recordValue == null) {
+      return;
+    }
+
     Object.keys(recordValue).forEach(function (fieldName) {
       const value = recordValue[fieldName];
       if (profile[fieldName] === undefined) {
