@@ -220,7 +220,9 @@ def preview_pipeline(record: dict, pipeline: dict, preview_step=None):
                     if record_matches_filter is False and (
                         record_transform is None or record_transform.get("key") is None
                     ):
-                        return add_filtered_out_at_step(record, step_index, preview_step)
+                        return add_filtered_out_at_step(
+                            record, step_index, preview_step
+                        )
 
                 # Apply transform only if no filter is defined or record matches filter
                 if (
@@ -259,7 +261,9 @@ def preview_pipeline(record: dict, pipeline: dict, preview_step=None):
                                 field_transform is None
                                 or field_transform.get("key") is None
                             ):
-                                return add_filtered_out_at_step(record, step_index, preview_step)
+                                return add_filtered_out_at_step(
+                                    record, step_index, preview_step
+                                )
 
                         # Apply transform only if no filter is defined or field matches filter
                         if (
@@ -321,12 +325,16 @@ def preview_pipeline(record: dict, pipeline: dict, preview_step=None):
             # Check which fields of the key have been changed by this step
             if type(record["key"]) is dict:
                 for key in record["key"].keys():
-                    if record["key"].get(key) != old_record["key"].get(key):
+                    if old_record["key"] is None or record["key"].get(
+                        key
+                    ) != old_record["key"].get(key):
                         record["metadata"]["lastChange"]["key"][key] = step_index
             # Check which fields of the value have been changed by this step
             if type(record["value"]) is dict:
                 for key in record["value"].keys():
-                    if record["value"].get(key) != old_record["value"].get(key):
+                    if old_record["value"] is None or record["value"].get(
+                        key
+                    ) != old_record["value"].get(key):
                         record["metadata"]["lastChange"]["value"][key] = step_index
 
             if preview_step == step_index:
@@ -370,9 +378,7 @@ def add_error_to_metadata(record, location, error_type, traceback):
 
 def add_filtered_out_at_step(record, step_index, preview_step):
     if preview_step is None or step_index == preview_step:
-        record["metadata"] = {
-            "filteredOutAtStep": step_index
-        }
+        record["metadata"] = {"filteredOutAtStep": step_index}
         return record
     else:
         return None
