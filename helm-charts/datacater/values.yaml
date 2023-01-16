@@ -42,7 +42,7 @@ image:
   repository: datacater/datacater
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "0e68a54814f35b4627877ebb2881dbae23212c74"
+  tag: "2023.1"
 
 # GitHub personal access tokens will be used until we publish to docker io
 # Follow instructions -> https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-container-registry#authenticating-to-the-container-registry
