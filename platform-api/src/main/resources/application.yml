@@ -2,7 +2,7 @@
 quarkus  :
   application:
     name: datacater
-    version: '2022.06'
+    version: '2023.1'
   datasource:
     db-kind: postgresql
     jdbc: false
@@ -13,7 +13,7 @@ quarkus  :
     name: ${quarkus.application.name}
     tag: ${quarkus.application.version}
     labels:
-      org.opencontainers.image.source: https://github.com/datacater/cloud-platform
+      org.opencontainers.image.source: https://github.com/DataCater/datacater
       org.opencontainers.image.description: DataCater - Modern, real-time ETL pipelines for data and dev teams
   security:
     users:
