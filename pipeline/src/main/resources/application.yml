@@ -18,12 +18,18 @@ mp       :
   messaging:
     outgoing:
       streamout:
+        batch:
+          size: 100000
+        linger:
+          ms: 100
         merge: true
         connector: smallrye-kafka
         topic: streamout
+        max-inflight-messages: 0
     incoming:
       streamin:
         batch: true
+        commit-strategy: throttled
         connector: smallrye-kafka
         max:
           poll:
