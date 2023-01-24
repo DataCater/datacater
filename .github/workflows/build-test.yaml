@@ -119,7 +119,6 @@ jobs:
           cp -R $TRANSFORM_SRC $DEST
     -   name: Push PR Image to ghcr.io
         if: github.base_ref == 'main'
-        with:
         run: |
           ./gradlew :platform-api:build --no-daemon -x test \
                 -Dquarkus.jib.platforms=linux/amd64,linux/arm64 \
