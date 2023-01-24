@@ -11,7 +11,7 @@ datacater:
     username: datacater
     password: datacater
   deployment:
-    image: "datacater/pipeline:a835f7248af45f92427180f69652d656b92f8ba0"
+    image: "datacater/pipeline:2023.1"
   transforms:
     path: "/datacater/transforms"
   filters:
@@ -21,7 +21,7 @@ datacater:
     image:
       repository: "datacater/python-runner"
       pullPolicy: IfNotPresent
-      tag: "a835f7248af45f92427180f69652d656b92f8ba0"
+      tag: "2023.1"
     replicas: 10
     serviceName: "pythonrunner"
     resources:
@@ -34,7 +34,7 @@ datacater:
     image:
       repository: datacater/ui
       pullPolicy: IfNotPresent
-      tag: 'a835f7248af45f92427180f69652d656b92f8ba0'
+      tag: "2023.1"
     service:
       type: ClusterIP
 
@@ -42,7 +42,7 @@ image:
   repository: datacater/datacater
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: 'a835f7248af45f92427180f69652d656b92f8ba0'
+  tag: "2023.1"
 
 # GitHub personal access tokens will be used until we publish to docker io
 # Follow instructions -> https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-container-registry#authenticating-to-the-container-registry
@@ -50,8 +50,7 @@ image:
 # kubectl create secret docker-registry github-pat --docker-username=USERNAME \
 #                                                  --docker-password=PAT \
 #                                                  --docker-server=ghcr.io
-imagePullSecrets:
-  - name: "github-pat"
+imagePullSecrets: []
 nameOverride: ''
 fullnameOverride: ''
 
