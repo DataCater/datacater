@@ -123,7 +123,7 @@ jobs:
           ./gradlew :platform-api:build --no-daemon -x test \
                 -Dquarkus.jib.platforms=linux/amd64,linux/arm64 \
                 -Dquarkus.container-image.tag=${GITHUB_SHA} \
-                -Dquarkus.container-image.additional-tags=${github.job} \
+                -Dquarkus.container-image.additional-tags=${{ github.job }} \
                 -Dquarkus.container-image.build=true \
                 -Dquarkus.container-image.push=true \
                 -Dquarkus.container-image.registry=ghcr.io \
