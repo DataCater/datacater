@@ -117,6 +117,18 @@ jobs:
           rm -fr $DEST/*
           cp -R $FILTERS_SRC $DEST
           cp -R $TRANSFORM_SRC $DEST
+    -   name: Push PR Image to ghcr.io
+        if: github.base_ref == 'main'
+        run: |
+          ./gradlew :platform-api:build --no-daemon -x test \
+                -Dquarkus.jib.platforms=linux/amd64,linux/arm64 \
+                -Dquarkus.container-image.tag=${GITHUB_SHA} \
+                -Dquarkus.container-image.additional-tags=${github.job} \
+                -Dquarkus.container-image.build=true \
+                -Dquarkus.container-image.push=true \
+                -Dquarkus.container-image.registry=ghcr.io \
+                -Dquarkus.container-image.username=${{ github.repository_owner }}\
+                -Dquarkus.container-image.password=${{ github.token }}
     -   name: Push datacater/datacater:nightly to Docker Hub
         if: github.ref_name == 'main'
         run: |
