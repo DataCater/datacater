@@ -98,6 +98,8 @@ jobs:
     name: Build and push datacater image
     needs: build
     runs-on: ubuntu-latest
+    permissions:
+      packages: write
     steps:
     -   uses: actions/checkout@v3
     -   name: Set RELEASE_VERSION
