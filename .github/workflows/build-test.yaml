@@ -32,9 +32,6 @@ jobs:
     -   uses: actions/checkout@v3
         with:
           fetch-depth: 0         # Shallow clones should be disabled for a better relevancy of analysis
-    -   name: start minikube
-        id: minikube
-        uses: medyagh/setup-minikube@master
     -   name: Set up JDK 17 and gradle cache
         uses: actions/setup-java@v3
         id: gradle-build
@@ -97,7 +94,7 @@ jobs:
         run: |
           pytest transforms
   push:
-    if: github.ref_name == 'main' || github.ref_type == 'tag'
+    if: github.ref_name == 'main' || github.ref_type == 'tag' || github.base_ref == 'main'
     name: Build and push datacater image
     needs: build
     runs-on: ubuntu-latest
@@ -144,7 +141,7 @@ jobs:
                 -Dquarkus.container-image.username=datacater \
                 -Dquarkus.container-image.password=${{ secrets.DOCKERHUB_TOKEN }}
   push_pipeline:
-    if: github.ref_name == 'main' || github.ref_type == 'tag'
+    if: github.ref_name == 'main' || github.ref_type == 'tag' || github.base_ref == 'main'
     name: Build and push pipeline image
     needs: build
     runs-on: ubuntu-latest
@@ -191,7 +188,7 @@ jobs:
                 -Dquarkus.container-image.username=datacater \
                 -Dquarkus.container-image.password=${{ secrets.DOCKERHUB_TOKEN }}
   push_pipeline_native:
-    if: github.ref_name == 'main' || github.ref_type == 'tag'
+    if: github.ref_name == 'main' || github.ref_type == 'tag' || github.base_ref == 'main'
     name: Build and push native pipeline image
     needs: build
     runs-on: ubuntu-latest
@@ -242,7 +239,7 @@ jobs:
                 -Dquarkus.container-image.username=datacater \
                 -Dquarkus.container-image.password=${{ secrets.DOCKERHUB_TOKEN }}
   push_python_runner:
-    if: github.ref_name == 'main' || github.ref_type == 'tag'
+    if: github.ref_name == 'main' || github.ref_type == 'tag' || github.base_ref == 'main'
     name: Build and push Python Runner image
     needs: build
     runs-on: ubuntu-latest
@@ -275,7 +272,7 @@ jobs:
           docker build -t datacater/python-runner:${RELEASE_VERSION} .
           docker push datacater/python-runner:${RELEASE_VERSION}
   build_and_push_ui:
-    if: github.ref_name == 'main' || github.ref_type == 'tag'
+    if: github.ref_name == 'main' || github.ref_type == 'tag' || github.base_ref == 'main'
     name: Build and push UI image
     needs: build
     runs-on: ubuntu-latest
