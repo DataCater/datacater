@@ -127,8 +127,8 @@ jobs:
                 -Dquarkus.container-image.build=true \
                 -Dquarkus.container-image.push=true \
                 -Dquarkus.container-image.registry=ghcr.io \
-                -Dquarkus.container-image.username=${{ github.repository_owner }}\
-                -Dquarkus.container-image.password=${{ github.token }}
+                -Dquarkus.container-image.username=${{ github.actor }}\
+                -Dquarkus.container-image.password=${{ secrets.GITHUB_TOKEN }}
     -   name: Push datacater/datacater:nightly to Docker Hub
         if: github.ref_name == 'main'
         run: |
