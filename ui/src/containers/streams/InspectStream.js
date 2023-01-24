@@ -80,7 +80,7 @@ class InspectStream extends Component {
           isScrolling,
         }) {
           if (!column.isRowNumber && column.field !== undefined) {
-            const rawValue = rowData[column.fieldName];
+            const rawValue = rowData["value"][column.fieldName];
             return (
               <div className="sample-cell w-100 text-nowrap">
                 {renderTableCellContent(rawValue)}
@@ -216,7 +216,7 @@ class InspectStream extends Component {
     const profile = profileRecords(sampleRecords, []);
 
     const records = sampleRecords.map(function (sample, index) {
-      return Object.assign({}, sample["value"], { id: index + 1 });
+      return Object.assign({}, sample, { id: index + 1 });
     });
 
     // Adjust height of grid if API call is shown,
