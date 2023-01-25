@@ -119,13 +119,13 @@ jobs:
           rm -fr $DEST/*
           cp -R $FILTERS_SRC $DEST
           cp -R $TRANSFORM_SRC $DEST
-    -   name: Push PR Image to ghcr.io
+    -   name: PR Push datacater image to ghcr.io
         if: github.base_ref == 'main'
         run: |
           ./gradlew :platform-api:build --no-daemon -x test \
                 -Dquarkus.jib.platforms=linux/amd64,linux/arm64 \
                 -Dquarkus.container-image.tag=${GITHUB_SHA} \
-                -Dquarkus.container-image.additional-tags=${{ github.job }} \
+                -Dquarkus.container-image.additional-tags=${{ github.run_id }} \
                 -Dquarkus.container-image.build=true \
                 -Dquarkus.container-image.push=true \
                 -Dquarkus.container-image.registry=ghcr.io \
@@ -178,6 +178,18 @@ jobs:
           rm -fr $DEST/*
           cp -R $FILTERS_SRC $DEST
           cp -R $TRANSFORM_SRC $DEST
+    -   name: '[PR] Push pipeline image to ghcr.io'
+        if: github.base_ref == 'main'
+        run: |
+          ./gradlew :pipeline:build --no-daemon -x test \
+                -Dquarkus.jib.platforms=linux/amd64,linux/arm64 \
+                -Dquarkus.container-image.tag=${GITHUB_SHA} \
+                -Dquarkus.container-image.additional-tags=${{ github.run_id }} \
+                -Dquarkus.container-image.build=true \
+                -Dquarkus.container-image.push=true \
+                -Dquarkus.container-image.registry=ghcr.io \
+                -Dquarkus.container-image.username=${{ github.actor }} \
+                -Dquarkus.container-image.password=${{ secrets.GITHUB_TOKEN }}
     -   name: Push datacater/pipeline:nightly to Docker Hub
         if: github.ref_name == 'main'
         run: |
@@ -225,6 +237,20 @@ jobs:
           rm -fr $DEST/*
           cp -R $FILTERS_SRC $DEST
           cp -R $TRANSFORM_SRC $DEST
+    -   name: '[PR] Push pipeline-native image to ghcr.io'
+        if: github.base_ref == 'main'
+        run: |
+          ./gradlew :pipeline:build --no-daemon -x test \
+                -Dquarkus.jib.platforms=linux/amd64 \
+                -Dquarkus.native.container-build=true \
+                -Dquarkus.package.type=native \
+                -Dquarkus.container-image.tag=native-${GITHUB_SHA} \
+                -Dquarkus.container-image.additional-tags=native-${{ github.run_id }} \
+                -Dquarkus.container-image.build=true \
+                -Dquarkus.container-image.push=true \
+                -Dquarkus.container-image.registry=ghcr.io \
+                -Dquarkus.container-image.username=${{ github.actor }} \
+                -Dquarkus.container-image.password=${{ secrets.GITHUB_TOKEN }}
     -   name: Push datacater/pipeline:native-nightly to Docker Hub
         if: github.ref_name == 'main'
         run: |
@@ -268,6 +294,21 @@ jobs:
           rm -rf python-runner/transforms
           cp -r transforms python-runner
     -   name: Login to Docker Hub
+        if: github.base_ref == 'main'
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GIHTUB_TOKEN }}
+    -   name: '[PR] Push python-runner'
+        working-directory: python-runner
+        if: github.base_ref == 'main'
+        run: |
+          docker build -t datacater/python-runner:${GITHUB_SHA} -t datacater/python-runner:${{ github.run_id}} .
+          docker push datacater/python-runner:${GITHUB_SHA}
+          docker push datacater/python-runner:${{ github.run_id }}
+    -   name: Login to Docker Hub
+        if: github.ref_name == 'main'
         uses: docker/login-action@v2
         with:
           username: datacater
@@ -311,6 +352,18 @@ jobs:
     -   name: Build the UI
         working-directory: ui
         run: npm run build --if-present
+    -   name: '[PR] Login to Docker Hub'
+        if: github.base_ref == 'main'
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GIHTUB_TOKEN }}
+    -   name: '[PR] Push UI'
+        working-directory: ui
+        if: github.base_ref == 'main'
+        run: |
+          docker buildx build --platform=linux/amd64,linux/arm64 -t datacater/ui:${GITHUB_SHA} -t datacater/ui:${{ github.actor }} --push .
     -   name: Build datacater/ui:nightly and push it to DockerHub
         working-directory: ui
         if: github.ref_name == 'main'
