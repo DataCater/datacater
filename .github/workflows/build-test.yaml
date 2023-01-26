@@ -325,8 +325,8 @@ jobs       :
         working-directory: python-runner
         if: github.event.action == 'released' || github.event.action == 'prereleased'
         run: |
-          docker build -t datacater/python-runner:${RELEASE_VERSION} .
-          docker push datacater/python-runner:${RELEASE_VERSION}
+          docker build -t ghcr.io/datacater/python-runner:${RELEASE_VERSION} .
+          docker push ghcr.io/datacater/python-runner:${RELEASE_VERSION}
   build_and_push_ui:
     if: github.ref_name == 'main' || github.ref_type == 'tag' || github.base_ref == 'main'
     name: Build and push UI image
@@ -364,7 +364,7 @@ jobs       :
         working-directory: ui
         if: github.base_ref == 'main'
         run: |
-          docker buildx build --platform=linux/amd64,linux/arm64 -t datacater/ui:${GITHUB_SHA} -t datacater/ui:${{ github.actor }} --push .
+          docker buildx build --platform=linux/amd64,linux/arm64 -t ghcr.io/datacater/ui:${GITHUB_SHA} -t ghcr.io/datacater/ui:${{ github.actor }} --push .
     -   name: Build datacater/ui:nightly and push it to DockerHub
         working-directory: ui
         if: github.ref_name == 'main'
