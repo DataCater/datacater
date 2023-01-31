@@ -11,7 +11,7 @@ datacater:
     username: datacater
     password: datacater
   deployment:
-    image: "datacater/pipeline:2023.1"
+    image: "datacater/pipeline:603ed45f1d05c69ab75179fd6f78455f398967bb"
   transforms:
     path: "/datacater/transforms"
   filters:
@@ -21,7 +21,7 @@ datacater:
     image:
       repository: "datacater/python-runner"
       pullPolicy: IfNotPresent
-      tag: "2023.1"
+      tag: "603ed45f1d05c69ab75179fd6f78455f398967bb"
     replicas: 10
     serviceName: "pythonrunner"
     resources:
@@ -34,7 +34,7 @@ datacater:
     image:
       repository: datacater/ui
       pullPolicy: IfNotPresent
-      tag: "2023.1"
+      tag: "603ed45f1d05c69ab75179fd6f78455f398967bb"
     service:
       type: ClusterIP
 
@@ -42,7 +42,7 @@ image:
   repository: datacater/datacater
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "2023.1"
+  tag: "603ed45f1d05c69ab75179fd6f78455f398967bb"
 
 # GitHub personal access tokens will be used until we publish to docker io
 # Follow instructions -> https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-container-registry#authenticating-to-the-container-registry
