@@ -7,6 +7,17 @@ helm template helm-charts/datacater \
   --set "postgres.username=datacater" > k8s-manifests/minikube-any-namespace.yaml
 ```
 
+# Create Plain DataCater Minikube Manifest for Default Namespace and with PostgreSQL
+
+```shell
+helm template helm-charts/datacater -ndefault \
+  --skip-tests \
+  --set "postgres.enabled=true" \
+  --set "datacater.database.username=postgres" \
+  --set "postgres.username=postgres" > k8s-manifests/minikube-with-postgres-ns-default.yaml
+```
+
+
 # Create and working with Redpanda manifest
 Redpanda offers a Helm chart for a quick and easy installation.
 We convert this helm chart to a Kubernetes Manifest to provide a quick and easy 
@@ -21,12 +32,11 @@ helm repo add redpanda https://charts.redpanda.com/
 2. Generate the kubernetes manifest from the helm chart, optionally changing some default values
 ```
 helm template redpanda redpanda/redpanda \
---set statefulset.replicas=1,\
-resources.cpu.cores=1,\
-storage.persistentVolume.size=5Gi,\
-post_install_job.enabled=false,\
-post_upgrade_job.enabled=false\
-> redpanda.yaml
+  --set "statefulset.replicas=1" \
+  --set "resources.cpu.cores=1" \
+  --set "storage.persistentVolume.size=5Gi" \
+  --set "post_install_job.enabled=false" \
+  --set "post_upgrade_job.enabled=false"  > redpanda.yaml
 ```
 >We only need the generated ConfigMap, two Services, and StatefulSet.
 
