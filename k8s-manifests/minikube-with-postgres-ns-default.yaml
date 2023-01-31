@@ -8,7 +8,9 @@ metadata:
     app.kubernetes.io/part-of: datacater-0.1.0
     app.kubernetes.io/name: datacater
     app.kubernetes.io/instance: release-name
-    app.kubernetes.io/version: "nightly-20230105"
+    app.kubernetes.io/version: "603ed45f1d05c69ab75179fd6f78455f398967bb"
+    helm.sh/chart: datacater-0.1.0
+    app.kubernetes.io/managed-by: Helm
 ---
 # Source: datacater/templates/role.yaml
 apiVersion: rbac.authorization.k8s.io/v1
@@ -28,7 +30,6 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   name: udf-testing-view
-  namespace: default
 roleRef:
   kind: Role
   apiGroup: rbac.authorization.k8s.io
@@ -62,7 +63,9 @@ metadata:
     app.kubernetes.io/part-of: datacater-0.1.0
     app.kubernetes.io/name: "python-runner"
     app.kubernetes.io/instance: release-name
-    app.kubernetes.io/version: "nightly-20230105"
+    app.kubernetes.io/version: "603ed45f1d05c69ab75179fd6f78455f398967bb"
+    helm.sh/chart: datacater-0.1.0
+    app.kubernetes.io/managed-by: Helm
 spec:
   selector:
     app.kubernetes.io/name: "python-runner"
@@ -79,9 +82,12 @@ kind: Service
 metadata:
   name: datacater
   labels:
+    app.kubernetes.io/part-of: datacater-0.1.0
     app.kubernetes.io/name: datacater
     app.kubernetes.io/instance: release-name
-    app.kubernetes.io/version: "nightly-20230105"
+    app.kubernetes.io/version: "603ed45f1d05c69ab75179fd6f78455f398967bb"
+    helm.sh/chart: datacater-0.1.0
+    app.kubernetes.io/managed-by: Helm
 spec:
   type: ClusterIP
   ports:
@@ -93,23 +99,59 @@ spec:
     app.kubernetes.io/name: datacater
     app.kubernetes.io/instance: release-name
 ---
-# Source: datacater/templates/ui.yaml
+# Source: datacater/templates/ui-service.yaml
 apiVersion: v1
-kind: Pod
+kind: Service
 metadata:
+  name: datacater-ui
   labels:
-    run: ui
-  name: ui
-  namespace: default
+    app.kubernetes.io/part-of: datacater-0.1.0
+    app.kubernetes.io/name: datacater
+    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/version: "603ed45f1d05c69ab75179fd6f78455f398967bb"
+    helm.sh/chart: datacater-0.1.0
+    app.kubernetes.io/managed-by: Helm
 spec:
-  containers:
-    - image: datacater/ui:a835f7248af45f92427180f69652d656b92f8ba0
-      imagePullPolicy: IfNotPresent
-      name: ui
-      ports:
-        - containerPort: 8080
-          protocol: TCP
-          name: http
+  selector:
+    app.kubernetes.io/name: "datacater-ui"
+    app.kubernetes.io/instance: release-name
+  ports:
+    - protocol: "TCP"
+      port: 80
+      targetPort: 8080
+  type: ClusterIP
+---
+# Source: datacater/templates/ui.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "datacater-ui"
+  labels:
+    app.kubernetes.io/part-of: datacater-0.1.0
+    app.kubernetes.io/name: datacater
+    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/version: "603ed45f1d05c69ab75179fd6f78455f398967bb"
+    helm.sh/chart: datacater-0.1.0
+    app.kubernetes.io/managed-by: Helm
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: "datacater-ui"
+      app.kubernetes.io/instance: release-name
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: "datacater-ui"
+        app.kubernetes.io/instance: release-name
+    spec:
+      containers:
+        - name: nginx
+          image: "datacater/ui:603ed45f1d05c69ab75179fd6f78455f398967bb"
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
 ---
 # Source: datacater/templates/postgres.yaml
 apiVersion: apps/v1
@@ -203,10 +245,12 @@ metadata:
     app.kubernetes.io/part-of: datacater-0.1.0
     app.kubernetes.io/name: "python-runner"
     app.kubernetes.io/instance: release-name
-    app.kubernetes.io/version: "nightly-20230105"
+    app.kubernetes.io/version: "603ed45f1d05c69ab75179fd6f78455f398967bb"
+    helm.sh/chart: datacater-0.1.0
+    app.kubernetes.io/managed-by: Helm
 spec:
   serviceName: pythonrunner
-  replicas: 5
+  replicas: 10
   selector:
     matchLabels:
       app.kubernetes.io/name: "python-runner"
@@ -218,11 +262,13 @@ spec:
         app.kubernetes.io/part-of: datacater-0.1.0
         app.kubernetes.io/name: "python-runner"
         app.kubernetes.io/instance: release-name
-        app.kubernetes.io/version: "nightly-20230105"
+        app.kubernetes.io/version: "603ed45f1d05c69ab75179fd6f78455f398967bb"
+        helm.sh/chart: datacater-0.1.0
+        app.kubernetes.io/managed-by: Helm
     spec:
       containers:
         - name: python-runner
-          image: "datacater/python-runner:a835f7248af45f92427180f69652d656b92f8ba0"
+          image: "datacater/python-runner:603ed45f1d05c69ab75179fd6f78455f398967bb"
           imagePullPolicy: IfNotPresent
           ports:
             - name: http
@@ -260,9 +306,12 @@ kind: StatefulSet
 metadata:
   name: datacater
   labels:
+    app.kubernetes.io/part-of: datacater-0.1.0
     app.kubernetes.io/name: datacater
     app.kubernetes.io/instance: release-name
-    app.kubernetes.io/version: "nightly-20230105"
+    app.kubernetes.io/version: "603ed45f1d05c69ab75179fd6f78455f398967bb"
+    helm.sh/chart: datacater-0.1.0
+    app.kubernetes.io/managed-by: Helm
 spec:
   serviceName: datacater
   replicas: 1
@@ -276,8 +325,6 @@ spec:
         app.kubernetes.io/name: datacater
         app.kubernetes.io/instance: release-name
     spec:
-      imagePullSecrets:
-        - name: github-pat
       serviceAccountName: datacater
       securityContext:
         {}
@@ -285,31 +332,37 @@ spec:
         - name: datacater
           securityContext:
             {}
-          image: "datacater/datacater:a835f7248af45f92427180f69652d656b92f8ba0"
+          image: "datacater/datacater:603ed45f1d05c69ab75179fd6f78455f398967bb"
           imagePullPolicy: IfNotPresent
           env:
             - name: QUARKUS_DATASOURCE_REACTIVE_URL
-              value: "postgresql://postgres.default.svc.cluster.local:5432/postgres"
-            - name: DATACATER_PYTHONRUNNER_IMAGE_NAMESPACE
-              value: default
+              value: "postgresql://postgres-postgresql:5432/postgres"
             - name: QUARKUS_DATASOURCE_USERNAME
-              value: postgres
+              value: "postgres"
             - name: QUARKUS_DATASOURCE_PASSWORD
-              value: datacater
+              value: "datacater"
             - name: DATACATER_DEPLOYMENT_NAMESPACE
-              value: default
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
             - name: DATACATER_DEPLOYMENT_IMAGE
-              value: datacater/pipeline:a835f7248af45f92427180f69652d656b92f8ba0
+              value: "datacater/pipeline:603ed45f1d05c69ab75179fd6f78455f398967bb"
             - name: DATACATER_TRANSFORMS_PATH
-              value: /datacater/transforms
+              value: "/datacater/transforms"
             - name: DATACATER_FILTERS_PATH
-              value: /datacater/filters
+              value: "/datacater/filters"
             - name: DATACATER_PYTHONRUNNER_REPLICAS
-              value: "5"
+              value: "10"
+            - name: DATACATER_PYTHONRUNNER_IMAGE_NAME
+              value: "datacater/python-runner"
             - name: DATACATER_PYTHONRUNNER_IMAGE_VERSION
-              value: a835f7248af45f92427180f69652d656b92f8ba0
+              value: "603ed45f1d05c69ab75179fd6f78455f398967bb"
             - name: QUARKUS_LOG_CONSOLE_JSON
               value: "false"
+            - name: DATACATER_PYTHONRUNNER_IMAGE_NAMESPACE
+              value: default
+            - name: DATACATER_PYTHONRUNNER_SERVICENAME
+              value: "pythonrunner"
           ports:
             - name: http
               containerPort: 8080
@@ -336,7 +389,7 @@ spec:
             timeoutSeconds: 10
           resources:
             limits:
-              memory: 2Gi
+              memory: 1Gi
             requests:
-              cpu: 500m
+              cpu: 200m
               memory: 1Gi

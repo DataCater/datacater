@@ -86,7 +86,7 @@ spec:
             successThreshold: 1
             timeoutSeconds: 3
           volumeMounts:
-            - mountPath: /var/lib/postgresql/data
+            - mountPath: /var/lib/postgresql/data/pgdata
               name: {{ .Values.postgres.pvc.volumeMountsName | default "postgres"}}
   volumeClaimTemplates:
     - metadata:
