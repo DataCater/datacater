@@ -364,8 +364,8 @@ jobs       :
         uses: docker/login-action@v2
         if: github.ref_name == 'main'
         with:
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          username: datacater
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
     -   name: Build datacater/ui:nightly and push it to DockerHub
         working-directory: ui
         if: github.ref_name == 'main'
