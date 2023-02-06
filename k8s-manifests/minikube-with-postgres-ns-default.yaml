@@ -225,7 +225,7 @@ spec:
             successThreshold: 1
             timeoutSeconds: 3
           volumeMounts:
-            - mountPath: /var/lib/postgresql/data/pgdata
+            - mountPath: /var/lib/postgresql/data
               name: postgres
   volumeClaimTemplates:
     - metadata:
@@ -336,7 +336,7 @@ spec:
           imagePullPolicy: IfNotPresent
           env:
             - name: QUARKUS_DATASOURCE_REACTIVE_URL
-              value: "postgresql://postgres-postgresql:5432/postgres"
+              value: "postgresql://postgres:5432/postgres"
             - name: QUARKUS_DATASOURCE_USERNAME
               value: "postgres"
             - name: QUARKUS_DATASOURCE_PASSWORD
