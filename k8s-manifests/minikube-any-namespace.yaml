@@ -237,7 +237,7 @@ spec:
           imagePullPolicy: IfNotPresent
           env:
             - name: QUARKUS_DATASOURCE_REACTIVE_URL
-              value: "postgresql://postgres-postgresql:5432/postgres"
+              value: "postgresql://postgres:5432/postgres"
             - name: QUARKUS_DATASOURCE_USERNAME
               value: "datacater"
             - name: QUARKUS_DATASOURCE_PASSWORD

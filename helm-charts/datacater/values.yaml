@@ -7,7 +7,7 @@ replicaCount: 1
 
 datacater:
   database:
-    host: "postgres-postgresql:5432/postgres"
+    host: "postgres:5432/postgres"
     username: datacater
     password: datacater
   deployment:
