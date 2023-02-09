@@ -1,7 +1,10 @@
 package io.datacater.core.config;
 
 import io.datacater.core.authentication.DataCaterSessionFactory;
-import io.datacater.core.stream.StreamEntity;
+import io.datacater.core.deployment.DeploymentEntity;
+import io.datacater.core.pipeline.Pipeline;
+import io.datacater.core.stream.Stream;
+import io.datacater.core.utilities.JsonUtilities;
 import io.smallrye.mutiny.Uni;
 import java.util.Map;
 
@@ -21,9 +24,12 @@ public class ConfigUtilities {
     return labels.get("app.datacater.io/config");
   }
 
-  public static void combineWithStream(StreamEntity stream, ConfigEntity config) {}
+  public static Stream combineWithStream(Stream stream, ConfigEntity config) {
+    stream.spec().getConfig().putAll(JsonUtilities.toMap(config.getSpec()));
+    return stream;
+  }
 
-  public static void combineWithPipeline(StreamEntity stream, ConfigEntity config) {}
+  public static void combineWithPipeline(Pipeline stream, ConfigEntity config) {}
 
-  public static void combineWithDeployment(StreamEntity stream, ConfigEntity config) {}
+  public static void combineWithDeployment(DeploymentEntity stream, ConfigEntity config) {}
 }

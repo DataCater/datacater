@@ -141,6 +141,7 @@ public class StreamEndpoint {
   }
 
   private void updateStreamObject(Stream stream, ConfigEntity config) {
+    stream = ConfigUtilities.combineWithStream(stream, config);
     StreamService kafkaAdmin = KafkaStreamsAdmin.from(stream);
     kafkaAdmin.updateStream(stream.spec());
     kafkaAdmin.close();
@@ -161,6 +162,7 @@ public class StreamEndpoint {
   }
 
   private void createStreamObject(Stream stream, ConfigEntity config) {
+    stream = ConfigUtilities.combineWithStream(stream, config);
     StreamService kafkaAdmin = KafkaStreamsAdmin.from(stream);
     kafkaAdmin.createStream(stream.spec());
     kafkaAdmin.close();
