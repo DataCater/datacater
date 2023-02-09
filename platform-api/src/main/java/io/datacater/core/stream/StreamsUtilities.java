@@ -16,10 +16,11 @@ public class StreamsUtilities {
   @Inject DataCaterSessionFactory dsf;
 
   public Uni<List<StreamMessage>> getStreamMessages(UUID uuid) {
-    return getStreamMessages(uuid, 100L);
+      //TODO what static value would be better here, distributed or not?
+    return getStreamMessages(uuid, 100L, false);
   }
 
-  public Uni<List<StreamMessage>> getStreamMessages(UUID uuid, Long limit) {
+  public Uni<List<StreamMessage>> getStreamMessages(UUID uuid, Long limit, boolean distributedInspect) {
     return dsf.withTransaction(
         ((session, transaction) ->
             session
@@ -35,7 +36,7 @@ public class StreamsUtilities {
                             // parameter `limit`
                             stream.spec().getKafka().put("max.poll.records", limit.intValue());
                             StreamService kafkaAdmin = KafkaStreamsAdmin.from(stream);
-                            List<StreamMessage> messages = kafkaAdmin.inspect(stream, limit);
+                            List<StreamMessage> messages = kafkaAdmin.inspect(stream, limit, distributedInspect);
                             kafkaAdmin.close();
                             return messages;
                           } catch (JsonProcessingException ex) {
