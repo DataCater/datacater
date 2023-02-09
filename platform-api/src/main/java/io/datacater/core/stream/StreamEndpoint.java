@@ -2,10 +2,11 @@ package io.datacater.core.stream;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.datacater.core.authentication.DataCaterSessionFactory;
+import io.datacater.core.config.ConfigEntity;
+import io.datacater.core.config.ConfigUtilities;
 import io.datacater.core.exceptions.*;
 import io.quarkus.security.Authenticated;
 import io.smallrye.mutiny.Uni;
-import io.smallrye.mutiny.unchecked.Unchecked;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.*;
@@ -57,17 +58,22 @@ public class StreamEndpoint {
   @RequestBody
   @Consumes(MediaType.APPLICATION_JSON)
   public Uni<Response> createStream(Stream stream) throws JsonProcessingException {
-    StreamEntity se = new StreamEntity(stream.name(), stream.spec());
+    StreamEntity se = new StreamEntity(stream.name(), stream.spec(), stream.labels());
+    Uni<ConfigEntity> ce =
+        ConfigUtilities.getConfig(ConfigUtilities.getConfigUUID(stream.labels()), dsf);
 
     return dsf.withTransaction(
             (session, transaction) ->
                 session
                     .persist(se)
                     .onItem()
+                    .transformToUni(
+                        a -> Uni.combine().all().unis(Uni.createFrom().item(a), ce).asTuple())
+                    .onItem()
                     .transform(
-                        a -> {
-                          createStreamObject(stream);
-                          return a;
+                        b -> {
+                          createStreamObject(stream, b.getItem2());
+                          return b;
                         })
                     .replaceWith(Response.ok(se).build()))
         .onFailure()
@@ -80,20 +86,33 @@ public class StreamEndpoint {
   @RequestBody
   @Consumes(MediaType.APPLICATION_JSON)
   public Uni<StreamEntity> updateStream(@PathParam("uuid") UUID uuid, Stream stream) {
+    Uni<ConfigEntity> ce =
+        ConfigUtilities.getConfig(ConfigUtilities.getConfigUUID(stream.labels()), dsf);
+
     return dsf.withTransaction(
-            ((session, transaction) ->
-                session
-                    .find(StreamEntity.class, uuid)
-                    .call(
-                        Unchecked.function(
-                            se -> {
-                              LOGGER.info(se);
-                              updateStreamObject(stream);
-                              return session.merge((se).updateEntity(stream));
-                            }))))
-        .onFailure()
-        .transform(
-            ex -> new UpdateStreamException(exceptionCauseMessageIfAvailable((Exception) ex)));
+        ((session, transaction) ->
+            session
+                .find(StreamEntity.class, uuid)
+                .onItem()
+                .transformToUni(
+                    a -> Uni.combine().all().unis(Uni.createFrom().item(a), ce).asTuple())
+                .onItem()
+                .transform(
+                    tuple -> {
+                      LOGGER.info(tuple.getItem1());
+                      updateStreamObject(stream, tuple.getItem2());
+                      try {
+                        return session.merge((tuple.getItem1()).updateEntity(stream));
+                      } catch (JsonProcessingException e) {
+                        throw new RuntimeException(e);
+                      }
+                    })
+                .flatMap(x -> x)
+                .onFailure()
+                .transform(
+                    ex ->
+                        new UpdateStreamException(
+                            exceptionCauseMessageIfAvailable((Exception) ex)))));
   }
 
   @DELETE
@@ -121,7 +140,7 @@ public class StreamEndpoint {
                 .replaceWith(Response.ok().build())));
   }
 
-  private void updateStreamObject(Stream stream) {
+  private void updateStreamObject(Stream stream, ConfigEntity config) {
     StreamService kafkaAdmin = KafkaStreamsAdmin.from(stream);
     kafkaAdmin.updateStream(stream.spec());
     kafkaAdmin.close();
@@ -141,7 +160,7 @@ public class StreamEndpoint {
     }
   }
 
-  private void createStreamObject(Stream stream) {
+  private void createStreamObject(Stream stream, ConfigEntity config) {
     StreamService kafkaAdmin = KafkaStreamsAdmin.from(stream);
     kafkaAdmin.createStream(stream.spec());
     kafkaAdmin.close();
