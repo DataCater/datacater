@@ -80,7 +80,10 @@ class InspectStream extends Component {
           isScrolling,
         }) {
           if (!column.isRowNumber && column.field !== undefined) {
-            const rawValue = rowData["value"][column.fieldName];
+            const rawValue =
+              rowData["value"] == null
+                ? null
+                : rowData["value"][column.fieldName];
             return (
               <div className="sample-cell w-100 text-nowrap">
                 {renderTableCellContent(rawValue)}
