@@ -200,7 +200,7 @@ public class K8Deployment {
     String name = getDeploymentName(deploymentId);
     String serviceName = StaticConfig.SERVICE_NAME_PREFIX + deploymentId;
     String configMapName = StaticConfig.CONFIGMAP_NAME_PREFIX + deploymentId;
-    Boolean status =
+    List<StatusDetails> status =
         client
             .apps()
             .deployments()
@@ -208,7 +208,10 @@ public class K8Deployment {
             .withName(name)
             .delete();
 
-    if (Boolean.TRUE.equals(status)) {
+    // Above request will return the deleted deployment in Kubernetes. We expect the matching
+    // deployment to be exactly
+    // one and continue only if that is true.
+    if (status.size() == 1) {
       k8Service.delete(serviceName);
       k8ConfigMap.delete(configMapName);
       LOGGER.info(String.format(StaticConfig.LoggerMessages.DEPLOYMENT_DELETED, name));

@@ -59,11 +59,14 @@ datacater:
       protocol: http
 
 '%test'  :
+  quarkus:
+    kafka:
+      devservices:
+        provider: kafka-native
   datacater:
     python-runner:
       protocol: http
       version: alpha-20221129
-  quarkus:
     log:
       level: INFO
       console:
