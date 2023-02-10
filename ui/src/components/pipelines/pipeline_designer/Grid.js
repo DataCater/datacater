@@ -23,7 +23,8 @@ class Grid extends Component {
 
     const field = column.field;
     const fieldName = field.name;
-    const rawValue = sample["value"][fieldName];
+    const rawValue =
+      sample["value"] == null ? null : sample["value"][fieldName];
 
     // Check whether an error has occured when applying the pipeline spec
     // in the current or a previous step
