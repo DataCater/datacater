@@ -15,6 +15,7 @@ import org.apache.kafka.common.PartitionInfo;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.config.ConfigResource;
 import org.eclipse.microprofile.config.ConfigProvider;
+import org.jboss.logging.Logger;
 
 /**
  * Implementation of an external Apache Kafka topic as a stream.
@@ -30,6 +31,7 @@ import org.eclipse.microprofile.config.ConfigProvider;
  * href="https://kafka.apache.org/documentation/#topicconfigs">https://kafka.apache.org/documentation/#topicconfigs</a>).
  */
 public class KafkaStreamsAdmin implements StreamService {
+  private static final Logger LOGGER = Logger.getLogger(KafkaStreamsAdmin.class);
   private static final String PARTITION_COUNT = "num.partitions";
   private static final String REPLICATION_FACTOR = "replication.factor";
   private final Admin admin;
@@ -190,7 +192,14 @@ public class KafkaStreamsAdmin implements StreamService {
       return messageList;
     }
     consumer.assign(partitionsList);
-    setPartitionOffsets(partitionsList, limit);
+
+    if (distributedInspect) {
+      final long partitionMessageAmount =
+          (long) Math.ceil((double) limit / (double) partitionsList.size());
+      setPartitionOffsets(partitionsList, partitionMessageAmount);
+    } else {
+      setPartitionOffsets(partitionsList, limit);
+    }
 
     ConsumerRecords<Object, Object> consumerRecords =
         consumer.poll(Duration.ofMillis(KAFKA_API_TIMEOUT_MS));
@@ -212,8 +221,6 @@ public class KafkaStreamsAdmin implements StreamService {
   private void setPartitionOffsets(List<TopicPartition> allPartitions, long limit) {
     Map<TopicPartition, Long> beginningOffsets = consumer.beginningOffsets(allPartitions);
     Map<TopicPartition, Long> endOffsets = consumer.endOffsets(allPartitions);
-    final long partitionMessageAmount =
-        (long) Math.ceil((double) limit / (double) allPartitions.size());
 
     for (TopicPartition partition : allPartitions) {
       if (consumer.position(partition) == 0) {
@@ -222,8 +229,7 @@ public class KafkaStreamsAdmin implements StreamService {
       }
       consumer.seek(
           partition,
-          getUsableOffset(
-              beginningOffsets.get(partition), endOffsets.get(partition), partitionMessageAmount));
+          getUsableOffset(beginningOffsets.get(partition), endOffsets.get(partition), limit));
     }
   }
 
