@@ -78,12 +78,9 @@ public class K8Deployment {
               .endSpec()
               .build();
 
-      client
-          .apps()
-          .deployments()
-          .inNamespace(StaticConfig.EnvironmentVariables.NAMESPACE)
-          .create(deployment);
-
+      var deploymentResource =
+          client.resource(deployment).inNamespace(StaticConfig.EnvironmentVariables.NAMESPACE);
+      deploymentResource.create();
     } catch (KubernetesClientException ex) {
       throw new CreateDeploymentException(StringUtilities.wrapString(ex.getMessage()));
     }
