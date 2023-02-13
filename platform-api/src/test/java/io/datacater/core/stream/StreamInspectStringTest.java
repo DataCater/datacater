@@ -20,6 +20,7 @@ import javax.inject.Inject;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.eclipse.microprofile.reactive.messaging.Channel;
 import org.eclipse.microprofile.reactive.messaging.Emitter;
+import org.jboss.logging.Logger;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -28,6 +29,8 @@ import org.junit.jupiter.api.TestInstance;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @TestHTTPEndpoint(StreamEndpoint.class)
 class StreamInspectStringTest {
+
+  private static final Logger LOGGER = Logger.getLogger(StreamInspectStringTest.class);
 
   @Inject
   @Channel("testStreamTopicOutString")
@@ -55,7 +58,12 @@ class StreamInspectStringTest {
     lastMessageToWaitOn.toCompletableFuture().get(1000, TimeUnit.MILLISECONDS);
 
     Response response =
-        given().pathParam("uuid", uuid.toString()).queryParam("limit", "3").get("/{uuid}/inspect");
+        given()
+            .pathParam("uuid", uuid.toString())
+            .queryParams("limit", "3", "distributedInspect", "true")
+            .get("/{uuid}/inspect");
+
+    LOGGER.info(response.body().asString());
 
     Assertions.assertEquals(200, response.getStatusCode());
     Assertions.assertTrue(response.body().asString().contains("test 1000"));
