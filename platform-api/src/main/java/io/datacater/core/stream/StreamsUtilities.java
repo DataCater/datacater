@@ -16,7 +16,6 @@ public class StreamsUtilities {
   @Inject DataCaterSessionFactory dsf;
 
   public Uni<List<StreamMessage>> getStreamMessages(UUID uuid) {
-    // TODO what static value would be better here, distributed or not?
     return getStreamMessages(uuid, 100L, false);
   }
 
