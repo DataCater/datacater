@@ -20,7 +20,6 @@ import javax.inject.Inject;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.eclipse.microprofile.reactive.messaging.Channel;
 import org.eclipse.microprofile.reactive.messaging.Emitter;
-import org.jboss.logging.Logger;
 import org.junit.jupiter.api.*;
 
 @QuarkusTest
@@ -28,8 +27,6 @@ import org.junit.jupiter.api.*;
 @TestHTTPEndpoint(StreamEndpoint.class)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class StreamInspectMethodsTest {
-
-  private static final Logger LOGGER = Logger.getLogger(StreamInspectMethodsTest.class);
 
   @Inject
   @Channel("testStreamInspectMethods")
@@ -44,8 +41,6 @@ class StreamInspectMethodsTest {
     start();
     Response response =
         given().pathParam("uuid", uuid.toString()).queryParams("limit", "3").get("/{uuid}/inspect");
-
-    LOGGER.info(response.body().asString());
 
     Assertions.assertEquals(200, response.getStatusCode());
     Assertions.assertTrue(response.body().asString().contains("\"partition\":0"));
@@ -62,8 +57,6 @@ class StreamInspectMethodsTest {
             .queryParams("limit", "10", "distributedInspect", "true")
             .get("/{uuid}/inspect");
 
-    LOGGER.info(response.body().asString());
-
     Assertions.assertEquals(200, response.getStatusCode());
     Assertions.assertTrue(response.body().asString().contains("\"partition\":0"));
     Assertions.assertTrue(response.body().asString().contains("\"partition\":1"));
@@ -78,8 +71,6 @@ class StreamInspectMethodsTest {
             .pathParam("uuid", uuid.toString())
             .queryParams("limit", "10", "distributedInspect", "false")
             .get("/{uuid}/inspect");
-
-    LOGGER.info(response.body().asString());
 
     Assertions.assertEquals(200, response.getStatusCode());
     Assertions.assertTrue(response.body().asString().contains("\"partition\":0"));
