@@ -20,7 +20,7 @@ public class StreamsUtilities {
   }
 
   public Uni<List<StreamMessage>> getStreamMessages(
-      UUID uuid, Long limit, boolean distributedInspect) {
+      UUID uuid, Long limit, boolean distributed) {
     return dsf.withTransaction(
         ((session, transaction) ->
             session
@@ -37,7 +37,7 @@ public class StreamsUtilities {
                             stream.spec().getKafka().put("max.poll.records", limit.intValue());
                             StreamService kafkaAdmin = KafkaStreamsAdmin.from(stream);
                             List<StreamMessage> messages =
-                                kafkaAdmin.inspect(stream, limit, distributedInspect);
+                                kafkaAdmin.inspect(stream, limit, distributed);
                             kafkaAdmin.close();
                             return messages;
                           } catch (JsonProcessingException ex) {

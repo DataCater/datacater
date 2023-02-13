@@ -38,7 +38,7 @@ public interface StreamService {
    *     `limit`, the next partition is polled and so on.
    * @return a List<StreamMessage> containing the inspected messages from each stream
    */
-  List<StreamMessage> inspect(Stream stream, long limit, boolean distributedInspect);
+  List<StreamMessage> inspect(Stream stream, long limit, boolean distributed);
 
   /**
    * Create a Topic with the given specifications.

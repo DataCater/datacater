@@ -54,7 +54,7 @@ class StreamInspectMethodsTest {
     Response response =
         given()
             .pathParam("uuid", uuid.toString())
-            .queryParams("limit", "10", "distributedInspect", "true")
+            .queryParams("limit", "10", "distributed", "true")
             .get("/{uuid}/inspect");
 
     Assertions.assertEquals(200, response.getStatusCode());
@@ -69,7 +69,7 @@ class StreamInspectMethodsTest {
     Response response =
         given()
             .pathParam("uuid", uuid.toString())
-            .queryParams("limit", "10", "distributedInspect", "false")
+            .queryParams("limit", "10", "distributed", "false")
             .get("/{uuid}/inspect");
 
     Assertions.assertEquals(200, response.getStatusCode());
