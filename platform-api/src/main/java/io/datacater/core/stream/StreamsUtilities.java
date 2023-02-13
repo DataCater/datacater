@@ -19,8 +19,7 @@ public class StreamsUtilities {
     return getStreamMessages(uuid, 100L, false);
   }
 
-  public Uni<List<StreamMessage>> getStreamMessages(
-      UUID uuid, Long limit, boolean distributed) {
+  public Uni<List<StreamMessage>> getStreamMessages(UUID uuid, Long limit, boolean distributed) {
     return dsf.withTransaction(
         ((session, transaction) ->
             session
