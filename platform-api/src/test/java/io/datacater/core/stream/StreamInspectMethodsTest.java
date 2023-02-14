@@ -17,6 +17,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import javax.inject.Inject;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.eclipse.microprofile.reactive.messaging.Channel;
 import org.eclipse.microprofile.reactive.messaging.Emitter;
@@ -42,25 +43,33 @@ class StreamInspectMethodsTest {
     Response response =
         given().pathParam("uuid", uuid.toString()).queryParams("limit", "3").get("/{uuid}/inspect");
 
+    int countPart0 = StringUtils.countMatches(response.body().asString(), "\"partition\":0");
+    int countPart1 = StringUtils.countMatches(response.body().asString(), "\"partition\":1");
+    int countPart2 = StringUtils.countMatches(response.body().asString(), "\"partition\":2");
+
     Assertions.assertEquals(200, response.getStatusCode());
-    Assertions.assertTrue(response.body().asString().contains("\"partition\":0"));
-    Assertions.assertFalse(response.body().asString().contains("\"partition\":1"));
-    Assertions.assertFalse(response.body().asString().contains("\"partition\":2"));
+    Assertions.assertNotEquals(0, countPart0);
+    Assertions.assertEquals(0, countPart1);
+    Assertions.assertEquals(0, countPart2);
   }
 
   @Test
   @Order(2)
-  void testDistributedInspect() {
+  void testUniformInspect() {
     Response response =
         given()
             .pathParam("uuid", uuid.toString())
-            .queryParams("limit", "10", "sampleMethod", SampleMethod.UNIFORM)
+            .queryParams("limit", "15", "sampleMethod", SampleMethod.UNIFORM)
             .get("/{uuid}/inspect");
 
+    int countPart0 = StringUtils.countMatches(response.body().asString(), "\"partition\":0");
+    int countPart1 = StringUtils.countMatches(response.body().asString(), "\"partition\":1");
+    int countPart2 = StringUtils.countMatches(response.body().asString(), "\"partition\":2");
+
     Assertions.assertEquals(200, response.getStatusCode());
-    Assertions.assertTrue(response.body().asString().contains("\"partition\":0"));
-    Assertions.assertTrue(response.body().asString().contains("\"partition\":1"));
-    Assertions.assertTrue(response.body().asString().contains("\"partition\":2"));
+    Assertions.assertEquals(5, countPart0);
+    Assertions.assertEquals(5, countPart1);
+    Assertions.assertEquals(5, countPart2);
   }
 
   @Test
@@ -72,10 +81,14 @@ class StreamInspectMethodsTest {
             .queryParams("limit", "10", "sampleMethod", SampleMethod.SEQUENCED)
             .get("/{uuid}/inspect");
 
+    int countPart0 = StringUtils.countMatches(response.body().asString(), "\"partition\":0");
+    int countPart1 = StringUtils.countMatches(response.body().asString(), "\"partition\":1");
+    int countPart2 = StringUtils.countMatches(response.body().asString(), "\"partition\":2");
+
     Assertions.assertEquals(200, response.getStatusCode());
-    Assertions.assertTrue(response.body().asString().contains("\"partition\":0"));
-    Assertions.assertFalse(response.body().asString().contains("\"partition\":1"));
-    Assertions.assertFalse(response.body().asString().contains("\"partition\":2"));
+    Assertions.assertNotEquals(0, countPart0);
+    Assertions.assertEquals(0, countPart1);
+    Assertions.assertEquals(0, countPart2);
   }
 
   void start() throws IOException, ExecutionException, InterruptedException, TimeoutException {
