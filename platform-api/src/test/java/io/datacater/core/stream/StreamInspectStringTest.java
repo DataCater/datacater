@@ -57,7 +57,7 @@ class StreamInspectStringTest {
     Response response =
         given()
             .pathParam("uuid", uuid.toString())
-            .queryParams("limit", "3", "distributed", "true")
+            .queryParams("limit", "3", "sampleMethod", SampleMethod.UNIFORM)
             .get("/{uuid}/inspect");
 
     Assertions.assertEquals(200, response.getStatusCode());

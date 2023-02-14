@@ -31,14 +31,14 @@ public interface StreamService {
    * Inspect (or retrieve) the most recent events of a stream.
    *
    * @param limit Number of records to retrieve.
-   * @param distributedInspect Mode of operation for the retrieval of records. - true: Distributed
-   *     retrieval. Records are polled evenly across partitions. The return amount can vary
-   *     depending on the amount of messages in a partition. - false: Top-down retrieval. Messages
-   *     are polled from one partition. If the partition does not contain the amount defined in
-   *     `limit`, the next partition is polled and so on.
+   * @param method Mode of operation for the retrieval of records. - Uniform: Distributed retrieval.
+   *     Records are polled evenly across partitions. The return amount can vary depending on the
+   *     amount of messages in a partition. - Sequenced: Top-down retrieval. Messages are polled
+   *     from one partition. If the partition does not contain the amount defined in `limit`, the
+   *     next partition is polled and so on.
    * @return a List<StreamMessage> containing the inspected messages from each stream
    */
-  List<StreamMessage> inspect(Stream stream, long limit, boolean distributed);
+  List<StreamMessage> inspect(Stream stream, long limit, SampleMethod method);
 
   /**
    * Create a Topic with the given specifications.

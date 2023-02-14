@@ -54,7 +54,7 @@ class StreamInspectMethodsTest {
     Response response =
         given()
             .pathParam("uuid", uuid.toString())
-            .queryParams("limit", "10", "distributed", "true")
+            .queryParams("limit", "10", "sampleMethod", SampleMethod.UNIFORM)
             .get("/{uuid}/inspect");
 
     Assertions.assertEquals(200, response.getStatusCode());
@@ -65,11 +65,11 @@ class StreamInspectMethodsTest {
 
   @Test
   @Order(3)
-  void testTopDownInspect() {
+  void testSequencedInspect() {
     Response response =
         given()
             .pathParam("uuid", uuid.toString())
-            .queryParams("limit", "10", "distributed", "false")
+            .queryParams("limit", "10", "sampleMethod", SampleMethod.SEQUENCED)
             .get("/{uuid}/inspect");
 
     Assertions.assertEquals(200, response.getStatusCode());

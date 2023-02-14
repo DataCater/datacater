@@ -16,10 +16,10 @@ public class StreamsUtilities {
   @Inject DataCaterSessionFactory dsf;
 
   public Uni<List<StreamMessage>> getStreamMessages(UUID uuid) {
-    return getStreamMessages(uuid, 100L, false);
+    return getStreamMessages(uuid, 100L, SampleMethod.SEQUENCED);
   }
 
-  public Uni<List<StreamMessage>> getStreamMessages(UUID uuid, Long limit, boolean distributed) {
+  public Uni<List<StreamMessage>> getStreamMessages(UUID uuid, Long limit, SampleMethod method) {
     return dsf.withTransaction(
         ((session, transaction) ->
             session
@@ -36,7 +36,7 @@ public class StreamsUtilities {
                             stream.spec().getKafka().put("max.poll.records", limit.intValue());
                             StreamService kafkaAdmin = KafkaStreamsAdmin.from(stream);
                             List<StreamMessage> messages =
-                                kafkaAdmin.inspect(stream, limit, distributed);
+                                kafkaAdmin.inspect(stream, limit, method);
                             kafkaAdmin.close();
                             return messages;
                           } catch (JsonProcessingException ex) {
