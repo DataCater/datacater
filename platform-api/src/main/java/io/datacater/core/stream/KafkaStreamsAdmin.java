@@ -173,14 +173,14 @@ public class KafkaStreamsAdmin implements StreamService {
    * Inspect (or retrieve) the most recent events of the Topic.
    *
    * @param limit Number of records to retrieve.
-   * @param method Mode of operation for the retrieval of records. - Uniform: Distributed retrieval.
-   *     Records are polled evenly across partitions. The return amount can vary depending on the
-   *     amount of messages in a partition. - Sequenced: Fold-right retrieval. Messages are polled
-   *     from one partition. If the partition does not contain the amount defined in `limit`, the
-   *     next partition is polled and so on.
+   * @param sampleMethod Mode of operation for the retrieval of records. - Uniform: Distributed
+   *     retrieval. Records are polled evenly across partitions. The return amount can vary
+   *     depending on the amount of messages in a partition. - Sequenced: Fold-right retrieval.
+   *     Messages are polled from one partition. If the partition does not contain the amount
+   *     defined in `limit`, the next partition is polled and so on.
    * @return a List<StreamMessage> containing the inspected messages form each topic
    */
-  public List<StreamMessage> inspect(Stream stream, long limit, SampleMethod method) {
+  public List<StreamMessage> inspect(Stream stream, long limit, SampleMethod sampleMethod) {
     List<StreamMessage> messageList = new ArrayList<>();
     if (!streamExists()) {
       return messageList;
@@ -191,7 +191,7 @@ public class KafkaStreamsAdmin implements StreamService {
     }
     consumer.assign(partitionsList);
 
-    if (method == SampleMethod.UNIFORM) {
+    if (sampleMethod == SampleMethod.UNIFORM) {
       final long partitionMessageAmount =
           (long) Math.ceil((double) limit / (double) partitionsList.size());
       setPartitionOffsets(partitionsList, partitionMessageAmount);

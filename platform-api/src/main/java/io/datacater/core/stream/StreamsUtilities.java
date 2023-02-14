@@ -19,7 +19,8 @@ public class StreamsUtilities {
     return getStreamMessages(uuid, 100L, SampleMethod.SEQUENCED);
   }
 
-  public Uni<List<StreamMessage>> getStreamMessages(UUID uuid, Long limit, SampleMethod method) {
+  public Uni<List<StreamMessage>> getStreamMessages(
+      UUID uuid, Long limit, SampleMethod sampleMethod) {
     return dsf.withTransaction(
         ((session, transaction) ->
             session
@@ -36,7 +37,7 @@ public class StreamsUtilities {
                             stream.spec().getKafka().put("max.poll.records", limit.intValue());
                             StreamService kafkaAdmin = KafkaStreamsAdmin.from(stream);
                             List<StreamMessage> messages =
-                                kafkaAdmin.inspect(stream, limit, method);
+                                kafkaAdmin.inspect(stream, limit, sampleMethod);
                             kafkaAdmin.close();
                             return messages;
                           } catch (JsonProcessingException ex) {
