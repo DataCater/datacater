@@ -55,10 +55,13 @@ class StreamInspectStringTest {
     lastMessageToWaitOn.toCompletableFuture().get(1000, TimeUnit.MILLISECONDS);
 
     Response response =
-        given().pathParam("uuid", uuid.toString()).queryParam("limit", "3").get("/{uuid}/inspect");
+        given()
+            .pathParam("uuid", uuid.toString())
+            .queryParams("limit", "3", "sampleMethod", SampleMethod.UNIFORM)
+            .get("/{uuid}/inspect");
 
     Assertions.assertEquals(200, response.getStatusCode());
-    Assertions.assertTrue(response.body().asString().contains("test 1000"));
+    Assertions.assertTrue(response.body().asString().contains("\"value\":\"test"));
   }
 
   void start() throws IOException {

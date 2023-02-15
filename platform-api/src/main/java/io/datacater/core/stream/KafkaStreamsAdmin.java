@@ -173,9 +173,14 @@ public class KafkaStreamsAdmin implements StreamService {
    * Inspect (or retrieve) the most recent events of the Topic.
    *
    * @param limit Number of records to retrieve.
+   * @param sampleMethod Mode of operation for the retrieval of records. - Uniform: Distributed
+   *     retrieval. Records are polled evenly across partitions. The return amount can vary
+   *     depending on the amount of messages in a partition. - Sequenced: Fold-right retrieval.
+   *     Messages are polled from one partition. If the partition does not contain the amount
+   *     defined in `limit`, the next partition is polled and so on.
    * @return a List<StreamMessage> containing the inspected messages form each topic
    */
-  public List<StreamMessage> inspect(Stream stream, long limit) {
+  public List<StreamMessage> inspect(Stream stream, long limit, SampleMethod sampleMethod) {
     List<StreamMessage> messageList = new ArrayList<>();
     if (!streamExists()) {
       return messageList;
@@ -185,7 +190,14 @@ public class KafkaStreamsAdmin implements StreamService {
       return messageList;
     }
     consumer.assign(partitionsList);
-    setPartitionOffsets(partitionsList, limit);
+
+    if (sampleMethod == SampleMethod.UNIFORM) {
+      final long partitionMessageAmount =
+          (long) Math.ceil((double) limit / (double) partitionsList.size());
+      setPartitionOffsets(partitionsList, partitionMessageAmount);
+    } else {
+      setPartitionOffsets(partitionsList, limit);
+    }
 
     ConsumerRecords<Object, Object> consumerRecords =
         consumer.poll(Duration.ofMillis(KAFKA_API_TIMEOUT_MS));
@@ -207,8 +219,6 @@ public class KafkaStreamsAdmin implements StreamService {
   private void setPartitionOffsets(List<TopicPartition> allPartitions, long limit) {
     Map<TopicPartition, Long> beginningOffsets = consumer.beginningOffsets(allPartitions);
     Map<TopicPartition, Long> endOffsets = consumer.endOffsets(allPartitions);
-    final long partitionMessageAmount =
-        (long) Math.ceil((double) limit / (double) allPartitions.size());
 
     for (TopicPartition partition : allPartitions) {
       if (consumer.position(partition) == 0) {
@@ -217,8 +227,7 @@ public class KafkaStreamsAdmin implements StreamService {
       }
       consumer.seek(
           partition,
-          getUsableOffset(
-              beginningOffsets.get(partition), endOffsets.get(partition), partitionMessageAmount));
+          getUsableOffset(beginningOffsets.get(partition), endOffsets.get(partition), limit));
     }
   }
 

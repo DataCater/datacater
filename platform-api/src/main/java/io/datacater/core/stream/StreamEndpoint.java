@@ -43,8 +43,10 @@ public class StreamEndpoint {
   @GET
   @Path("{uuid}/inspect")
   public Uni<List<StreamMessage>> inspectStream(
-      @PathParam("uuid") UUID uuid, @DefaultValue("100") @QueryParam("limit") Long limit) {
-    return streamsUtil.getStreamMessages(uuid, limit);
+      @PathParam("uuid") UUID uuid,
+      @DefaultValue("100") @QueryParam("limit") Long limit,
+      @DefaultValue("SEQUENCED") @QueryParam("sampleMethod") SampleMethod sampleMethod) {
+    return streamsUtil.getStreamMessages(uuid, limit, sampleMethod);
   }
 
   @GET

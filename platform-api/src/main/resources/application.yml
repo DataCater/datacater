@@ -220,6 +220,9 @@ datacater:
         testStreamTopicOutLong:
           connector: smallrye-kafka
           topic: testLongDeserializer
+        testStreamInspectMethods:
+          connector: smallrye-kafka
+          topic: testStreamInspect
   smallrye:
     jwt:
       sign:
