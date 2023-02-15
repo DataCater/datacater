@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.datacater.core.ExcludeFromGeneratedCoverageReport;
 import io.datacater.core.exceptions.DatacaterException;
+import java.util.HashMap;
 import java.util.Map;
 
 public class JsonUtilities {
@@ -25,6 +26,10 @@ public class JsonUtilities {
   @ExcludeFromGeneratedCoverageReport
   public static Map<String, String> toMap(JsonNode json) {
     ObjectMapper om = new ObjectMapper();
-    return om.convertValue(json, new TypeReference<>() {});
+    Map<String, String> map = om.convertValue(json, new TypeReference<>() {});
+    if (map == null) {
+      return new HashMap<>();
+    }
+    return map;
   }
 }

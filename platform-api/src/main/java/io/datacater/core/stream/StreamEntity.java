@@ -3,6 +3,7 @@ package io.datacater.core.stream;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import io.datacater.core.utilities.JsonUtilities;
 import io.quarkiverse.hibernate.types.json.JsonBinaryType;
 import io.quarkiverse.hibernate.types.json.JsonType;
@@ -48,6 +49,12 @@ public class StreamEntity {
   private JsonNode labels;
 
   protected StreamEntity() {}
+
+  public StreamEntity(String name, StreamSpec spec) throws JsonProcessingException {
+    this.name = name;
+    this.spec = spec.serializeStreamSpec();
+    this.labels = JsonNodeFactory.instance.objectNode();
+  }
 
   public StreamEntity(String name, StreamSpec spec, Map<String, String> labels)
       throws JsonProcessingException {

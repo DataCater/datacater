@@ -7,10 +7,11 @@ import io.datacater.core.stream.Stream;
 import io.datacater.core.utilities.JsonUtilities;
 import io.smallrye.mutiny.Uni;
 import java.util.Map;
+import java.util.UUID;
 
 public class ConfigUtilities {
 
-  public static Uni<ConfigEntity> getConfig(String configUUID, DataCaterSessionFactory dsf) {
+  public static Uni<ConfigEntity> getConfig(UUID configUUID, DataCaterSessionFactory dsf) {
     return dsf.withTransaction(
         (session, transaction) ->
             session
@@ -20,12 +21,18 @@ public class ConfigUtilities {
                 .continueWith(new ConfigEntity()));
   }
 
-  public static String getConfigUUID(Map<String, String> labels) {
-    return labels.get("app.datacater.io/config");
+  public static UUID getConfigUUID(Map<String, String> labels) {
+    // TODO consider other label options
+    try {
+      return UUID.fromString(labels.get("app.datacater.io/config"));
+    } catch (Exception e) {
+      return new UUID(0, 0);
+    }
   }
 
   public static Stream combineWithStream(Stream stream, ConfigEntity config) {
-    stream.spec().getConfig().putAll(JsonUtilities.toMap(config.getSpec()));
+    // TODO this needs to be done cleaner and consider not only top level spec, but also kafka spec
+    stream.spec().getKafka().putAll(JsonUtilities.toMap(config.getSpec()));
     return stream;
   }
 

@@ -80,6 +80,7 @@ public class KafkaStreamsAdmin implements StreamService {
         .putIfAbsent("key.deserializer", io.datacater.core.serde.JsonDeserializer.class);
     Admin admin = Admin.create(stream.spec().getKafka());
     KafkaConsumer<Object, Object> consumer = new KafkaConsumer<>(stream.spec().getKafka());
+
     Optional<String> name = Optional.of(stream.name());
 
     Integer partitions = getPartitions(stream.spec().getTopic());
@@ -90,14 +91,16 @@ public class KafkaStreamsAdmin implements StreamService {
   }
 
   private static int getPartitions(Map<String, Object> topicConfig) {
-    if (topicConfig.get(PARTITION_COUNT) instanceof String partitions) {
+    if (topicConfig.get(PARTITION_COUNT) instanceof String partitions
+        && !topicConfig.get(PARTITION_COUNT).toString().isEmpty()) {
       return Integer.parseInt(partitions);
     }
     return DEFAULT_NUM_PARTITIONS;
   }
 
   private static Short getReplicationFactor(Map<String, Object> topicConfig) {
-    if (topicConfig.get(REPLICATION_FACTOR) instanceof String repFactor) {
+    if (topicConfig.get(REPLICATION_FACTOR) instanceof String repFactor
+        && !topicConfig.get(PARTITION_COUNT).toString().isEmpty()) {
       return Short.valueOf(repFactor);
     }
     return DEFAULT_REPLICATION_FACTOR;
