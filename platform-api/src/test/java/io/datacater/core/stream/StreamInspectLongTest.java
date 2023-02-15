@@ -52,7 +52,7 @@ class StreamInspectLongTest {
         given().pathParam("uuid", uuid.toString()).queryParam("limit", "3").get("/{uuid}/inspect");
 
     Assertions.assertEquals(200, response.getStatusCode());
-    Assertions.assertTrue(response.body().asString().contains("1000"));
+    Assertions.assertTrue(response.body().asString().contains("\"value\":\"test"));
   }
 
   void start() throws IOException {
