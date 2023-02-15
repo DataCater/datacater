@@ -17,6 +17,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import javax.inject.Inject;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.eclipse.microprofile.reactive.messaging.Channel;
 import org.eclipse.microprofile.reactive.messaging.Emitter;
@@ -39,6 +40,7 @@ class StreamInspectLongTest {
   void testLongDeserializer()
       throws IOException, InterruptedException, ExecutionException, TimeoutException {
     start();
+    int expectedRecordCount = 3;
 
     for (long i = 0L; i <= 300L; i++) {
       producer.send(new ProducerRecord<>("testLongDeserializer", i, i));
@@ -49,10 +51,15 @@ class StreamInspectLongTest {
     lastMessageToWaitOn.toCompletableFuture().get(1000, TimeUnit.MILLISECONDS);
 
     Response response =
-        given().pathParam("uuid", uuid.toString()).queryParam("limit", "3").get("/{uuid}/inspect");
+        given()
+            .pathParam("uuid", uuid.toString())
+            .queryParam("limit", Integer.toString(expectedRecordCount))
+            .get("/{uuid}/inspect");
+
+    int actualRecordCount = StringUtils.countMatches(response.body().asString(), "\"value\":");
 
     Assertions.assertEquals(200, response.getStatusCode());
-    Assertions.assertTrue(response.body().asString().contains("\"value\":\"test"));
+    Assertions.assertEquals(expectedRecordCount, actualRecordCount);
   }
 
   void start() throws IOException {
