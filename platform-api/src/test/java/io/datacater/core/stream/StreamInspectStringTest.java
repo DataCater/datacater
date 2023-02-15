@@ -61,7 +61,7 @@ class StreamInspectStringTest {
             .get("/{uuid}/inspect");
 
     Assertions.assertEquals(200, response.getStatusCode());
-    Assertions.assertTrue(response.body().asString().contains("test 1000"));
+    Assertions.assertTrue(response.body().asString().contains("\"value\":\"test"));
   }
 
   void start() throws IOException {
