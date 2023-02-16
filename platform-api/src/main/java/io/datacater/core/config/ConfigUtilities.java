@@ -2,7 +2,7 @@ package io.datacater.core.config;
 
 import io.datacater.core.authentication.DataCaterSessionFactory;
 import io.datacater.core.deployment.DeploymentEntity;
-import io.datacater.core.pipeline.Pipeline;
+import io.datacater.core.pipeline.PipelineEntity;
 import io.datacater.core.stream.Stream;
 import io.datacater.core.utilities.JsonUtilities;
 import io.smallrye.mutiny.Uni;
@@ -36,7 +36,9 @@ public class ConfigUtilities {
     return stream;
   }
 
-  public static void combineWithPipeline(Pipeline stream, ConfigEntity config) {}
+  public static PipelineEntity combineWithPipeline(PipelineEntity pipeline, ConfigEntity config) {
+    return pipeline;
+  }
 
   public static void combineWithDeployment(DeploymentEntity stream, ConfigEntity config) {}
 }
