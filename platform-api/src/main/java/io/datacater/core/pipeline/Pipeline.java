@@ -48,7 +48,7 @@ public class Pipeline {
   }
 
   @JsonCreator
-  static Pipeline from(
+  public static Pipeline from(
       @JsonProperty(value = "name", required = true) String name,
       @JsonProperty(value = "metadata", required = true) Map<String, String> metadata,
       @JsonProperty(value = "spec", required = true) PipelineSpec spec) {
