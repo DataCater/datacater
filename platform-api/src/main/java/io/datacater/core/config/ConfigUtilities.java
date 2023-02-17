@@ -70,9 +70,12 @@ public class ConfigUtilities {
     return deploymentSpec;
   }
 
-  private static void checkValidKind(Kind expected, Kind actual){
-    if(expected != actual){
-      String ExceptionMessage = String.format("The Config kind '%s' does not match that of the given resource '%s'", actual, expected);
+  private static void checkValidKind(Kind expected, Kind actual) {
+    if (expected != actual) {
+      String ExceptionMessage =
+          String.format(
+              "The Config kind '%s' does not match that of the given resource '%s'",
+              actual, expected);
       throw new IncorrectConfigKindException(ExceptionMessage);
     }
   }
