@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.json.JsonMapper;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import io.datacater.core.ExcludeFromGeneratedCoverageReport;
 import io.datacater.core.exceptions.JsonNotParsableException;
 import io.datacater.core.utilities.JsonUtilities;
@@ -68,6 +69,7 @@ public class PipelineEntity {
     this.name = name;
     this.metadata = metadata;
     this.spec = spec;
+    this.labels = JsonNodeFactory.instance.objectNode();
   }
 
   private PipelineEntity(

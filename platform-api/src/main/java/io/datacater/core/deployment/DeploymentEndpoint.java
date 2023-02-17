@@ -3,6 +3,8 @@ package io.datacater.core.deployment;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.datacater.core.authentication.DataCaterSessionFactory;
+import io.datacater.core.config.ConfigEntity;
+import io.datacater.core.config.ConfigUtilities;
 import io.datacater.core.exceptions.*;
 import io.datacater.core.pipeline.PipelineEntity;
 import io.datacater.core.stream.StreamEntity;
@@ -162,6 +164,9 @@ public class DeploymentEndpoint {
   public Uni<DeploymentEntity> createDeployment(DeploymentSpec spec) {
     DeploymentEntity de = new DeploymentEntity(spec);
     Uni<PipelineEntity> pipelineUni = getPipeline(spec);
+    Uni<ConfigEntity> configUni =
+        ConfigUtilities.getConfig(ConfigUtilities.getConfigUUID(spec.labels()), dsf);
+
     return dsf.withTransaction(
         (session, transaction) ->
             session
@@ -184,13 +189,19 @@ public class DeploymentEndpoint {
                                     spec,
                                     StaticConfig.STREAM_OUT_CONFIG,
                                     pipelineEntity,
-                                    StaticConfig.STREAM_OUT))
+                                    StaticConfig.STREAM_OUT),
+                                configUni)
                             .asTuple())
                 .onItem()
                 .transform(
                     tuple ->
                         createDeployment(
-                            tuple.getItem1(), tuple.getItem3(), tuple.getItem2(), spec, de)));
+                            tuple.getItem1(),
+                            tuple.getItem3(),
+                            tuple.getItem2(),
+                            spec,
+                            de,
+                            tuple.getItem4())));
   }
 
   @DELETE
@@ -221,6 +232,8 @@ public class DeploymentEndpoint {
       @PathParam("uuid") UUID deploymentUuid, DeploymentSpec spec) {
     Uni<PipelineEntity> pipelineUni = getPipeline(spec);
     Uni<DeploymentEntity> deploymentUni = getDeploymentUni(deploymentUuid);
+    Uni<ConfigEntity> configUni =
+        ConfigUtilities.getConfig(ConfigUtilities.getConfigUUID(spec.labels()), dsf);
     return pipelineUni
         .onItem()
         .transformToUni(
@@ -239,13 +252,19 @@ public class DeploymentEndpoint {
                             StaticConfig.STREAM_OUT_CONFIG,
                             pipelineEntity,
                             StaticConfig.STREAM_OUT),
-                        deploymentUni)
+                        deploymentUni,
+                        configUni)
                     .asTuple())
         .onItem()
         .transform(
             tuple ->
                 updateDeployment(
-                    tuple.getItem1(), tuple.getItem3(), tuple.getItem2(), spec, tuple.getItem4()))
+                    tuple.getItem1(),
+                    tuple.getItem3(),
+                    tuple.getItem2(),
+                    spec,
+                    tuple.getItem4(),
+                    tuple.getItem5()))
         .onFailure()
         .transform(
             ex ->
@@ -351,8 +370,10 @@ public class DeploymentEndpoint {
       StreamEntity streamOut,
       StreamEntity streamIn,
       DeploymentSpec deploymentSpec,
-      DeploymentEntity de) {
+      DeploymentEntity de,
+      ConfigEntity ce) {
     K8Deployment k8Deployment = new K8Deployment(client);
+    deploymentSpec = ConfigUtilities.combineWithDeployment(deploymentSpec, ce);
     de.setStatus(
         DeploymentEntity.serializeMap(
             k8Deployment.create(pe, streamIn, streamOut, deploymentSpec, de.getId())));
@@ -364,9 +385,10 @@ public class DeploymentEndpoint {
       StreamEntity streamOut,
       StreamEntity streamIn,
       DeploymentSpec deploymentSpec,
-      DeploymentEntity de) {
+      DeploymentEntity de,
+      ConfigEntity ce) {
     deleteK8Deployment(de.getId());
-    return createDeployment(pe, streamOut, streamIn, deploymentSpec, de);
+    return createDeployment(pe, streamOut, streamIn, deploymentSpec, de, ce);
   }
 
   private UUID getStreamUUID(

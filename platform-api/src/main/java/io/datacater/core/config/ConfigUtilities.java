@@ -1,7 +1,7 @@
 package io.datacater.core.config;
 
 import io.datacater.core.authentication.DataCaterSessionFactory;
-import io.datacater.core.deployment.DeploymentEntity;
+import io.datacater.core.deployment.DeploymentSpec;
 import io.datacater.core.pipeline.PipelineEntity;
 import io.datacater.core.stream.Stream;
 import io.datacater.core.utilities.JsonUtilities;
@@ -40,5 +40,8 @@ public class ConfigUtilities {
     return pipeline;
   }
 
-  public static void combineWithDeployment(DeploymentEntity stream, ConfigEntity config) {}
+  public static DeploymentSpec combineWithDeployment(
+      DeploymentSpec deploymentSpec, ConfigEntity config) {
+    return deploymentSpec;
+  }
 }

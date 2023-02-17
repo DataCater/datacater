@@ -3,6 +3,7 @@ package io.datacater.core.deployment;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.datacater.core.utilities.JsonUtilities;
 import io.quarkiverse.hibernate.types.json.JsonBinaryType;
 import io.quarkiverse.hibernate.types.json.JsonType;
 import io.quarkiverse.hibernate.types.json.JsonTypes;
@@ -45,6 +46,11 @@ public class DeploymentEntity {
   @Transient
   private JsonNode status;
 
+  @Type(type = JsonTypes.JSON)
+  @Column(name = "labels", columnDefinition = JsonTypes.JSON_BIN)
+  @JsonProperty("labels")
+  private JsonNode labels;
+
   protected DeploymentEntity() {}
 
   public static JsonNode serializeMap(Map<String, Object> map) {
@@ -55,6 +61,7 @@ public class DeploymentEntity {
   public DeploymentEntity(DeploymentSpec spec) {
     this.name = spec.name();
     this.spec = DeploymentEntity.serializeMap(spec.deployment());
+    this.labels = JsonUtilities.convertMap(spec.labels());
   }
 
   protected void setSpec(JsonNode spec) {
@@ -71,5 +78,9 @@ public class DeploymentEntity {
 
   protected JsonNode getSpec() {
     return this.spec;
+  }
+
+  protected JsonNode getLabels() {
+    return labels;
   }
 }
