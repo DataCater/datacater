@@ -2,7 +2,9 @@ package io.datacater.core.config;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import io.datacater.core.authentication.DataCaterSessionFactory;
+import io.datacater.core.config.enums.Kind;
 import io.datacater.core.deployment.DeploymentSpec;
+import io.datacater.core.exceptions.IncorrectConfigKindException;
 import io.datacater.core.pipeline.PipelineEntity;
 import io.datacater.core.stream.Stream;
 import io.datacater.core.utilities.JsonUtilities;
@@ -32,6 +34,7 @@ public class ConfigUtilities {
   }
 
   public static Stream combineWithStream(Stream stream, ConfigEntity config) {
+    checkValidKind(Kind.STREAM, config.getKind());
     // TODO this needs to be done cleaner and consider not only top level spec, but also kafka spec
     // make a list of known config options for kafka topic (only things like bootstrap servers,
     // partitions and replications)
@@ -42,6 +45,7 @@ public class ConfigUtilities {
   }
 
   public static PipelineEntity combineWithPipeline(PipelineEntity pe, ConfigEntity config) {
+    checkValidKind(Kind.PIPELINE, config.getKind());
     JsonNode pipelineSpecNode = pe.getSpec();
     Map<String, String> pipelineSpec = JsonUtilities.toMap(pipelineSpecNode);
     Map<String, String> configSPec = JsonUtilities.toMap(config.getSpec());
@@ -58,10 +62,18 @@ public class ConfigUtilities {
 
   public static DeploymentSpec combineWithDeployment(
       DeploymentSpec deploymentSpec, ConfigEntity config) {
+    checkValidKind(Kind.DEPLOYMENT, config.getKind());
     // TODO
     // i think just overwriting/adding to deployment is fine, only one level and little config
     // options?
     deploymentSpec.deployment().putAll(JsonUtilities.toMap(config.getSpec()));
     return deploymentSpec;
+  }
+
+  private static void checkValidKind(Kind expected, Kind actual){
+    if(expected != actual){
+      String ExceptionMessage = String.format("The Config kind '%s' does not match that of the given resource '%s'", actual, expected);
+      throw new IncorrectConfigKindException(ExceptionMessage);
+    }
   }
 }
