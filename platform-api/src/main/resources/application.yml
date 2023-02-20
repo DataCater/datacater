@@ -27,7 +27,7 @@ quarkus  :
   http:
     root-path: /api/${datacater.api.version}
     non-application-root-path: /q
-    cors: true
+    cors: false
     auth:
       basic: true
       proactive: true
