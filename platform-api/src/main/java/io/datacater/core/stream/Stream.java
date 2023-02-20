@@ -19,6 +19,6 @@ public record Stream(String name, StreamSpec spec, Map<String, String> labels) {
   public static Stream from(StreamEntity se) throws JsonProcessingException {
     ObjectMapper mapper = new ObjectMapper();
     StreamSpec spec = mapper.treeToValue(se.getSpec(), StreamSpec.class);
-    return new Stream(se.getName(), spec, JsonUtilities.toMap(se.getLabels()));
+    return new Stream(se.getName(), spec, JsonUtilities.toStringMap(se.getLabels()));
   }
 }

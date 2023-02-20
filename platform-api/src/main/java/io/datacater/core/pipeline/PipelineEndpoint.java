@@ -169,7 +169,7 @@ public class PipelineEndpoint {
         pe.flatMap(
             pipelineEntity -> {
               JsonNode labelsNode = pipelineEntity.getLabels();
-              Map labels = JsonUtilities.toMap(labelsNode);
+              Map labels = JsonUtilities.toStringMap(labelsNode);
               UUID configUuid = ConfigUtilities.getConfigUUID(labels);
               return ConfigUtilities.getConfig(configUuid, dsf);
             });

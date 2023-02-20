@@ -24,9 +24,19 @@ public class JsonUtilities {
   }
 
   @ExcludeFromGeneratedCoverageReport
-  public static Map<String, String> toMap(JsonNode json) {
+  public static Map<String, String> toStringMap(JsonNode json) {
     ObjectMapper om = new ObjectMapper();
     Map<String, String> map = om.convertValue(json, new TypeReference<>() {});
+    if (map == null) {
+      return new HashMap<>();
+    }
+    return map;
+  }
+
+  @ExcludeFromGeneratedCoverageReport
+  public static Map<String, Object> toObjectMap(JsonNode json) {
+    ObjectMapper om = new ObjectMapper();
+    Map<String, Object> map = om.convertValue(json, new TypeReference<>() {});
     if (map == null) {
       return new HashMap<>();
     }

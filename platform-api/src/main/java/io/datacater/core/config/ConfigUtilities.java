@@ -9,10 +9,13 @@ import io.datacater.core.pipeline.PipelineEntity;
 import io.datacater.core.stream.Stream;
 import io.datacater.core.utilities.JsonUtilities;
 import io.smallrye.mutiny.Uni;
+import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
+import org.jboss.logging.Logger;
 
 public class ConfigUtilities {
+  private static final Logger LOGGER = Logger.getLogger(ConfigUtilities.class);
 
   public static Uni<ConfigEntity> getConfig(UUID configUUID, DataCaterSessionFactory dsf) {
     return dsf.withTransaction(
@@ -35,21 +38,23 @@ public class ConfigUtilities {
 
   public static Stream combineWithStream(Stream stream, ConfigEntity config) {
     checkValidKind(Kind.STREAM, config.getKind());
-    // TODO this needs to be done cleaner and consider not only top level spec, but also kafka spec
-    // make a list of known config options for kafka topic (only things like bootstrap servers,
-    // partitions and replications)
-    // these should be manually mapped and the other options can be overwritten/added to the
-    // underlying spec
-    stream.spec().getKafka().putAll(JsonUtilities.toMap(config.getSpec()));
+
+    stream
+        .spec()
+        .getKafka()
+        .putAll(
+            JsonUtilities.toObjectMap(
+                config.getSpec().get(stream.spec().getKind().name().toLowerCase(Locale.ROOT))));
+
     return stream;
   }
 
   public static PipelineEntity combineWithPipeline(PipelineEntity pe, ConfigEntity config) {
     checkValidKind(Kind.PIPELINE, config.getKind());
     JsonNode pipelineSpecNode = pe.getSpec();
-    Map<String, String> pipelineSpec = JsonUtilities.toMap(pipelineSpecNode);
-    Map<String, String> configSPec = JsonUtilities.toMap(config.getSpec());
-    pipelineSpec.putAll(configSPec);
+    Map<String, Object> pipelineSpec = JsonUtilities.toObjectMap(pipelineSpecNode);
+    Map<String, Object> configSpec = JsonUtilities.toObjectMap(config.getSpec());
+    pipelineSpec.putAll(configSpec);
 
     // need to map steps from config
     // add the steps to pe
@@ -57,16 +62,16 @@ public class ConfigUtilities {
     // the way records are transformed and filtered
 
     // TODO finish mapping
+    LOGGER.info(pe.asJsonString());
     return pe;
   }
 
   public static DeploymentSpec combineWithDeployment(
       DeploymentSpec deploymentSpec, ConfigEntity config) {
     checkValidKind(Kind.DEPLOYMENT, config.getKind());
-    // TODO
-    // i think just overwriting/adding to deployment is fine, only one level and little config
-    // options?
-    deploymentSpec.deployment().putAll(JsonUtilities.toMap(config.getSpec()));
+
+    deploymentSpec.deployment().putAll(JsonUtilities.toObjectMap(config.getSpec()));
+
     return deploymentSpec;
   }
 
