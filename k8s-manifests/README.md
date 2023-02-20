@@ -50,7 +50,7 @@ helm template redpanda redpanda/redpanda \
 ## Accessing Redpanda from within the cluster
 
 To access the Redpanda broker from inside the Kubernetes cluster, e.g.,
-from DataCater, you can set `bootsrap.servers` to `redpanda-0.redpanda.default.svc.cluster.local.:9093`.
+from DataCater, you can set `bootstrap.servers` to `redpanda-0.redpanda.default.svc.cluster.local.:9093`.
 
 ### Working with [rpk](https://docs.redpanda.com/docs/platform/reference/rpk/) inside the cluster
 
