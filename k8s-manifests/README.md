@@ -1,4 +1,4 @@
-# Create Plain DataCater Minikube Manifest
+# Create Minikube manifest
 
 ```shell
 helm template helm-charts/datacater \
@@ -7,7 +7,7 @@ helm template helm-charts/datacater \
   --set "postgres.username=datacater" > k8s-manifests/minikube-any-namespace.yaml
 ```
 
-# Create Plain DataCater Minikube Manifest for Default Namespace and with PostgreSQL
+# Create Minikube manifest for installing DataCater into the default namespace
 
 ```shell
 helm template helm-charts/datacater -ndefault \
@@ -17,19 +17,19 @@ helm template helm-charts/datacater -ndefault \
   --set "postgres.username=postgres" > k8s-manifests/minikube-with-postgres-ns-default.yaml
 ```
 
+# Create Minikube manifest with DataCater and Redpanda
 
-# Create and working with Redpanda manifest
 Redpanda offers a Helm chart for a quick and easy installation.
-We convert this helm chart to a Kubernetes Manifest to provide a quick and easy 
-installation and integration with our Open-Core product.
-If the redpanda version needs to be updated, the following steps can be done.
+We convert this Helm chart to a Kubernetes Manifest to provide a quick and easy 
+installation and integration with our open-core product.
+If you want to update Redpanda, please perform the following steps:
 
-1. Add the RedPanda repository to your helm client
+1. Add the Redpanda repository to your local Helm client.
 ```
 helm repo add redpanda https://charts.redpanda.com/
 ```
 
-2. Generate the kubernetes manifest from the helm chart, optionally changing some default values
+2. Generate the Kubernetes manifest from the Helm chart. Optionally, adjust configuration values.
 ```
 helm template redpanda redpanda/redpanda \
   --set "statefulset.replicas=1" \
@@ -45,27 +45,29 @@ helm template redpanda redpanda/redpanda \
 >Then, the `--reserve-memory` needs to be reduced from 205 to 0M.
 >After that, the `spec.template.spec.containers.resources.limits.memory` should be reduced from 2.5Gi to 1Gi
 
-3. Copy the Statefulset, `redpanda` and `redpanda-external` services, and ConfigMap to the Datacater kubernetes manifest.
+3. Copy the StatefulSet, the Services `redpanda` and `redpanda-external`, and the ConfigMap to DataCater's Kubernetes manifest, which you generated as describe above.
 
-## working with Redpanda in Cluster
-To access the broker inside datacater, the `bootsrap.servers` 
-should be set to `redpanda-0.redpanda.default.svc.cluster.local.:9093`.
+## Accessing Redpanda from within the cluster
 
-### Working with [rpk](https://docs.redpanda.com/docs/platform/reference/rpk/) inside Cluster
-Redpanda offers a command line tool, `rpk`, that can be used to interact with the broker 
-from inside the kubernetes cluster. rpk can be used with the following command:
+To access the Redpanda broker from inside the Kubernetes cluster, e.g.,
+from DataCater, you can set `bootsrap.servers` to `redpanda-0.redpanda.default.svc.cluster.local.:9093`.
+
+### Working with [rpk](https://docs.redpanda.com/docs/platform/reference/rpk/) inside the cluster
+
+Redpanda offers a command line tool, `rpk`, that can be used to administrate the Redpanda broker.
+You can use `rpk` with the following command:
 ```
 kubectl exec -it -n [NAMESPACE] redpanda-0 -- rpk [COMMAND] --brokers='redpanda-0.redpanda.default.svc.cluster.local.:9093'
 ```
 
-## Working with RedPanda from outside the cluster
-The broker can also be access from outside the kubernetes cluster, locally. 
-In order for this to work with the configured advertised address, 
-The address resolution needs to be changed in your systems `/etc/hosts` file.
-append the line `127.0.0.1 redpanda-0.redpanda.default.svc.cluster.local.` to the `/etc/hosts` file
+## Accessing Redpanda from outside the cluster
 
-The Broker cann then be accessed by port-forwarding:
+The Redpanda broker can also be accessed from outside the Kubernetes cluster, i.e., from your host machine.
+To this end, you need to perform two steps.
+
+1. Please append the line `127.0.0.1 redpanda-0.redpanda.default.svc.cluster.local.` to the `/etc/hosts` file of your host OS, such that the advertised listener is correctly working when accessing Redpanda.
+
+2. Create a port forward to allow accessing Redpanda from your host:
 ```
 kubectl port-forward redpanda-0 9093:9093
 ```
-
