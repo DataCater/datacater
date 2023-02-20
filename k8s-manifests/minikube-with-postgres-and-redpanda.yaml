@@ -7,7 +7,7 @@ metadata:
   labels:
     app.kubernetes.io/name: datacater
     app.kubernetes.io/instance: release-name
-    app.kubernetes.io/version: "a8c44ec189ab82763809d59ffa9659ace3e7466e"
+    app.kubernetes.io/version: "f27effbb9df8779d8c473cbf54c9c726b24fcb6d"
 ---
 # Source: datacater/templates/role.yaml
 apiVersion: rbac.authorization.k8s.io/v1
@@ -61,7 +61,7 @@ metadata:
     app.kubernetes.io/part-of: datacater-0.1.0
     app.kubernetes.io/name: "python-runner"
     app.kubernetes.io/instance: release-name
-    app.kubernetes.io/version: "a8c44ec189ab82763809d59ffa9659ace3e7466e"
+    app.kubernetes.io/version: "f27effbb9df8779d8c473cbf54c9c726b24fcb6d"
 spec:
   selector:
     app.kubernetes.io/name: "python-runner"
@@ -80,7 +80,7 @@ metadata:
   labels:
     app.kubernetes.io/name: datacater
     app.kubernetes.io/instance: release-name
-    app.kubernetes.io/version: "a8c44ec189ab82763809d59ffa9659ace3e7466e"
+    app.kubernetes.io/version: "f27effbb9df8779d8c473cbf54c9c726b24fcb6d"
 spec:
   type: ClusterIP
   ports:
@@ -102,7 +102,7 @@ metadata:
   namespace: default
 spec:
   containers:
-    - image: datacater/ui:a8c44ec189ab82763809d59ffa9659ace3e7466e
+    - image: datacater/ui:f27effbb9df8779d8c473cbf54c9c726b24fcb6d
       imagePullPolicy: IfNotPresent
       name: ui
       ports:
@@ -202,7 +202,7 @@ metadata:
     app.kubernetes.io/part-of: datacater-0.1.0
     app.kubernetes.io/name: "python-runner"
     app.kubernetes.io/instance: release-name
-    app.kubernetes.io/version: "a8c44ec189ab82763809d59ffa9659ace3e7466e"
+    app.kubernetes.io/version: "f27effbb9df8779d8c473cbf54c9c726b24fcb6d"
 spec:
   serviceName: pythonrunner
   replicas: 5
@@ -217,11 +217,11 @@ spec:
         app.kubernetes.io/part-of: datacater-0.1.0
         app.kubernetes.io/name: "python-runner"
         app.kubernetes.io/instance: release-name
-        app.kubernetes.io/version: "a8c44ec189ab82763809d59ffa9659ace3e7466e"
+        app.kubernetes.io/version: "f27effbb9df8779d8c473cbf54c9c726b24fcb6d"
     spec:
       containers:
         - name: python-runner
-          image: "datacater/python-runner:a8c44ec189ab82763809d59ffa9659ace3e7466e"
+          image: "datacater/python-runner:f27effbb9df8779d8c473cbf54c9c726b24fcb6d"
           imagePullPolicy: IfNotPresent
           ports:
             - name: http
@@ -261,7 +261,7 @@ metadata:
   labels:
     app.kubernetes.io/name: datacater
     app.kubernetes.io/instance: release-name
-    app.kubernetes.io/version: "a8c44ec189ab82763809d59ffa9659ace3e7466e"
+    app.kubernetes.io/version: "f27effbb9df8779d8c473cbf54c9c726b24fcb6d"
 spec:
   serviceName: datacater
   replicas: 1
@@ -284,7 +284,7 @@ spec:
         - name: datacater
           securityContext:
             {}
-          image: "datacater/datacater:a8c44ec189ab82763809d59ffa9659ace3e7466e"
+          image: "datacater/datacater:f27effbb9df8779d8c473cbf54c9c726b24fcb6d"
           imagePullPolicy: IfNotPresent
           env:
             - name: QUARKUS_DATASOURCE_REACTIVE_URL
@@ -298,7 +298,7 @@ spec:
             - name: DATACATER_DEPLOYMENT_NAMESPACE
               value: default
             - name: DATACATER_DEPLOYMENT_IMAGE
-              value: datacater/pipeline:a8c44ec189ab82763809d59ffa9659ace3e7466e
+              value: datacater/pipeline:f27effbb9df8779d8c473cbf54c9c726b24fcb6d
             - name: DATACATER_TRANSFORMS_PATH
               value: /datacater/transforms
             - name: DATACATER_FILTERS_PATH
@@ -306,7 +306,7 @@ spec:
             - name: DATACATER_PYTHONRUNNER_REPLICAS
               value: "5"
             - name: DATACATER_PYTHONRUNNER_IMAGE_VERSION
-              value: a8c44ec189ab82763809d59ffa9659ace3e7466e
+              value: f27effbb9df8779d8c473cbf54c9c726b24fcb6d
             - name: QUARKUS_LOG_CONSOLE_JSON
               value: "false"
               #these thresholds should be raised if your deployments are getting `Java heap Out of memory` exceptions
