@@ -1,0 +1,16 @@
+{
+  "name": "stream-test",
+  "spec": {
+    "kafka": {
+      "bootstrap.servers": "",
+      "topic": {
+        "config": {
+        }
+      }
+    },
+    "kind": "KAFKA"
+  },
+  "labels": {
+    "app.datacater.io/config": "configUUIDPlaceholder"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "name": "stream-config",
+  "kind": "STREAM",
+  "metadata" : {
+  },
+  "spec": {
+    "kafka": {
+      "bootstrap.servers": "localhost:9092",
+      "topic": {
+        "num.partitions": "4",
+        "replication.factor": "1"
+      }
+    }
+  }
+}
