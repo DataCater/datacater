@@ -37,41 +37,46 @@ public class ConfigUtilities {
   }
 
   public static Stream combineWithStream(Stream stream, ConfigEntity config) {
-    checkValidKind(Kind.STREAM, config.getKind());
 
-    stream
-        .spec()
-        .getKafka()
-        .putAll(
-            JsonUtilities.toObjectMap(
-                config.getSpec().get(stream.spec().getKind().name().toLowerCase(Locale.ROOT))));
-
+    if (config.getId() != null) {
+      checkValidKind(Kind.STREAM, config.getKind());
+      stream
+          .spec()
+          .getKafka()
+          .putAll(
+              JsonUtilities.toObjectMap(
+                  config.getSpec().get(stream.spec().getKind().name().toLowerCase(Locale.ROOT))));
+    }
     return stream;
   }
 
   public static PipelineEntity combineWithPipeline(PipelineEntity pe, ConfigEntity config) {
-    checkValidKind(Kind.PIPELINE, config.getKind());
-    JsonNode pipelineSpecNode = pe.getSpec();
-    Map<String, Object> pipelineSpec = JsonUtilities.toObjectMap(pipelineSpecNode);
-    Map<String, Object> configSpec = JsonUtilities.toObjectMap(config.getSpec());
-    pipelineSpec.putAll(configSpec);
+    if (config.getId() != null) {
+      checkValidKind(Kind.PIPELINE, config.getKind());
+      JsonNode pipelineSpecNode = pe.getSpec();
+      Map<String, Object> pipelineSpec = JsonUtilities.toObjectMap(pipelineSpecNode);
+      Map<String, Object> configSpec = JsonUtilities.toObjectMap(config.getSpec());
+      pipelineSpec.putAll(configSpec);
 
-    // need to map steps from config
-    // add the steps to pe
-    // should the steps be added at the bottom of the steps or overwrite steps? has implications and
-    // the way records are transformed and filtered
+      // need to map steps from config
+      // add the steps to pe
+      // should the steps be added at the bottom of the steps or overwrite steps? has implications
+      // and
+      // the way records are transformed and filtered
 
-    // TODO finish mapping
-    LOGGER.info(pe.asJsonString());
+      // TODO finish mapping
+      LOGGER.info(pe.asJsonString());
+    }
     return pe;
   }
 
   public static DeploymentSpec combineWithDeployment(
       DeploymentSpec deploymentSpec, ConfigEntity config) {
-    checkValidKind(Kind.DEPLOYMENT, config.getKind());
+    if (config.getId() != null) {
+      checkValidKind(Kind.DEPLOYMENT, config.getKind());
 
-    deploymentSpec.deployment().putAll(JsonUtilities.toObjectMap(config.getSpec()));
-
+      deploymentSpec.deployment().putAll(JsonUtilities.toObjectMap(config.getSpec()));
+    }
     return deploymentSpec;
   }
 
