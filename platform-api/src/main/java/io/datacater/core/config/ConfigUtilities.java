@@ -12,10 +12,8 @@ import io.smallrye.mutiny.Uni;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
-import org.jboss.logging.Logger;
 
 public class ConfigUtilities {
-  private static final Logger LOGGER = Logger.getLogger(ConfigUtilities.class);
 
   public static Uni<ConfigEntity> getConfig(UUID configUUID, DataCaterSessionFactory dsf) {
     return dsf.withTransaction(
@@ -65,7 +63,6 @@ public class ConfigUtilities {
       // the way records are transformed and filtered
 
       // TODO finish mapping
-      LOGGER.info(pe.asJsonString());
     }
     return pe;
   }
