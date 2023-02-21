@@ -55,15 +55,6 @@ public class Pipeline {
     return new Pipeline(name, metadata, spec);
   }
 
-  @JsonCreator
-  static Pipeline from(
-      @JsonProperty(value = "name", required = true) String name,
-      @JsonProperty(value = "metadata", required = true) Map<String, String> metadata,
-      @JsonProperty(value = "spec", required = true) PipelineSpec spec,
-      @JsonProperty(value = "labels", required = true) Map<String, String> labels) {
-    return new Pipeline(name, metadata, spec, labels);
-  }
-
   @JsonIgnore
   static Pipeline from(PipelineEntity pe) throws JsonProcessingException {
     ObjectMapper mapper = new ObjectMapper();
