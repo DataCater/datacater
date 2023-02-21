@@ -1,0 +1,9 @@
+{
+  "name": "deployment-config",
+  "kind": "DEPLOYMENT",
+  "metadata" : {
+  },
+  "spec": {
+    "pipeline": "pipelineUUIDPlaceholder"
+  }
+}

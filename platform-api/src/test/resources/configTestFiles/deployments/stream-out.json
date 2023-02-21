@@ -1,0 +1,15 @@
+{
+  "name": "config-mapping-stream-out",
+  "spec": {
+    "kafka": {
+      "bootstrap.servers": "localhost:9092",
+      "topic": {
+        "config": {
+        }
+      }
+    },
+    "kind": "KAFKA"
+  },
+  "labels": {
+  }
+}
