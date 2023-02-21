@@ -11,15 +11,12 @@ import io.restassured.response.Response;
 import java.io.IOException;
 import java.net.URL;
 import java.util.UUID;
-import org.jboss.logging.Logger;
 import org.junit.jupiter.api.*;
 
 @QuarkusTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class ConfigStreamTest {
-  private static final Logger LOGGER = Logger.getLogger(ConfigStreamTest.class);
-
   JsonNode configJson;
   JsonNode streamJson;
   UUID configUUID;
@@ -65,8 +62,7 @@ public class ConfigStreamTest {
   void postStream() {
     String jsonString = streamJson.toString();
     jsonString = jsonString.replace(configUUIDPlaceholder, configUUID.toString());
-    LOGGER.info("adding stream");
-    LOGGER.info(jsonString);
+
     given()
         .header("Content-Type", "application/json")
         .body(jsonString)
