@@ -163,7 +163,6 @@ public class DeploymentEndpoint {
   @Consumes(MediaType.APPLICATION_JSON)
   public Uni<DeploymentEntity> createDeployment(DeploymentSpec spec) {
     DeploymentEntity de = new DeploymentEntity(spec);
-    Uni<PipelineEntity> pipelineUni = getPipeline(spec);
     Uni<ConfigEntity> configUni =
         ConfigUtilities.getConfig(ConfigUtilities.getConfigUUID(spec.labels()), dsf);
 
@@ -172,25 +171,44 @@ public class DeploymentEndpoint {
             session
                 .persist(de)
                 .onItem()
-                .transformToUni(empty -> pipelineUni)
+                .transform(
+                    x ->
+                        configUni
+                            .onItem()
+                            .transform(
+                                config -> ConfigUtilities.combineWithDeployment(spec, config)))
                 .onItem()
                 .transformToUni(
-                    pipelineEntity ->
+                    combinedSpecUni ->
+                        combinedSpecUni
+                            .onItem()
+                            .transformToUni(
+                                combinedSpec ->
+                                    Uni.combine()
+                                        .all()
+                                        .unis(
+                                            Uni.createFrom().item(combinedSpec),
+                                            getPipeline(combinedSpec))
+                                        .asTuple()))
+                .onItem()
+                .transformToUni(
+                    specAndPipeline ->
                         Uni.combine()
                             .all()
                             .unis(
-                                Uni.createFrom().item(pipelineEntity),
+                                Uni.createFrom().item(specAndPipeline.getItem2()),
                                 getStream(
-                                    spec,
+                                    specAndPipeline.getItem1(),
                                     StaticConfig.STREAM_IN_CONFIG,
-                                    pipelineEntity,
+                                    specAndPipeline.getItem2(),
                                     StaticConfig.STREAM_IN),
                                 getStream(
-                                    spec,
+                                    specAndPipeline.getItem1(),
                                     StaticConfig.STREAM_OUT_CONFIG,
-                                    pipelineEntity,
+                                    specAndPipeline.getItem2(),
                                     StaticConfig.STREAM_OUT),
-                                configUni)
+                                configUni,
+                                Uni.createFrom().item(specAndPipeline.getItem1()))
                             .asTuple())
                 .onItem()
                 .transform(
@@ -199,7 +217,7 @@ public class DeploymentEndpoint {
                             tuple.getItem1(),
                             tuple.getItem3(),
                             tuple.getItem2(),
-                            spec,
+                            tuple.getItem5(),
                             de,
                             tuple.getItem4())));
   }
