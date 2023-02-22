@@ -13,9 +13,11 @@ public record Config(
     String name, Kind kind, Map<String, Object> metadata, Map<String, Object> spec) {
 
   public Config(String name, Kind kind, Map<String, Object> metadata, Map<String, Object> spec) {
-    Map<String, Object> labels = new HashMap<>();
-    labels.put("app.datacater.io/config", name);
-    metadata.put("labels", labels);
+    Map<String, Object> parentLabels = new HashMap<>();
+    Map<String, Object> childLabels = new HashMap<>();
+    childLabels.put("app.datacater.io/config", name);
+    parentLabels.put("labels", childLabels);
+    metadata.putAll(parentLabels);
 
     this.name = name;
     this.kind = kind;
