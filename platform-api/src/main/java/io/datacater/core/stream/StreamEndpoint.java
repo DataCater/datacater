@@ -59,7 +59,7 @@ public class StreamEndpoint {
   @Consumes(MediaType.APPLICATION_JSON)
   public Uni<Response> createStream(Stream stream) throws JsonProcessingException {
     StreamEntity se = new StreamEntity(stream.name(), stream.spec(), stream.labels());
-    Uni<ConfigEntity> ce =
+    Uni<List<ConfigEntity>> configList =
         ConfigUtilities.getConfig(ConfigUtilities.getConfigUUID(stream.labels()), dsf);
 
     return dsf.withTransaction(
@@ -68,7 +68,11 @@ public class StreamEndpoint {
                     .persist(se)
                     .onItem()
                     .transformToUni(
-                        a -> Uni.combine().all().unis(Uni.createFrom().item(a), ce).asTuple())
+                        a ->
+                            Uni.combine()
+                                .all()
+                                .unis(Uni.createFrom().item(a), configList)
+                                .asTuple())
                     .onItem()
                     .transform(
                         b -> {
@@ -86,7 +90,7 @@ public class StreamEndpoint {
   @RequestBody
   @Consumes(MediaType.APPLICATION_JSON)
   public Uni<StreamEntity> updateStream(@PathParam("uuid") UUID uuid, Stream stream) {
-    Uni<ConfigEntity> ce =
+    Uni<List<ConfigEntity>> configList =
         ConfigUtilities.getConfig(ConfigUtilities.getConfigUUID(stream.labels()), dsf);
 
     return dsf.withTransaction(
@@ -95,7 +99,7 @@ public class StreamEndpoint {
                 .find(StreamEntity.class, uuid)
                 .onItem()
                 .transformToUni(
-                    a -> Uni.combine().all().unis(Uni.createFrom().item(a), ce).asTuple())
+                    a -> Uni.combine().all().unis(Uni.createFrom().item(a), configList).asTuple())
                 .onItem()
                 .transform(
                     tuple -> {
@@ -140,8 +144,8 @@ public class StreamEndpoint {
                 .replaceWith(Response.ok().build())));
   }
 
-  private void updateStreamObject(Stream stream, ConfigEntity config) {
-    stream = ConfigUtilities.combineWithStream(stream, config);
+  private void updateStreamObject(Stream stream, List<ConfigEntity> configList) {
+    stream = ConfigUtilities.combineWithStream(stream, configList);
     StreamService kafkaAdmin = KafkaStreamsAdmin.from(stream);
     kafkaAdmin.updateStream(stream.spec());
     kafkaAdmin.close();
@@ -161,8 +165,8 @@ public class StreamEndpoint {
     }
   }
 
-  private void createStreamObject(Stream stream, ConfigEntity config) {
-    stream = ConfigUtilities.combineWithStream(stream, config);
+  private void createStreamObject(Stream stream, List<ConfigEntity> configList) {
+    stream = ConfigUtilities.combineWithStream(stream, configList);
     StreamService kafkaAdmin = KafkaStreamsAdmin.from(stream);
     kafkaAdmin.createStream(stream.spec());
     kafkaAdmin.close();

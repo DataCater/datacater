@@ -3,8 +3,6 @@ package io.datacater.core.pipeline;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import io.datacater.core.authentication.DataCaterSessionFactory;
-import io.datacater.core.config.ConfigEntity;
-import io.datacater.core.config.ConfigUtilities;
 import io.datacater.core.exceptions.DatacaterException;
 import io.datacater.core.exceptions.PipelineNotFoundException;
 import io.datacater.core.kubernetes.DataCaterK8sConfig;
@@ -12,11 +10,10 @@ import io.datacater.core.kubernetes.PythonRunnerPool;
 import io.datacater.core.kubernetes.PythonRunnerPool.NamedPod;
 import io.datacater.core.stream.StreamMessage;
 import io.datacater.core.stream.StreamsUtilities;
-import io.datacater.core.utilities.JsonUtilities;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.quarkus.security.Authenticated;
 import io.smallrye.mutiny.Uni;
-import io.smallrye.mutiny.tuples.Tuple4;
+import io.smallrye.mutiny.tuples.Tuple3;
 import io.smallrye.mutiny.unchecked.Unchecked;
 import io.vertx.mutiny.core.Vertx;
 import io.vertx.mutiny.ext.web.client.WebClient;
@@ -26,7 +23,6 @@ import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandlers;
 import java.time.Duration;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import javax.inject.Inject;
@@ -165,18 +161,18 @@ public class PipelineEndpoint {
               return streamsUtil.getStreamMessages(streamUUID);
             });
 
-    Uni<ConfigEntity> ce =
-        pe.flatMap(
-            pipelineEntity -> {
-              JsonNode labelsNode = pipelineEntity.getLabels();
-              Map labels = JsonUtilities.toStringMap(labelsNode);
-              UUID configUuid = ConfigUtilities.getConfigUUID(labels);
-              return ConfigUtilities.getConfig(configUuid, dsf);
-            });
+    //    Uni<ConfigEntity> ce =
+    //        pe.flatMap(
+    //            pipelineEntity -> {
+    //              JsonNode labelsNode = pipelineEntity.getLabels();
+    //              Map labels = JsonUtilities.toStringMap(labelsNode);
+    //              UUID configUuid = ConfigUtilities.getConfigUUID(labels);
+    //              return ConfigUtilities.getConfig(configUuid, dsf);
+    //            });
 
     Uni<NamedPod> namedPodAsync = runnerPool.getStaticPod();
-    Uni<Tuple4<PipelineEntity, List<StreamMessage>, NamedPod, ConfigEntity>> combinedPeMsg =
-        Uni.combine().all().unis(pe, messages, namedPodAsync, ce).asTuple();
+    Uni<Tuple3<PipelineEntity, List<StreamMessage>, NamedPod>> combinedPeMsg =
+        Uni.combine().all().unis(pe, messages, namedPodAsync).asTuple();
 
     return combinedPeMsg.flatMap(
         Unchecked.function(
@@ -184,11 +180,8 @@ public class PipelineEndpoint {
               PipelineEntity entity = peMsg.getItem1();
               List<StreamMessage> msgs = peMsg.getItem2();
               NamedPod namedPod = peMsg.getItem3();
-              ConfigEntity config = peMsg.getItem4();
 
-              PipelineEntity updatedEntity = ConfigUtilities.combineWithPipeline(entity, config);
-
-              HttpRequest specPost = namedPod.buildPost(updatedEntity.asJsonString(), "/pipeline");
+              HttpRequest specPost = namedPod.buildPost(entity.asJsonString(), "/pipeline");
               CompletableFuture<HttpResponse<String>> specResponse =
                   httpClient.sendAsync(specPost, BodyHandlers.ofString());
 

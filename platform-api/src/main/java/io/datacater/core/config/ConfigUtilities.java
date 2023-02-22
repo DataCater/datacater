@@ -9,20 +9,19 @@ import io.datacater.core.pipeline.PipelineEntity;
 import io.datacater.core.stream.Stream;
 import io.datacater.core.utilities.JsonUtilities;
 import io.smallrye.mutiny.Uni;
-import java.util.Locale;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 public class ConfigUtilities {
 
-  public static Uni<ConfigEntity> getConfig(UUID configUUID, DataCaterSessionFactory dsf) {
+  public static Uni<List<ConfigEntity>> getConfig(UUID configUUID, DataCaterSessionFactory dsf) {
     return dsf.withTransaction(
         (session, transaction) ->
             session
-                .find(ConfigEntity.class, configUUID)
+                .createQuery("from ConfigEntity", ConfigEntity.class)
+                .getResultList()
                 .onItem()
                 .ifNull()
-                .continueWith(new ConfigEntity()));
+                .continueWith(new ArrayList<ConfigEntity>()));
   }
 
   public static UUID getConfigUUID(Map<String, String> labels) {
@@ -34,16 +33,21 @@ public class ConfigUtilities {
     }
   }
 
-  public static Stream combineWithStream(Stream stream, ConfigEntity config) {
-
-    if (config.getId() != null) {
-      checkValidKind(Kind.STREAM, config.getKind());
-      stream
-          .spec()
-          .getKafka()
-          .putAll(
-              JsonUtilities.toObjectMap(
-                  config.getSpec().get(stream.spec().getKind().name().toLowerCase(Locale.ROOT))));
+  public static Stream combineWithStream(Stream stream, List<ConfigEntity> configList) {
+    if (!configList.isEmpty()) {
+      for (ConfigEntity config : configList) {
+        if (config.getId() != null) {
+          checkValidKind(Kind.STREAM, config.getKind());
+          stream
+              .spec()
+              .getKafka()
+              .putAll(
+                  JsonUtilities.toObjectMap(
+                      config
+                          .getSpec()
+                          .get(stream.spec().getKind().name().toLowerCase(Locale.ROOT))));
+        }
+      }
     }
     return stream;
   }
@@ -68,11 +72,14 @@ public class ConfigUtilities {
   }
 
   public static DeploymentSpec combineWithDeployment(
-      DeploymentSpec deploymentSpec, ConfigEntity config) {
-    if (config.getId() != null) {
-      checkValidKind(Kind.DEPLOYMENT, config.getKind());
-
-      deploymentSpec.deployment().putAll(JsonUtilities.toObjectMap(config.getSpec()));
+      DeploymentSpec deploymentSpec, List<ConfigEntity> configList) {
+    if (!configList.isEmpty()) {
+      for (ConfigEntity config : configList) {
+        if (config.getId() != null) {
+          checkValidKind(Kind.DEPLOYMENT, config.getKind());
+          deploymentSpec.deployment().putAll(JsonUtilities.toObjectMap(config.getSpec()));
+        }
+      }
     }
     return deploymentSpec;
   }
