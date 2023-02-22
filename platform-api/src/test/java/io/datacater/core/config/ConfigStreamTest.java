@@ -2,15 +2,12 @@ package io.datacater.core.config;
 
 import static io.restassured.RestAssured.given;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import io.quarkus.test.junit.QuarkusTest;
-import io.restassured.response.Response;
 import java.io.IOException;
 import java.net.URL;
-import java.util.UUID;
 import org.junit.jupiter.api.*;
 
 @QuarkusTest
@@ -19,11 +16,9 @@ import org.junit.jupiter.api.*;
 public class ConfigStreamTest {
   JsonNode configJson;
   JsonNode streamJson;
-  UUID configUUID;
   final String baseURI = "http://localhost:8081";
   final String streamsPath = "/streams";
   final String configsPath = "/configs";
-  String configUUIDPlaceholder = "configUUIDPlaceholder";
 
   @BeforeAll
   public void setUp() throws IOException {
@@ -41,31 +36,24 @@ public class ConfigStreamTest {
 
   @Test
   @Order(1)
-  void postConfig() throws JsonProcessingException {
-    Response configResponse =
-        given()
-            .header("Content-Type", "application/json")
-            .body(configJson.toString())
-            .baseUri(baseURI)
-            .post(configsPath);
+  void postConfig() {
 
-    ObjectMapper mapper = new JsonMapper();
-    ConfigEntity ce = mapper.readValue(configResponse.body().asString(), ConfigEntity.class);
-
-    configUUID = ce.getId();
-
-    Assertions.assertEquals(200, configResponse.getStatusCode());
+    given()
+        .header("Content-Type", "application/json")
+        .body(configJson.toString())
+        .baseUri(baseURI)
+        .post(configsPath)
+        .then()
+        .statusCode(200);
   }
 
   @Test
   @Order(2)
   void postStream() {
-    String jsonString = streamJson.toString();
-    jsonString = jsonString.replace(configUUIDPlaceholder, configUUID.toString());
 
     given()
         .header("Content-Type", "application/json")
-        .body(jsonString)
+        .body(streamJson.toString())
         .baseUri(baseURI)
         .post(streamsPath)
         .then()
