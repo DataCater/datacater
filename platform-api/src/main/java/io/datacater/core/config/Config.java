@@ -6,10 +6,23 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.datacater.core.config.enums.Kind;
+import java.util.HashMap;
 import java.util.Map;
 
 public record Config(
     String name, Kind kind, Map<String, Object> metadata, Map<String, Object> spec) {
+
+  public Config(String name, Kind kind, Map<String, Object> metadata, Map<String, Object> spec) {
+    Map<String, Object> labels = new HashMap<>();
+    labels.put("app.datacater.io/config", name);
+    metadata.put("labels", labels);
+
+    this.name = name;
+    this.kind = kind;
+    this.metadata = metadata;
+    this.spec = spec;
+  }
+
   @JsonCreator
   static Config from(
       @JsonProperty(value = "name", required = true) String name,
