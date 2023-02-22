@@ -15,7 +15,7 @@ public record Config(
   public Config(String name, Kind kind, Map<String, Object> metadata, Map<String, Object> spec) {
     Map<String, Object> parentLabels = new HashMap<>();
     Map<String, Object> childLabels = new HashMap<>();
-    childLabels.put("app.datacater.io/config", name);
+    childLabels.put("app.datacater.io/name", name);
     parentLabels.put("labels", childLabels);
     metadata.putAll(parentLabels);
 

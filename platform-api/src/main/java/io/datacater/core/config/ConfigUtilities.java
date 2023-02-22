@@ -10,10 +10,12 @@ import io.datacater.core.stream.Stream;
 import io.datacater.core.utilities.JsonUtilities;
 import io.smallrye.mutiny.Uni;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class ConfigUtilities {
 
-  public static Uni<List<ConfigEntity>> getConfig(UUID configUUID, DataCaterSessionFactory dsf) {
+  public static Uni<List<ConfigEntity>> getConfig(
+      List<String> configs, DataCaterSessionFactory dsf) {
     return dsf.withTransaction(
         (session, transaction) ->
             session
@@ -24,13 +26,14 @@ public class ConfigUtilities {
                 .continueWith(new ArrayList<ConfigEntity>()));
   }
 
-  public static UUID getConfigUUID(Map<String, String> labels) {
+  public static List<String> getConfigNames(Map<String, String> labels) {
     // TODO consider other label options
-    try {
-      return UUID.fromString(labels.get("app.datacater.io/config"));
-    } catch (Exception e) {
-      return new UUID(0, 0);
-    }
+    return labels.entrySet().stream()
+        .filter(x -> x.getKey() == "app.datacater.io/name")
+        .collect(Collectors.toMap(map -> map.getKey(), map -> map.getValue()))
+        .values()
+        .stream()
+        .toList();
   }
 
   public static Stream combineWithStream(Stream stream, List<ConfigEntity> configList) {

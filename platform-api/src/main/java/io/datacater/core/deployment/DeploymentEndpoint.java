@@ -164,7 +164,7 @@ public class DeploymentEndpoint {
   public Uni<DeploymentEntity> createDeployment(DeploymentSpec spec) {
     DeploymentEntity de = new DeploymentEntity(spec);
     Uni<List<ConfigEntity>> configList =
-        ConfigUtilities.getConfig(ConfigUtilities.getConfigUUID(spec.labels()), dsf);
+        ConfigUtilities.getConfig(ConfigUtilities.getConfigNames(spec.labels()), dsf);
 
     return dsf.withTransaction(
         (session, transaction) ->
@@ -250,7 +250,7 @@ public class DeploymentEndpoint {
       @PathParam("uuid") UUID deploymentUuid, DeploymentSpec spec) {
     Uni<DeploymentEntity> deploymentUni = getDeploymentUni(deploymentUuid);
     Uni<List<ConfigEntity>> configList =
-        ConfigUtilities.getConfig(ConfigUtilities.getConfigUUID(spec.labels()), dsf);
+        ConfigUtilities.getConfig(ConfigUtilities.getConfigNames(spec.labels()), dsf);
     return configList
         .onItem()
         .transform(configs -> ConfigUtilities.combineWithDeployment(spec, configs))
