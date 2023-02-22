@@ -248,30 +248,39 @@ public class DeploymentEndpoint {
   @Path("{uuid}")
   public Uni<DeploymentEntity> updateDeployment(
       @PathParam("uuid") UUID deploymentUuid, DeploymentSpec spec) {
-    Uni<PipelineEntity> pipelineUni = getPipeline(spec);
     Uni<DeploymentEntity> deploymentUni = getDeploymentUni(deploymentUuid);
     Uni<ConfigEntity> configUni =
         ConfigUtilities.getConfig(ConfigUtilities.getConfigUUID(spec.labels()), dsf);
-    return pipelineUni
+    return configUni
+        .onItem()
+        .transform(config -> ConfigUtilities.combineWithDeployment(spec, config))
         .onItem()
         .transformToUni(
-            pipelineEntity ->
+            combinedSpec ->
+                Uni.combine()
+                    .all()
+                    .unis(Uni.createFrom().item(combinedSpec), getPipeline(combinedSpec))
+                    .asTuple())
+        .onItem()
+        .transformToUni(
+            specAndPipeline ->
                 Uni.combine()
                     .all()
                     .unis(
-                        Uni.createFrom().item(pipelineEntity),
+                        Uni.createFrom().item(specAndPipeline.getItem2()),
                         getStream(
-                            spec,
+                            specAndPipeline.getItem1(),
                             StaticConfig.STREAM_IN_CONFIG,
-                            pipelineEntity,
+                            specAndPipeline.getItem2(),
                             StaticConfig.STREAM_IN),
                         getStream(
-                            spec,
+                            specAndPipeline.getItem1(),
                             StaticConfig.STREAM_OUT_CONFIG,
-                            pipelineEntity,
+                            specAndPipeline.getItem2(),
                             StaticConfig.STREAM_OUT),
                         deploymentUni,
-                        configUni)
+                        configUni,
+                        Uni.createFrom().item(specAndPipeline.getItem1()))
                     .asTuple())
         .onItem()
         .transform(
@@ -280,7 +289,7 @@ public class DeploymentEndpoint {
                     tuple.getItem1(),
                     tuple.getItem3(),
                     tuple.getItem2(),
-                    spec,
+                    tuple.getItem6(),
                     tuple.getItem4(),
                     tuple.getItem5()))
         .onFailure()
