@@ -26,10 +26,6 @@ public class Pipeline {
   @JsonProperty("spec")
   private PipelineSpec spec;
 
-  @ElementCollection
-  @JsonProperty("labels")
-  Map<String, String> labels;
-
   @ExcludeFromGeneratedCoverageReport
   protected Pipeline() {}
 
@@ -37,14 +33,6 @@ public class Pipeline {
     this.name = name;
     this.metadata = metadata;
     this.spec = spec;
-  }
-
-  private Pipeline(
-      String name, Map<String, String> metadata, PipelineSpec spec, Map<String, String> labels) {
-    this.name = name;
-    this.metadata = metadata;
-    this.spec = spec;
-    this.labels = labels;
   }
 
   @JsonCreator

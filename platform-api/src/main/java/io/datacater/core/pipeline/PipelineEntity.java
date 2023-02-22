@@ -7,15 +7,12 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.json.JsonMapper;
-import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import io.datacater.core.ExcludeFromGeneratedCoverageReport;
 import io.datacater.core.exceptions.JsonNotParsableException;
-import io.datacater.core.utilities.JsonUtilities;
 import io.quarkiverse.hibernate.types.json.JsonBinaryType;
 import io.quarkiverse.hibernate.types.json.JsonType;
 import io.quarkiverse.hibernate.types.json.JsonTypes;
 import java.util.Date;
-import java.util.Map;
 import java.util.UUID;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -58,26 +55,12 @@ public class PipelineEntity {
   @JsonProperty("spec")
   private JsonNode spec;
 
-  @Type(type = JsonTypes.JSON)
-  @Column(name = "labels", columnDefinition = JsonTypes.JSON_BIN)
-  @JsonProperty("labels")
-  private JsonNode labels;
-
   public PipelineEntity() {}
 
   private PipelineEntity(String name, JsonNode metadata, JsonNode spec) {
     this.name = name;
     this.metadata = metadata;
     this.spec = spec;
-    this.labels = JsonNodeFactory.instance.objectNode();
-  }
-
-  private PipelineEntity(
-      String name, JsonNode metadata, JsonNode spec, Map<String, String> labels) {
-    this.name = name;
-    this.metadata = metadata;
-    this.spec = spec;
-    this.labels = JsonUtilities.convertMap(labels);
   }
 
   @JsonIgnore
@@ -114,10 +97,6 @@ public class PipelineEntity {
 
   public String getName() {
     return name;
-  }
-
-  public JsonNode getLabels() {
-    return labels;
   }
 
   @ExcludeFromGeneratedCoverageReport

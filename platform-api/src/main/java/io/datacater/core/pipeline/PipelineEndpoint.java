@@ -161,15 +161,6 @@ public class PipelineEndpoint {
               return streamsUtil.getStreamMessages(streamUUID);
             });
 
-    //    Uni<ConfigEntity> ce =
-    //        pe.flatMap(
-    //            pipelineEntity -> {
-    //              JsonNode labelsNode = pipelineEntity.getLabels();
-    //              Map labels = JsonUtilities.toStringMap(labelsNode);
-    //              UUID configUuid = ConfigUtilities.getConfigUUID(labels);
-    //              return ConfigUtilities.getConfig(configUuid, dsf);
-    //            });
-
     Uni<NamedPod> namedPodAsync = runnerPool.getStaticPod();
     Uni<Tuple3<PipelineEntity, List<StreamMessage>, NamedPod>> combinedPeMsg =
         Uni.combine().all().unis(pe, messages, namedPodAsync).asTuple();
