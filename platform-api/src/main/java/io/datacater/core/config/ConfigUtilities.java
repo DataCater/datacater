@@ -22,8 +22,11 @@ public class ConfigUtilities {
                 .createQuery("from ConfigEntity", ConfigEntity.class)
                 .getResultList()
                 .onItem()
+                .transform(
+                    x -> x.stream().filter(item -> configs.contains(item.getName())).toList())
+                .onItem()
                 .ifNull()
-                .continueWith(new ArrayList<ConfigEntity>()));
+                .continueWith(new ArrayList<>()));
   }
 
   public static List<String> getConfigNames(Map<String, String> labels) {

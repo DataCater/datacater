@@ -61,7 +61,6 @@ public class StreamEndpoint {
     StreamEntity se = new StreamEntity(stream.name(), stream.spec(), stream.labels());
     Uni<List<ConfigEntity>> configList =
         ConfigUtilities.getConfig(ConfigUtilities.getConfigNames(stream.labels()), dsf);
-
     return dsf.withTransaction(
             (session, transaction) ->
                 session
