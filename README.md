@@ -80,9 +80,9 @@ kubectl apply -f k8s-manifests/minikube-with-postgres-ns-default.yaml
 ```
 kubectl get all --all-namespaces
 ```
-4. Port-forward to service
+4. Port-forward to service `datacater-ui`
 ```
-kubectl port-forward ui 8080:8080
+kubectl port-forward svc/datacater-ui 8080:80
 ```
 5. Browse to `localhost:8080` in your browser. The default login credentials are `admin:admin`.
 
