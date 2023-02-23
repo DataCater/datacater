@@ -8,7 +8,6 @@ import io.datacater.core.stream.Stream;
 import io.datacater.core.utilities.JsonUtilities;
 import io.smallrye.mutiny.Uni;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class ConfigUtilities {
 
@@ -27,14 +26,9 @@ public class ConfigUtilities {
                 .continueWith(new ArrayList<>()));
   }
 
-  public static List<String> getConfigNames(Map<String, String> labels) {
+  public static List<String> getConfigNames(Map<String, List<String>> labels) {
     // TODO consider other label options
-    return labels.entrySet().stream()
-        .filter(x -> Objects.equals(x.getKey(), "app.datacater.io/name"))
-        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue))
-        .values()
-        .stream()
-        .toList();
+    return labels.get("app.datacater.io/name");
   }
 
   public static Stream combineWithStream(Stream stream, List<ConfigEntity> configList) {

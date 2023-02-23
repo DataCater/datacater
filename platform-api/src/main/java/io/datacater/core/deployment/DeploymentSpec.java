@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
@@ -24,7 +25,7 @@ public record DeploymentSpec(
         """)
         @JsonProperty(value = "spec", required = true)
         Map<String, Object> deployment,
-    Map<String, String> labels) {
+    Map<String, List<String>> labels) {
   public DeploymentSpec(String name, Map<String, Object> deployment) {
     this(name, deployment, new HashMap<>());
   }
