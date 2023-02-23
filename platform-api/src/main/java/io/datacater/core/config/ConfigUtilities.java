@@ -3,7 +3,7 @@ package io.datacater.core.config;
 import io.datacater.core.authentication.DataCaterSessionFactory;
 import io.datacater.core.config.enums.Kind;
 import io.datacater.core.deployment.DeploymentSpec;
-import io.datacater.core.exceptions.IncorrectConfigKindException;
+import io.datacater.core.exceptions.IncorrectConfigException;
 import io.datacater.core.stream.Stream;
 import io.datacater.core.utilities.JsonUtilities;
 import io.smallrye.mutiny.Uni;
@@ -39,6 +39,7 @@ public class ConfigUtilities {
 
   public static Stream combineWithStream(Stream stream, List<ConfigEntity> configList) {
     if (!configList.isEmpty()) {
+      validateConfigList(configList);
       for (ConfigEntity config : configList) {
         if (config.getId() != null) {
           checkValidKind(Kind.STREAM, config.getKind());
@@ -59,6 +60,7 @@ public class ConfigUtilities {
   public static DeploymentSpec combineWithDeployment(
       DeploymentSpec deploymentSpec, List<ConfigEntity> configList) {
     if (!configList.isEmpty()) {
+      validateConfigList(configList);
       for (ConfigEntity config : configList) {
         if (config.getId() != null) {
           checkValidKind(Kind.DEPLOYMENT, config.getKind());
@@ -75,7 +77,45 @@ public class ConfigUtilities {
           String.format(
               "The Config kind '%s' does not match that of the given resource '%s'",
               actual, expected);
-      throw new IncorrectConfigKindException(ExceptionMessage);
+      throw new IncorrectConfigException(ExceptionMessage);
     }
+  }
+
+  private static void validateConfigList(List<ConfigEntity> configList) {
+    if (configList.size() <= 1) {
+      // nothing to compare
+      return;
+    }
+    Map<String, Object> givenMap = JsonUtilities.toObjectMap(configList.get(0).getSpec());
+    configList.stream()
+        .skip(1)
+        .forEach(
+            x -> {
+              Map<String, Object> currentMap = JsonUtilities.toObjectMap(x.getSpec());
+              String duplicateKey = mapsContainEqualKey(givenMap, currentMap);
+              if (duplicateKey != null) {
+                String ExceptionMessage =
+                    String.format(
+                        "The key '%s' was found in at least two given Configs", duplicateKey);
+                throw new IncorrectConfigException(ExceptionMessage);
+              }
+            });
+  }
+
+  private static String mapsContainEqualKey(
+      Map<String, Object> givenMap, Map<String, Object> currentMap) {
+    for (String currentKey : currentMap.keySet()) {
+      if (givenMap.containsKey(currentKey)) {
+        Object value = currentMap.get(currentKey);
+        if (value instanceof HashMap<?, ?>) {
+          return mapsContainEqualKey(
+              (Map<String, Object>) givenMap.get(currentKey),
+              (Map<String, Object>) currentMap.get(currentKey));
+        } else {
+          return currentKey;
+        }
+      }
+    }
+    return null;
   }
 }

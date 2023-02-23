@@ -7,10 +7,9 @@ import javax.ws.rs.ext.Provider;
 
 @ExcludeFromGeneratedCoverageReport
 @Provider
-public class IncorrectConfigKindExceptionMapper
-    implements ExceptionMapper<IncorrectConfigKindException> {
+public class IncorrectConfigExceptionMapper implements ExceptionMapper<IncorrectConfigException> {
   @Override
-  public Response toResponse(IncorrectConfigKindException exception) {
+  public Response toResponse(IncorrectConfigException exception) {
     Error error =
         Error.from(
             Response.Status.BAD_REQUEST.getStatusCode(),
