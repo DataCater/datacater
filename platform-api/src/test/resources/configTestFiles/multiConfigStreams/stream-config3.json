@@ -1,0 +1,14 @@
+{
+  "name": "stream-config3",
+  "kind": "STREAM",
+  "metadata" : {
+  },
+  "spec": {
+    "kafka": {
+      "topic": {
+        "num.partitions": "4",
+        "replication.factor": "1"
+      }
+    }
+  }
+}

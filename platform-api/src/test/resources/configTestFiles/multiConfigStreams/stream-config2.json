@@ -1,0 +1,11 @@
+{
+  "name": "stream-config2",
+  "kind": "STREAM",
+  "metadata" : {
+  },
+  "spec": {
+    "kafka": {
+      "bootstrap.servers": "localhost:9092"
+    }
+  }
+}
