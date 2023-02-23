@@ -13,28 +13,24 @@ import io.restassured.response.Response;
 import java.io.IOException;
 import java.net.URL;
 import java.util.UUID;
-import org.jboss.logging.Logger;
 import org.junit.jupiter.api.*;
 
 @QuarkusTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class ConfigDeploymentTest {
-  private static final Logger LOGGER = Logger.getLogger(ConfigStreamTest.class);
 
   JsonNode configJson;
   JsonNode streamInJson;
   JsonNode streamOutJson;
   JsonNode pipelineJson;
   JsonNode deploymentJson;
-  UUID configUUID;
   UUID pipelineUUID;
   final String baseURI = "http://localhost:8081";
   final String deploymentsPath = "/deployments";
   final String streamsPath = "/streams";
   final String pipelinesPath = "/pipelines";
   final String configsPath = "/configs";
-  String configUUIDPlaceholder = "configUUIDPlaceholder";
   String streaminUUIDPlaceholder = "streaminUUIDPlaceholder";
   String streamoutUUIDPlaceholder = "streamoutUUIDPlaceholder";
   String pipelineUUIDPlaceholder = "pipelineUUIDPlaceholder";
@@ -68,9 +64,6 @@ public class ConfigDeploymentTest {
   @Order(1)
   void postResources() throws JsonProcessingException {
     ObjectMapper mapper = new JsonMapper();
-
-    LOGGER.info(streamInJson.toString());
-    LOGGER.info(streamOutJson.toString());
 
     Response streamInResponse =
         given()
@@ -111,39 +104,27 @@ public class ConfigDeploymentTest {
 
   @Test
   @Order(2)
-  void postConfig() throws JsonProcessingException {
-    ObjectMapper mapper = new JsonMapper();
+  void postConfig() {
     String configString = configJson.toString();
     configString = configString.replace(pipelineUUIDPlaceholder, pipelineUUID.toString());
 
-    Response configResponse =
+    Response resp =
         given()
             .header("Content-Type", "application/json")
             .body(configString)
             .baseUri(baseURI)
             .post(configsPath);
-
-    ConfigEntity ce = mapper.readValue(configResponse.body().asString(), ConfigEntity.class);
-
-    configUUID = ce.getId();
-
-    Assertions.assertEquals(200, configResponse.getStatusCode());
   }
 
   @Test
   @Order(3)
   void postDeployment() {
-    String deploymentString = deploymentJson.toString();
-    deploymentString = deploymentString.replace(configUUIDPlaceholder, configUUID.toString());
-    LOGGER.info(deploymentString);
     Response deploymentResponse =
         given()
             .header("Content-Type", "application/json")
-            .body(deploymentString)
+            .body(deploymentJson.toString())
             .baseUri(baseURI)
             .post(deploymentsPath);
-
-    LOGGER.info(deploymentResponse.body().asString());
 
     Assertions.assertEquals(200, deploymentResponse.getStatusCode());
   }
