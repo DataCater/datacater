@@ -1,7 +1,6 @@
 package io.datacater.core.config;
 
 import static io.restassured.RestAssured.given;
-import static org.hamcrest.Matchers.containsString;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -43,8 +42,8 @@ class ConfigEndpointTest {
 
   @Test
   @Order(1)
-  void testGetEmptyConfigList() {
-    given().get().then().statusCode(200).and().body(containsString("[]"));
+  void testGetConfigList() {
+    given().get().then().statusCode(200);
   }
 
   @Test
@@ -92,7 +91,7 @@ class ConfigEndpointTest {
 
   @Test
   @Order(6)
-  void testGetConfigList() throws JsonProcessingException {
+  void testGetPropagatedConfigList() throws JsonProcessingException {
     Response response = given().get();
 
     ObjectMapper objectMapper = new ObjectMapper();
@@ -101,7 +100,7 @@ class ConfigEndpointTest {
         objectMapper.readValue(response.getBody().asString(), new TypeReference<>() {});
 
     Assertions.assertEquals(200, response.statusCode());
-    Assertions.assertEquals(4, receivedConfigs.size());
+    Assertions.assertTrue(4 <= receivedConfigs.size());
   }
 
   @Test

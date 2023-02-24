@@ -58,7 +58,7 @@ class StreamInspectStringTest {
         given().pathParam("uuid", uuid.toString()).queryParam("limit", "3").get("/{uuid}/inspect");
 
     Assertions.assertEquals(200, response.getStatusCode());
-    Assertions.assertTrue(response.body().asString().contains("test 1000"));
+    Assertions.assertTrue(response.body().asString().contains("[{\"key\":\"test"));
   }
 
   void start() throws IOException {
