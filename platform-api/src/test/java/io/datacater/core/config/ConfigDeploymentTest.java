@@ -13,13 +13,14 @@ import io.restassured.response.Response;
 import java.io.IOException;
 import java.net.URL;
 import java.util.UUID;
+import org.jboss.logging.Logger;
 import org.junit.jupiter.api.*;
 
 @QuarkusTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class ConfigDeploymentTest {
-
+  private static final Logger LOGGER = Logger.getLogger(ConfigDeploymentTest.class);
   JsonNode configJson;
   JsonNode streamInJson;
   JsonNode streamOutJson;
@@ -119,12 +120,14 @@ public class ConfigDeploymentTest {
   @Test
   @Order(3)
   void postDeployment() {
-    given()
-        .header("Content-Type", "application/json")
-        .body(deploymentJson.toString())
-        .baseUri(baseURI)
-        .post(deploymentsPath)
-        .then()
-        .statusCode(200);
+    Response response =
+        given()
+            .header("Content-Type", "application/json")
+            .body(deploymentJson.toString())
+            .baseUri(baseURI)
+            .post(deploymentsPath);
+    LOGGER.debug("deployment response: ");
+    LOGGER.debug(response.body().asString());
+    Assertions.assertEquals(200, response.getStatusCode());
   }
 }
