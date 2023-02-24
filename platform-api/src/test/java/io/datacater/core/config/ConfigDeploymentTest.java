@@ -107,25 +107,24 @@ public class ConfigDeploymentTest {
   void postConfig() {
     String configString = configJson.toString();
     configString = configString.replace(pipelineUUIDPlaceholder, pipelineUUID.toString());
-
-    Response resp =
-        given()
-            .header("Content-Type", "application/json")
-            .body(configString)
-            .baseUri(baseURI)
-            .post(configsPath);
+    given()
+        .header("Content-Type", "application/json")
+        .body(configString)
+        .baseUri(baseURI)
+        .post(configsPath)
+        .then()
+        .statusCode(200);
   }
 
   @Test
   @Order(3)
   void postDeployment() {
-    Response deploymentResponse =
-        given()
-            .header("Content-Type", "application/json")
-            .body(deploymentJson.toString())
-            .baseUri(baseURI)
-            .post(deploymentsPath);
-
-    Assertions.assertEquals(200, deploymentResponse.getStatusCode());
+    given()
+        .header("Content-Type", "application/json")
+        .body(deploymentJson.toString())
+        .baseUri(baseURI)
+        .post(deploymentsPath)
+        .then()
+        .statusCode(200);
   }
 }
