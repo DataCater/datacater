@@ -1,5 +1,6 @@
 package io.datacater.core.stream;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -47,6 +48,7 @@ public class StreamEntity {
   @Type(type = JsonTypes.JSON)
   @Column(name = "labels", columnDefinition = JsonTypes.JSON_BIN)
   @JsonProperty("labels")
+  @JsonInclude(JsonInclude.Include.NON_NULL)
   private JsonNode labels;
 
   protected StreamEntity() {}

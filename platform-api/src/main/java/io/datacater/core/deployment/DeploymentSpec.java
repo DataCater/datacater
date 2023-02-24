@@ -25,7 +25,7 @@ public record DeploymentSpec(
         """)
         @JsonProperty(value = "spec", required = true)
         Map<String, Object> deployment,
-    Map<String, List<String>> labels) {
+    @JsonProperty(value = "labels") Map<String, List<String>> labels) {
   public DeploymentSpec(String name, Map<String, Object> deployment) {
     this(name, deployment, new HashMap<>());
   }

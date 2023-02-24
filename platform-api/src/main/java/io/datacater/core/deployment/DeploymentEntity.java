@@ -1,5 +1,6 @@
 package io.datacater.core.deployment;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -49,6 +50,7 @@ public class DeploymentEntity {
   @Type(type = JsonTypes.JSON)
   @Column(name = "labels", columnDefinition = JsonTypes.JSON_BIN)
   @JsonProperty("labels")
+  @JsonInclude(JsonInclude.Include.NON_NULL)
   private JsonNode labels;
 
   protected DeploymentEntity() {}

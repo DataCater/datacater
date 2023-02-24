@@ -13,7 +13,7 @@ public record Stream(String name, StreamSpec spec, Map<String, List<String>> lab
   static Stream from(
       @JsonProperty(value = "name", required = true) String name,
       @JsonProperty(value = "spec", required = true) StreamSpec spec,
-      @JsonProperty(value = "labels", required = true) Map<String, List<String>> labels) {
+      @JsonProperty(value = "labels") Map<String, List<String>> labels) {
     return new Stream(name, spec, labels);
   }
 

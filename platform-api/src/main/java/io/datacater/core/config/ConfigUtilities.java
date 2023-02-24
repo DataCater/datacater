@@ -28,7 +28,10 @@ public class ConfigUtilities {
 
   public static List<String> getConfigNames(Map<String, List<String>> labels) {
     // TODO consider other label options
-    return labels.get("app.datacater.io/name");
+    if (labels != null) {
+      return labels.get("app.datacater.io/name");
+    }
+    return new ArrayList<>();
   }
 
   public static Stream combineWithStream(Stream stream, List<ConfigEntity> configList) {
