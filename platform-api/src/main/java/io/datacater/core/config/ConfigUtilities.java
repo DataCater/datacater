@@ -26,6 +26,7 @@ public class ConfigUtilities {
                 .continueWith(new ArrayList<>()));
   }
 
+  // extractConfigNames
   public static List<String> getConfigNames(Map<String, List<String>> labels) {
     // TODO consider other label options
     if (labels != null) {
@@ -34,7 +35,7 @@ public class ConfigUtilities {
     return new ArrayList<>();
   }
 
-  public static Stream combineWithStream(Stream stream, List<ConfigEntity> configList) {
+  public static Stream applyConfigsToStream(Stream stream, List<ConfigEntity> configList) {
     if (!configList.isEmpty()) {
       validateConfigList(configList);
       for (ConfigEntity config : configList) {
