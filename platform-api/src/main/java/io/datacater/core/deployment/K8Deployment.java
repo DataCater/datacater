@@ -44,6 +44,12 @@ public class K8Deployment {
     final String dataShareVolumeName = StaticConfig.DATA_SHARE_VOLUME_NAME_PREFIX + deploymentId;
     final String serviceName = StaticConfig.SERVICE_NAME_PREFIX + deploymentId;
 
+    LOGGER.info("creating deployment in k8");
+    LOGGER.info("new deployment spec: ");
+    LOGGER.info(deploymentSpec.deployment());
+    LOGGER.info("pipeline: ");
+    LOGGER.info(pe.asJsonString());
+
     List<EnvVar> variables =
         getEnvironmentVariables(streamIn, streamOut, deploymentSpec, deploymentId);
 
