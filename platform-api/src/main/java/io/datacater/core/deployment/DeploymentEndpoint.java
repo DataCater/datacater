@@ -162,11 +162,6 @@ public class DeploymentEndpoint {
   @POST
   @Consumes(MediaType.APPLICATION_JSON)
   public Uni<DeploymentEntity> createDeployment(DeploymentSpec spec) {
-    LOGGER.info("creating deployment.");
-    LOGGER.info("Deployment Spec: ");
-    LOGGER.info(spec.deployment());
-    LOGGER.info("Deployment labels: ");
-    LOGGER.info(spec.labels());
     DeploymentEntity de = new DeploymentEntity(spec);
     Uni<List<ConfigEntity>> configList =
         ConfigUtilities.getConfig(ConfigUtilities.getConfigNames(spec.labels()), dsf);
@@ -405,10 +400,7 @@ public class DeploymentEndpoint {
       DeploymentEntity de,
       List<ConfigEntity> configList) {
     K8Deployment k8Deployment = new K8Deployment(client);
-
-    LOGGER.info("adding config to deployment");
     deploymentSpec = ConfigUtilities.combineWithDeployment(deploymentSpec, configList);
-    LOGGER.info("config added to deployment");
     de.setStatus(
         DeploymentEntity.serializeMap(
             k8Deployment.create(pe, streamIn, streamOut, deploymentSpec, de.getId())));

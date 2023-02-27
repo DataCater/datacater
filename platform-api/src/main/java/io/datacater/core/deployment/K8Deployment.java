@@ -44,17 +44,10 @@ public class K8Deployment {
     final String dataShareVolumeName = StaticConfig.DATA_SHARE_VOLUME_NAME_PREFIX + deploymentId;
     final String serviceName = StaticConfig.SERVICE_NAME_PREFIX + deploymentId;
 
-    LOGGER.info("creating deployment in k8");
-    LOGGER.info("new deployment spec: ");
-    LOGGER.info(deploymentSpec.deployment());
-    LOGGER.info("pipeline: ");
-    LOGGER.info(pe.asJsonString());
-
     List<EnvVar> variables =
         getEnvironmentVariables(streamIn, streamOut, deploymentSpec, deploymentId);
 
     try {
-      LOGGER.info("trying to create");
       Deployment deployment =
           new DeploymentBuilder()
               .withNewMetadata()
@@ -91,25 +84,25 @@ public class K8Deployment {
           .inNamespace(StaticConfig.EnvironmentVariables.NAMESPACE)
           .create(deployment);
 
-      LOGGER.info("created");
-
     } catch (KubernetesClientException ex) {
 
       LOGGER.info("error thrown");
+      LOGGER.info("message: ");
       LOGGER.info(ex.getMessage());
+      LOGGER.info(ex.getCause().getMessage());
+      LOGGER.info(ex.getCause().getLocalizedMessage());
+      LOGGER.info("status: ");
+      LOGGER.info(ex.getStatus());
+      LOGGER.info("code: ");
+      LOGGER.info(ex.getCode());
       throw new CreateDeploymentException(StringUtilities.wrapString(ex.getMessage()));
     }
 
     if (!exists(deploymentId)) {
-      LOGGER.info("deployment doesn't exits");
       throw new CreateDeploymentException(StaticConfig.LoggerMessages.DEPLOYMENT_NOT_CREATED);
     }
-    LOGGER.info("creating configmap");
     k8ConfigMap.getOrCreate(configmapName, pe);
-    LOGGER.info("configmap created");
-    LOGGER.info("creating service");
     k8Service.create(serviceName);
-    LOGGER.info("service created");
     return getDeployment(deploymentId);
   }
 
