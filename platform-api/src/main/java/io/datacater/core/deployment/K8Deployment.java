@@ -85,17 +85,7 @@ public class K8Deployment {
           .create(deployment);
 
     } catch (KubernetesClientException ex) {
-
-      LOGGER.info("error thrown");
-      LOGGER.info("message: ");
-      LOGGER.info(ex.getMessage());
-      LOGGER.info(ex.getCause().getMessage());
-      LOGGER.info(ex.getCause().getLocalizedMessage());
-      LOGGER.info("status: ");
-      LOGGER.info(ex.getStatus());
-      LOGGER.info("code: ");
-      LOGGER.info(ex.getCode());
-      throw new CreateDeploymentException(StringUtilities.wrapString(ex.getMessage()));
+      throw new CreateDeploymentException(StringUtilities.wrapString(ex.getCause().getMessage()));
     }
 
     if (!exists(deploymentId)) {
