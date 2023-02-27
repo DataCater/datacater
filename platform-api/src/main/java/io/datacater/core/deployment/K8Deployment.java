@@ -54,6 +54,7 @@ public class K8Deployment {
         getEnvironmentVariables(streamIn, streamOut, deploymentSpec, deploymentId);
 
     try {
+      LOGGER.info("trying to create");
       Deployment deployment =
           new DeploymentBuilder()
               .withNewMetadata()
@@ -90,15 +91,25 @@ public class K8Deployment {
           .inNamespace(StaticConfig.EnvironmentVariables.NAMESPACE)
           .create(deployment);
 
+      LOGGER.info("created");
+
     } catch (KubernetesClientException ex) {
+
+      LOGGER.info("error thrown");
+      LOGGER.info(ex.getMessage());
       throw new CreateDeploymentException(StringUtilities.wrapString(ex.getMessage()));
     }
 
     if (!exists(deploymentId)) {
+      LOGGER.info("deployment doesn't exits");
       throw new CreateDeploymentException(StaticConfig.LoggerMessages.DEPLOYMENT_NOT_CREATED);
     }
+    LOGGER.info("creating configmap");
     k8ConfigMap.getOrCreate(configmapName, pe);
+    LOGGER.info("configmap created");
+    LOGGER.info("creating service");
     k8Service.create(serviceName);
+    LOGGER.info("service created");
     return getDeployment(deploymentId);
   }
 
