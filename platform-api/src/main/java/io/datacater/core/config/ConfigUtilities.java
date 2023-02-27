@@ -26,9 +26,7 @@ public class ConfigUtilities {
                 .continueWith(new ArrayList<>()));
   }
 
-  // extractConfigNames
   public static List<String> getConfigNames(Map<String, List<String>> labels) {
-    // TODO consider other label options
     if (labels != null) {
       return labels.get("app.datacater.io/name");
     }
@@ -37,10 +35,10 @@ public class ConfigUtilities {
 
   public static Stream applyConfigsToStream(Stream stream, List<ConfigEntity> configList) {
     if (!configList.isEmpty()) {
-      validateConfigList(configList);
+      depthSearchConfigsForDuplicateKeys(configList);
       for (ConfigEntity config : configList) {
         if (config.getId() != null) {
-          checkValidKind(Kind.STREAM, config.getKind());
+          verifyKindOfConfig(Kind.STREAM, config.getKind());
           stream
               .spec()
               .getKafka()
@@ -55,13 +53,13 @@ public class ConfigUtilities {
     return stream;
   }
 
-  public static DeploymentSpec combineWithDeployment(
+  public static DeploymentSpec applyConfigsToDeployment(
       DeploymentSpec deploymentSpec, List<ConfigEntity> configList) {
     if (!configList.isEmpty()) {
-      validateConfigList(configList);
+      depthSearchConfigsForDuplicateKeys(configList);
       for (ConfigEntity config : configList) {
         if (config.getId() != null) {
-          checkValidKind(Kind.DEPLOYMENT, config.getKind());
+          verifyKindOfConfig(Kind.DEPLOYMENT, config.getKind());
           deploymentSpec.deployment().putAll(JsonUtilities.toObjectMap(config.getSpec()));
         }
       }
@@ -69,7 +67,7 @@ public class ConfigUtilities {
     return deploymentSpec;
   }
 
-  private static void checkValidKind(Kind expected, Kind actual) {
+  private static void verifyKindOfConfig(Kind expected, Kind actual) {
     if (expected != actual) {
       String ExceptionMessage =
           String.format(
@@ -79,7 +77,7 @@ public class ConfigUtilities {
     }
   }
 
-  private static void validateConfigList(List<ConfigEntity> configList) {
+  private static void depthSearchConfigsForDuplicateKeys(List<ConfigEntity> configList) {
     if (configList.size() <= 1) {
       // nothing to compare
       return;

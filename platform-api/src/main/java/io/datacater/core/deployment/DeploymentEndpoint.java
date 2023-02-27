@@ -172,11 +172,11 @@ public class DeploymentEndpoint {
                 .persist(de)
                 .onItem()
                 .transform(
-                    x ->
+                    voidObject ->
                         configList
                             .onItem()
                             .transform(
-                                configs -> ConfigUtilities.combineWithDeployment(spec, configs)))
+                                configs -> ConfigUtilities.applyConfigsToDeployment(spec, configs)))
                 .onItem()
                 .transformToUni(
                     combinedSpecUni ->
@@ -253,7 +253,7 @@ public class DeploymentEndpoint {
         ConfigUtilities.getConfig(ConfigUtilities.getConfigNames(spec.labels()), dsf);
     return configList
         .onItem()
-        .transform(configs -> ConfigUtilities.combineWithDeployment(spec, configs))
+        .transform(configs -> ConfigUtilities.applyConfigsToDeployment(spec, configs))
         .onItem()
         .transformToUni(
             combinedSpec ->
@@ -400,7 +400,7 @@ public class DeploymentEndpoint {
       DeploymentEntity de,
       List<ConfigEntity> configList) {
     K8Deployment k8Deployment = new K8Deployment(client);
-    deploymentSpec = ConfigUtilities.combineWithDeployment(deploymentSpec, configList);
+    deploymentSpec = ConfigUtilities.applyConfigsToDeployment(deploymentSpec, configList);
     de.setStatus(
         DeploymentEntity.serializeMap(
             k8Deployment.create(pe, streamIn, streamOut, deploymentSpec, de.getId())));

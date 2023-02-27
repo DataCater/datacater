@@ -66,17 +66,12 @@ public class StreamEndpoint {
                 session
                     .persist(se)
                     .onItem()
-                    .transformToUni(
-                        a ->
-                            Uni.combine()
-                                .all()
-                                .unis(Uni.createFrom().item(a), configList)
-                                .asTuple())
+                    .transformToUni(voidObject -> configList)
                     .onItem()
                     .transform(
-                        b -> {
-                          createStreamObject(stream, b.getItem2());
-                          return b;
+                        configEntities -> {
+                          createStreamObject(stream, configEntities);
+                          return configEntities;
                         })
                     .replaceWith(Response.ok(se).build()))
         .onFailure()
@@ -98,7 +93,11 @@ public class StreamEndpoint {
                 .find(StreamEntity.class, uuid)
                 .onItem()
                 .transformToUni(
-                    a -> Uni.combine().all().unis(Uni.createFrom().item(a), configList).asTuple())
+                    streamEntity ->
+                        Uni.combine()
+                            .all()
+                            .unis(Uni.createFrom().item(streamEntity), configList)
+                            .asTuple())
                 .onItem()
                 .transform(
                     tuple -> {
@@ -110,7 +109,7 @@ public class StreamEndpoint {
                         throw new RuntimeException(e);
                       }
                     })
-                .flatMap(x -> x)
+                .flatMap(streamEntity -> streamEntity)
                 .onFailure()
                 .transform(
                     ex ->
