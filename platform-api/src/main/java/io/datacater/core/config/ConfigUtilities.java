@@ -90,7 +90,7 @@ public class ConfigUtilities {
         .forEach(
             x -> {
               Map<String, Object> currentMap = JsonUtilities.toObjectMap(x.getSpec());
-              String duplicateKey = mapsContainEqualKey(givenMap, currentMap);
+              String duplicateKey = mapsContainsEqualKey(givenMap, currentMap);
               if (duplicateKey != null) {
                 String ExceptionMessage =
                     String.format(
@@ -100,13 +100,13 @@ public class ConfigUtilities {
             });
   }
 
-  private static String mapsContainEqualKey(
+  private static String mapsContainsEqualKey(
       Map<String, Object> givenMap, Map<String, Object> currentMap) {
     for (String currentKey : currentMap.keySet()) {
       if (givenMap.containsKey(currentKey)) {
         Object value = currentMap.get(currentKey);
         if (value instanceof HashMap<?, ?>) {
-          return mapsContainEqualKey(
+          return mapsContainsEqualKey(
               (Map<String, Object>) givenMap.get(currentKey),
               (Map<String, Object>) currentMap.get(currentKey));
         } else {
