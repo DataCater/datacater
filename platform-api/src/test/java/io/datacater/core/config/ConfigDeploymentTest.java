@@ -126,8 +126,8 @@ public class ConfigDeploymentTest {
             .body(deploymentJson.toString())
             .baseUri(baseURI)
             .post(deploymentsPath);
-    LOGGER.debug("deployment response: ");
-    LOGGER.debug(response.body().asString());
+    LOGGER.info("deployment response: ");
+    LOGGER.info(response.body().asString());
     Assertions.assertEquals(200, response.getStatusCode());
   }
 }
