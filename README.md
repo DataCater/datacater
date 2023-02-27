@@ -16,7 +16,7 @@ You find each component in this repository. See the [File Structure section](#fi
 Please watch the following video if you are interested in a demo of our
 2023.1 release:
 
-[<p align="center"><img src="https://cdn.loom.com/sessions/thumbnails/15947f13e71540948e3f9d57eac64976-with-play.gif" alt="Watch a demo of our 2023.1 release" width="300"/></p>](https://www.loom.com/share/15947f13e71540948e3f9d57eac64976)
+<p align="center"><a href="https://www.loom.com/share/15947f13e71540948e3f9d57eac64976"><img src="https://cdn.loom.com/sessions/thumbnails/15947f13e71540948e3f9d57eac64976-with-play.gif" alt="Watch a demo of our 2023.1 release" width="75%"/></a></p>
 
 ## Use Cases
 
