@@ -13,6 +13,11 @@ Users can choose from an extensive repository of [filter functions](https://gith
 
 You find each component in this repository. See the [File Structure section](#file-structure) for orientation.
 
+Please watch the following video if you are interested in a demo of our
+2023.1 release:
+
+<iframe src="https://www.loom.com/embed/15947f13e71540948e3f9d57eac64976" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></iframe>
+
 ## Use Cases
 
 ### DataCater excels at
