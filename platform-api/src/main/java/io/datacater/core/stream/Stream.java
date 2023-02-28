@@ -8,18 +8,18 @@ import io.datacater.core.utilities.JsonUtilities;
 import java.util.List;
 import java.util.Map;
 
-public record Stream(String name, StreamSpec spec, Map<String, List<String>> labels) {
+public record Stream(String name, StreamSpec spec, Map<String, List<String>> configSelector) {
   @JsonCreator
   static Stream from(
       @JsonProperty(value = "name", required = true) String name,
       @JsonProperty(value = "spec", required = true) StreamSpec spec,
-      @JsonProperty(value = "labels") Map<String, List<String>> labels) {
-    return new Stream(name, spec, labels);
+      @JsonProperty(value = "configSelector") Map<String, List<String>> configSelector) {
+    return new Stream(name, spec, configSelector);
   }
 
   public static Stream from(StreamEntity se) throws JsonProcessingException {
     ObjectMapper mapper = new ObjectMapper();
     StreamSpec spec = mapper.treeToValue(se.getSpec(), StreamSpec.class);
-    return new Stream(se.getName(), spec, JsonUtilities.toStringMap(se.getLabels()));
+    return new Stream(se.getName(), spec, JsonUtilities.toStringMap(se.getConfigSelector()));
   }
 }

@@ -10,7 +10,7 @@
     },
     "kind": "KAFKA"
   },
-  "labels": {
+  "configSelector": {
     "app.datacater.io/name": ["stream-config1", "stream-config3"]
   }
 }

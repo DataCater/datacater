@@ -10,6 +10,6 @@
     },
     "kind": "KAFKA"
   },
-  "labels": {
+  "configSelector": {
   }
 }

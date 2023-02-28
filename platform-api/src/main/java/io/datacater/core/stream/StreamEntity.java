@@ -46,24 +46,24 @@ public class StreamEntity {
   private JsonNode spec;
 
   @Type(type = JsonTypes.JSON)
-  @Column(name = "labels", columnDefinition = JsonTypes.JSON_BIN)
-  @JsonProperty("labels")
+  @Column(name = "configSelector", columnDefinition = JsonTypes.JSON_BIN)
+  @JsonProperty("configSelector")
   @JsonInclude(JsonInclude.Include.NON_NULL)
-  private JsonNode labels;
+  private JsonNode configSelector;
 
   protected StreamEntity() {}
 
   public StreamEntity(String name, StreamSpec spec) throws JsonProcessingException {
     this.name = name;
     this.spec = spec.serializeStreamSpec();
-    this.labels = JsonNodeFactory.instance.objectNode();
+    this.configSelector = JsonNodeFactory.instance.objectNode();
   }
 
-  public StreamEntity(String name, StreamSpec spec, Map<String, List<String>> labels)
+  public StreamEntity(String name, StreamSpec spec, Map<String, List<String>> configSelector)
       throws JsonProcessingException {
     this.name = name;
     this.spec = spec.serializeStreamSpec();
-    this.labels = JsonUtilities.convertMap(labels);
+    this.configSelector = JsonUtilities.convertMap(configSelector);
   }
 
   public StreamEntity updateEntity(Stream stream) throws JsonProcessingException {
@@ -83,7 +83,7 @@ public class StreamEntity {
     return id;
   }
 
-  public JsonNode getLabels() {
-    return labels;
+  public JsonNode getConfigSelector() {
+    return configSelector;
   }
 }

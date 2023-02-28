@@ -1,7 +1,7 @@
 {
   "spec": {
   },
-  "labels": {
+  "configSelector": {
     "app.datacater.io/name": ["deployment-config"]
   }
 }

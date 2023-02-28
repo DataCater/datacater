@@ -48,10 +48,10 @@ public class DeploymentEntity {
   private JsonNode status;
 
   @Type(type = JsonTypes.JSON)
-  @Column(name = "labels", columnDefinition = JsonTypes.JSON_BIN)
-  @JsonProperty("labels")
+  @Column(name = "configSelector", columnDefinition = JsonTypes.JSON_BIN)
+  @JsonProperty("configSelector")
   @JsonInclude(JsonInclude.Include.NON_NULL)
-  private JsonNode labels;
+  private JsonNode configSelector;
 
   protected DeploymentEntity() {}
 
@@ -63,7 +63,7 @@ public class DeploymentEntity {
   public DeploymentEntity(DeploymentSpec spec) {
     this.name = spec.name();
     this.spec = DeploymentEntity.serializeMap(spec.deployment());
-    this.labels = JsonUtilities.convertMap(spec.labels());
+    this.configSelector = JsonUtilities.convertMap(spec.configSelector());
   }
 
   protected void setSpec(JsonNode spec) {
@@ -82,7 +82,7 @@ public class DeploymentEntity {
     return this.spec;
   }
 
-  protected JsonNode getLabels() {
-    return labels;
+  protected JsonNode getConfigSelector() {
+    return configSelector;
   }
 }
