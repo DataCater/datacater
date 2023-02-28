@@ -10,7 +10,6 @@ import io.quarkiverse.hibernate.types.json.JsonBinaryType;
 import io.quarkiverse.hibernate.types.json.JsonType;
 import io.quarkiverse.hibernate.types.json.JsonTypes;
 import java.util.Date;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import javax.persistence.*;
@@ -59,11 +58,11 @@ public class StreamEntity {
     this.configSelector = JsonNodeFactory.instance.objectNode();
   }
 
-  public StreamEntity(String name, StreamSpec spec, Map<String, List<String>> configSelector)
+  public StreamEntity(String name, StreamSpec spec, Map<String, String> configSelector)
       throws JsonProcessingException {
     this.name = name;
     this.spec = spec.serializeStreamSpec();
-    this.configSelector = JsonUtilities.convertMap(configSelector);
+    this.configSelector = JsonUtilities.convertStringMap(configSelector);
   }
 
   public StreamEntity updateEntity(Stream stream) throws JsonProcessingException {

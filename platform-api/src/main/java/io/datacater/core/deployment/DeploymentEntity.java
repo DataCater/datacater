@@ -63,7 +63,7 @@ public class DeploymentEntity {
   public DeploymentEntity(DeploymentSpec spec) {
     this.name = spec.name();
     this.spec = DeploymentEntity.serializeMap(spec.deployment());
-    this.configSelector = JsonUtilities.convertMap(spec.configSelector());
+    this.configSelector = JsonUtilities.convertStringMap(spec.configSelector());
   }
 
   protected void setSpec(JsonNode spec) {

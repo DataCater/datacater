@@ -26,9 +26,9 @@ public class ConfigUtilities {
                 .continueWith(new ArrayList<>()));
   }
 
-  public static List<String> getConfigNames(Map<String, List<String>> labels) {
+  public static List<String> getConfigNames(Map<String, String> labels) {
     if (labels != null) {
-      return labels.get("app.datacater.io/name");
+      return Collections.singletonList(labels.get("app.datacater.io/name"));
     }
     return new ArrayList<>();
   }

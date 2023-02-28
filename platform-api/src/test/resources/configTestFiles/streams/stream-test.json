@@ -11,6 +11,6 @@
     "kind": "KAFKA"
   },
   "configSelector": {
-    "app.datacater.io/name": ["stream-config"]
+    "app.datacater.io/name": "stream-config"
   }
 }

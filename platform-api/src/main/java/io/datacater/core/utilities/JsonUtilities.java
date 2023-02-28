@@ -15,7 +15,7 @@ public class JsonUtilities {
   private JsonUtilities() {}
 
   @ExcludeFromGeneratedCoverageReport
-  public static JsonNode convertMap(Map<String, List<String>> map) {
+  public static JsonNode convertStringListMap(Map<String, List<String>> map) {
     try {
       ObjectMapper om = new ObjectMapper();
       return om.reader().readTree(om.writeValueAsString(map));
@@ -25,9 +25,29 @@ public class JsonUtilities {
   }
 
   @ExcludeFromGeneratedCoverageReport
-  public static Map<String, List<String>> toStringMap(JsonNode json) {
+  public static JsonNode convertStringMap(Map<String, String> map) {
+    try {
+      ObjectMapper om = new ObjectMapper();
+      return om.reader().readTree(om.writeValueAsString(map));
+    } catch (JsonProcessingException e) {
+      throw new DatacaterException(e.getMessage());
+    }
+  }
+
+  @ExcludeFromGeneratedCoverageReport
+  public static Map<String, List<String>> toStringListMap(JsonNode json) {
     ObjectMapper om = new ObjectMapper();
     Map<String, List<String>> map = om.convertValue(json, new TypeReference<>() {});
+    if (map == null) {
+      return new HashMap<>();
+    }
+    return map;
+  }
+
+  @ExcludeFromGeneratedCoverageReport
+  public static Map<String, String> toStringMap(JsonNode json) {
+    ObjectMapper om = new ObjectMapper();
+    Map<String, String> map = om.convertValue(json, new TypeReference<>() {});
     if (map == null) {
       return new HashMap<>();
     }

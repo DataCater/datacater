@@ -5,15 +5,14 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.datacater.core.utilities.JsonUtilities;
-import java.util.List;
 import java.util.Map;
 
-public record Stream(String name, StreamSpec spec, Map<String, List<String>> configSelector) {
+public record Stream(String name, StreamSpec spec, Map<String, String> configSelector) {
   @JsonCreator
   static Stream from(
       @JsonProperty(value = "name", required = true) String name,
       @JsonProperty(value = "spec", required = true) StreamSpec spec,
-      @JsonProperty(value = "configSelector") Map<String, List<String>> configSelector) {
+      @JsonProperty(value = "configSelector") Map<String, String> configSelector) {
     return new Stream(name, spec, configSelector);
   }
 
