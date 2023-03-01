@@ -8,10 +8,13 @@ import io.datacater.core.stream.Stream;
 import io.datacater.core.utilities.JsonUtilities;
 import io.smallrye.mutiny.Uni;
 import java.util.*;
-import org.jboss.logging.Logger;
 
 public class ConfigUtilities {
-  private static final Logger LOGGER = Logger.getLogger(ConfigUtilities.class);
+  static final String LABELS = "labels";
+  static final String KIND_DOES_NOT_MATCH_EXCEPTION_MESSAGE =
+      "The Config kind '%s' does not match that of the given resource '%s'";
+  static final String KEY_EXISTS_TWICE_EXCEPTION_MESSAGE =
+      "The key '%s' was found in at least two given Configs";
 
   public static Uni<List<ConfigEntity>> getConfig(
       Map<String, String> configs, DataCaterSessionFactory dsf) {
@@ -27,7 +30,7 @@ public class ConfigUtilities {
                             .filter(
                                 item ->
                                     stringMapsContainsEqualKey(
-                                        JsonUtilities.toStringMap(item.getMetadata().get("labels")),
+                                        JsonUtilities.toStringMap(item.getMetadata().get(LABELS)),
                                         configs))
                             .toList())
                 .onItem()
@@ -72,29 +75,29 @@ public class ConfigUtilities {
   private static void verifyKindOfConfig(Kind expected, Kind actual) {
     if (expected != actual) {
       String ExceptionMessage =
-          String.format(
-              "The Config kind '%s' does not match that of the given resource '%s'",
-              actual, expected);
+          String.format(KIND_DOES_NOT_MATCH_EXCEPTION_MESSAGE, actual, expected);
       throw new IncorrectConfigException(ExceptionMessage);
     }
   }
 
   private static void depthSearchConfigsForDuplicateKeys(List<ConfigEntity> configList) {
+    int skipFirstEntry = 1;
+    int listFirstEntry = 0;
     if (configList.size() <= 1) {
       // nothing to compare
       return;
     }
-    Map<String, Object> givenMap = JsonUtilities.toObjectMap(configList.get(0).getSpec());
+    Map<String, Object> givenMap =
+        JsonUtilities.toObjectMap(configList.get(listFirstEntry).getSpec());
     configList.stream()
-        .skip(1)
+        .skip(skipFirstEntry)
         .forEach(
-            x -> {
-              Map<String, Object> currentMap = JsonUtilities.toObjectMap(x.getSpec());
+            configEntity -> {
+              Map<String, Object> currentMap = JsonUtilities.toObjectMap(configEntity.getSpec());
               String duplicateKey = mapsContainsEqualKey(givenMap, currentMap);
               if (duplicateKey != null) {
                 String ExceptionMessage =
-                    String.format(
-                        "The key '%s' was found in at least two given Configs", duplicateKey);
+                    String.format(KEY_EXISTS_TWICE_EXCEPTION_MESSAGE, duplicateKey);
                 throw new IncorrectConfigException(ExceptionMessage);
               }
             });

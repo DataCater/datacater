@@ -14,7 +14,7 @@ public record Config(
   public Config(String name, Kind kind, Map<String, Object> metadata, Map<String, Object> spec) {
     this.name = name;
     this.kind = kind;
-    this.metadata = configureMetaDataLabels(metadata);
+    this.metadata = metadata;
     this.spec = spec;
   }
 
@@ -35,14 +35,5 @@ public record Config(
   public JsonNode serializeConfigSpec() throws JsonProcessingException {
     ObjectMapper objectMapper = new ObjectMapper();
     return objectMapper.readTree(objectMapper.writeValueAsString(spec));
-  }
-
-  private Map<String, Object> configureMetaDataLabels(Map<String, Object> metadata) {
-    //    Map<String, Object> parentLabels = new HashMap<>();
-    //    Map<String, Object> childLabels = new HashMap<>();
-    //    childLabels.put("app.datacater.io/name", name);
-    //    parentLabels.put("labels", childLabels);
-    //    metadata.putAll(parentLabels);
-    return metadata;
   }
 }
