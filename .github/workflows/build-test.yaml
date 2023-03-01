@@ -42,7 +42,7 @@ jobs       :
           java-version: '17'
           distribution: zulu
           cache: gradle
-    -   run: ./gradlew :platform-api:build --no-daemon --debug
+    -   run: ./gradlew :platform-api:build --no-daemon
     -   run: ./gradlew :pipeline:build --no-daemon
     -   name: Cache SonarCloud packages
         uses: actions/cache@v3
