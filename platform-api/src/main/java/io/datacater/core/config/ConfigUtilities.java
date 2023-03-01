@@ -122,9 +122,9 @@ public class ConfigUtilities {
     if (givenMap == null || currentMap == null || givenMap.isEmpty() || currentMap.isEmpty()) {
       return false;
     }
-    for (String currentKey : givenMap.keySet()) {
-      if (currentMap.containsKey(currentKey)) {
-        if (Objects.equals(currentMap.get(currentKey), givenMap.get(currentKey))) {
+    for (Map.Entry<String, String> givenEntry : givenMap.entrySet()) {
+      if (currentMap.containsKey(givenEntry.getKey())) {
+        if (Objects.equals(givenEntry.getValue(), currentMap.get(givenEntry.getKey()))) {
           return true;
         }
       }
