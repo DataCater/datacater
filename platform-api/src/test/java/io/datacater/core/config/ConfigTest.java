@@ -29,7 +29,7 @@ class ConfigTest {
   @Test
   void test() {
     Map<String, Object> spec = config.spec();
-    String expectedMetaData = "{labels={app.datacater.io/name=config1}}";
+    String expectedMetaData = "{}";
 
     Assertions.assertEquals("config1", config.name());
     Assertions.assertEquals(Kind.STREAM, config.kind());

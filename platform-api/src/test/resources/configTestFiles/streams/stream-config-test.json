@@ -2,6 +2,9 @@
   "name": "stream-config",
   "kind": "STREAM",
   "metadata" : {
+    "labels": {
+      "app.datacater.io/name": "stream-config"
+    }
   },
   "spec": {
     "kafka": {

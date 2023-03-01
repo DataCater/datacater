@@ -119,14 +119,12 @@ public class ConfigUtilities {
 
   private static boolean stringMapsContainsEqualKey(
       Map<String, String> givenMap, Map<String, String> currentMap) {
-    LOGGER.info("logging maps: ");
-    LOGGER.info(givenMap.entrySet());
-    LOGGER.info(currentMap.entrySet());
+    if (givenMap == null || currentMap == null || givenMap.isEmpty() || currentMap.isEmpty()) {
+      return false;
+    }
     for (String currentKey : givenMap.keySet()) {
-      LOGGER.info("checking key: " + currentKey + " with value: " + givenMap.get(currentKey));
       if (currentMap.containsKey(currentKey)) {
         if (Objects.equals(currentMap.get(currentKey), givenMap.get(currentKey))) {
-          LOGGER.info("key: " + currentKey + ", has matched");
           return true;
         }
       }

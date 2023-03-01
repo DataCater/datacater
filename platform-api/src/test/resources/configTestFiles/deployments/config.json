@@ -2,6 +2,9 @@
   "name": "deployment-config",
   "kind": "DEPLOYMENT",
   "metadata" : {
+    "labels" : {
+      "app.datacater.io/name": "deployment-config"
+    }
   },
   "spec": {
     "pipeline": "pipelineUUIDPlaceholder"
