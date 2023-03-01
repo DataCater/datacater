@@ -16,6 +16,8 @@ public class ConfigUtilities {
   static final String KEY_EXISTS_TWICE_EXCEPTION_MESSAGE =
       "The key '%s' was found in at least two given Configs";
 
+  private ConfigUtilities(){}
+
   public static Uni<List<ConfigEntity>> getMappedConfigs(
       Map<String, String> configs, DataCaterSessionFactory dsf) {
     return dsf.withTransaction(
