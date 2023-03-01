@@ -59,7 +59,8 @@ public class StreamEndpoint {
   @Consumes(MediaType.APPLICATION_JSON)
   public Uni<Response> createStream(Stream stream) throws JsonProcessingException {
     StreamEntity se = new StreamEntity(stream.name(), stream.spec(), stream.configSelector());
-    Uni<List<ConfigEntity>> configList = ConfigUtilities.getConfig(stream.configSelector(), dsf);
+    Uni<List<ConfigEntity>> configList =
+        ConfigUtilities.getMappedConfigs(stream.configSelector(), dsf);
     return dsf.withTransaction(
             (session, transaction) ->
                 session
@@ -83,7 +84,8 @@ public class StreamEndpoint {
   @RequestBody
   @Consumes(MediaType.APPLICATION_JSON)
   public Uni<StreamEntity> updateStream(@PathParam("uuid") UUID uuid, Stream stream) {
-    Uni<List<ConfigEntity>> configList = ConfigUtilities.getConfig(stream.configSelector(), dsf);
+    Uni<List<ConfigEntity>> configList =
+        ConfigUtilities.getMappedConfigs(stream.configSelector(), dsf);
 
     return dsf.withTransaction(
         ((session, transaction) ->

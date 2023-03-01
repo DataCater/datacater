@@ -16,7 +16,7 @@ public class ConfigUtilities {
   static final String KEY_EXISTS_TWICE_EXCEPTION_MESSAGE =
       "The key '%s' was found in at least two given Configs";
 
-  public static Uni<List<ConfigEntity>> getConfig(
+  public static Uni<List<ConfigEntity>> getMappedConfigs(
       Map<String, String> configs, DataCaterSessionFactory dsf) {
     return dsf.withTransaction(
         (session, transaction) ->
@@ -25,8 +25,8 @@ public class ConfigUtilities {
                 .getResultList()
                 .onItem()
                 .transform(
-                    x ->
-                        x.stream()
+                    configEntityList ->
+                        configEntityList.stream()
                             .filter(
                                 item ->
                                     stringMapsContainsEqualKey(
