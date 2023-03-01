@@ -13,7 +13,7 @@ import org.junit.jupiter.api.*;
 @QuarkusTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-public class ConfigStreamTest {
+class ConfigStreamTest {
   JsonNode configJson;
   JsonNode streamJson;
   final String baseURI = "http://localhost:8081";

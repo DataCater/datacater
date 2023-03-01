@@ -21,7 +21,7 @@ import org.junit.jupiter.api.*;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @WithKubernetesTestServer
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-public class ConfigDeploymentTest {
+class ConfigDeploymentTest {
   private static final Logger LOGGER = Logger.getLogger(ConfigDeploymentTest.class);
   JsonNode configJson;
   JsonNode streamInJson;

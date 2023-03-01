@@ -23,7 +23,7 @@ import org.junit.jupiter.api.*;
 @QuarkusTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-public class MultiConfigStreamTest {
+class MultiConfigStreamTest {
   static final Logger LOGGER = Logger.getLogger(MultiConfigStreamTest.class);
   JsonNode config1Json;
   JsonNode config2Json;
