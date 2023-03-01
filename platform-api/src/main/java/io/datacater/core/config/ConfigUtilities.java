@@ -39,20 +39,16 @@ public class ConfigUtilities {
   }
 
   public static Stream applyConfigsToStream(Stream stream, List<ConfigEntity> configList) {
-    if (!configList.isEmpty()) {
-      depthSearchConfigsForDuplicateKeys(configList);
-      for (ConfigEntity config : configList) {
-        if (config.getId() != null) {
-          verifyKindOfConfig(Kind.STREAM, config.getKind());
-          stream
-              .spec()
-              .getKafka()
-              .putAll(
-                  JsonUtilities.toObjectMap(
-                      config
-                          .getSpec()
-                          .get(stream.spec().getKind().name().toLowerCase(Locale.ROOT))));
-        }
+    depthSearchConfigsForDuplicateKeys(configList);
+    for (ConfigEntity config : configList) {
+      if (config.getId() != null) {
+        verifyKindOfConfig(Kind.STREAM, config.getKind());
+        stream
+            .spec()
+            .getKafka()
+            .putAll(
+                JsonUtilities.toObjectMap(
+                    config.getSpec().get(stream.spec().getKind().name().toLowerCase(Locale.ROOT))));
       }
     }
     return stream;
