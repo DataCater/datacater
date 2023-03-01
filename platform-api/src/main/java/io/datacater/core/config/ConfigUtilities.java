@@ -8,11 +8,13 @@ import io.datacater.core.stream.Stream;
 import io.datacater.core.utilities.JsonUtilities;
 import io.smallrye.mutiny.Uni;
 import java.util.*;
+import org.jboss.logging.Logger;
 
 public class ConfigUtilities {
+  private static final Logger LOGGER = Logger.getLogger(ConfigUtilities.class);
 
   public static Uni<List<ConfigEntity>> getConfig(
-      List<String> configs, DataCaterSessionFactory dsf) {
+      Map<String, String> configs, DataCaterSessionFactory dsf) {
     return dsf.withTransaction(
         (session, transaction) ->
             session
@@ -20,17 +22,17 @@ public class ConfigUtilities {
                 .getResultList()
                 .onItem()
                 .transform(
-                    x -> x.stream().filter(item -> configs.contains(item.getName())).toList())
+                    x ->
+                        x.stream()
+                            .filter(
+                                item ->
+                                    stringMapsContainsEqualKey(
+                                        JsonUtilities.toStringMap(item.getMetadata().get("labels")),
+                                        configs))
+                            .toList())
                 .onItem()
                 .ifNull()
                 .continueWith(new ArrayList<>()));
-  }
-
-  public static List<String> getConfigNames(Map<String, String> labels) {
-    if (labels != null) {
-      return Collections.singletonList(labels.get("app.datacater.io/name"));
-    }
-    return new ArrayList<>();
   }
 
   public static Stream applyConfigsToStream(Stream stream, List<ConfigEntity> configList) {
@@ -113,5 +115,22 @@ public class ConfigUtilities {
       }
     }
     return null;
+  }
+
+  private static boolean stringMapsContainsEqualKey(
+      Map<String, String> givenMap, Map<String, String> currentMap) {
+    LOGGER.info("logging maps: ");
+    LOGGER.info(givenMap.entrySet());
+    LOGGER.info(currentMap.entrySet());
+    for (String currentKey : givenMap.keySet()) {
+      LOGGER.info("checking key: " + currentKey + " with value: " + givenMap.get(currentKey));
+      if (currentMap.containsKey(currentKey)) {
+        if (Objects.equals(currentMap.get(currentKey), givenMap.get(currentKey))) {
+          LOGGER.info("key: " + currentKey + ", has matched");
+          return true;
+        }
+      }
+    }
+    return false;
   }
 }
