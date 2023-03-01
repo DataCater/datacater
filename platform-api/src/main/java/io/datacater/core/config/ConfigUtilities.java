@@ -16,7 +16,7 @@ public class ConfigUtilities {
   static final String KEY_EXISTS_TWICE_EXCEPTION_MESSAGE =
       "The key '%s' was found in at least two given Configs";
 
-  private ConfigUtilities(){}
+  private ConfigUtilities() {}
 
   public static Uni<List<ConfigEntity>> getMappedConfigs(
       Map<String, String> configs, DataCaterSessionFactory dsf) {
@@ -72,9 +72,9 @@ public class ConfigUtilities {
 
   private static void verifyKindOfConfig(Kind expected, Kind actual) {
     if (expected != actual) {
-      String ExceptionMessage =
+      String exceptionMessage =
           String.format(KIND_DOES_NOT_MATCH_EXCEPTION_MESSAGE, actual, expected);
-      throw new IncorrectConfigException(ExceptionMessage);
+      throw new IncorrectConfigException(exceptionMessage);
     }
   }
 
@@ -94,9 +94,9 @@ public class ConfigUtilities {
               Map<String, Object> currentMap = JsonUtilities.toObjectMap(configEntity.getSpec());
               String duplicateKey = mapsContainsEqualKey(givenMap, currentMap);
               if (duplicateKey != null) {
-                String ExceptionMessage =
+                String exceptionMessage =
                     String.format(KEY_EXISTS_TWICE_EXCEPTION_MESSAGE, duplicateKey);
-                throw new IncorrectConfigException(ExceptionMessage);
+                throw new IncorrectConfigException(exceptionMessage);
               }
             });
   }
