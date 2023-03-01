@@ -123,10 +123,9 @@ public class ConfigUtilities {
       return false;
     }
     for (Map.Entry<String, String> givenEntry : givenMap.entrySet()) {
-      if (currentMap.containsKey(givenEntry.getKey())) {
-        if (Objects.equals(givenEntry.getValue(), currentMap.get(givenEntry.getKey()))) {
-          return true;
-        }
+      if (currentMap.containsKey(givenEntry.getKey())
+          && Objects.equals(givenEntry.getValue(), currentMap.get(givenEntry.getKey()))) {
+        return true;
       }
     }
     return false;
