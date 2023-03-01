@@ -11,13 +11,6 @@ import java.util.Map;
 public record Config(
     String name, Kind kind, Map<String, Object> metadata, Map<String, Object> spec) {
 
-  public Config(String name, Kind kind, Map<String, Object> metadata, Map<String, Object> spec) {
-    this.name = name;
-    this.kind = kind;
-    this.metadata = metadata;
-    this.spec = spec;
-  }
-
   @JsonCreator
   static Config from(
       @JsonProperty(value = "name", required = true) String name,
