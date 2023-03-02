@@ -27,7 +27,7 @@ quarkus  :
   http:
     root-path: /api/${datacater.api.version}
     non-application-root-path: /q
-    cors: true
+    cors: false
     auth:
       basic: true
       proactive: true
@@ -220,6 +220,9 @@ datacater:
         testStreamTopicOutLong:
           connector: smallrye-kafka
           topic: testLongDeserializer
+        testStreamInspectMethods:
+          connector: smallrye-kafka
+          topic: testStreamInspect
   smallrye:
     jwt:
       sign:

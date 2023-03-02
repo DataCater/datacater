@@ -8,7 +8,7 @@ metadata:
     app.kubernetes.io/part-of: datacater-0.1.0
     app.kubernetes.io/name: datacater
     app.kubernetes.io/instance: release-name
-    app.kubernetes.io/version: "603ed45f1d05c69ab75179fd6f78455f398967bb"
+    app.kubernetes.io/version: "f27effbb9df8779d8c473cbf54c9c726b24fcb6d"
     helm.sh/chart: datacater-0.1.0
     app.kubernetes.io/managed-by: Helm
 ---
@@ -47,7 +47,7 @@ metadata:
     app.kubernetes.io/part-of: datacater-0.1.0
     app.kubernetes.io/name: "python-runner"
     app.kubernetes.io/instance: release-name
-    app.kubernetes.io/version: "603ed45f1d05c69ab75179fd6f78455f398967bb"
+    app.kubernetes.io/version: "f27effbb9df8779d8c473cbf54c9c726b24fcb6d"
     helm.sh/chart: datacater-0.1.0
     app.kubernetes.io/managed-by: Helm
 spec:
@@ -69,7 +69,7 @@ metadata:
     app.kubernetes.io/part-of: datacater-0.1.0
     app.kubernetes.io/name: datacater
     app.kubernetes.io/instance: release-name
-    app.kubernetes.io/version: "603ed45f1d05c69ab75179fd6f78455f398967bb"
+    app.kubernetes.io/version: "f27effbb9df8779d8c473cbf54c9c726b24fcb6d"
     helm.sh/chart: datacater-0.1.0
     app.kubernetes.io/managed-by: Helm
 spec:
@@ -92,7 +92,7 @@ metadata:
     app.kubernetes.io/part-of: datacater-0.1.0
     app.kubernetes.io/name: datacater
     app.kubernetes.io/instance: release-name
-    app.kubernetes.io/version: "603ed45f1d05c69ab75179fd6f78455f398967bb"
+    app.kubernetes.io/version: "f27effbb9df8779d8c473cbf54c9c726b24fcb6d"
     helm.sh/chart: datacater-0.1.0
     app.kubernetes.io/managed-by: Helm
 spec:
@@ -114,7 +114,7 @@ metadata:
     app.kubernetes.io/part-of: datacater-0.1.0
     app.kubernetes.io/name: datacater
     app.kubernetes.io/instance: release-name
-    app.kubernetes.io/version: "603ed45f1d05c69ab75179fd6f78455f398967bb"
+    app.kubernetes.io/version: "f27effbb9df8779d8c473cbf54c9c726b24fcb6d"
     helm.sh/chart: datacater-0.1.0
     app.kubernetes.io/managed-by: Helm
 spec:
@@ -130,7 +130,7 @@ spec:
     spec:
       containers:
         - name: nginx
-          image: "datacater/ui:603ed45f1d05c69ab75179fd6f78455f398967bb"
+          image: "datacater/ui:f27effbb9df8779d8c473cbf54c9c726b24fcb6d"
           imagePullPolicy: IfNotPresent
           ports:
             - name: http
@@ -146,7 +146,7 @@ metadata:
     app.kubernetes.io/part-of: datacater-0.1.0
     app.kubernetes.io/name: "python-runner"
     app.kubernetes.io/instance: release-name
-    app.kubernetes.io/version: "603ed45f1d05c69ab75179fd6f78455f398967bb"
+    app.kubernetes.io/version: "f27effbb9df8779d8c473cbf54c9c726b24fcb6d"
     helm.sh/chart: datacater-0.1.0
     app.kubernetes.io/managed-by: Helm
 spec:
@@ -163,13 +163,13 @@ spec:
         app.kubernetes.io/part-of: datacater-0.1.0
         app.kubernetes.io/name: "python-runner"
         app.kubernetes.io/instance: release-name
-        app.kubernetes.io/version: "603ed45f1d05c69ab75179fd6f78455f398967bb"
+        app.kubernetes.io/version: "f27effbb9df8779d8c473cbf54c9c726b24fcb6d"
         helm.sh/chart: datacater-0.1.0
         app.kubernetes.io/managed-by: Helm
     spec:
       containers:
         - name: python-runner
-          image: "datacater/python-runner:603ed45f1d05c69ab75179fd6f78455f398967bb"
+          image: "datacater/python-runner:f27effbb9df8779d8c473cbf54c9c726b24fcb6d"
           imagePullPolicy: IfNotPresent
           ports:
             - name: http
@@ -210,7 +210,7 @@ metadata:
     app.kubernetes.io/part-of: datacater-0.1.0
     app.kubernetes.io/name: datacater
     app.kubernetes.io/instance: release-name
-    app.kubernetes.io/version: "603ed45f1d05c69ab75179fd6f78455f398967bb"
+    app.kubernetes.io/version: "f27effbb9df8779d8c473cbf54c9c726b24fcb6d"
     helm.sh/chart: datacater-0.1.0
     app.kubernetes.io/managed-by: Helm
 spec:
@@ -233,7 +233,7 @@ spec:
         - name: datacater
           securityContext:
             {}
-          image: "datacater/datacater:603ed45f1d05c69ab75179fd6f78455f398967bb"
+          image: "datacater/datacater:f27effbb9df8779d8c473cbf54c9c726b24fcb6d"
           imagePullPolicy: IfNotPresent
           env:
             - name: QUARKUS_DATASOURCE_REACTIVE_URL
@@ -247,7 +247,7 @@ spec:
                 fieldRef:
                   fieldPath: metadata.namespace
             - name: DATACATER_DEPLOYMENT_IMAGE
-              value: "datacater/pipeline:603ed45f1d05c69ab75179fd6f78455f398967bb"
+              value: "datacater/pipeline:f27effbb9df8779d8c473cbf54c9c726b24fcb6d"
             - name: DATACATER_TRANSFORMS_PATH
               value: "/datacater/transforms"
             - name: DATACATER_FILTERS_PATH
@@ -257,7 +257,7 @@ spec:
             - name: DATACATER_PYTHONRUNNER_IMAGE_NAME
               value: "datacater/python-runner"
             - name: DATACATER_PYTHONRUNNER_IMAGE_VERSION
-              value: "603ed45f1d05c69ab75179fd6f78455f398967bb"
+              value: "f27effbb9df8779d8c473cbf54c9c726b24fcb6d"
             - name: QUARKUS_LOG_CONSOLE_JSON
               value: "false"
             - name: DATACATER_PYTHONRUNNER_IMAGE_NAMESPACE

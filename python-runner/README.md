@@ -1,14 +1,12 @@
 # DataCater Python® runner
 
-This Python tool is used for evaluating our filters and transforms.
+The Python runner is used for previewing and running pipelines. It applies pre-defined and inline functions to records.
 
-The Python runner is being deployed as a sidecar container in the pod of the Quarkus-based
-streaming pipelines and called via HTTP. We are currently considering
-switching to gRPC for performance reasons.
+For Deployments, the Python runner is being deployed as a sidecar container.
 
-## Try it out the Python runner outside of DataCater
+## Try out the Python runner outside of DataCater
 
-Install Python dependencies:
+Install the Python dependencies:
 
 ```
 $ pip3 install -r requirements.txt
@@ -38,16 +36,12 @@ $ curl http://localhost:8000/batch \
   '
 ```
 
-## How to build the docker image locally?
+## Running tests
+
+After copying the pre-defined [filters](https://github.com/DataCater/datacater/tree/main/filters) and [transforms](https://github.com/DataCater/datacater/tree/main/transforms) from the root directory of this repository, you can invoke `pytest`:
+
 ```
-bash build.sh
-
-docker run -it --rm --name python-runner-local python-runner bash
-
-# To run the server interactively
-python3 -m uvicorn runner:app --port 50000 --host 0.0.0.0
-
-# To run the health checks
-python3 -m uvicorn runner:app --port 50000 --host 0.0.0.0 &
-python3 health_check.py
+$ cp -r ../filters .
+$ cp -r ../transforms .
+$ python3 -m pytest test_runner.py
 ```

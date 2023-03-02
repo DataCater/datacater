@@ -13,6 +13,11 @@ Users can choose from an extensive repository of [filter functions](https://gith
 
 You find each component in this repository. See the [File Structure section](#file-structure) for orientation.
 
+Please watch the following video if you are interested in a demo of our
+2023.1 release:
+
+<p align="center"><a href="https://www.loom.com/share/15947f13e71540948e3f9d57eac64976"><img src="https://cdn.loom.com/sessions/thumbnails/15947f13e71540948e3f9d57eac64976-with-play.gif" alt="Watch a demo of our 2023.1 release" width="75%"/></a></p>
+
 ## Use Cases
 
 ### DataCater excels at
@@ -80,9 +85,9 @@ kubectl apply -f k8s-manifests/minikube-with-postgres-ns-default.yaml
 ```
 kubectl get all --all-namespaces
 ```
-4. Port-forward to service
+4. Port-forward to service `datacater-ui`
 ```
-kubectl port-forward ui 8080:8080
+kubectl port-forward svc/datacater-ui 8080:80
 ```
 5. Browse to `localhost:8080` in your browser. The default login credentials are `admin:admin`.
 
