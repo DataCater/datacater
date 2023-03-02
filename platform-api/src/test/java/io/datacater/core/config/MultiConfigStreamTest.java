@@ -104,8 +104,7 @@ class MultiConfigStreamTest {
             .baseUri(baseURI)
             .post(streamsPath);
 
-    LOGGER.info("stream: ");
-    LOGGER.info(response.body().asString());
+    LOGGER.info("stream: " + response.body().asString());
 
     Properties props = new Properties();
     props.put("bootstrap.servers", "localhost:9092");
