@@ -80,6 +80,7 @@ public class StaticConfig {
   static final String CONDITIONS = "Conditions";
   static final String ERROR_TAG = "error";
   static final String MESSAGE_TAG = "message";
+  static final String REPLICAS_TEXT = "replicas";
 
   static class EnvironmentVariables {
     private EnvironmentVariables() {}

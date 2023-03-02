@@ -38,11 +38,13 @@ public class K8Deployment {
       StreamEntity streamOut,
       DeploymentSpec deploymentSpec,
       UUID deploymentId) {
+
     final String name = StaticConfig.DEPLOYMENT_NAME_PREFIX + deploymentId;
     final String configmapName = StaticConfig.CONFIGMAP_NAME_PREFIX + deploymentId;
     final String configmapVolumeName = StaticConfig.CONFIGMAP_VOLUME_NAME_PREFIX + deploymentId;
     final String dataShareVolumeName = StaticConfig.DATA_SHARE_VOLUME_NAME_PREFIX + deploymentId;
     final String serviceName = StaticConfig.SERVICE_NAME_PREFIX + deploymentId;
+    final int replicaCount = getDeploymentReplicaOrDefault(deploymentSpec.deployment());
 
     List<EnvVar> variables =
         getEnvironmentVariables(streamIn, streamOut, deploymentSpec, deploymentId);
@@ -55,7 +57,7 @@ public class K8Deployment {
               .addToLabels(getLabels(deploymentId, deploymentSpec.name(), serviceName))
               .endMetadata()
               .withNewSpec()
-              .withReplicas(StaticConfig.EnvironmentVariables.REPLICAS)
+              .withReplicas(replicaCount)
               .withMinReadySeconds(StaticConfig.EnvironmentVariables.READY_SECONDS)
               .withNewSelector()
               .addToMatchLabels(getLabels(deploymentId, deploymentSpec.name(), serviceName))
@@ -455,5 +457,15 @@ public class K8Deployment {
       return StaticConfig.LOCALHOST_BOOTSTRAP_SERVER;
     }
     return StaticConfig.EMPTY_STRING;
+  }
+
+  private int getDeploymentReplicaOrDefault(Map<String, Object> map){
+    int replica = StaticConfig.EnvironmentVariables.REPLICAS;
+    try{
+      replica = (int) map.get(StaticConfig.REPLICAS_TEXT);
+    } catch (Exception e){
+      return replica;
+    }
+    return replica;
   }
 }
