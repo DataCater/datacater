@@ -101,7 +101,6 @@ public class StreamEndpoint {
                 .onItem()
                 .transform(
                     tuple -> {
-                      LOGGER.info(tuple.getItem1());
                       updateStreamObject(stream, tuple.getItem2());
                       try {
                         return session.merge((tuple.getItem1()).updateEntity(stream));
