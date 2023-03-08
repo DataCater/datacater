@@ -1,0 +1,17 @@
+{
+  "name": "stream-config3",
+  "kind": "STREAM",
+  "metadata" : {
+    "labels" : {
+      "app.datacater.io/test": "test-config"
+    }
+  },
+  "spec": {
+    "kafka": {
+      "topic": {
+        "num.partitions": "4",
+        "replication.factor": "1"
+      }
+    }
+  }
+}

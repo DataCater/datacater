@@ -1,12 +1,16 @@
 package io.datacater.core.stream;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import io.datacater.core.utilities.JsonUtilities;
 import io.quarkiverse.hibernate.types.json.JsonBinaryType;
 import io.quarkiverse.hibernate.types.json.JsonType;
 import io.quarkiverse.hibernate.types.json.JsonTypes;
 import java.util.Date;
+import java.util.Map;
 import java.util.UUID;
 import javax.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -40,11 +44,25 @@ public class StreamEntity {
   @JsonProperty("spec")
   private JsonNode spec;
 
+  @Type(type = JsonTypes.JSON)
+  @Column(name = "configSelector", columnDefinition = JsonTypes.JSON_BIN)
+  @JsonProperty("configSelector")
+  @JsonInclude(JsonInclude.Include.NON_NULL)
+  private JsonNode configSelector;
+
   protected StreamEntity() {}
 
   public StreamEntity(String name, StreamSpec spec) throws JsonProcessingException {
     this.name = name;
     this.spec = spec.serializeStreamSpec();
+    this.configSelector = JsonNodeFactory.instance.objectNode();
+  }
+
+  public StreamEntity(String name, StreamSpec spec, Map<String, String> configSelector)
+      throws JsonProcessingException {
+    this.name = name;
+    this.spec = spec.serializeStreamSpec();
+    this.configSelector = JsonUtilities.convertStringMap(configSelector);
   }
 
   public StreamEntity updateEntity(Stream stream) throws JsonProcessingException {
@@ -62,5 +80,9 @@ public class StreamEntity {
 
   public UUID getId() {
     return id;
+  }
+
+  public JsonNode getConfigSelector() {
+    return configSelector;
   }
 }

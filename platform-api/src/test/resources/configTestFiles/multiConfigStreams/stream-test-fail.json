@@ -1,0 +1,17 @@
+{
+  "name": "stream-test-multi-config-fail",
+  "spec": {
+    "kafka": {
+      "bootstrap.servers": "",
+      "topic": {
+        "config": {
+        }
+      }
+    },
+    "kind": "KAFKA"
+  },
+  "configSelector": {
+    "app.datacater.io/name": "stream-config1",
+    "app.datacater.io/name2": "stream-config3"
+  }
+}

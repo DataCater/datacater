@@ -10,6 +10,7 @@ import java.util.Map;
 
 public record Config(
     String name, Kind kind, Map<String, Object> metadata, Map<String, Object> spec) {
+
   @JsonCreator
   static Config from(
       @JsonProperty(value = "name", required = true) String name,

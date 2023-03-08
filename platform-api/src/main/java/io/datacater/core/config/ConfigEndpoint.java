@@ -11,11 +11,13 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
+import org.eclipse.microprofile.openapi.annotations.security.SecurityRequirement;
 import org.hibernate.reactive.mutiny.Mutiny.SessionFactory;
 
 @Path("/configs")
 @Authenticated
 @Produces(MediaType.APPLICATION_JSON)
+@SecurityRequirement(name = "apiToken")
 public class ConfigEndpoint {
   private static final String UUID_NOT_FOUND_ERROR_MESSAGE = "No config found for uuid %s";
 
