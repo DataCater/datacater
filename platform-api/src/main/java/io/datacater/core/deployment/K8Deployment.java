@@ -262,6 +262,30 @@ public class K8Deployment {
     }
   }
 
+  public String getDeploymentReplicaIp(UUID deploymentId, int replica) {
+    String deploymentName = getDeploymentName(deploymentId);
+    final Map<String, String> matchLabels =
+        client
+            .apps()
+            .deployments()
+            .inNamespace(StaticConfig.EnvironmentVariables.NAMESPACE)
+            .withName(deploymentName)
+            .get()
+            .getSpec()
+            .getSelector()
+            .getMatchLabels();
+
+    final Pod first =
+        client
+            .pods()
+            .inNamespace(StaticConfig.EnvironmentVariables.NAMESPACE)
+            .withLabels(matchLabels)
+            .list()
+            .getItems()
+            .get(replica);
+    return first.getStatus().getPodIP();
+  }
+
   private boolean exists(UUID deploymentId) {
     return !client
         .apps()
@@ -273,7 +297,7 @@ public class K8Deployment {
         .isEmpty();
   }
 
-  private String getDeploymentName(UUID deploymentId) {
+  public String getDeploymentName(UUID deploymentId) {
     List<Deployment> deployments =
         client
             .apps()

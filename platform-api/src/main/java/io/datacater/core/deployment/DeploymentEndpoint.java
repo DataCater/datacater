@@ -92,7 +92,9 @@ public class DeploymentEndpoint {
                   HttpClient httpClient = HttpClient.newHttpClient();
                   HttpRequest req =
                       buildDeploymentServiceRequest(
-                          deploymentId, StaticConfig.EnvironmentVariables.DEPLOYMENT_HEALTH_PATH);
+                          deploymentId,
+                          StaticConfig.EnvironmentVariables.DEPLOYMENT_HEALTH_PATH,
+                          1);
                   HttpResponse<String> response =
                       httpClient.send(req, HttpResponse.BodyHandlers.ofString());
                   return Response.ok().entity(response.body()).build();
@@ -116,7 +118,9 @@ public class DeploymentEndpoint {
                   HttpClient httpClient = HttpClient.newHttpClient();
                   HttpRequest req =
                       buildDeploymentServiceRequest(
-                          deploymentId, StaticConfig.EnvironmentVariables.DEPLOYMENT_METRICS_PATH);
+                          deploymentId,
+                          StaticConfig.EnvironmentVariables.DEPLOYMENT_METRICS_PATH,
+                          1);
                   HttpResponse<String> response =
                       httpClient.send(req, HttpResponse.BodyHandlers.ofString());
                   return Response.ok().entity(response.body()).build();
@@ -295,16 +299,17 @@ public class DeploymentEndpoint {
     return Arrays.asList(k8Deployment.getLogs(deploymentId).split("\n"));
   }
 
-  private HttpRequest buildDeploymentServiceRequest(UUID deploymentId, String path) {
+  private HttpRequest buildDeploymentServiceRequest(UUID deploymentId, String path, int replica) {
     K8Deployment k8Deployment = new K8Deployment(client);
-    String clusterIp = k8Deployment.getClusterIp(deploymentId);
+    String ip = k8Deployment.getDeploymentReplicaIp(deploymentId, replica).replace(".", "-");
+    String service = StaticConfig.SERVICE_NAME_PREFIX + deploymentId;
+    String namespace = StaticConfig.EnvironmentVariables.NAMESPACE;
+    int port = StaticConfig.EnvironmentVariables.DEPLOYMENT_CONTAINER_PORT;
+    String protocol = StaticConfig.EnvironmentVariables.DEPLOYMENT_CONTAINER_PROTOCOL;
+
     String uriReady =
         String.format(
-            "%s://%s:%d%s",
-            StaticConfig.EnvironmentVariables.DEPLOYMENT_CONTAINER_PROTOCOL,
-            clusterIp,
-            StaticConfig.EnvironmentVariables.DEPLOYMENT_CONTAINER_PORT,
-            path);
+            "%s://%s.%s.%s.svc.cluster.local:%d%s", protocol, ip, service, namespace, port, path);
 
     return HttpRequest.newBuilder()
         .GET()
