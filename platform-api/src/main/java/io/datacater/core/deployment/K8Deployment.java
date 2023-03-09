@@ -298,10 +298,7 @@ public class K8Deployment {
               .toList()
               .get(replica);
     } catch (ResourceNotFoundException e) {
-      final String errorMessage =
-          String.format(
-              "The deployment replica you are searching for, %s, does not match the defined replica amount of %s.",
-              replica, pods.size());
+      final String errorMessage = String.format("Replica not found: %s.", e.getCause());
       throw new DeploymentReplicaMismatchException(errorMessage);
     }
     return first.getStatus().getPodIP();
