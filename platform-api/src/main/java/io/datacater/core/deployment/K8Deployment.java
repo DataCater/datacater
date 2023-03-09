@@ -282,19 +282,16 @@ public class K8Deployment {
             .getMatchLabels();
 
     Pod first;
-    List<Pod> pods = new ArrayList<>();
     try {
-      pods =
+      first =
           client
               .pods()
               .inNamespace(StaticConfig.EnvironmentVariables.NAMESPACE)
               .withLabels(matchLabels)
               .list()
-              .getItems();
-
-      first =
-          pods.stream()
-              .sorted(Comparator.comparing(HasMetadata::getFullResourceName))
+              .getItems()
+              .stream()
+              .sorted((Comparator.comparing(o -> o.getMetadata().getName())))
               .toList()
               .get(replica);
     } catch (ResourceNotFoundException e) {
