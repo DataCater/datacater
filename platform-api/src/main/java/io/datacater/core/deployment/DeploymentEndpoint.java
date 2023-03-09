@@ -76,9 +76,10 @@ public class DeploymentEndpoint {
   }
 
   @GET
-  @Path("{uuid}/health")
+  @Path("{uuid}/{replica}/health")
   @Produces(MediaType.APPLICATION_JSON)
-  public Uni<Response> getHealth(@PathParam("uuid") UUID deploymentId) {
+  public Uni<Response> getHealth(
+      @PathParam("uuid") UUID deploymentId, @DefaultValue("1") @PathParam("replica") int replica) {
     return dsf.withTransaction(
             ((session, transaction) -> session.find(DeploymentEntity.class, deploymentId)))
         .onItem()
@@ -94,7 +95,7 @@ public class DeploymentEndpoint {
                       buildDeploymentServiceRequest(
                           deploymentId,
                           StaticConfig.EnvironmentVariables.DEPLOYMENT_HEALTH_PATH,
-                          1);
+                          replica);
                   HttpResponse<String> response =
                       httpClient.send(req, HttpResponse.BodyHandlers.ofString());
                   return Response.ok().entity(response.body()).build();
@@ -102,9 +103,10 @@ public class DeploymentEndpoint {
   }
 
   @GET
-  @Path("{uuid}/metrics")
+  @Path("{uuid}/{replica}/metrics")
   @Produces(MediaType.TEXT_PLAIN)
-  public Uni<Response> getMetrics(@PathParam("uuid") UUID deploymentId) {
+  public Uni<Response> getMetrics(
+      @PathParam("uuid") UUID deploymentId, @DefaultValue("1") @PathParam("replica") int replica) {
     return dsf.withTransaction(
             ((session, transaction) -> session.find(DeploymentEntity.class, deploymentId)))
         .onItem()
@@ -120,7 +122,7 @@ public class DeploymentEndpoint {
                       buildDeploymentServiceRequest(
                           deploymentId,
                           StaticConfig.EnvironmentVariables.DEPLOYMENT_METRICS_PATH,
-                          1);
+                          replica);
                   HttpResponse<String> response =
                       httpClient.send(req, HttpResponse.BodyHandlers.ofString());
                   return Response.ok().entity(response.body()).build();
