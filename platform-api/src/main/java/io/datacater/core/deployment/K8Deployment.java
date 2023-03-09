@@ -487,7 +487,7 @@ public class K8Deployment {
     return StaticConfig.EMPTY_STRING;
   }
 
-  private int getDeploymentReplicaOrDefault(Map<String, Object> map) {
+  public static int getDeploymentReplicaOrDefault(Map<String, Object> map) {
     int replica = StaticConfig.EnvironmentVariables.REPLICAS;
     try {
       replica = (int) map.get(StaticConfig.REPLICAS_TEXT);
