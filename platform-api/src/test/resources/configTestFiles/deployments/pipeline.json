@@ -1,0 +1,47 @@
+{
+  "name": "config-mapping-pipeline",
+  "metadata": {
+    "stream-in": "streaminUUIDPlaceholder",
+    "stream-out": "streamoutUUIDPlaceholder"
+  },
+  "spec": {
+    "steps": [
+      {
+        "kind": "Field",
+        "name": "First step",
+        "fields": {
+          "age": {
+            "filter": {
+              "key": "less-than",
+              "config": {
+                "value": 50
+              }
+            }
+          }
+        }
+      },
+      {
+        "kind": "Field",
+        "name": "Second step",
+        "fields": {
+          "email": {
+            "transform": {
+              "key": "hash",
+              "config": {
+                "algorithm": "sha1"
+              }
+            }
+          },
+          "name": {
+            "transform": {
+              "key": "trim"
+            },
+            "filter": {
+              "key": "not-empty"
+            }
+          }
+        }
+      }
+    ]
+  }
+}

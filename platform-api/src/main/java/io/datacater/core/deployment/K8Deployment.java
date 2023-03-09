@@ -84,7 +84,7 @@ public class K8Deployment {
           client.resource(deployment).inNamespace(StaticConfig.EnvironmentVariables.NAMESPACE);
       deploymentResource.create();
     } catch (KubernetesClientException ex) {
-      throw new CreateDeploymentException(StringUtilities.wrapString(ex.getMessage()));
+      throw new CreateDeploymentException(StringUtilities.wrapString(ex.getCause().getMessage()));
     }
 
     if (!exists(deploymentId)) {
