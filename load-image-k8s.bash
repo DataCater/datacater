@@ -29,6 +29,7 @@ echo "Loaded image datacater/$NAME:$VERSION"
    --set "postgres.username=postgres" \
    --set image.tag=$VERSION\
    --set image.repository=datacater/$NAME --skip-tests\
-    > k8s-manifests/minikube-with-postgres-ns-default.yaml
+    > k8s-manifests/minikube-with-postgres-image-test.yaml
 
-echo "Updated helm template."
+echo "Created helm template."
+echo "to install, run the following command: kubectl apply -f k8s-manifests/minikube-with-postgres-image-test.yaml"
