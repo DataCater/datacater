@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.datacater.core.exceptions.CreateDeploymentException;
 import io.datacater.core.exceptions.DeploymentNotFoundException;
+import io.datacater.core.exceptions.DeploymentReplicaMismatchException;
 import io.datacater.core.pipeline.PipelineEntity;
 import io.datacater.core.stream.StreamEntity;
 import io.datacater.core.utilities.StringUtilities;
@@ -14,6 +15,7 @@ import io.fabric8.kubernetes.api.model.apps.Deployment;
 import io.fabric8.kubernetes.api.model.apps.DeploymentBuilder;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClientException;
+import io.fabric8.kubernetes.client.ResourceNotFoundException;
 import io.fabric8.kubernetes.client.dsl.RollableScalableResource;
 import java.util.*;
 import javax.inject.Singleton;
@@ -279,14 +281,29 @@ public class K8Deployment {
             .getSelector()
             .getMatchLabels();
 
-    final Pod first =
-        client
-            .pods()
-            .inNamespace(StaticConfig.EnvironmentVariables.NAMESPACE)
-            .withLabels(matchLabels)
-            .list()
-            .getItems()
-            .get(replica);
+    Pod first;
+    List<Pod> pods = new ArrayList<>();
+    try {
+      pods =
+          client
+              .pods()
+              .inNamespace(StaticConfig.EnvironmentVariables.NAMESPACE)
+              .withLabels(matchLabels)
+              .list()
+              .getItems();
+
+      first =
+          pods.stream()
+              .sorted(Comparator.comparing(HasMetadata::getFullResourceName))
+              .toList()
+              .get(replica);
+    } catch (ResourceNotFoundException e) {
+      final String errorMessage =
+          String.format(
+              "The deployment replica you are searching for, %s, does not match the defined replica amount of %s.",
+              replica, pods.size());
+      throw new DeploymentReplicaMismatchException(errorMessage);
+    }
     return first.getStatus().getPodIP();
   }
 
@@ -487,7 +504,7 @@ public class K8Deployment {
     return StaticConfig.EMPTY_STRING;
   }
 
-  public static int getDeploymentReplicaOrDefault(Map<String, Object> map) {
+  private int getDeploymentReplicaOrDefault(Map<String, Object> map) {
     int replica = StaticConfig.EnvironmentVariables.REPLICAS;
     try {
       replica = (int) map.get(StaticConfig.REPLICAS_TEXT);

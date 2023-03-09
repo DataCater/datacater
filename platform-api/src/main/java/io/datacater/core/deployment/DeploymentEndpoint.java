@@ -8,7 +8,6 @@ import io.datacater.core.config.ConfigUtilities;
 import io.datacater.core.exceptions.*;
 import io.datacater.core.pipeline.PipelineEntity;
 import io.datacater.core.stream.StreamEntity;
-import io.datacater.core.utilities.JsonUtilities;
 import io.datacater.core.utilities.StringUtilities;
 import io.fabric8.kubernetes.api.model.apps.Deployment;
 import io.fabric8.kubernetes.client.KubernetesClient;
@@ -93,7 +92,6 @@ public class DeploymentEndpoint {
         .transform(
             Unchecked.function(
                 deployment -> {
-                  validateGivenAndActualReplica(replica, deployment.getSpec());
                   HttpClient httpClient = HttpClient.newHttpClient();
                   HttpRequest req =
                       buildDeploymentServiceRequest(
@@ -121,7 +119,6 @@ public class DeploymentEndpoint {
         .transform(
             Unchecked.function(
                 deployment -> {
-                  validateGivenAndActualReplica(replica, deployment.getSpec());
                   HttpClient httpClient = HttpClient.newHttpClient();
                   HttpRequest req =
                       buildDeploymentServiceRequest(
@@ -478,17 +475,5 @@ public class DeploymentEndpoint {
     }
     is.close();
     lw.close();
-  }
-
-  private void validateGivenAndActualReplica(int given, JsonNode spec) {
-    Map<String, Object> specMap = JsonUtilities.toObjectMap(spec);
-    int actual = K8Deployment.getDeploymentReplicaOrDefault(specMap);
-    if (given > actual) {
-      final String errorMessage =
-          String.format(
-              "The deployment replica you are searching for, %s, does not match the defined replica amount of %s.",
-              given, actual);
-      throw new DeploymentReplicaMismatchException(errorMessage);
-    }
   }
 }
