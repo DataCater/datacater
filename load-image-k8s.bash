@@ -22,7 +22,11 @@ minikube image load datacater/$NAME:$VERSION
 
 echo "Loaded image datacater/$NAME:$VERSION"
 
- helm template ./helm-charts/datacater\
+ helm template ./helm-charts/datacater -ndefault \
+   --skip-tests \
+   --set "postgres.enabled=true" \
+   --set "datacater.database.username=postgres" \
+   --set "postgres.username=postgres" \
    --set image.tag=$VERSION\
    --set image.repository=datacater/$NAME --skip-tests\
     > k8s-manifests/minikube-with-postgres-ns-default.yaml
