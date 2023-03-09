@@ -263,6 +263,10 @@ public class K8Deployment {
   }
 
   public String getDeploymentReplicaIp(UUID deploymentId, int replica) {
+    if (replica > 0) {
+      // map replica number to array position
+      replica--;
+    }
     String deploymentName = getDeploymentName(deploymentId);
     final Map<String, String> matchLabels =
         client

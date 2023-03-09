@@ -76,10 +76,10 @@ public class DeploymentEndpoint {
   }
 
   @GET
-  @Path("{uuid}/{replica}/health")
+  @Path("{uuid}/health")
   @Produces(MediaType.APPLICATION_JSON)
   public Uni<Response> getHealth(
-      @PathParam("uuid") UUID deploymentId, @DefaultValue("1") @PathParam("replica") int replica) {
+      @PathParam("uuid") UUID deploymentId, @DefaultValue("1") @QueryParam("replica") int replica) {
     return dsf.withTransaction(
             ((session, transaction) -> session.find(DeploymentEntity.class, deploymentId)))
         .onItem()
@@ -103,10 +103,10 @@ public class DeploymentEndpoint {
   }
 
   @GET
-  @Path("{uuid}/{replica}/metrics")
+  @Path("{uuid}/metrics")
   @Produces(MediaType.TEXT_PLAIN)
   public Uni<Response> getMetrics(
-      @PathParam("uuid") UUID deploymentId, @DefaultValue("1") @PathParam("replica") int replica) {
+      @PathParam("uuid") UUID deploymentId, @DefaultValue("1") @QueryParam("replica") int replica) {
     return dsf.withTransaction(
             ((session, transaction) -> session.find(DeploymentEntity.class, deploymentId)))
         .onItem()
