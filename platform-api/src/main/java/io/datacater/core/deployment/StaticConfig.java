@@ -52,7 +52,6 @@ public class StaticConfig {
   static final String CONFIGMAP_VOLUME_NAME_PREFIX = "datacater-volume-";
   static final String DATA_SHARE_VOLUME_NAME_PREFIX = "datacater-volume-data-";
   static final String SERVICE_NAME_PREFIX = "datacater-service-";
-  static final String NONE = "None";
   static final String TCP_TAG = "TCP";
   static final String SPEC = "spec";
   static final String STREAM_OUT = "stream-out";
@@ -74,8 +73,6 @@ public class StaticConfig {
   static final String VALUE_SERIALIZER = "value.serializer";
   static final String STREAMIN_CONFIG_TEXT = "stream-in-config";
   static final String STREAMOUT_CONFIG_TEXT = "stream-out-config";
-  static final String DC_STREAMIN_CONFIG_TEXT = "DATACATER_STREAMIN_CONFIG";
-  static final String DC_STREAMOUT_CONFIG_TEXT = "DATACATER_STREAM_OUTCONFIG";
   static final String HTTP = "http";
   static final String CONDITIONS = "Conditions";
   static final String ERROR_TAG = "error";
@@ -110,10 +107,6 @@ public class StaticConfig {
         ConfigProvider.getConfig()
             .getOptionalValue("datacater.deployment.metrics-path", String.class)
             .orElse("/q/metrics");
-    public static final long DEPLOYMENT_STATS_TIMEOUT =
-        ConfigProvider.getConfig()
-            .getOptionalValue("datacater.deployment.stats.timeout", Long.class)
-            .orElse(10000L);
     static final int DEPLOYMENT_CONTAINER_PORT =
         ConfigProvider.getConfig()
             .getOptionalValue("datacater.deployment.image.container.port", Integer.class)

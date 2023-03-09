@@ -174,11 +174,6 @@ public class K8Deployment {
     return new ConfigMapVolumeSourceBuilder().withName(deploymentName).build();
   }
 
-  public String getClusterIp(UUID deploymentId) {
-    final String serviceName = StaticConfig.SERVICE_NAME_PREFIX + deploymentId;
-    return k8Service.getClusterIp(serviceName);
-  }
-
   public String getLogs(UUID deploymentId) {
     return client
         .apps()
