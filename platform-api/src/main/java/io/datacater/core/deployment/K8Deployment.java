@@ -15,7 +15,6 @@ import io.fabric8.kubernetes.api.model.apps.Deployment;
 import io.fabric8.kubernetes.api.model.apps.DeploymentBuilder;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClientException;
-import io.fabric8.kubernetes.client.ResourceNotFoundException;
 import io.fabric8.kubernetes.client.dsl.RollableScalableResource;
 import java.util.*;
 import javax.inject.Singleton;
@@ -260,9 +259,10 @@ public class K8Deployment {
   }
 
   public String getDeploymentReplicaIp(UUID deploymentId, int replica) {
-    if (replica > 0) {
+    int replicaPosition = replica;
+    if (replicaPosition > 0) {
       // map replica number to array position
-      replica--;
+      replicaPosition--;
     }
     String deploymentName = getDeploymentName(deploymentId);
     final Map<String, String> matchLabels =
@@ -277,20 +277,26 @@ public class K8Deployment {
             .getMatchLabels();
 
     Pod first;
+    List<Pod> podList = new ArrayList<>();
     try {
-      first =
+      podList =
           client
               .pods()
               .inNamespace(StaticConfig.EnvironmentVariables.NAMESPACE)
               .withLabels(matchLabels)
               .list()
-              .getItems()
-              .stream()
+              .getItems();
+
+      first =
+          podList.stream()
               .sorted((Comparator.comparing(o -> o.getMetadata().getName())))
               .toList()
-              .get(replica);
-    } catch (ResourceNotFoundException e) {
-      final String errorMessage = String.format("Replica not found: %s.", e.getCause());
+              .get(replicaPosition);
+    } catch (ArrayIndexOutOfBoundsException e) {
+      final String errorMessage =
+          String.format(
+              "The deployment replica you are searching for, %s, does not match the defined replica amount of %s.",
+              replica, podList.size());
       throw new DeploymentReplicaMismatchException(errorMessage);
     }
     return first.getStatus().getPodIP();
