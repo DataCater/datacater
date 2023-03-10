@@ -215,7 +215,10 @@ class InspectStream extends Component {
       );
     }
 
-    const sampleRecords = this.props.streams.inspectionResult;
+    const sampleRecords =
+      this.props.streams.inspectionResult !== undefined
+        ? this.props.streams.inspectionResult
+        : [];
     const profile = profileRecords(sampleRecords, []);
 
     const records = sampleRecords.map(function (sample, index) {
@@ -285,11 +288,20 @@ class InspectStream extends Component {
               />
             </div>
           </div>
-          {sampleRecords.length === 0 && (
-            <div className="alert alert-warning mt-4" role="alert">
-              We couldn&apos;t extract any sample records. Is your stream empty?
-            </div>
-          )}
+          {sampleRecords.length === 0 &&
+            this.props.streams.errorMessage === undefined && (
+              <div className="alert alert-warning mt-4" role="alert">
+                We couldn&apos;t extract any sample records. Is your stream
+                empty?
+              </div>
+            )}
+          {sampleRecords.length === 0 &&
+            this.props.streams.errorMessage !== undefined && (
+              <div className="alert alert-danger mt-4" role="alert">
+                <p className="h6 fs-bolder">API response:</p>
+                {this.state.errorMessage}
+              </div>
+            )}
         </div>
         {sampleRecords.length > 0 && this.state.showGrid && (
           <div className="container-fluid datacater-grid-stream-inspect">
