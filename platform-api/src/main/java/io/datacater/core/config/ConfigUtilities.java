@@ -20,6 +20,11 @@ public class ConfigUtilities {
 
   public static Uni<List<ConfigEntity>> getMappedConfigs(
       Map<String, String> configs, DataCaterSessionFactory dsf) {
+
+    if (configs == null) {
+      return Uni.createFrom().item(new ArrayList<>());
+    }
+
     return dsf.withTransaction(
         (session, transaction) ->
             session
