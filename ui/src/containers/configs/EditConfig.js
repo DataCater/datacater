@@ -4,7 +4,7 @@ import { Redirect } from "react-router-dom";
 import Select from "react-select";
 import Breadcrumb from "../../components/layout/Breadcrumb";
 import Header from "../../components/layout/Header";
-import { fetchDeployment, updateDeployment } from "../../actions/configs";
+import { fetchConfig, updateConfig } from "../../actions/configs";
 import "../../scss/fonts.scss";
 
 class EditConfig extends Component {
