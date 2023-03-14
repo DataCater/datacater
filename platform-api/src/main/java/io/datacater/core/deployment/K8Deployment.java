@@ -276,10 +276,10 @@ public class K8Deployment {
             .getSelector()
             .getMatchLabels();
 
-    Pod first;
-    List<Pod> podList = new ArrayList<>();
+    Pod searchedPod;
+    List<Pod> allDeploymentPods = new ArrayList<>();
     try {
-      podList =
+      allDeploymentPods =
           client
               .pods()
               .inNamespace(StaticConfig.EnvironmentVariables.NAMESPACE)
@@ -287,8 +287,8 @@ public class K8Deployment {
               .list()
               .getItems();
 
-      first =
-          podList.stream()
+      searchedPod =
+              allDeploymentPods.stream()
               .sorted((Comparator.comparing(o -> o.getMetadata().getName())))
               .toList()
               .get(replicaPosition);
@@ -296,10 +296,10 @@ public class K8Deployment {
       final String errorMessage =
           String.format(
               "The deployment replica you are searching for, %s, does not match the defined replica amount of %s.",
-              replica, podList.size());
+              replica, allDeploymentPods.size());
       throw new DeploymentReplicaMismatchException(errorMessage);
     }
-    return first.getStatus().getPodIP();
+    return searchedPod.getStatus().getPodIP();
   }
 
   private boolean exists(UUID deploymentId) {
