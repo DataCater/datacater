@@ -44,6 +44,7 @@ class EditPipeline extends Component {
       addedColumn: false,
       editColumn: undefined,
       contextBarActive: false,
+      contextBarSize: "S",
       currentStep: undefined,
       debugRecord: undefined,
       errorMessage: "",
@@ -82,6 +83,7 @@ class EditPipeline extends Component {
     this.toggleShowSettings = this.toggleShowSettings.bind(this);
     this.toggleHideFilteredOutRecords =
       this.toggleHideFilteredOutRecords.bind(this);
+    this.changeContextBarSize = this.changeContextBarSize.bind(this);
   }
 
   componentDidMount() {
@@ -727,6 +729,14 @@ class EditPipeline extends Component {
     });
   }
 
+  changeContextBarSize(event) {
+    event.preventDefault();
+
+    this.setState({
+      contextBarSize: event.target.dataset.size,
+    });
+  }
+
   render() {
     const pipeline = this.state.pipeline;
 
@@ -912,6 +922,12 @@ class EditPipeline extends Component {
     if (this.state.contextBarActive && this.state.currentStep !== undefined) {
       classNames += "datacater-context-bar-active";
     }
+    if (this.state.contextBarSize === "M") {
+      classNames += " datacater-context-bar-size-m";
+    }
+    if (this.state.contextBarSize === "L") {
+      classNames += " datacater-context-bar-size-l";
+    }
 
     return (
       <div className={classNames}>
@@ -920,7 +936,9 @@ class EditPipeline extends Component {
           <PipelineDesigner
             addStepFunc={this.addStep}
             fields={Object.keys(profile)}
+            changeContextBarSizeFunc={this.changeContextBarSize}
             contextBarActive={this.state.contextBarActive}
+            contextBarSize={this.state.contextBarSize}
             currentStep={this.state.currentStep}
             debugRecord={this.state.debugRecord}
             editColumn={this.state.editColumn}

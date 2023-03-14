@@ -7,8 +7,9 @@ $enable-negative-margins: true;
 
 /* CSS vars */
 :root {
-  --datacater-context-bar-width: 400px;
-  --datacater-context-bar-width-large-screen: 500px;
+  --datacater-context-bar-width: 500px;
+  --datacater-context-bar-width-size-m: 700px;
+  --datacater-context-bar-width-size-l: 900px;
   --datacater-pipeline-designer-navigation-width: 0px;
 }
 

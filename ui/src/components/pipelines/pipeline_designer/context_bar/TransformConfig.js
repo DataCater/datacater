@@ -281,7 +281,7 @@ class TransformConfig extends Component {
             </>
           )}
           {this.state.currentTab === "spec" && (
-            <div className="mt-1" style={{ width: "427px" }}>
+            <div className="mt-1" style={{ width: "100%" }}>
               <SyntaxHighlighter
                 language="yaml"
                 showLineNumbers={true}
