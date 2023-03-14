@@ -98,6 +98,11 @@ class Navigation extends Component {
                 "/deployments",
                 <PlayCircle className="feather-icon me-2" />
               )}
+              {this.renderNavItem(
+                              "Configs",
+                              "/configs",
+                              <PlayCircle className="feather-icon me-2" />
+                            )}
             </ul>
             <div className="my-2 my-md-0">
               <a
