@@ -9,6 +9,7 @@ import {
   LogOut,
   PlayCircle,
   Wind,
+  Tool,
 } from "react-feather";
 import "../../scss/nav.scss";
 
@@ -101,7 +102,7 @@ class Navigation extends Component {
               {this.renderNavItem(
                               "Configs",
                               "/configs",
-                              <PlayCircle className="feather-icon me-2" />
+                              <Tool className="feather-icon me-2" />
                             )}
             </ul>
             <div className="my-2 my-md-0">

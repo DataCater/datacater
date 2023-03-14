@@ -25,7 +25,7 @@ class ListConfigs extends Component {
       );
     }
 
-    const configs = this.props.configs.configs.sort(
+    const configs = this.props.configs.sort(
       (a, b) => Date.parse(b.updatedAt) - Date.parse(a.updatedAt)
     );
 
