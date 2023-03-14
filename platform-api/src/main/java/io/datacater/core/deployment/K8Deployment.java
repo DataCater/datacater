@@ -260,10 +260,16 @@ public class K8Deployment {
 
   public String getDeploymentReplicaIp(UUID deploymentId, int replica) {
     int replicaPosition = replica;
-    if (replicaPosition > 0) {
-      // map replica number to array position
-      replicaPosition--;
+    LOGGER.info(replica);
+    if (replicaPosition <= 0) {
+      final String errorMessage =
+          "The deployment replica you are searching for can not be less than 1";
+      throw new DeploymentReplicaMismatchException(errorMessage);
     }
+
+    // map replica number to array position
+    replicaPosition--;
+
     String deploymentName = getDeploymentName(deploymentId);
     final Map<String, String> matchLabels =
         client
@@ -288,7 +294,7 @@ public class K8Deployment {
               .getItems();
 
       searchedPod =
-              allDeploymentPods.stream()
+          allDeploymentPods.stream()
               .sorted((Comparator.comparing(o -> o.getMetadata().getName())))
               .toList()
               .get(replicaPosition);
