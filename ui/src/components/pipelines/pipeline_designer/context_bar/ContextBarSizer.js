@@ -19,30 +19,27 @@ class ContextBarSizer extends Component {
 
     return (
       <React.Fragment>
-        <a
-          href="#"
+        <button
           className={sClassNames}
           data-size="S"
           onClick={changeContextBarSizeFunc}
         >
           S
-        </a>
-        <a
-          href="#"
+        </button>
+        <button
           className={mClassNames}
           data-size="M"
           onClick={changeContextBarSizeFunc}
         >
           M
-        </a>
-        <a
-          href="#"
+        </button>
+        <button
           className={lClassNames}
           data-size="L"
           onClick={changeContextBarSizeFunc}
         >
           L
-        </a>
+        </button>
       </React.Fragment>
     );
   }
