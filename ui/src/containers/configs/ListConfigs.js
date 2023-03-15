@@ -52,7 +52,7 @@ class ListConfigs extends Component {
               </>
             }
             title="Configs"
-            subTitle="Configs operate Pipelines."
+            subTitle="Configs are used to outsource the configuration of streams and deployments."
           />
         </div>
         <div className="row mt-4">
