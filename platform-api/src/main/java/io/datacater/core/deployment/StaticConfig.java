@@ -87,12 +87,12 @@ public class StaticConfig {
     static final String NAMESPACE =
         ConfigProvider.getConfig()
             .getOptionalValue("datacater.deployment.namespace", String.class)
-            .orElse("datacater")
+            .orElse("default")
             .toLowerCase();
     static final String FULL_IMAGE_NAME =
         ConfigProvider.getConfig()
             .getOptionalValue("datacater.deployment.image", String.class)
-            .orElse("datacater/pipeline:alpha-20221117");
+            .orElse("datacater/pipeline:2023.1");
     static final Integer READY_SECONDS =
         ConfigProvider.getConfig()
             .getOptionalValue("datacater.deployment.ready-seconds", Integer.class)
