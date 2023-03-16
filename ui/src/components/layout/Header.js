@@ -1,13 +1,27 @@
 import React, { Component } from "react";
 import ApiCall from "./ApiCall";
+import PayloadEditor from "../payload-editor/PayloadEditor";
 
 class Header extends Component {
   constructor(props) {
     super(props);
     this.state = {
       showApiCall: false,
+      showPayloadEditor: false,
     };
     this.toggleShowApiCall = this.toggleShowApiCall.bind(this);
+    this.togglePayloadEditor = this.togglePayloadEditor.bind(this);
+  }
+
+  togglePayloadEditor(event) {
+    event.preventDefault();
+
+    const toggledPayloadEditor = !this.state.showPayloadEditor;
+
+    this.setState({
+      showApiCall: false,
+      showPayloadEditor: toggledPayloadEditor,
+    });
   }
 
   toggleShowApiCall(event) {
@@ -21,6 +35,8 @@ class Header extends Component {
 
     this.setState({
       showApiCall: newShowApiCall,
+      showPayloadEditor: false, // do not stack payload editor and api call
+      // TODO(hknlof): implement toggle while considering newShowApiCall, PUT, and POST requests only.
     });
   }
 
@@ -46,8 +62,18 @@ class Header extends Component {
                   <p className="text-white mb-0">{subTitle}</p>
                 )}
               </div>
+
               <div className="col-12 col-lg-6 d-flex align-items-center justify-content-lg-end">
                 <div>
+                  {(httpMethod === "POST" || httpMethod === "PUT") && (
+                    <a
+                      href="#"
+                      className="btn btn-light"
+                      onClick={this.togglePayloadEditor}
+                    >
+                      Edit Payload
+                    </a>
+                  )}
                   <a
                     href="#"
                     className="btn btn-light"
@@ -59,6 +85,17 @@ class Header extends Component {
                 </div>
               </div>
             </div>
+            {this.state.showPayloadEditor && (
+              <div className="mx-n3 mt-2 mb-n3">
+                <PayloadEditor
+                  apiDocs={apiDocs}
+                  apiPath={apiPath}
+                  buttons={buttons}
+                  httpMethod={httpMethod}
+                  requestBody={requestBody}
+                />
+              </div>
+            )}
             {this.state.showApiCall && (
               <div className="mx-n3 mt-2 mb-n3">
                 <ApiCall
