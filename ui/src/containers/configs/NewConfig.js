@@ -7,6 +7,7 @@ import Breadcrumb from "../../components/layout/Breadcrumb";
 import { getConfigKindOptions } from "../../helpers/getConfigKindOptions";
 import Header from "../../components/layout/Header";
 import { addConfig } from "../../actions/configs";
+import { fetchPipelines } from "../../actions/pipelines";
 import "../../scss/fonts.scss";
 
 class NewConfig extends Component {
@@ -17,14 +18,29 @@ class NewConfig extends Component {
       creatingConfigFailed: false,
       errorMessages: {},
       config: {
-        spec: {},
+        name: "",
+        kind: "STREAM",
         metadata: {
             labels: {}
         },
+        spec: {},
       },
       tempLabel: {
         labelKey: "",
         labelValue: "",
+      },
+      deployment: {
+        spec: {},
+      },
+      stream: {
+        spec: {
+          kind: "KAFKA",
+          kafka: {
+            topic: {
+              config: {},
+            },
+          },
+        },
       },
       configCreated: false,
     };
@@ -33,6 +49,11 @@ class NewConfig extends Component {
     this.handleChange = this.handleChange.bind(this);
     this.addLabel = this.addLabel.bind(this);
     this.removeLabel = this.removeLabel.bind(this);
+  }
+
+
+  componentDidMount() {
+    this.props.fetchPipelines();
   }
 
     updateTempLabel(field, value) {
@@ -69,8 +90,21 @@ class NewConfig extends Component {
 
   handleChange(name, value, prefix) {
     let config = this.state.config;
+    let deployment = this.state.deployment;
+    let stream = this.state.stream;
 
-    config.metadata.labels[name] = value;
+    if(prefix === "deployment.spec"){
+        deployment.spec[name] = value;
+    } else{
+        config[name] = value;
+    }
+
+    if(prefix.includes("deployment")){
+        config.spec = deployment.spec;
+    } else{
+        config.spec = stream.spec;
+    }
+
     this.setState({
       creatingConfigFailed: false,
       errorMessage: "",
@@ -94,6 +128,15 @@ class NewConfig extends Component {
       this.setState({ config: config });
     }
 
+        setDefaultKind(field, value) {
+          let config = this.state.config;
+
+          config.kind = value;
+
+          this.setState({ config: config });
+          return this.state.config.kind;
+        }
+
   render() {
     if (this.state.configCreated) {
       return (
@@ -105,10 +148,13 @@ class NewConfig extends Component {
 
     const kindOptions = getConfigKindOptions();
     const config = this.state.config;
-
     const defaultKind = "STREAM";
-
     const addedLabels = Object.keys(config.metadata.labels);
+
+    const pipelineOptions = this.props.pipelines.pipelines.map((pipeline) => {
+          const name = `${pipeline.name || "Untitled pipeline"} (${pipeline.uuid})`;
+          return { value: pipeline.uuid, label: name };
+        });
 
     return (
       <div className="container">
@@ -233,6 +279,34 @@ class NewConfig extends Component {
                 </div>
               </div>
             </div>
+
+
+
+            {[undefined, defaultKind].includes(this.state.config["kind"]) && (
+              <>
+                <div className="col-12 mt-4">
+
+                </div>
+              </>
+            )}
+
+
+
+            {this.state.config["kind"] == "DEPLOYMENT" && (
+              <>
+                <div className="col-12 mt-4">
+                  <label className="form-label">Pipeline</label>
+                  <Select
+                    isSearchable
+                    isClearable
+                    options={pipelineOptions}
+                    onChange={(value) => {
+                      this.handleChange("pipeline", value.value, "deployment.spec");
+                    }}
+                  />
+                </div>
+              </>
+            )}
             {![undefined, ""].includes(this.state.errorMessage) && (
               <div className="alert alert-danger mt-4">
                 <p className="h6 fs-bolder">API response:</p>
@@ -258,11 +332,13 @@ class NewConfig extends Component {
 const mapStateToProps = function (state) {
   return {
     configs: state.configs,
+    pipelines: state.pipelines,
   };
 };
 
 const mapDispatchToProps = {
   addonfig: addConfig,
+  fetchPipelines: fetchPipelines,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(NewConfig);
