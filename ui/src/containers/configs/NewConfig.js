@@ -174,27 +174,6 @@ class NewConfig extends Component {
         config.spec = stream.spec;
     }
 
-    if(prefix.includes("stream")){
-        switch (event.target.dataset.prefix) {
-          case "stream.spec":
-            stream["spec"][event.target.name] = newValue;
-            break;
-          case "stream.spec.kafka":
-            stream["spec"]["kafka"][event.target.name] = newValue;
-            break;
-          case "stream.spec.kafka.topic":
-            stream["spec"]["kafka"]["topic"][event.target.name] = newValue;
-            break;
-          case "stream.spec.kafka.topic.config":
-            stream["spec"]["kafka"]["topic"]["config"][event.target.name] =
-              newValue;
-            break;
-          default:
-            stream[event.target.name] = newValue;
-            break;
-        }
-    }
-
 
     this.setState({
       creatingConfigFailed: false,
@@ -267,6 +246,13 @@ class NewConfig extends Component {
 
         this.setState({ stream: stream });
       }
+
+    updateConnectionConfig(field, value) {
+      let stream = this.state.stream;
+      stream.spec.kafka[field] = value;
+
+      this.setState({ stream: stream });
+    }
 
 
 
@@ -595,6 +581,97 @@ class NewConfig extends Component {
                     </div>
                   </>
                 )}
+                <div className="col-12 mt-4">
+                  <h5 className="fw-semibold">Data format</h5>
+                </div>
+                <div className="col-12">
+                  <label htmlFor="key.deserializer" className="form-label">
+                    key.deserializer
+                  </label>
+                  <Creatable
+                    defaultValue={deserializerOptions.find(
+                      (deserializer) => deserializer.value === defaultDeserializer
+                    )}
+                    isSearchable
+                    options={deserializerOptions}
+                    onChange={(value) => {
+                      this.updateConnectionConfig("key.deserializer", value.value);
+                    }}
+                  />
+                </div>
+                <div className="col-12 mt-2">
+                  <label htmlFor="value.deserializer" className="form-label">
+                    value.deserializer
+                  </label>
+                  <Creatable
+                    defaultValue={deserializerOptions.find(
+                      (deserializer) => deserializer.value === defaultDeserializer
+                    )}
+                    isSearchable
+                    options={deserializerOptions}
+                    onChange={(value) => {
+                      this.updateConnectionConfig(
+                        "value.deserializer",
+                        value.value
+                      );
+                    }}
+                  />
+                </div>
+                <div className="col-12 mt-2">
+                  <label htmlFor="key.serializer" className="form-label">
+                    key.serializer
+                  </label>
+                  <Creatable
+                    defaultValue={serializerOptions.find(
+                      (deserializer) => deserializer.value === defaultSerializer
+                    )}
+                    isSearchable
+                    options={serializerOptions}
+                    onChange={(value) => {
+                      this.updateConnectionConfig("key.serializer", value.value);
+                    }}
+                  />
+                </div>
+                <div className="col-12 mt-2">
+                  <label htmlFor="value.serializer" className="form-label">
+                    value.serializer
+                  </label>
+                  <Creatable
+                    defaultValue={serializerOptions.find(
+                      (deserializer) => deserializer.value === defaultSerializer
+                    )}
+                    isSearchable
+                    options={serializerOptions}
+                    onChange={(value) => {
+                      this.updateConnectionConfig("value.serializer", value.value);
+                    }}
+                  />
+                </div>
+                {streamHoldsAvroFormat && (
+                  <>
+                    <div className="col-12 mt-2">
+                      <label htmlFor="schema.registry.url" className="form-label">
+                        schema.registry.url
+                      </label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        id="schema.registry.url"
+                        data-prefix="stream.spec.kafka"
+                        name="schema.registry.url"
+                        onChange={this.handleEventChange}
+                        value={
+                          this.state.stream.spec.kafka["schema.registry.url"] || ""
+                        }
+                      />
+                    </div>
+                  </>
+                )}
+
+
+
+
+
               </>
             )}
 
