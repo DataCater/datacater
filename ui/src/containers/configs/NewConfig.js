@@ -123,6 +123,7 @@ class NewConfig extends Component {
 
   handleCreateConfig(event) {
     event.preventDefault();
+    this.updateConfigSpec();
     this.props.addConfig(this.state.config).then(() => {
       if (this.props.configs.errorMessage !== undefined) {
         this.setState({
@@ -136,7 +137,6 @@ class NewConfig extends Component {
         });
       }
     });
-    this.updateConfigSpec();
   }
 
   handleEventChange(event) {
