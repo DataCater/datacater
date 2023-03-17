@@ -667,16 +667,109 @@ class NewConfig extends Component {
                     </div>
                   </>
                 )}
-
-
-
-
-
+                <div className="col-12 mt-4">
+                  <h5 className="fw-semibold">Connection</h5>
+                </div>
+                <div className="col-12 mt-2">
+                  <label htmlFor="bootstrap.servers" className="form-label">
+                    bootstrap.servers<span className="text-danger ms-1">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    id="bootstrap.servers"
+                    data-prefix="stream.spec.kafka"
+                    name="bootstrap.servers"
+                    onChange={this.handleEventChange}
+                    value={this.state.stream.spec.kafka["bootstrap.servers"] || ""}
+                  />
+                </div>
+                {addedConnectionConfigs.map((connectionConfig) => (
+                  <div className="col-12 mt-2" key={connectionConfig}>
+                    <label htmlFor={connectionConfig} className="form-label">
+                      {connectionConfig}
+                      <a
+                        className="ms-2 fs-7"
+                        data-config={connectionConfig}
+                        data-prefix="stream.spec.kafka"
+                        href="/configs/new"
+                        onClick={this.removeStreamConfig}
+                      >
+                        Remove
+                      </a>
+                    </label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      id={connectionConfig}
+                      data-prefix="stream.spec.kafka"
+                      name={connectionConfig}
+                      onChange={this.handleEventChange}
+                      value={this.state.stream.spec.kafka[connectionConfig] || ""}
+                    />
+                  </div>
+                ))}
+                <div className="col-12 mt-3">
+                  <h6 className="d-inline me-2">Add config</h6>
+                  <span className="text-muted fs-7">
+                    You can here use{" "}
+                    <a
+                      href="https://kafka.apache.org/documentation/#consumerconfigs"
+                      target="_blank"
+                    >
+                      consumer-level
+                    </a>{" "}
+                    and{" "}
+                    <a
+                      href="https://kafka.apache.org/documentation/#producerconfigs"
+                      target="_blank"
+                    >
+                      producer-level
+                    </a>{" "}
+                    configuration options.
+                  </span>
+                </div>
+                <div className="col-12 mt-2">
+                  <div className="row">
+                    <div className="col-md-3">
+                      <label className="form-label">Name</label>
+                      <Creatable
+                        isSearchable
+                        options={connectionOptions}
+                        onChange={(value) => {
+                          this.updateTempStreamConfig("connectionName", value.value);
+                        }}
+                      />
+                    </div>
+                    <div className="col-md-3">
+                      <label className="form-label">Value</label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        name="topicValue"
+                        onChange={(event) => {
+                          this.updateTempStreamConfig(
+                            "connectionValue",
+                            event.target.value
+                          );
+                        }}
+                        value={this.state.tempConfig.connectionValue || ""}
+                      />
+                    </div>
+                    <div className="col-md-3 d-flex align-items-end">
+                      <a
+                        href="/configs/new"
+                        className="btn btn-outline-primary"
+                        data-prefix="stream.spec.kafka"
+                        onClick={this.addStreamConfig}
+                      >
+                        Add
+                      </a>
+                    </div>
+                  </div>
+                </div>
               </>
             )}
-
-
-
             {this.state.config["kind"] == "DEPLOYMENT" && (
               <>
                 <div className="col-12 mt-4">
