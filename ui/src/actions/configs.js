@@ -41,7 +41,7 @@ export function fetchConfig(id) {
 
   const receivedConfig = (response) => ({
     type: "RECEIVE_CONFIG",
-    Config: response,
+    config: response,
   });
 
   const receivedConfigFailed = (response) => ({
