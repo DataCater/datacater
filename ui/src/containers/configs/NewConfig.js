@@ -65,21 +65,41 @@ class NewConfig extends Component {
     this.toggleShowTopicConfig = this.toggleShowTopicConfig.bind(this);
     this.addStreamConfig = this.addStreamConfig.bind(this);
     this.removeStreamConfig = this.removeStreamConfig.bind(this);
+    this.updateConfigSpec = this.updateConfigSpec.bind(this);
   }
+
+
+  updateConfigSpec(){
+    let config = this.state.config;
+    let deployment = this.state.deployment;
+    let stream = this.state.stream;
+    const currentKind = config.kind
+
+    if(currentKind === "STREAM"){
+        config.spec = stream.spec.kafka;
+    } else{
+        config.spec = deployment.spec;
+    }
+
+    this.setState({ config: config });
+  }
+
+
+
     updateTempStreamConfig(field, value) {
       let tempStreamConfig = this.state.tempStreamConfig;
 
       tempStreamConfig[field] = value;
-
       this.setState({ tempStreamConfig: tempStreamConfig });
+      this.updateConfigSpec();
     }
 
     updateConnectionConfig(field, value) {
       let stream = this.state.stream;
 
       stream.spec.kafka[field] = value;
-
       this.setState({ stream: stream });
+      this.updateConfigSpec();
     }
 
 
@@ -103,7 +123,6 @@ class NewConfig extends Component {
 
   handleCreateConfig(event) {
     event.preventDefault();
-
     this.props.addConfig(this.state.config).then(() => {
       if (this.props.configs.errorMessage !== undefined) {
         this.setState({
@@ -117,6 +136,7 @@ class NewConfig extends Component {
         });
       }
     });
+    this.updateConfigSpec();
   }
 
   handleEventChange(event) {
@@ -145,12 +165,12 @@ class NewConfig extends Component {
         stream[event.target.name] = newValue;
         break;
     }
-
     this.setState({
       creatingConfigFailed: false,
       errorMessage: "",
       stream: stream,
     });
+    this.updateConfigSpec();
   }
 
   handleChange(name, value, prefix) {
@@ -168,12 +188,6 @@ class NewConfig extends Component {
         config[name] = value;
     }
 
-    if(prefix.includes("deployment")){
-        config.spec = deployment.spec;
-    } else{
-        config.spec = stream.spec;
-    }
-
 
     this.setState({
       creatingConfigFailed: false,
@@ -182,6 +196,7 @@ class NewConfig extends Component {
       deployment: deployment,
       stream: stream,
     });
+    this.updateConfigSpec();
   }
 
     removeLabel(event) {
@@ -230,6 +245,7 @@ class NewConfig extends Component {
           tempStreamConfig.topicValue;
         this.setState({ stream: stream, tempStreamConfig: tempStreamConfig });
       }
+      this.updateConfigSpec();
     }
 
       removeStreamConfig(event) {
@@ -245,6 +261,7 @@ class NewConfig extends Component {
         }
 
         this.setState({ stream: stream });
+        this.updateConfigSpec();
       }
 
     updateConnectionConfig(field, value) {
@@ -252,6 +269,7 @@ class NewConfig extends Component {
       stream.spec.kafka[field] = value;
 
       this.setState({ stream: stream });
+      this.updateConfigSpec();
     }
 
 
@@ -753,7 +771,7 @@ class NewConfig extends Component {
                             event.target.value
                           );
                         }}
-                        value={this.state.tempConfig.connectionValue || ""}
+                        value={this.state.tempStreamConfig.connectionValue || ""}
                       />
                     </div>
                     <div className="col-md-3 d-flex align-items-end">
