@@ -188,7 +188,6 @@ class NewConfig extends Component {
         config[name] = value;
     }
 
-
     this.setState({
       creatingConfigFailed: false,
       errorMessage: "",
