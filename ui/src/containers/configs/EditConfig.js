@@ -333,7 +333,7 @@ return (
             apiPath="/configs/"
             httpMethod="POST"
             requestBody={this.state.config}
-            title="Create new config"
+            title={config.name || "Untitled config"}
             subTitle="Configs are used to outsource the configuration of streams and deployments."
           />
           <form>
