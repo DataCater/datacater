@@ -594,8 +594,6 @@ class NewStream extends Component {
                 </div>
               </div>
             </div>
-
-
             {addedLabels.map((labels) => (
               <div className="col-12 mt-2" key={labels}>
                 <label htmlFor={labels} className="form-label">
@@ -671,10 +669,6 @@ class NewStream extends Component {
                 </div>
               </div>
             </div>
-
-
-
-
             {![undefined, ""].includes(this.state.errorMessage) && (
               <div className="alert alert-danger mt-4">
                 <p className="h6 fs-bolder">API response:</p>
