@@ -37,6 +37,9 @@ class EditStream extends Component {
     this.updateConnectionConfig = this.updateConnectionConfig.bind(this);
     this.addConfig = this.addConfig.bind(this);
     this.removeConfig = this.removeConfig.bind(this);
+    this.addLabel = this.addLabel.bind(this);
+    this.removeLabel = this.removeLabel.bind(this);
+    this.updateTempLabel = this.updateTempLabel.bind(this);
   }
 
   componentDidMount() {
@@ -135,6 +138,10 @@ class EditStream extends Component {
         stream["spec"]["kafka"]["topic"]["config"][event.target.name] =
           newValue;
         break;
+      case "configSelector":
+        stream.configSelector[event.target.name] =
+          newValue;
+        break;
       default:
         stream[event.target.name] = newValue;
         break;
@@ -155,6 +162,28 @@ class EditStream extends Component {
     });
   }
 
+  updateTempLabel(field, value) {
+    let tempLabel = this.state.tempLabel;
+    tempLabel[field] = value;
+    this.setState({ tempLabel: tempLabel });
+  }
+
+  addLabel(event) {
+      event.preventDefault();
+      const tempLabel = this.state.tempLabel;
+      let stream = this.state.stream;
+      stream.configSelector[tempLabel.labelKey] = tempLabel.labelValue;
+      this.setState({ stream: stream, tempLabel: tempLabel });
+  }
+
+  removeLabel(event) {
+    event.preventDefault();
+    let stream = this.state.stream;
+    const label = event.target.dataset.label;
+    delete stream.configSelector[label];
+    this.setState({ stream: stream });
+  }
+
   render() {
     if (this.state.streamUpdated) {
       return <Redirect to={"/streams/" + this.getStreamId()} />;
@@ -166,6 +195,7 @@ class EditStream extends Component {
       return <></>;
     }
 
+    const addedLabels = Object.keys(stream.configSelector);
     const apiPayload = Object.assign({}, stream);
     delete apiPayload.uuid;
     delete apiPayload.createdAt;
@@ -587,6 +617,81 @@ class EditStream extends Component {
                     className="btn btn-outline-primary"
                     data-prefix="spec.kafka"
                     onClick={this.addConfig}
+                  >
+                    Add
+                  </a>
+                </div>
+              </div>
+            </div>
+            {addedLabels.map((labels) => (
+              <div className="col-12 mt-2" key={labels}>
+                <label htmlFor={labels} className="form-label">
+                  {labels}
+                  <a
+                    className="ms-2 fs-7"
+                    data-label={labels}
+                    data-prefix="configSelector"
+                    href="/streams/new"
+                    onClick={this.removeLabel}
+                  >
+                    Remove
+                  </a>
+                </label>
+                <input
+                  type="text"
+                  className="form-control"
+                  id={labels}
+                  data-prefix="configSelector"
+                  name={labels}
+                  onChange={this.handleChange}
+                  value={this.state.stream.configSelector[labels] || ""}
+                />
+              </div>
+            ))}
+            <div className="col-12 mt-3">
+              <h6 className="d-inline me-2">Add labels</h6>
+              <span className="text-muted fs-7">
+              used for matching the stream to configs.
+              </span>
+            </div>
+            <div className="col-12 mt-2">
+              <div className="row">
+                <div className="col-md-3">
+                  <label className="form-label">Key</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    name="labelKey"
+                    onChange={(event) => {
+                      this.updateTempLabel(
+                        "labelKey",
+                        event.target.value
+                      );
+                    }}
+                    value={this.state.tempLabel.labelKey || ""}
+                  />
+                </div>
+                <div className="col-md-3">
+                  <label className="form-label">Value</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    name="labelValue"
+                    onChange={(event) => {
+                      this.updateTempLabel(
+                        "labelValue",
+                        event.target.value
+                      );
+                    }}
+                    value={this.state.tempLabel.labelValue || ""}
+                  />
+                </div>
+                <div className="col-md-3 d-flex align-items-end">
+                  <a
+                    href="/streams/new"
+                    className="btn btn-outline-primary"
+                    data-prefix="configSelector"
+                    onClick={this.addLabel}
                   >
                     Add
                   </a>
