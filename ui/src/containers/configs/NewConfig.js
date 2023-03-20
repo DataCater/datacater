@@ -374,7 +374,7 @@ class NewConfig extends Component {
                     className="ms-2 fs-7"
                     data-label={labels}
                     data-prefix="metadata.labels"
-                    href="/config/new"
+                    href="/configs/new"
                     onClick={this.removeLabel}
                   >
                     Remove
