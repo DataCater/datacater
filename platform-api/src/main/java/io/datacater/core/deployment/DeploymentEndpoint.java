@@ -354,14 +354,12 @@ public class DeploymentEndpoint {
   private HttpRequest buildDeploymentServiceRequest(UUID deploymentId, String path, int replica) {
     K8Deployment k8Deployment = new K8Deployment(client);
     String ip = k8Deployment.getDeploymentReplicaIp(deploymentId, replica).replace(".", "-");
-    String service = StaticConfig.SERVICE_NAME_PREFIX + deploymentId;
     String namespace = StaticConfig.EnvironmentVariables.NAMESPACE;
     int port = StaticConfig.EnvironmentVariables.DEPLOYMENT_CONTAINER_PORT;
     String protocol = StaticConfig.EnvironmentVariables.DEPLOYMENT_CONTAINER_PROTOCOL;
 
     String uriReady =
-        String.format(
-            "%s://%s.%s.%s.svc.cluster.local:%d%s", protocol, ip, service, namespace, port, path);
+        String.format("%s://%s.%s.pod.cluster.local:%d%s", protocol, ip, namespace, port, path);
 
     return HttpRequest.newBuilder()
         .GET()

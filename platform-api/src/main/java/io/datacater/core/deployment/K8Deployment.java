@@ -25,12 +25,10 @@ public class K8Deployment {
   private static final Logger LOGGER = Logger.getLogger(K8Deployment.class);
   private final KubernetesClient client;
   private final K8ConfigMap k8ConfigMap;
-  private final K8Service k8Service;
 
   public K8Deployment(KubernetesClient client) {
     this.client = client;
     this.k8ConfigMap = new K8ConfigMap(client);
-    this.k8Service = new K8Service(client);
   }
 
   public Map<String, Object> create(
@@ -92,7 +90,6 @@ public class K8Deployment {
       throw new CreateDeploymentException(StaticConfig.LoggerMessages.DEPLOYMENT_NOT_CREATED);
     }
     k8ConfigMap.getOrCreate(configmapName, pe);
-    k8Service.create(serviceName);
     return getDeployment(deploymentId);
   }
 
@@ -212,7 +209,6 @@ public class K8Deployment {
     // deployment to be exactly
     // one and continue only if that is true.
     if (status.size() == 1) {
-      k8Service.delete(serviceName);
       k8ConfigMap.delete(configMapName);
       LOGGER.info(String.format(StaticConfig.LoggerMessages.DEPLOYMENT_DELETED, name));
     } else {
