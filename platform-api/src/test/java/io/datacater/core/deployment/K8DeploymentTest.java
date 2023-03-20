@@ -110,7 +110,7 @@ class K8DeploymentTest {
   @Test
   @Order(3)
   void testGetLogs() {
-    String logs = k8Deployment.getLogs(deploymentId);
+    String logs = k8Deployment.getLogs(deploymentId, 1);
     Assertions.assertNotNull(logs);
   }
 

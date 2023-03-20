@@ -15,7 +15,7 @@ import io.fabric8.kubernetes.api.model.apps.Deployment;
 import io.fabric8.kubernetes.api.model.apps.DeploymentBuilder;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClientException;
-import io.fabric8.kubernetes.client.dsl.RollableScalableResource;
+import io.fabric8.kubernetes.client.dsl.ContainerResource;
 import java.util.*;
 import javax.inject.Singleton;
 import org.jboss.logging.Logger;
@@ -173,22 +173,27 @@ public class K8Deployment {
     return new ConfigMapVolumeSourceBuilder().withName(deploymentName).build();
   }
 
-  public String getLogs(UUID deploymentId) {
+  public String getLogs(UUID deploymentId, int replica) {
+    String deploymentName = getDeploymentName(deploymentId);
+    Pod pod = getDeploymentPodByReplica(deploymentName, replica);
+
     return client
-        .apps()
-        .deployments()
+        .pods()
         .inNamespace(StaticConfig.EnvironmentVariables.NAMESPACE)
-        .withName(getDeploymentName(deploymentId))
+        .withName(pod.getMetadata().getName())
         .inContainer(StaticConfig.DEPLOYMENT_NAME_PREFIX + deploymentId)
         .getLog(true);
   }
 
-  public RollableScalableResource<Deployment> watchLogs(UUID deploymentId) {
+  public ContainerResource watchLogs(UUID deploymentId, int replica) {
+    String deploymentName = getDeploymentName(deploymentId);
+    Pod pod = getDeploymentPodByReplica(deploymentName, replica);
+
     return client
-        .apps()
-        .deployments()
+        .pods()
         .inNamespace(StaticConfig.EnvironmentVariables.NAMESPACE)
-        .withName(getDeploymentName(deploymentId));
+        .withName(pod.getMetadata().getName())
+        .inContainer(StaticConfig.DEPLOYMENT_NAME_PREFIX + deploymentId);
   }
 
   public void delete(UUID deploymentId) {
@@ -259,53 +264,10 @@ public class K8Deployment {
   }
 
   public String getDeploymentReplicaIp(UUID deploymentId, int replica) {
-    int replicaPosition = replica;
-    LOGGER.info(replica);
-    if (replicaPosition <= 0) {
-      final String errorMessage =
-          "The deployment replica you are searching for can not be less than 1";
-      throw new DeploymentReplicaMismatchException(errorMessage);
-    }
-
-    // map replica number to array position
-    replicaPosition--;
-
     String deploymentName = getDeploymentName(deploymentId);
-    final Map<String, String> matchLabels =
-        client
-            .apps()
-            .deployments()
-            .inNamespace(StaticConfig.EnvironmentVariables.NAMESPACE)
-            .withName(deploymentName)
-            .get()
-            .getSpec()
-            .getSelector()
-            .getMatchLabels();
+    Pod pod = getDeploymentPodByReplica(deploymentName, replica);
 
-    Pod searchedPod;
-    List<Pod> allDeploymentPods = new ArrayList<>();
-    try {
-      allDeploymentPods =
-          client
-              .pods()
-              .inNamespace(StaticConfig.EnvironmentVariables.NAMESPACE)
-              .withLabels(matchLabels)
-              .list()
-              .getItems();
-
-      searchedPod =
-          allDeploymentPods.stream()
-              .sorted((Comparator.comparing(o -> o.getMetadata().getName())))
-              .toList()
-              .get(replicaPosition);
-    } catch (ArrayIndexOutOfBoundsException e) {
-      final String errorMessage =
-          String.format(
-              "The deployment replica you are searching for, %s, does not match the defined replica amount of %s.",
-              replica, allDeploymentPods.size());
-      throw new DeploymentReplicaMismatchException(errorMessage);
-    }
-    return searchedPod.getStatus().getPodIP();
+    return pod.getStatus().getPodIP();
   }
 
   private boolean exists(UUID deploymentId) {
@@ -513,5 +475,56 @@ public class K8Deployment {
       return replica;
     }
     return replica;
+  }
+
+  private int replicaNumberToArrayPosition(int replica) {
+    int replicaPosition = replica;
+    if (replicaPosition <= 0) {
+      final String errorMessage =
+          "The deployment replica you are searching for can not be less than 1";
+      throw new DeploymentReplicaMismatchException(errorMessage);
+    }
+    // map replica number to array position
+    replicaPosition--;
+    return replicaPosition;
+  }
+
+  private Pod getDeploymentPodByReplica(String deploymentName, int replica) {
+    int replicaPosition = replicaNumberToArrayPosition(replica);
+    final Map<String, String> matchLabels =
+        client
+            .apps()
+            .deployments()
+            .inNamespace(StaticConfig.EnvironmentVariables.NAMESPACE)
+            .withName(deploymentName)
+            .get()
+            .getSpec()
+            .getSelector()
+            .getMatchLabels();
+
+    Pod searchedPod;
+    List<Pod> allDeploymentPods = new ArrayList<>();
+    try {
+      allDeploymentPods =
+          client
+              .pods()
+              .inNamespace(StaticConfig.EnvironmentVariables.NAMESPACE)
+              .withLabels(matchLabels)
+              .list()
+              .getItems();
+
+      searchedPod =
+          allDeploymentPods.stream()
+              .sorted((Comparator.comparing(o -> o.getMetadata().getName())))
+              .toList()
+              .get(replicaPosition);
+    } catch (ArrayIndexOutOfBoundsException e) {
+      final String errorMessage =
+          String.format(
+              "The deployment replica you are searching for, %s, does not match the defined replica amount of %s.",
+              replica, allDeploymentPods.size());
+      throw new DeploymentReplicaMismatchException(errorMessage);
+    }
+    return searchedPod;
   }
 }
