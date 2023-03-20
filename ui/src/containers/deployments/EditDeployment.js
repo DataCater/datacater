@@ -21,6 +21,10 @@ class EditDeployment extends Component {
 
     this.handleUpdateDeployment = this.handleUpdateDeployment.bind(this);
     this.handleChange = this.handleChange.bind(this);
+    this.handleEventChange = this.handleEventChange.bind(this);
+    this.addLabel = this.addLabel.bind(this);
+    this.removeLabel = this.removeLabel.bind(this);
+    this.updateTempLabel = this.updateTempLabel.bind(this);
   }
 
   componentDidMount() {
@@ -74,6 +78,58 @@ class EditDeployment extends Component {
     });
   }
 
+    updateTempLabel(field, value) {
+      let tempLabel = this.state.tempLabel;
+      tempLabel[field] = value;
+      this.setState({ tempLabel: tempLabel });
+    }
+
+    addLabel(event) {
+        event.preventDefault();
+        const tempLabel = this.state.tempLabel;
+        let deployment = this.state.deployment;
+        deployment.configSelector[tempLabel.labelKey] = tempLabel.labelValue;
+        this.setState({ deployment: deployment, tempLabel: tempLabel });
+    }
+
+    removeLabel(event) {
+      event.preventDefault();
+      let deployment = this.state.deployment;
+      const label = event.target.dataset.label;
+      delete deployment.configSelector[label];
+      this.setState({ deployment: deployment });
+    }
+
+        handleEventChange(event) {
+          let deployment = this.state.deployment;
+
+          const newValue =
+                event.target.type === "checkbox"
+                  ? event.target.checked
+                  : event.target.value;
+
+          switch (event.target.dataset.prefix) {
+                case "metadata":
+                  deployment.metadata[event.target.name] = newValue;
+                  break;
+                case "spec":
+                  deployment.spec[event.target.name] = newValue;
+                  break;
+                case "configSelector":
+                  deployment.configSelector[event.target.name] = newValue;
+                  break;
+                default:
+                  deployment[event.target.name] = newValue;
+                  break;
+              }
+
+          this.setState({
+            creatingDeploymentFailed: false,
+            errorMessage: "",
+            deployment: deployment,
+          });
+        }
+
   render() {
     if (this.state.deploymentUpdated) {
       return <Redirect to={`/deployments/${this.getDeploymentId()}`} />;
@@ -90,6 +146,9 @@ class EditDeployment extends Component {
     delete apiPayload.createdAt;
     delete apiPayload.updatedAt;
     delete apiPayload.status;
+
+
+    const addedLabels = Object.keys(deployment.configSelector);
 
     const pipelineOptions = this.props.pipelines.pipelines.map((pipeline) => {
       const name = `${pipeline.name || "Untitled pipeline"} (${pipeline.uuid})`;
@@ -145,6 +204,89 @@ class EditDeployment extends Component {
                 }}
               />
             </div>
+
+
+
+            {addedLabels.map((labels) => (
+              <div className="col-12 mt-2" key={labels}>
+                <label htmlFor={labels} className="form-label">
+                  {labels}
+                  <a
+                    className="ms-2 fs-7"
+                    data-label={labels}
+                    data-prefix="configSelector"
+                    href="/deployments/new"
+                    onClick={this.removeLabel}
+                  >
+                    Remove
+                  </a>
+                </label>
+                <input
+                  type="text"
+                  className="form-control"
+                  id={labels}
+                  data-prefix="configSelector"
+                  name={labels}
+                  onChange={this.handleEventChange}
+                  value={this.state.deployment.configSelector[labels] || ""}
+                />
+              </div>
+            ))}
+            <div className="col-12 mt-3">
+              <h6 className="d-inline me-2">Add labels</h6>
+              <span className="text-muted fs-7">
+              used for matching the deployment to configs.
+              </span>
+            </div>
+            <div className="col-12 mt-2">
+              <div className="row">
+                <div className="col-md-3">
+                  <label className="form-label">Key</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    name="labelKey"
+                    onChange={(event) => {
+                      this.updateTempLabel(
+                        "labelKey",
+                        event.target.value
+                      );
+                    }}
+                    value={this.state.tempLabel.labelKey || ""}
+                  />
+                </div>
+                <div className="col-md-3">
+                  <label className="form-label">Value</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    name="labelValue"
+                    onChange={(event) => {
+                      this.updateTempLabel(
+                        "labelValue",
+                        event.target.value
+                      );
+                    }}
+                    value={this.state.tempLabel.labelValue || ""}
+                  />
+                </div>
+                <div className="col-md-3 d-flex align-items-end">
+                  <a
+                    href="/deployments/new"
+                    className="btn btn-outline-primary"
+                    data-prefix="configSelector"
+                    onClick={this.addLabel}
+                  >
+                    Add
+                  </a>
+                </div>
+              </div>
+            </div>
+
+
+
+
+
             {![undefined, ""].includes(this.state.errorMessage) && (
               <div className="alert alert-danger mt-4">
                 <p className="h6 fs-bolder">API response:</p>

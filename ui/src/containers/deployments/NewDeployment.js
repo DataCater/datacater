@@ -31,6 +31,7 @@ class NewDeployment extends Component {
     this.handleEventChange = this.handleEventChange.bind(this);
     this.addLabel = this.addLabel.bind(this);
     this.removeLabel = this.removeLabel.bind(this);
+    this.updateTempLabel = this.updateTempLabel.bind(this);
   }
 
   componentDidMount() {
