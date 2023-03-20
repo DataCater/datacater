@@ -11,6 +11,7 @@ import java.util.concurrent.*;
 import java.util.stream.Collectors;
 import org.apache.kafka.clients.admin.*;
 import org.apache.kafka.clients.consumer.*;
+import org.apache.kafka.common.KafkaFuture;
 import org.apache.kafka.common.PartitionInfo;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.config.ConfigResource;
@@ -300,7 +301,19 @@ public class KafkaStreamsAdmin implements StreamService {
 
   public StreamSpec updateStream(StreamSpec spec) {
     if (streamExists() && Boolean.TRUE.equals(isValidConfig(spec.getConfig()))) {
-      admin.incrementalAlterConfigs(convertConfigs(spec.getConfig()));
+      KafkaFuture<Void> alterTopicConfigFuture =
+          admin.incrementalAlterConfigs(convertConfigs(spec.getConfig())).all();
+      try {
+        alterTopicConfigFuture.get(KAFKA_API_TIMEOUT_MS.longValue(), TimeUnit.MILLISECONDS);
+      } catch (InterruptedException | ExecutionException e) {
+        throw new KafkaConnectionException(
+            String.format("%s: %s", e.getClass().toString(), e.getMessage()));
+      } catch (TimeoutException e) {
+        throw new KafkaConnectionException(
+            String.format(
+                "Exceeded timeout of %d ms when updating the config of the Apache Kafka topic.",
+                KAFKA_API_TIMEOUT_MS));
+      }
     }
     return spec;
   }
@@ -309,7 +322,19 @@ public class KafkaStreamsAdmin implements StreamService {
     if (!streamExists()) {
       NewTopic newTopic = new NewTopic(this.name, this.partitions, this.replication);
       newTopic.configs(spec.getConfig());
-      admin.createTopics(List.of(newTopic));
+      KafkaFuture<Config> createTopicConfigFuture =
+          admin.createTopics(List.of(newTopic)).config(this.name);
+      try {
+        createTopicConfigFuture.get(KAFKA_API_TIMEOUT_MS.longValue(), TimeUnit.MILLISECONDS);
+      } catch (InterruptedException | ExecutionException e) {
+        throw new KafkaConnectionException(
+            String.format("%s: %s", e.getClass().toString(), e.getMessage()));
+      } catch (TimeoutException e) {
+        throw new KafkaConnectionException(
+            String.format(
+                "Exceeded timeout of %d ms when creating Apache Kafka topic.",
+                KAFKA_API_TIMEOUT_MS));
+      }
       return spec;
     }
     Map<String, String> actualMetaData = getMetadata();
