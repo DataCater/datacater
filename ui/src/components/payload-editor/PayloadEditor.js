@@ -2,24 +2,32 @@ import React, {Component} from "react";
 import AceEditor from "react-ace";
 import * as defaults from "./PayloadDefaults";
 import {Copy, Play} from "react-feather";
+import {Redirect} from "react-router-dom";
+import {addStream} from "../../actions/streams";
+import {connect} from "react-redux";
 
 
 class PayloadEditor extends Component {
+
 
   constructor(props) {
     super(props);
     this.state = {
       code: this.getDefault(),
-      unsavedChanges: false
+      unsavedChanges: false,
+      streamCreated: false,
+      stream: defaults.getByString(props.apiPath)
     };
 
     this.getDefault = this.getDefault.bind(this);
     this.handleChange = this.handleChange.bind(this);
-    this.sendPayload = this.sendPayload.bind(this);
+    this.handleCreateStream = this.handleCreateStream.bind(this);
   }
 
   getDefault() {
-    let jsonString = JSON.stringify(defaults.STREAM, null, 2);
+    const apiPath = this.props.apiPath;
+    let jsonString = JSON.stringify(defaults.getByString(apiPath), null, 2);
+
     return jsonString;
   }
 
@@ -31,15 +39,28 @@ class PayloadEditor extends Component {
     });
   }
 
-  sendPayload() {
-    // TODO include auto-forward
+  handleCreateStream(event) {
+    event.preventDefault();
 
+    this.props.addStream(this.state.stream).then(() => {
+      if (this.props.streams.errorMessage !== undefined) {
+        this.setState({
+          streamCreated: false,
+          errorMessage: this.props.streams.errorMessage,
+        });
+      } else {
+        this.setState({
+          streamCreated: true,
+          errorMessage: "",
+        });
+      }
+    });
   }
 
   render() {
-    const buttonClassNames = this.state.unsavedChanges
-      ? "btn btn-sm d-flex align-items-center my-2 btn-primary-soft"
-      : "btn btn-sm d-flex align-items-center my-2 btn-outline-primary-soft";
+    if (this.state.streamCreated) {
+      return <Redirect to={"/streams/" + this.props.streams.stream.uuid} />;
+    }
 
     return (
       <div className="bg-black text-start p-3 position-relative">
@@ -49,7 +70,7 @@ class PayloadEditor extends Component {
             target="_blank"
             rel="noreferrer"
             className="btn btn-sm btn-light me-2"
-            onClick={this.sendPayload}
+            onClick={this.handleCreateStream}
           >
             <Play className="feather-icon" />
           </a>
@@ -78,4 +99,14 @@ class PayloadEditor extends Component {
   }
 }
 
-export default PayloadEditor;
+const mapStateToProps = function (state) {
+  return {
+    streams: state.streams,
+  };
+};
+
+const mapDispatchToProps = {
+  addStream: addStream,
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(PayloadEditor);
