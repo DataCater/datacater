@@ -142,6 +142,7 @@ class EditConfig extends Component {
 
     handleEventChange(event) {
     let stream = this.state.stream;
+    let config = this.state.config;
 
     const newValue =
         event.target.type === "checkbox"
@@ -162,6 +163,10 @@ class EditConfig extends Component {
       stream["spec"]["kafka"]["topic"]["config"][event.target.name] =
         newValue;
       break;
+      case "metadata.labels":
+        config.metadata.labels[event.target.name] =
+          newValue;
+        break;
     default:
       stream[event.target.name] = newValue;
       break;
@@ -170,33 +175,34 @@ class EditConfig extends Component {
     creatingConfigFailed: false,
     errorMessage: "",
     stream: stream,
+    config: config,
     });
     this.updateConfigSpec();
     }
 
     handleChange(name, value, prefix) {
-    let config = this.state.config;
-    let deployment = this.state.deployment;
-    let stream = this.state.stream;
+        let config = this.state.config;
+        let deployment = this.state.deployment;
+        let stream = this.state.stream;
 
-    if(prefix === undefined){
-        prefix = "";
-    }
+        if(prefix === undefined){
+            prefix = "";
+        }
 
-    if(prefix === "deployment.spec"){
-        deployment.spec[name] = value;
-    } else{
-        config[name] = value;
-    }
+        if(prefix === "deployment.spec"){
+            deployment.spec[name] = value;
+        } else{
+            config[name] = value;
+        }
 
-    this.setState({
-      creatingConfigFailed: false,
-      errorMessage: "",
-      config: config,
-      deployment: deployment,
-      stream: stream,
-    });
-    this.updateConfigSpec();
+        this.setState({
+          creatingConfigFailed: false,
+          errorMessage: "",
+          config: config,
+          deployment: deployment,
+          stream: stream,
+        });
+        this.updateConfigSpec();
     }
 
     removeLabel(event) {
@@ -283,7 +289,6 @@ class EditConfig extends Component {
     if (config == null) {
       return <></>;
     }
-console.log(config);
 
     const kindOptions = getConfigKindOptions();
     const defaultKind = "STREAM";
@@ -397,7 +402,7 @@ return (
                   id={labels}
                   data-prefix="metadata.labels"
                   name={labels}
-                  onChange={this.handleChange}
+                  onChange={this.handleEventChange}
                   value={this.state.config.metadata.labels[labels] || ""}
                 />
               </div>

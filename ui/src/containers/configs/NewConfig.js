@@ -141,6 +141,7 @@ class NewConfig extends Component {
 
   handleEventChange(event) {
     let stream = this.state.stream;
+    let config = this.state.config;
 
     const newValue =
           event.target.type === "checkbox"
@@ -161,6 +162,10 @@ class NewConfig extends Component {
         stream["spec"]["kafka"]["topic"]["config"][event.target.name] =
           newValue;
         break;
+      case "metadata.labels":
+        config.metadata.labels[event.target.name] =
+          newValue;
+        break;
       default:
         stream[event.target.name] = newValue;
         break;
@@ -169,6 +174,7 @@ class NewConfig extends Component {
       creatingConfigFailed: false,
       errorMessage: "",
       stream: stream,
+    config: config,
     });
     this.updateConfigSpec();
   }
@@ -386,7 +392,7 @@ class NewConfig extends Component {
                   id={labels}
                   data-prefix="metadata.labels"
                   name={labels}
-                  onChange={this.handleChange}
+                  onChange={this.handleEventChange}
                   value={this.state.config.metadata.labels[labels] || ""}
                 />
               </div>

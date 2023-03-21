@@ -176,6 +176,11 @@ class EditStream extends Component {
       event.preventDefault();
       const tempLabel = this.state.tempLabel;
       let stream = this.state.stream;
+
+      if(stream.configSelector == null){
+        stream.configSelector = {};
+      }
+
       stream.configSelector[tempLabel.labelKey] = tempLabel.labelValue;
       this.setState({ stream: stream, tempLabel: tempLabel });
   }

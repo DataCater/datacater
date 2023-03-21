@@ -80,12 +80,6 @@ class ShowConfig extends Component {
                   Edit
                 </a>
                 <a
-                  href={`/configs/${config.uuid}/inspect`}
-                  className="btn btn-light ms-2"
-                >
-                  Inspect
-                </a>
-                <a
                   href={`/configs/${config.uuid}`}
                   onClick={this.handleDelete}
                   className="btn btn-light btn-outline-danger ms-2"
