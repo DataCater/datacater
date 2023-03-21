@@ -23,14 +23,7 @@ class EditConfig extends Component {
       updatingConfigFailed: false,
       errorMessages: {},
       showTopicConfig: false,
-      config: {
-        name: "",
-        kind: "STREAM",
-        metadata: {
-            labels: {}
-        },
-        spec: {},
-      },
+      config: undefined,
       tempLabel: {
         labelKey: "",
         labelValue: "",
@@ -65,7 +58,7 @@ class EditConfig extends Component {
     this.toggleShowTopicConfig = this.toggleShowTopicConfig.bind(this);
     this.addStreamConfig = this.addStreamConfig.bind(this);
     this.removeStreamConfig = this.removeStreamConfig.bind(this);
-
+    this.updateConfigSpec = this.updateConfigSpec.bind(this);
     this.handleUpdateConfig = this.handleUpdateConfig.bind(this);
   }
 
@@ -74,12 +67,24 @@ class EditConfig extends Component {
       .fetchConfig(this.getConfigId())
       .then(() =>
         this.setState({ config: this.props.configs.config })
-      );
-
-      if(this.state.config.kind === "DEPLOYMENT"){
-        this.props.fetchPipelines();
-      }
+     );
+      this.props.fetchPipelines();
     }
+
+      updateConfigSpec(){
+        let config = this.state.config;
+        let deployment = this.state.deployment;
+        let stream = this.state.stream;
+        const currentKind = config.kind
+
+        if(currentKind === "STREAM"){
+            config.spec = stream.spec.kafka;
+        } else{
+            config.spec = deployment.spec;
+        }
+
+        this.setState({ config: config });
+      }
 
     getConfigId() {
         return this.props.match.params.id;
@@ -273,8 +278,14 @@ class EditConfig extends Component {
     }
 
 
-    const kindOptions = getConfigKindOptions();
     const config = this.state.config;
+
+    if (config == null) {
+      return <></>;
+    }
+console.log(config);
+
+    const kindOptions = getConfigKindOptions();
     const defaultKind = "STREAM";
     const addedLabels = Object.keys(config.metadata.labels);
 
@@ -284,6 +295,7 @@ class EditConfig extends Component {
         });
 
     const stream = this.state.stream;
+    const deployment = this.state.deployment;
 
     const topicOptions = getStreamTopicOptions();
     const connectionOptions = getStreamConnectionOptions();
@@ -308,10 +320,6 @@ class EditConfig extends Component {
     );
 
     const streamHoldsAvroFormat = isStreamHoldingAvroFormat(stream);
-
-    if (config === undefined) {
-      return <></>;
-    }
 
     const apiPayload = Object.assign({}, config);
     delete apiPayload.uuid;
@@ -346,6 +354,7 @@ return (
                 className="form-control"
                 id="name"
                 name="name"
+                disabled
                 onChange={(event) => {
                   this.handleChange("name", event.target.value);
                 }}
@@ -356,16 +365,17 @@ return (
               <label htmlFor="kind" className="form-label">
                 kind
               </label>
-              <Select
-                defaultValue={kindOptions.find(
-                  (kind) => kind.value === (this.state.config["kind"] || defaultKind)
-                )}
-                isSearchable
-                options={kindOptions}
-                onChange={(kind) => {
-                  this.updateKindOption("kind", kind.value);
-                }}
-              />
+                <input
+                  type="text"
+                  className="form-control"
+                  id="kind"
+                  name="kind"
+                  disabled
+                  onChange={(event) => {
+                    this.handleChange("kind", event.target.value);
+                  }}
+                  value={this.state.config["kind"] || ""}
+                />
             </div>
             {addedLabels.map((labels) => (
               <div className="col-12 mt-2" key={labels}>
@@ -797,7 +807,7 @@ return (
                     isClearable
                     defaultValue={
                       pipelineOptions.filter(
-                        (option) => option.value === deployment.spec["pipeline"]
+                        (option) => option.value === config.spec["pipeline"]
                       )[0]
                     }
                     options={pipelineOptions}
