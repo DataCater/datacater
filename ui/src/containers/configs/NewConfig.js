@@ -76,7 +76,7 @@ class NewConfig extends Component {
     const currentKind = config.kind
 
     if(currentKind === "STREAM"){
-        config.spec = stream.spec.kafka;
+        config.spec = stream.spec;
     } else{
         config.spec = deployment.spec;
     }
