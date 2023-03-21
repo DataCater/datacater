@@ -16,6 +16,7 @@ import org.apache.kafka.common.PartitionInfo;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.config.ConfigResource;
 import org.eclipse.microprofile.config.ConfigProvider;
+import org.jboss.logging.Logger;
 
 /**
  * Implementation of an external Apache Kafka topic as a stream.
@@ -31,6 +32,9 @@ import org.eclipse.microprofile.config.ConfigProvider;
  * href="https://kafka.apache.org/documentation/#topicconfigs">https://kafka.apache.org/documentation/#topicconfigs</a>).
  */
 public class KafkaStreamsAdmin implements StreamService {
+
+  private static final Logger LOGGER = Logger.getLogger(KafkaStreamsAdmin.class);
+
   private static final String PARTITION_COUNT = "num.partitions";
   private static final String REPLICATION_FACTOR = "replication.factor";
   private final Admin admin;
@@ -305,7 +309,10 @@ public class KafkaStreamsAdmin implements StreamService {
           admin.incrementalAlterConfigs(convertConfigs(spec.getConfig())).all();
       try {
         alterTopicConfigFuture.get(KAFKA_API_TIMEOUT_MS.longValue(), TimeUnit.MILLISECONDS);
-      } catch (InterruptedException | ExecutionException e) {
+      } catch (InterruptedException e) {
+        LOGGER.error("Thread got interrupted: ", e);
+        Thread.currentThread().interrupt();
+      } catch (ExecutionException e) {
         throw new KafkaConnectionException(
             String.format("%s: %s", e.getClass().toString(), e.getMessage()));
       } catch (TimeoutException e) {
@@ -326,7 +333,10 @@ public class KafkaStreamsAdmin implements StreamService {
           admin.createTopics(List.of(newTopic)).config(this.name);
       try {
         createTopicConfigFuture.get(KAFKA_API_TIMEOUT_MS.longValue(), TimeUnit.MILLISECONDS);
-      } catch (InterruptedException | ExecutionException e) {
+      } catch (InterruptedException e) {
+        LOGGER.error("Thread got interrupted: ", e);
+        Thread.currentThread().interrupt();
+      } catch (ExecutionException e) {
         throw new KafkaConnectionException(
             String.format("%s: %s", e.getClass().toString(), e.getMessage()));
       } catch (TimeoutException e) {
