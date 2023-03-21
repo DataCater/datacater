@@ -16,6 +16,10 @@ class EditDeployment extends Component {
       updatingDeploymentFailed: false,
       errorMessages: {},
       deployment: undefined,
+      tempLabel: {
+        labelKey: "",
+        labelValue: "",
+      },
       deploymentUpdated: false,
     };
 
@@ -137,7 +141,7 @@ class EditDeployment extends Component {
 
     const deployment = this.state.deployment;
 
-    if (deployment === undefined) {
+    if (deployment == null) {
       return <></>;
     }
 
@@ -148,7 +152,7 @@ class EditDeployment extends Component {
     delete apiPayload.status;
 
 
-    const addedLabels = Object.keys(deployment.configSelector);
+    const addedLabels = Object.keys(deployment.configSelector || {});
 
     const pipelineOptions = this.props.pipelines.pipelines.map((pipeline) => {
       const name = `${pipeline.name || "Untitled pipeline"} (${pipeline.uuid})`;

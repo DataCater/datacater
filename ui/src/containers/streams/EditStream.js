@@ -27,6 +27,10 @@ class EditStream extends Component {
         connectionName: "",
         connectionValue: "",
       },
+      tempLabel: {
+        labelKey: "",
+        labelValue: "",
+      },
       streamUpdated: false,
     };
 
@@ -191,12 +195,12 @@ class EditStream extends Component {
 
     const stream = this.state.stream;
 
-    if (stream === undefined) {
+    if (stream == null) {
       return <></>;
     }
 
-    const addedLabels = Object.keys(stream.configSelector);
     const apiPayload = Object.assign({}, stream);
+    const addedLabels = Object.keys(stream.configSelector || {});
     delete apiPayload.uuid;
     delete apiPayload.createdAt;
     delete apiPayload.updatedAt;
