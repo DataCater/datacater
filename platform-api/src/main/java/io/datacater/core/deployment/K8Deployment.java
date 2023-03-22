@@ -42,7 +42,6 @@ public class K8Deployment {
     final String configmapName = StaticConfig.CONFIGMAP_NAME_PREFIX + deploymentId;
     final String configmapVolumeName = StaticConfig.CONFIGMAP_VOLUME_NAME_PREFIX + deploymentId;
     final String dataShareVolumeName = StaticConfig.DATA_SHARE_VOLUME_NAME_PREFIX + deploymentId;
-    final String serviceName = StaticConfig.SERVICE_NAME_PREFIX + deploymentId;
     final int replicaCount = getDeploymentReplicaOrDefault(deploymentSpec.deployment());
 
     List<EnvVar> variables =
@@ -53,17 +52,17 @@ public class K8Deployment {
           new DeploymentBuilder()
               .withNewMetadata()
               .withName(name)
-              .addToLabels(getLabels(deploymentId, deploymentSpec.name(), serviceName))
+              .addToLabels(getLabels(deploymentId, deploymentSpec.name()))
               .endMetadata()
               .withNewSpec()
               .withReplicas(replicaCount)
               .withMinReadySeconds(StaticConfig.EnvironmentVariables.READY_SECONDS)
               .withNewSelector()
-              .addToMatchLabels(getLabels(deploymentId, deploymentSpec.name(), serviceName))
+              .addToMatchLabels(getLabels(deploymentId, deploymentSpec.name()))
               .endSelector()
               .withNewTemplate()
               .withNewMetadata()
-              .addToLabels(getLabels(deploymentId, deploymentSpec.name(), serviceName))
+              .addToLabels(getLabels(deploymentId, deploymentSpec.name()))
               .endMetadata()
               .withNewSpec()
               .addAllToContainers(
@@ -93,8 +92,7 @@ public class K8Deployment {
     return getDeployment(deploymentId);
   }
 
-  private static Map<String, String> getLabels(
-      UUID deploymentId, String prettyName, String serviceName) {
+  private static Map<String, String> getLabels(UUID deploymentId, String prettyName) {
     return Map.of(
         StaticConfig.APP,
         StaticConfig.DATACATER_PIPELINE,
@@ -105,9 +103,7 @@ public class K8Deployment {
         StaticConfig.UUID_TEXT,
         deploymentId.toString(),
         StaticConfig.DEPLOYMENT_NAME_TEXT,
-        prettyName,
-        StaticConfig.DEPLOYMENT_SERVICE_TEXT,
-        serviceName);
+        prettyName);
   }
 
   private Container pythonRunnerContainer(String configmapVolumeName, String dataShareVolumeName) {
@@ -171,6 +167,7 @@ public class K8Deployment {
   }
 
   public String getLogs(UUID deploymentId, int replica) {
+
     String deploymentName = getDeploymentName(deploymentId);
     Pod pod = getDeploymentPodByReplica(deploymentName, replica);
 
@@ -195,7 +192,6 @@ public class K8Deployment {
 
   public void delete(UUID deploymentId) {
     String name = getDeploymentName(deploymentId);
-    String serviceName = StaticConfig.SERVICE_NAME_PREFIX + deploymentId;
     String configMapName = StaticConfig.CONFIGMAP_NAME_PREFIX + deploymentId;
     List<StatusDetails> status =
         client
@@ -487,6 +483,7 @@ public class K8Deployment {
 
   private Pod getDeploymentPodByReplica(String deploymentName, int replica) {
     int replicaPosition = replicaNumberToArrayPosition(replica);
+
     final Map<String, String> matchLabels =
         client
             .apps()
@@ -515,6 +512,9 @@ public class K8Deployment {
               .toList()
               .get(replicaPosition);
     } catch (ArrayIndexOutOfBoundsException e) {
+      LOGGER.info(
+          String.format(
+              "An error occurred while trying to get replica %s: %s", replica, e.getMessage()));
       final String errorMessage =
           String.format(
               "The deployment replica you are searching for, %s, does not match the defined replica amount of %s.",
