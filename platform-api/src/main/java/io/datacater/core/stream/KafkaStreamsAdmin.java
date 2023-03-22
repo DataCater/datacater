@@ -329,8 +329,7 @@ public class KafkaStreamsAdmin implements StreamService {
     if (!streamExists()) {
       NewTopic newTopic = new NewTopic(this.name, this.partitions, this.replication);
       newTopic.configs(spec.getConfig());
-      KafkaFuture<Config> createTopicConfigFuture =
-          admin.createTopics(List.of(newTopic)).config(this.name);
+      KafkaFuture<Void> createTopicConfigFuture = admin.createTopics(List.of(newTopic)).all();
       try {
         createTopicConfigFuture.get(KAFKA_API_TIMEOUT_MS.longValue(), TimeUnit.MILLISECONDS);
       } catch (InterruptedException e) {

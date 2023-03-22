@@ -190,7 +190,6 @@ datacater:
     kafka:
       devservices:
         port: 9092
-        provider: kafka-native
     apicurio-registry:
       devservices:
         port: 8082
