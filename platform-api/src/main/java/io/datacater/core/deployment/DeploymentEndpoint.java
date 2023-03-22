@@ -57,10 +57,8 @@ public class DeploymentEndpoint {
             ((session, transaction) -> session.find(DeploymentEntity.class, deploymentId)))
         .onItem()
         .ifNull()
-        .failWith(new DeploymentNotFoundException(StaticConfig.LoggerMessages.DEPLOYMENT_NOT_FOUND))
-        .onItem()
-        .ifNotNull()
-        .transform(this::getK8Deployment);
+        .failWith(
+            new DeploymentNotFoundException(StaticConfig.LoggerMessages.DEPLOYMENT_NOT_FOUND));
   }
 
   @GET
@@ -152,11 +150,7 @@ public class DeploymentEndpoint {
   public Uni<List<DeploymentEntity>> getDeployments() {
     return dsf.withSession(
         session ->
-            session
-                .createQuery("from DeploymentEntity", DeploymentEntity.class)
-                .getResultList()
-                .onItem()
-                .transform(this::getK8Deployments));
+            session.createQuery("from DeploymentEntity", DeploymentEntity.class).getResultList());
   }
 
   @POST
@@ -364,23 +358,6 @@ public class DeploymentEndpoint {
     return k8Deployment.watchLogs(deploymentId);
   }
 
-  private List<DeploymentEntity> getK8Deployments(List<DeploymentEntity> deployments) {
-    K8Deployment k8Deployment = new K8Deployment(client);
-    for (DeploymentEntity deployment : deployments) {
-      deployment.setStatus(
-          DeploymentEntity.serializeMap(k8Deployment.getDeployment(deployment.getId())));
-    }
-    return deployments;
-  }
-
-  private DeploymentEntity getK8Deployment(DeploymentEntity deployment) {
-    K8Deployment k8Deployment = new K8Deployment(client);
-    Map<String, Object> map = k8Deployment.getDeployment(deployment.getId());
-    JsonNode node = DeploymentEntity.serializeMap(map);
-    deployment.setStatus(node);
-    return deployment;
-  }
-
   private void deleteK8Deployment(UUID deploymentId) {
     try {
       K8Deployment k8Deployment = new K8Deployment(client);
@@ -401,9 +378,9 @@ public class DeploymentEndpoint {
       List<ConfigEntity> configList) {
     K8Deployment k8Deployment = new K8Deployment(client);
     deploymentSpec = ConfigUtilities.applyConfigsToDeployment(deploymentSpec, configList);
-    de.setStatus(
-        DeploymentEntity.serializeMap(
-            k8Deployment.create(pe, streamIn, streamOut, deploymentSpec, de.getId())));
+
+    k8Deployment.create(pe, streamIn, streamOut, deploymentSpec, de.getId());
+
     return de;
   }
 

@@ -5,6 +5,7 @@ import AttributeFilterList from "./AttributeFilterList";
 import DataTypeIcon from "../grid/DataTypeIcon";
 import TransformConfig from "./TransformConfig";
 import FilterConfig from "./FilterConfig";
+import ContextBarSizer from "./ContextBarSizer";
 
 class Attribute extends Component {
   constructor(props) {
@@ -40,9 +41,11 @@ class Attribute extends Component {
 
   render() {
     const {
-      fields,
+      changeContextBarSizeFunc,
+      contextBarSize,
       currentStep,
       editColumn,
+      fields,
       filters,
       handleChangeFunc,
       profile,
@@ -75,11 +78,17 @@ class Attribute extends Component {
     return (
       <React.Fragment>
         <div className="row py-4">
-          <div className="col">
+          <div className="col overflow-hidden">
             <h4 className="mb-0 overflow-hidden text-nowrap d-flex align-items-center fw-bold">
               <DataTypeIcon dataType={fieldProfile.dataType} />{" "}
               <span className="ms-2">{field}</span>
             </h4>
+          </div>
+          <div className="col-auto ps-0">
+            <ContextBarSizer
+              changeContextBarSizeFunc={changeContextBarSizeFunc}
+              contextBarSize={contextBarSize}
+            />
           </div>
         </div>
         <ul className="nav nav-tabs">

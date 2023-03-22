@@ -43,10 +43,6 @@ public class DeploymentEntity {
   @JsonProperty("spec")
   private JsonNode spec;
 
-  @JsonProperty("status")
-  @Transient
-  private JsonNode status;
-
   @Type(type = JsonTypes.JSON)
   @Column(name = "configSelector", columnDefinition = JsonTypes.JSON_BIN)
   @JsonProperty("configSelector")
@@ -68,10 +64,6 @@ public class DeploymentEntity {
 
   protected void setSpec(JsonNode spec) {
     this.spec = spec;
-  }
-
-  protected void setStatus(JsonNode status) {
-    this.status = status;
   }
 
   protected UUID getId() {

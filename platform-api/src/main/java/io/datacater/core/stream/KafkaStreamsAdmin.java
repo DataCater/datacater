@@ -11,10 +11,12 @@ import java.util.concurrent.*;
 import java.util.stream.Collectors;
 import org.apache.kafka.clients.admin.*;
 import org.apache.kafka.clients.consumer.*;
+import org.apache.kafka.common.KafkaFuture;
 import org.apache.kafka.common.PartitionInfo;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.config.ConfigResource;
 import org.eclipse.microprofile.config.ConfigProvider;
+import org.jboss.logging.Logger;
 
 /**
  * Implementation of an external Apache Kafka topic as a stream.
@@ -30,6 +32,9 @@ import org.eclipse.microprofile.config.ConfigProvider;
  * href="https://kafka.apache.org/documentation/#topicconfigs">https://kafka.apache.org/documentation/#topicconfigs</a>).
  */
 public class KafkaStreamsAdmin implements StreamService {
+
+  private static final Logger LOGGER = Logger.getLogger(KafkaStreamsAdmin.class);
+
   private static final String PARTITION_COUNT = "num.partitions";
   private static final String REPLICATION_FACTOR = "replication.factor";
   private final Admin admin;
@@ -300,7 +305,22 @@ public class KafkaStreamsAdmin implements StreamService {
 
   public StreamSpec updateStream(StreamSpec spec) {
     if (streamExists() && Boolean.TRUE.equals(isValidConfig(spec.getConfig()))) {
-      admin.incrementalAlterConfigs(convertConfigs(spec.getConfig()));
+      KafkaFuture<Void> alterTopicConfigFuture =
+          admin.incrementalAlterConfigs(convertConfigs(spec.getConfig())).all();
+      try {
+        alterTopicConfigFuture.get(KAFKA_API_TIMEOUT_MS.longValue(), TimeUnit.MILLISECONDS);
+      } catch (InterruptedException e) {
+        LOGGER.error("Thread got interrupted: ", e);
+        Thread.currentThread().interrupt();
+      } catch (ExecutionException e) {
+        throw new KafkaConnectionException(
+            String.format("%s: %s", e.getClass().toString(), e.getMessage()));
+      } catch (TimeoutException e) {
+        throw new KafkaConnectionException(
+            String.format(
+                "Exceeded timeout of %d ms when updating the config of the Apache Kafka topic.",
+                KAFKA_API_TIMEOUT_MS));
+      }
     }
     return spec;
   }
@@ -309,7 +329,21 @@ public class KafkaStreamsAdmin implements StreamService {
     if (!streamExists()) {
       NewTopic newTopic = new NewTopic(this.name, this.partitions, this.replication);
       newTopic.configs(spec.getConfig());
-      admin.createTopics(List.of(newTopic));
+      KafkaFuture<Void> createTopicConfigFuture = admin.createTopics(List.of(newTopic)).all();
+      try {
+        createTopicConfigFuture.get(KAFKA_API_TIMEOUT_MS.longValue(), TimeUnit.MILLISECONDS);
+      } catch (InterruptedException e) {
+        LOGGER.error("Thread got interrupted: ", e);
+        Thread.currentThread().interrupt();
+      } catch (ExecutionException e) {
+        throw new KafkaConnectionException(
+            String.format("%s: %s", e.getClass().toString(), e.getMessage()));
+      } catch (TimeoutException e) {
+        throw new KafkaConnectionException(
+            String.format(
+                "Exceeded timeout of %d ms when creating Apache Kafka topic.",
+                KAFKA_API_TIMEOUT_MS));
+      }
       return spec;
     }
     Map<String, String> actualMetaData = getMetadata();
