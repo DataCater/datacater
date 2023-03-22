@@ -364,7 +364,7 @@ class EditConfig extends Component {
             </div>
             <div className="col-12 mt-2">
               <label htmlFor="kind" className="form-label">
-                kind
+                Kind
               </label>
               <input
                 type="text"

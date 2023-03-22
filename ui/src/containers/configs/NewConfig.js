@@ -351,7 +351,7 @@ class NewConfig extends Component {
             </div>
             <div className="col-12 mt-2">
               <label htmlFor="kind" className="form-label">
-                kind
+                Kind
               </label>
               <Creatable
                 defaultValue={kindOptions.find(
