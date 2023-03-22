@@ -25,9 +25,7 @@ export function fetchConfigs() {
           localStorage.removeItem("userToken");
           window.location = "/sign_in";
         } else {
-          dispatch(
-            receivedConfigsFailed(JSON.stringify(error.response.data))
-          );
+          dispatch(receivedConfigsFailed(JSON.stringify(error.response.data)));
         }
       }
     );
@@ -61,9 +59,7 @@ export function fetchConfig(id) {
         } else if (error.response.status === 404) {
           window.location = "/404";
         } else {
-          dispatch(
-            receivedConfigFailed(JSON.stringify(error.response.data))
-          );
+          dispatch(receivedConfigFailed(JSON.stringify(error.response.data)));
         }
       }
     );

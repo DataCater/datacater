@@ -113,7 +113,11 @@ class DataCaterApp extends Component {
 
               <PrivateRoute exact path="/configs" component={ListConfigs} />
               <PrivateRoute exact path="/configs/new" component={NewConfig} />
-              <PrivateRoute exact path="/configs/:id/edit" component={EditConfig} />
+              <PrivateRoute
+                exact
+                path="/configs/:id/edit"
+                component={EditConfig}
+              />
               <PrivateRoute exact path="/configs/:id" component={ShowConfig} />
 
               <Route exact path="/404" component={NotFoundError} />

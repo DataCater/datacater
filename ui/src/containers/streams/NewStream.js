@@ -143,8 +143,7 @@ class NewStream extends Component {
           newValue;
         break;
       case "configSelector":
-        stream.configSelector[event.target.name] =
-          newValue;
+        stream.configSelector[event.target.name] = newValue;
         break;
       default:
         stream[event.target.name] = newValue;
@@ -166,27 +165,27 @@ class NewStream extends Component {
     });
   }
 
-    updateTempLabel(field, value) {
-      let tempLabel = this.state.tempLabel;
-      tempLabel[field] = value;
-      this.setState({ tempLabel: tempLabel });
-    }
+  updateTempLabel(field, value) {
+    let tempLabel = this.state.tempLabel;
+    tempLabel[field] = value;
+    this.setState({ tempLabel: tempLabel });
+  }
 
-    addLabel(event) {
-        event.preventDefault();
-        const tempLabel = this.state.tempLabel;
-        let stream = this.state.stream;
-        stream.configSelector[tempLabel.labelKey] = tempLabel.labelValue;
-        this.setState({ stream: stream, tempLabel: tempLabel });
-    }
+  addLabel(event) {
+    event.preventDefault();
+    const tempLabel = this.state.tempLabel;
+    let stream = this.state.stream;
+    stream.configSelector[tempLabel.labelKey] = tempLabel.labelValue;
+    this.setState({ stream: stream, tempLabel: tempLabel });
+  }
 
-    removeLabel(event) {
-      event.preventDefault();
-      let stream = this.state.stream;
-      const label = event.target.dataset.label;
-      delete stream.configSelector[label];
-      this.setState({ stream: stream });
-    }
+  removeLabel(event) {
+    event.preventDefault();
+    let stream = this.state.stream;
+    const label = event.target.dataset.label;
+    delete stream.configSelector[label];
+    this.setState({ stream: stream });
+  }
 
   render() {
     if (this.state.streamCreated) {
@@ -622,7 +621,7 @@ class NewStream extends Component {
             <div className="col-12 mt-3">
               <h6 className="d-inline me-2">Add labels</h6>
               <span className="text-muted fs-7">
-              used for matching the stream to configs.
+                used for matching the stream to configs.
               </span>
             </div>
             <div className="col-12 mt-2">
@@ -634,10 +633,7 @@ class NewStream extends Component {
                     className="form-control"
                     name="labelKey"
                     onChange={(event) => {
-                      this.updateTempLabel(
-                        "labelKey",
-                        event.target.value
-                      );
+                      this.updateTempLabel("labelKey", event.target.value);
                     }}
                     value={this.state.tempLabel.labelKey || ""}
                   />
@@ -649,10 +645,7 @@ class NewStream extends Component {
                     className="form-control"
                     name="labelValue"
                     onChange={(event) => {
-                      this.updateTempLabel(
-                        "labelValue",
-                        event.target.value
-                      );
+                      this.updateTempLabel("labelValue", event.target.value);
                     }}
                     value={this.state.tempLabel.labelValue || ""}
                   />

@@ -100,10 +100,10 @@ class Navigation extends Component {
                 <PlayCircle className="feather-icon me-2" />
               )}
               {this.renderNavItem(
-                              "Configs",
-                              "/configs",
-                              <Tool className="feather-icon me-2" />
-                            )}
+                "Configs",
+                "/configs",
+                <Tool className="feather-icon me-2" />
+              )}
             </ul>
             <div className="my-2 my-md-0">
               <a

@@ -82,57 +82,57 @@ class EditDeployment extends Component {
     });
   }
 
-    updateTempLabel(field, value) {
-      let tempLabel = this.state.tempLabel;
-      tempLabel[field] = value;
-      this.setState({ tempLabel: tempLabel });
+  updateTempLabel(field, value) {
+    let tempLabel = this.state.tempLabel;
+    tempLabel[field] = value;
+    this.setState({ tempLabel: tempLabel });
+  }
+
+  addLabel(event) {
+    event.preventDefault();
+    const tempLabel = this.state.tempLabel;
+    let deployment = this.state.deployment;
+    deployment.configSelector[tempLabel.labelKey] = tempLabel.labelValue;
+    this.setState({ deployment: deployment, tempLabel: tempLabel });
+  }
+
+  removeLabel(event) {
+    event.preventDefault();
+    let deployment = this.state.deployment;
+    const label = event.target.dataset.label;
+    delete deployment.configSelector[label];
+    this.setState({ deployment: deployment });
+  }
+
+  handleEventChange(event) {
+    let deployment = this.state.deployment;
+
+    const newValue =
+      event.target.type === "checkbox"
+        ? event.target.checked
+        : event.target.value;
+
+    switch (event.target.dataset.prefix) {
+      case "metadata":
+        deployment.metadata[event.target.name] = newValue;
+        break;
+      case "spec":
+        deployment.spec[event.target.name] = newValue;
+        break;
+      case "configSelector":
+        deployment.configSelector[event.target.name] = newValue;
+        break;
+      default:
+        deployment[event.target.name] = newValue;
+        break;
     }
 
-    addLabel(event) {
-        event.preventDefault();
-        const tempLabel = this.state.tempLabel;
-        let deployment = this.state.deployment;
-        deployment.configSelector[tempLabel.labelKey] = tempLabel.labelValue;
-        this.setState({ deployment: deployment, tempLabel: tempLabel });
-    }
-
-    removeLabel(event) {
-      event.preventDefault();
-      let deployment = this.state.deployment;
-      const label = event.target.dataset.label;
-      delete deployment.configSelector[label];
-      this.setState({ deployment: deployment });
-    }
-
-        handleEventChange(event) {
-          let deployment = this.state.deployment;
-
-          const newValue =
-                event.target.type === "checkbox"
-                  ? event.target.checked
-                  : event.target.value;
-
-          switch (event.target.dataset.prefix) {
-                case "metadata":
-                  deployment.metadata[event.target.name] = newValue;
-                  break;
-                case "spec":
-                  deployment.spec[event.target.name] = newValue;
-                  break;
-                case "configSelector":
-                  deployment.configSelector[event.target.name] = newValue;
-                  break;
-                default:
-                  deployment[event.target.name] = newValue;
-                  break;
-              }
-
-          this.setState({
-            creatingDeploymentFailed: false,
-            errorMessage: "",
-            deployment: deployment,
-          });
-        }
+    this.setState({
+      creatingDeploymentFailed: false,
+      errorMessage: "",
+      deployment: deployment,
+    });
+  }
 
   render() {
     if (this.state.deploymentUpdated) {
@@ -150,7 +150,6 @@ class EditDeployment extends Component {
     delete apiPayload.createdAt;
     delete apiPayload.updatedAt;
     delete apiPayload.status;
-
 
     const addedLabels = Object.keys(deployment.configSelector || {});
 
@@ -209,8 +208,6 @@ class EditDeployment extends Component {
               />
             </div>
 
-
-
             {addedLabels.map((labels) => (
               <div className="col-12 mt-2" key={labels}>
                 <label htmlFor={labels} className="form-label">
@@ -239,7 +236,7 @@ class EditDeployment extends Component {
             <div className="col-12 mt-3">
               <h6 className="d-inline me-2">Add labels</h6>
               <span className="text-muted fs-7">
-              used for matching the deployment to configs.
+                used for matching the deployment to configs.
               </span>
             </div>
             <div className="col-12 mt-2">
@@ -251,10 +248,7 @@ class EditDeployment extends Component {
                     className="form-control"
                     name="labelKey"
                     onChange={(event) => {
-                      this.updateTempLabel(
-                        "labelKey",
-                        event.target.value
-                      );
+                      this.updateTempLabel("labelKey", event.target.value);
                     }}
                     value={this.state.tempLabel.labelKey || ""}
                   />
@@ -266,10 +260,7 @@ class EditDeployment extends Component {
                     className="form-control"
                     name="labelValue"
                     onChange={(event) => {
-                      this.updateTempLabel(
-                        "labelValue",
-                        event.target.value
-                      );
+                      this.updateTempLabel("labelValue", event.target.value);
                     }}
                     value={this.state.tempLabel.labelValue || ""}
                   />
@@ -286,10 +277,6 @@ class EditDeployment extends Component {
                 </div>
               </div>
             </div>
-
-
-
-
 
             {![undefined, ""].includes(this.state.errorMessage) && (
               <div className="alert alert-danger mt-4">
