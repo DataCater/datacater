@@ -104,7 +104,7 @@ class CodeEditor extends Component {
     return (
       <div className="datacater-code-editor border-start border-end border-top border-bottom border-grey">
         <div className="row py-2 px-3 border-bottom border-dark">
-          <div className="col d-flex align-items-center font-weight-bold">
+          <div className="col d-flex align-items-center fw-semibold">
             Python®
           </div>
           <div className="col-auto">

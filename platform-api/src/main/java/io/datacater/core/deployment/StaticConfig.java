@@ -85,7 +85,7 @@ public class StaticConfig {
     static final String NAMESPACE =
         ConfigProvider.getConfig()
             .getOptionalValue("datacater.deployment.namespace", String.class)
-            .orElse("datacater")
+            .orElse("default")
             .toLowerCase();
     static final String FULL_IMAGE_NAME =
         ConfigProvider.getConfig()

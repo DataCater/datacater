@@ -9,10 +9,12 @@ class Edit extends Component {
       <React.Fragment>
         {this.props.transformStep.kind === "Field" && (
           <Field
-            field={this.props.field}
-            fields={this.props.fields}
+            changeContextBarSizeFunc={this.props.changeContextBarSizeFunc}
+            contextBarSize={this.props.contextBarSize}
             currentStep={this.props.currentStep}
             editColumn={this.props.editColumn}
+            field={this.props.field}
+            fields={this.props.fields}
             filters={this.props.filters}
             handleChangeFunc={this.props.handleChangeFunc}
             previewState={this.props.previewState}
@@ -24,10 +26,12 @@ class Edit extends Component {
 
         {this.props.transformStep.kind === "Record" && (
           <Record
-            field={this.props.field}
-            fields={this.props.fields}
+            changeContextBarSizeFunc={this.props.changeContextBarSizeFunc}
+            contextBarSize={this.props.contextBarSize}
             currentStep={this.props.currentStep}
             editColumn={this.props.editColumn}
+            field={this.props.field}
+            fields={this.props.fields}
             filters={this.props.filters}
             handleChangeFunc={this.props.handleChangeFunc}
             previewState={this.props.previewState}
