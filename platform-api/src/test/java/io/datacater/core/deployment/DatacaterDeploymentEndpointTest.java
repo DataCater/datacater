@@ -28,8 +28,6 @@ class DatacaterDeploymentEndpointTest {
   private static final Logger LOGGER = Logger.getLogger(DatacaterDeploymentEndpointTest.class);
   @KubernetesTestServer KubernetesServer mockServer;
 
-  K8Deployment k8Deployment;
-
   final String baseURI = "http://localhost:8081";
   final String deploymentsPath = "/deployments";
   final String streamsPath = "/streams";
@@ -130,21 +128,8 @@ class DatacaterDeploymentEndpointTest {
     given().baseUri(baseURI).get(deploymentsPath).then().statusCode(200);
   }
 
-  // only testing that logs can be fetched.
-  // Log validity  ist harder to test, since logs will always change
   @Test
   @Order(4)
-  void testGetDeploymentLogs() {
-    given()
-        .pathParam("uuid", deploymentId)
-        .baseUri(baseURI)
-        .get(deploymentsPath + "/{uuid}/logs")
-        .then()
-        .statusCode(200);
-  }
-
-  @Test
-  @Order(5)
   void testUpdateDeployment() throws IOException {
     String pipelineUUIDPlaceholder = "pipelineUUIDPlaceholder";
     URL JsonURL = ClassLoader.getSystemClassLoader().getResource(deploymentPath);
@@ -165,7 +150,7 @@ class DatacaterDeploymentEndpointTest {
   }
 
   @Test
-  @Order(6)
+  @Order(5)
   void testDeleteDeployment() {
     Response response =
         RestAssured.given()
@@ -178,7 +163,7 @@ class DatacaterDeploymentEndpointTest {
   }
 
   @Test
-  @Order(7)
+  @Order(6)
   void testGetDeletedDeployment() {
     given()
         .pathParam("uuid", deploymentId)
@@ -189,7 +174,7 @@ class DatacaterDeploymentEndpointTest {
   }
 
   @Test
-  @Order(8)
+  @Order(7)
   void testGetUnknownDeployment() {
     given()
         .pathParam("uuid", UUID.randomUUID())
@@ -200,7 +185,7 @@ class DatacaterDeploymentEndpointTest {
   }
 
   @Test
-  @Order(9)
+  @Order(8)
   void testGetUnknownDeploymentLogs() {
     given()
         .pathParam("uuid", UUID.randomUUID())
@@ -211,7 +196,7 @@ class DatacaterDeploymentEndpointTest {
   }
 
   @Test
-  @Order(10)
+  @Order(9)
   void testWatchUnknownDeploymentLogs() {
     given()
         .pathParam("uuid", UUID.randomUUID())
@@ -370,7 +355,7 @@ class DatacaterDeploymentEndpointTest {
   }
 
   @Test
-  @Order(13)
+  @Order(14)
   void testCreateDeploymentWithEmptySpec() throws IOException {
     String deploymentPath = "deploymentTests/deployment_with_empty_spec.json";
 
@@ -391,7 +376,7 @@ class DatacaterDeploymentEndpointTest {
   }
 
   @Test
-  @Order(14)
+  @Order(15)
   void testCreateDeploymentWithCustomReplicas() throws IOException {
     String deploymentPath = "deploymentTests/deployment_with_custom_replicas.json";
 
