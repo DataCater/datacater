@@ -217,7 +217,7 @@ class EditStream extends Component {
     const defaultDeserializer = "io.datacater.core.serde.JsonDeserializer";
     const defaultSerializer = "io.datacater.core.serde.JsonSerializer";
 
-    const addedTopicConfigs = Object.keys(stream.spec.kafka.topic.config);
+    const addedTopicConfigs = Object.keys(stream.spec.kafka.topic.config || {});
     const addedConnectionConfigs = Object.keys(stream.spec.kafka).filter(
       (item) =>
         ![
