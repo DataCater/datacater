@@ -90,7 +90,7 @@ public class StaticConfig {
     static final String FULL_IMAGE_NAME =
         ConfigProvider.getConfig()
             .getOptionalValue("datacater.deployment.image", String.class)
-            .orElse("datacater/pipeline:nightly");
+            .orElse("datacater/pipeline:2023.1");
     static final Integer READY_SECONDS =
         ConfigProvider.getConfig()
             .getOptionalValue("datacater.deployment.ready-seconds", Integer.class)
@@ -124,7 +124,7 @@ public class StaticConfig {
     static final String PYTHON_RUNNER_IMAGE_TAG =
         ConfigProvider.getConfig()
             .getOptionalValue("datacater.pythonrunner.image.version", String.class)
-            .orElse("nightly");
+            .orElse("2023.1");
     static final int PYTHON_RUNNER_CONTAINER_PORT =
         ConfigProvider.getConfig()
             .getOptionalValue("datacater.pythonrunner.image.containerPort", Integer.class)
