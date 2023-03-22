@@ -9,10 +9,9 @@ import io.datacater.core.exceptions.*;
 import io.datacater.core.pipeline.PipelineEntity;
 import io.datacater.core.stream.StreamEntity;
 import io.datacater.core.utilities.StringUtilities;
-import io.fabric8.kubernetes.api.model.apps.Deployment;
 import io.fabric8.kubernetes.client.KubernetesClient;
+import io.fabric8.kubernetes.client.dsl.ContainerResource;
 import io.fabric8.kubernetes.client.dsl.LogWatch;
-import io.fabric8.kubernetes.client.dsl.RollableScalableResource;
 import io.quarkus.security.Authenticated;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.unchecked.Unchecked;
@@ -64,7 +63,8 @@ public class DeploymentEndpoint {
   @GET
   @Path("{uuid}/logs")
   @Produces(MediaType.APPLICATION_JSON)
-  public Uni<List<String>> getLogs(@PathParam("uuid") UUID deploymentId) {
+  public Uni<List<String>> getLogs(
+      @PathParam("uuid") UUID deploymentId, @DefaultValue("1") @QueryParam("replica") int replica) {
     return dsf.withTransaction(
             ((session, transaction) -> session.find(DeploymentEntity.class, deploymentId)))
         .onItem()
@@ -72,13 +72,15 @@ public class DeploymentEndpoint {
         .failWith(new DeploymentNotFoundException(StaticConfig.LoggerMessages.DEPLOYMENT_NOT_FOUND))
         .onItem()
         .ifNotNull()
-        .transform(Unchecked.function(deployment -> getDeploymentLogsAsList(deployment.getId())));
+        .transform(
+            Unchecked.function(deployment -> getDeploymentLogsAsList(deployment.getId(), replica)));
   }
 
   @GET
   @Path("{uuid}/health")
   @Produces(MediaType.APPLICATION_JSON)
-  public Uni<Response> getHealth(@PathParam("uuid") UUID deploymentId) {
+  public Uni<Response> getHealth(
+      @PathParam("uuid") UUID deploymentId, @DefaultValue("1") @QueryParam("replica") int replica) {
     return dsf.withTransaction(
             ((session, transaction) -> session.find(DeploymentEntity.class, deploymentId)))
         .onItem()
@@ -92,7 +94,9 @@ public class DeploymentEndpoint {
                   HttpClient httpClient = HttpClient.newHttpClient();
                   HttpRequest req =
                       buildDeploymentServiceRequest(
-                          deploymentId, StaticConfig.EnvironmentVariables.DEPLOYMENT_HEALTH_PATH);
+                          deploymentId,
+                          StaticConfig.EnvironmentVariables.DEPLOYMENT_HEALTH_PATH,
+                          replica);
                   HttpResponse<String> response =
                       httpClient.send(req, HttpResponse.BodyHandlers.ofString());
                   return Response.ok().entity(response.body()).build();
@@ -102,7 +106,8 @@ public class DeploymentEndpoint {
   @GET
   @Path("{uuid}/metrics")
   @Produces(MediaType.TEXT_PLAIN)
-  public Uni<Response> getMetrics(@PathParam("uuid") UUID deploymentId) {
+  public Uni<Response> getMetrics(
+      @PathParam("uuid") UUID deploymentId, @DefaultValue("1") @QueryParam("replica") int replica) {
     return dsf.withTransaction(
             ((session, transaction) -> session.find(DeploymentEntity.class, deploymentId)))
         .onItem()
@@ -116,7 +121,9 @@ public class DeploymentEndpoint {
                   HttpClient httpClient = HttpClient.newHttpClient();
                   HttpRequest req =
                       buildDeploymentServiceRequest(
-                          deploymentId, StaticConfig.EnvironmentVariables.DEPLOYMENT_METRICS_PATH);
+                          deploymentId,
+                          StaticConfig.EnvironmentVariables.DEPLOYMENT_METRICS_PATH,
+                          replica);
                   HttpResponse<String> response =
                       httpClient.send(req, HttpResponse.BodyHandlers.ofString());
                   return Response.ok().entity(response.body()).build();
@@ -127,7 +134,10 @@ public class DeploymentEndpoint {
   @Path("{uuid}/watch-logs")
   @Produces(MediaType.SERVER_SENT_EVENTS)
   public Uni<Response> watchLogs(
-      @PathParam("uuid") UUID deploymentId, @Context Sse sse, @Context SseEventSink eventSink) {
+      @PathParam("uuid") UUID deploymentId,
+      @DefaultValue("1") @QueryParam("replica") int replica,
+      @Context Sse sse,
+      @Context SseEventSink eventSink) {
     return dsf.withTransaction(
             ((session, transaction) -> session.find(DeploymentEntity.class, deploymentId)))
         .onItem()
@@ -138,7 +148,7 @@ public class DeploymentEndpoint {
         .transform(
             deployment -> {
               try {
-                watchLogsRunner(deployment.getId(), sse, eventSink);
+                watchLogsRunner(deployment.getId(), replica, sse, eventSink);
               } catch (IOException e) {
                 throw new DatacaterException(StringUtilities.wrapString(e.getMessage()));
               }
@@ -330,21 +340,20 @@ public class DeploymentEndpoint {
                         String.format(StaticConfig.LoggerMessages.STREAM_NOT_FOUND, key))));
   }
 
-  private List<String> getDeploymentLogsAsList(UUID deploymentId) {
+  private List<String> getDeploymentLogsAsList(UUID deploymentId, int replica) {
     K8Deployment k8Deployment = new K8Deployment(client);
-    return Arrays.asList(k8Deployment.getLogs(deploymentId).split("\n"));
+    return Arrays.asList(k8Deployment.getLogs(deploymentId, replica).split("\n"));
   }
 
-  private HttpRequest buildDeploymentServiceRequest(UUID deploymentId, String path) {
+  private HttpRequest buildDeploymentServiceRequest(UUID deploymentId, String path, int replica) {
     K8Deployment k8Deployment = new K8Deployment(client);
-    String clusterIp = k8Deployment.getClusterIp(deploymentId);
+    String ip = k8Deployment.getDeploymentReplicaIp(deploymentId, replica).replace(".", "-");
+    String namespace = StaticConfig.EnvironmentVariables.NAMESPACE;
+    int port = StaticConfig.EnvironmentVariables.DEPLOYMENT_CONTAINER_PORT;
+    String protocol = StaticConfig.EnvironmentVariables.DEPLOYMENT_CONTAINER_PROTOCOL;
+
     String uriReady =
-        String.format(
-            "%s://%s:%d%s",
-            StaticConfig.EnvironmentVariables.DEPLOYMENT_CONTAINER_PROTOCOL,
-            clusterIp,
-            StaticConfig.EnvironmentVariables.DEPLOYMENT_CONTAINER_PORT,
-            path);
+        String.format("%s://%s.%s.pod.cluster.local:%d%s", protocol, ip, namespace, port, path);
 
     return HttpRequest.newBuilder()
         .GET()
@@ -353,9 +362,9 @@ public class DeploymentEndpoint {
         .build();
   }
 
-  private RollableScalableResource<Deployment> watchDeploymentLogs(UUID deploymentId) {
+  private ContainerResource watchDeploymentLogs(UUID deploymentId, int replica) {
     K8Deployment k8Deployment = new K8Deployment(client);
-    return k8Deployment.watchLogs(deploymentId);
+    return k8Deployment.watchLogs(deploymentId, replica);
   }
 
   private void deleteK8Deployment(UUID deploymentId) {
@@ -429,12 +438,10 @@ public class DeploymentEndpoint {
     }
   }
 
-  private void watchLogsRunner(UUID deploymentId, @Context Sse sse, @Context SseEventSink eventSink)
+  private void watchLogsRunner(
+      UUID deploymentId, int replica, @Context Sse sse, @Context SseEventSink eventSink)
       throws IOException {
-    LogWatch lw =
-        watchDeploymentLogs(deploymentId)
-            .inContainer(StaticConfig.DEPLOYMENT_NAME_PREFIX + deploymentId)
-            .watchLog();
+    LogWatch lw = watchDeploymentLogs(deploymentId, replica).watchLog();
     InputStream is = lw.getOutput();
     BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(is));
     String line;

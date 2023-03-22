@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.datacater.core.exceptions.CreateDeploymentException;
 import io.datacater.core.exceptions.DeploymentNotFoundException;
+import io.datacater.core.exceptions.DeploymentReplicaMismatchException;
 import io.datacater.core.pipeline.PipelineEntity;
 import io.datacater.core.stream.StreamEntity;
 import io.datacater.core.utilities.StringUtilities;
@@ -14,7 +15,7 @@ import io.fabric8.kubernetes.api.model.apps.Deployment;
 import io.fabric8.kubernetes.api.model.apps.DeploymentBuilder;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClientException;
-import io.fabric8.kubernetes.client.dsl.RollableScalableResource;
+import io.fabric8.kubernetes.client.dsl.ContainerResource;
 import java.util.*;
 import javax.inject.Singleton;
 import org.jboss.logging.Logger;
@@ -24,12 +25,10 @@ public class K8Deployment {
   private static final Logger LOGGER = Logger.getLogger(K8Deployment.class);
   private final KubernetesClient client;
   private final K8ConfigMap k8ConfigMap;
-  private final K8Service k8Service;
 
   public K8Deployment(KubernetesClient client) {
     this.client = client;
     this.k8ConfigMap = new K8ConfigMap(client);
-    this.k8Service = new K8Service(client);
   }
 
   public Map<String, Object> create(
@@ -38,11 +37,12 @@ public class K8Deployment {
       StreamEntity streamOut,
       DeploymentSpec deploymentSpec,
       UUID deploymentId) {
+
     final String name = StaticConfig.DEPLOYMENT_NAME_PREFIX + deploymentId;
     final String configmapName = StaticConfig.CONFIGMAP_NAME_PREFIX + deploymentId;
     final String configmapVolumeName = StaticConfig.CONFIGMAP_VOLUME_NAME_PREFIX + deploymentId;
     final String dataShareVolumeName = StaticConfig.DATA_SHARE_VOLUME_NAME_PREFIX + deploymentId;
-    final String serviceName = StaticConfig.SERVICE_NAME_PREFIX + deploymentId;
+    final int replicaCount = getDeploymentReplicaOrDefault(deploymentSpec.deployment());
 
     List<EnvVar> variables =
         getEnvironmentVariables(streamIn, streamOut, deploymentSpec, deploymentId);
@@ -52,17 +52,17 @@ public class K8Deployment {
           new DeploymentBuilder()
               .withNewMetadata()
               .withName(name)
-              .addToLabels(getLabels(deploymentId, deploymentSpec.name(), serviceName))
+              .addToLabels(getLabels(deploymentId, deploymentSpec.name()))
               .endMetadata()
               .withNewSpec()
-              .withReplicas(StaticConfig.EnvironmentVariables.REPLICAS)
+              .withReplicas(replicaCount)
               .withMinReadySeconds(StaticConfig.EnvironmentVariables.READY_SECONDS)
               .withNewSelector()
-              .addToMatchLabels(getLabels(deploymentId, deploymentSpec.name(), serviceName))
+              .addToMatchLabels(getLabels(deploymentId, deploymentSpec.name()))
               .endSelector()
               .withNewTemplate()
               .withNewMetadata()
-              .addToLabels(getLabels(deploymentId, deploymentSpec.name(), serviceName))
+              .addToLabels(getLabels(deploymentId, deploymentSpec.name()))
               .endMetadata()
               .withNewSpec()
               .addAllToContainers(
@@ -89,12 +89,10 @@ public class K8Deployment {
       throw new CreateDeploymentException(StaticConfig.LoggerMessages.DEPLOYMENT_NOT_CREATED);
     }
     k8ConfigMap.getOrCreate(configmapName, pe);
-    k8Service.create(serviceName);
     return getDeployment(deploymentId);
   }
 
-  private static Map<String, String> getLabels(
-      UUID deploymentId, String prettyName, String serviceName) {
+  private static Map<String, String> getLabels(UUID deploymentId, String prettyName) {
     return Map.of(
         StaticConfig.APP,
         StaticConfig.DATACATER_PIPELINE,
@@ -105,9 +103,7 @@ public class K8Deployment {
         StaticConfig.UUID_TEXT,
         deploymentId.toString(),
         StaticConfig.DEPLOYMENT_NAME_TEXT,
-        prettyName,
-        StaticConfig.DEPLOYMENT_SERVICE_TEXT,
-        serviceName);
+        prettyName);
   }
 
   private Container pythonRunnerContainer(String configmapVolumeName, String dataShareVolumeName) {
@@ -170,32 +166,32 @@ public class K8Deployment {
     return new ConfigMapVolumeSourceBuilder().withName(deploymentName).build();
   }
 
-  public String getClusterIp(UUID deploymentId) {
-    final String serviceName = StaticConfig.SERVICE_NAME_PREFIX + deploymentId;
-    return k8Service.getClusterIp(serviceName);
-  }
+  public String getLogs(UUID deploymentId, int replica) {
 
-  public String getLogs(UUID deploymentId) {
+    String deploymentName = getDeploymentName(deploymentId);
+    Pod pod = getDeploymentPodByReplica(deploymentName, replica);
+
     return client
-        .apps()
-        .deployments()
+        .pods()
         .inNamespace(StaticConfig.EnvironmentVariables.NAMESPACE)
-        .withName(getDeploymentName(deploymentId))
+        .withName(pod.getMetadata().getName())
         .inContainer(StaticConfig.DEPLOYMENT_NAME_PREFIX + deploymentId)
         .getLog(true);
   }
 
-  public RollableScalableResource<Deployment> watchLogs(UUID deploymentId) {
+  public ContainerResource watchLogs(UUID deploymentId, int replica) {
+    String deploymentName = getDeploymentName(deploymentId);
+    Pod pod = getDeploymentPodByReplica(deploymentName, replica);
+
     return client
-        .apps()
-        .deployments()
+        .pods()
         .inNamespace(StaticConfig.EnvironmentVariables.NAMESPACE)
-        .withName(getDeploymentName(deploymentId));
+        .withName(pod.getMetadata().getName())
+        .inContainer(StaticConfig.DEPLOYMENT_NAME_PREFIX + deploymentId);
   }
 
   public void delete(UUID deploymentId) {
     String name = getDeploymentName(deploymentId);
-    String serviceName = StaticConfig.SERVICE_NAME_PREFIX + deploymentId;
     String configMapName = StaticConfig.CONFIGMAP_NAME_PREFIX + deploymentId;
     List<StatusDetails> status =
         client
@@ -209,7 +205,6 @@ public class K8Deployment {
     // deployment to be exactly
     // one and continue only if that is true.
     if (status.size() == 1) {
-      k8Service.delete(serviceName);
       k8ConfigMap.delete(configMapName);
       LOGGER.info(String.format(StaticConfig.LoggerMessages.DEPLOYMENT_DELETED, name));
     } else {
@@ -260,6 +255,13 @@ public class K8Deployment {
     }
   }
 
+  public String getDeploymentReplicaIp(UUID deploymentId, int replica) {
+    String deploymentName = getDeploymentName(deploymentId);
+    Pod pod = getDeploymentPodByReplica(deploymentName, replica);
+
+    return pod.getStatus().getPodIP();
+  }
+
   private boolean exists(UUID deploymentId) {
     return !client
         .apps()
@@ -271,7 +273,7 @@ public class K8Deployment {
         .isEmpty();
   }
 
-  private String getDeploymentName(UUID deploymentId) {
+  public String getDeploymentName(UUID deploymentId) {
     List<Deployment> deployments =
         client
             .apps()
@@ -455,5 +457,70 @@ public class K8Deployment {
       return StaticConfig.LOCALHOST_BOOTSTRAP_SERVER;
     }
     return StaticConfig.EMPTY_STRING;
+  }
+
+  private int getDeploymentReplicaOrDefault(Map<String, Object> map) {
+    int replica = StaticConfig.EnvironmentVariables.REPLICAS;
+    try {
+      replica = (int) map.get(StaticConfig.REPLICAS_TEXT);
+    } catch (Exception e) {
+      return replica;
+    }
+    return replica;
+  }
+
+  private int replicaNumberToArrayPosition(int replica) {
+    int replicaPosition = replica;
+    if (replicaPosition <= 0) {
+      final String errorMessage =
+          "The deployment replica you are searching for can not be less than 1";
+      throw new DeploymentReplicaMismatchException(errorMessage);
+    }
+    // map replica number to array position
+    replicaPosition--;
+    return replicaPosition;
+  }
+
+  private Pod getDeploymentPodByReplica(String deploymentName, int replica) {
+    int replicaPosition = replicaNumberToArrayPosition(replica);
+
+    final Map<String, String> matchLabels =
+        client
+            .apps()
+            .deployments()
+            .inNamespace(StaticConfig.EnvironmentVariables.NAMESPACE)
+            .withName(deploymentName)
+            .get()
+            .getSpec()
+            .getSelector()
+            .getMatchLabels();
+
+    Pod searchedPod;
+    List<Pod> allDeploymentPods = new ArrayList<>();
+    try {
+      allDeploymentPods =
+          client
+              .pods()
+              .inNamespace(StaticConfig.EnvironmentVariables.NAMESPACE)
+              .withLabels(matchLabels)
+              .list()
+              .getItems();
+
+      searchedPod =
+          allDeploymentPods.stream()
+              .sorted((Comparator.comparing(o -> o.getMetadata().getName())))
+              .toList()
+              .get(replicaPosition);
+    } catch (ArrayIndexOutOfBoundsException e) {
+      LOGGER.info(
+          String.format(
+              "An error occurred while trying to get replica %s: %s", replica, e.getMessage()));
+      final String errorMessage =
+          String.format(
+              "The deployment replica you are searching for, %s, does not match the defined replica amount of %s.",
+              replica, allDeploymentPods.size());
+      throw new DeploymentReplicaMismatchException(errorMessage);
+    }
+    return searchedPod;
   }
 }

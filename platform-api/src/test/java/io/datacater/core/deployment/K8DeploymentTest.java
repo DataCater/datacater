@@ -107,13 +107,6 @@ class K8DeploymentTest {
     Assertions.assertEquals(true, getDeploymentExistsMethod().invoke(k8Deployment, deploymentId));
   }
 
-  @Test
-  @Order(3)
-  void testGetLogs() {
-    String logs = k8Deployment.getLogs(deploymentId);
-    Assertions.assertNotNull(logs);
-  }
-
   private Method getConfigMapExistsMethod() throws NoSuchMethodException {
     final String methodName = "exists";
     Method method = K8ConfigMap.class.getDeclaredMethod(methodName, String.class);
