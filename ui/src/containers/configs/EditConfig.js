@@ -362,22 +362,6 @@ class EditConfig extends Component {
                 value={this.state.config["name"] || ""}
               />
             </div>
-            <div className="col-12 mt-2">
-              <label htmlFor="kind" className="form-label">
-                Kind
-              </label>
-              <input
-                type="text"
-                className="form-control"
-                id="kind"
-                name="kind"
-                disabled
-                onChange={(event) => {
-                  this.handleChange("kind", event.target.value);
-                }}
-                value={this.state.config["kind"] || ""}
-              />
-            </div>
             {addedLabels.map((labels) => (
               <div className="col-12 mt-2" key={labels}>
                 <label htmlFor={labels} className="form-label">
@@ -446,6 +430,22 @@ class EditConfig extends Component {
                   </a>
                 </div>
               </div>
+            </div>
+            <div className="col-12 mt-2">
+              <label htmlFor="kind" className="form-label">
+                Kind
+              </label>
+              <input
+                type="text"
+                className="form-control"
+                id="kind"
+                name="kind"
+                disabled
+                onChange={(event) => {
+                  this.handleChange("kind", event.target.value);
+                }}
+                value={this.state.config["kind"] || ""}
+              />
             </div>
             {[undefined, defaultKind].includes(this.state.config["kind"]) && (
               <>

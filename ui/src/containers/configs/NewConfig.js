@@ -349,21 +349,6 @@ class NewConfig extends Component {
                 value={this.state.config["name"] || ""}
               />
             </div>
-            <div className="col-12 mt-2">
-              <label htmlFor="kind" className="form-label">
-                Kind
-              </label>
-              <Creatable
-                defaultValue={kindOptions.find(
-                  (kind) => kind.value === defaultKind
-                )}
-                isSearchable
-                options={kindOptions}
-                onChange={(kind) => {
-                  this.updateKindOption("kind", kind.value);
-                }}
-              />
-            </div>
             {addedLabels.map((labels) => (
               <div className="col-12 mt-2" key={labels}>
                 <label htmlFor={labels} className="form-label">
@@ -432,6 +417,21 @@ class NewConfig extends Component {
                   </a>
                 </div>
               </div>
+            </div>
+            <div className="col-12 mt-2">
+              <label htmlFor="kind" className="form-label">
+                Kind
+              </label>
+              <Creatable
+                defaultValue={kindOptions.find(
+                  (kind) => kind.value === defaultKind
+                )}
+                isSearchable
+                options={kindOptions}
+                onChange={(kind) => {
+                  this.updateKindOption("kind", kind.value);
+                }}
+              />
             </div>
             {[undefined, defaultKind].includes(this.state.config["kind"]) && (
               <>
