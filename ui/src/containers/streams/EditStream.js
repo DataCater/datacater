@@ -219,8 +219,9 @@ class EditStream extends Component {
                   Name<span className="text-danger ms-1">*</span>
                 </h5>
                 <span className="text-muted fs-7 me-2">
-                  Name of the Apache Kafka topic. If the topic does not yet
-                  exist on the broker, we will automatically create it.
+                  Name of the Apache Kafka topic. You cannot update the field{" "}
+                  <i>name</i> of existing streams. Please create a new stream
+                  instead.
                 </span>
                 <a
                   className="fs-7"
@@ -234,6 +235,7 @@ class EditStream extends Component {
               <input
                 type="text"
                 className="form-control"
+                disabled
                 id="name"
                 name="name"
                 onChange={this.handleChange}
@@ -259,10 +261,16 @@ class EditStream extends Component {
                     <div className="col-12 mt-2">
                       <label htmlFor="num.partitions" className="form-label">
                         num.partitions
+                        <span className="text-muted fs-7 ms-2">
+                          You cannot update the topic configuration{" "}
+                          <i>num.partitions</i> of existing streams. Please
+                          create a new stream instead.
+                        </span>
                       </label>
                       <input
                         type="text"
                         className="form-control"
+                        disabled
                         id="num.partitions"
                         data-prefix="spec.kafka.topic"
                         name="num.partitions"
@@ -281,10 +289,16 @@ class EditStream extends Component {
                         className="form-label"
                       >
                         replication.factor
+                        <span className="text-muted fs-7 ms-2">
+                          You cannot update the topic configuration{" "}
+                          <i>replication.factor</i> of existing streams. Please
+                          create a new stream instead.
+                        </span>
                       </label>
                       <input
                         type="text"
                         className="form-control"
+                        disabled
                         id="replication.factor"
                         data-prefix="spec.kafka.topic"
                         name="replication.factor"

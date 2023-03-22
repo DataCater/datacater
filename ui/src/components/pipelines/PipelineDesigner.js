@@ -198,6 +198,8 @@ class PipelineDesigner extends Component {
               <Edit
                 field={this.props.editColumn.field}
                 fields={this.props.fields}
+                changeContextBarSizeFunc={this.props.changeContextBarSizeFunc}
+                contextBarSize={this.props.contextBarSize}
                 currentStep={this.props.currentStep}
                 editColumn={this.props.editColumn}
                 filters={this.props.filters}

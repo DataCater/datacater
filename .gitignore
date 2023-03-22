@@ -47,3 +47,4 @@ python-runner/transforms/
 # python
 __pycache__
 .venv
+/k8s-manifests/minikube-with-postgres-image-test.yaml

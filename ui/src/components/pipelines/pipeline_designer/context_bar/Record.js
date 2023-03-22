@@ -3,6 +3,7 @@ import TransformationList from "./AttributeTransformationList";
 import FilterList from "./AttributeFilterList";
 import TransformConfig from "./TransformConfig";
 import FilterConfig from "./FilterConfig";
+import ContextBarSizer from "./ContextBarSizer";
 
 class Record extends Component {
   constructor(props) {
@@ -34,9 +35,11 @@ class Record extends Component {
 
   render() {
     const {
-      fields,
+      changeContextBarSizeFunc,
+      contextBarSize,
       currentStep,
       editColumn,
+      fields,
       filters,
       handleChangeFunc,
       sortPosition,
@@ -68,6 +71,12 @@ class Record extends Component {
             <h4 className="mb-0 overflow-hidden text-nowrap d-flex align-items-center fw-bold">
               Record
             </h4>
+          </div>
+          <div className="col-auto">
+            <ContextBarSizer
+              changeContextBarSizeFunc={changeContextBarSizeFunc}
+              contextBarSize={contextBarSize}
+            />
           </div>
         </div>
         <ul className="nav nav-tabs">
