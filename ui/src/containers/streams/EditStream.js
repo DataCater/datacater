@@ -27,6 +27,10 @@ class EditStream extends Component {
         connectionName: "",
         connectionValue: "",
       },
+      tempLabel: {
+        labelKey: "",
+        labelValue: "",
+      },
       streamUpdated: false,
     };
 
@@ -37,6 +41,9 @@ class EditStream extends Component {
     this.updateConnectionConfig = this.updateConnectionConfig.bind(this);
     this.addConfig = this.addConfig.bind(this);
     this.removeConfig = this.removeConfig.bind(this);
+    this.addLabel = this.addLabel.bind(this);
+    this.removeLabel = this.removeLabel.bind(this);
+    this.updateTempLabel = this.updateTempLabel.bind(this);
   }
 
   componentDidMount() {
@@ -135,6 +142,9 @@ class EditStream extends Component {
         stream["spec"]["kafka"]["topic"]["config"][event.target.name] =
           newValue;
         break;
+      case "configSelector":
+        stream.configSelector[event.target.name] = newValue;
+        break;
       default:
         stream[event.target.name] = newValue;
         break;
@@ -155,6 +165,39 @@ class EditStream extends Component {
     });
   }
 
+  updateTempLabel(field, value) {
+    let tempLabel = this.state.tempLabel;
+    tempLabel[field] = value;
+    this.setState({ tempLabel: tempLabel });
+  }
+
+  addLabel(event) {
+    event.preventDefault();
+    const tempLabel = this.state.tempLabel;
+    let stream = this.state.stream;
+
+    if (stream.configSelector == null) {
+      stream.configSelector = {};
+    }
+
+    stream.configSelector[tempLabel.labelKey] = tempLabel.labelValue;
+    this.setState({
+      stream: stream,
+      tempLabel: {
+        labelKey: "",
+        labelValue: "",
+      },
+    });
+  }
+
+  removeLabel(event) {
+    event.preventDefault();
+    let stream = this.state.stream;
+    const label = event.target.dataset.label;
+    delete stream.configSelector[label];
+    this.setState({ stream: stream });
+  }
+
   render() {
     if (this.state.streamUpdated) {
       return <Redirect to={"/streams/" + this.getStreamId()} />;
@@ -162,11 +205,12 @@ class EditStream extends Component {
 
     const stream = this.state.stream;
 
-    if (stream === undefined) {
+    if (stream == null) {
       return <></>;
     }
 
     const apiPayload = Object.assign({}, stream);
+    const addedLabels = Object.keys(stream.configSelector || {});
     delete apiPayload.uuid;
     delete apiPayload.createdAt;
     delete apiPayload.updatedAt;
@@ -179,7 +223,7 @@ class EditStream extends Component {
     const defaultDeserializer = "io.datacater.core.serde.JsonDeserializer";
     const defaultSerializer = "io.datacater.core.serde.JsonSerializer";
 
-    const addedTopicConfigs = Object.keys(stream.spec.kafka.topic.config);
+    const addedTopicConfigs = Object.keys(stream.spec.kafka.topic.config || {});
     const addedConnectionConfigs = Object.keys(stream.spec.kafka).filter(
       (item) =>
         ![
@@ -587,6 +631,81 @@ class EditStream extends Component {
                     className="btn btn-outline-primary"
                     data-prefix="spec.kafka"
                     onClick={this.addConfig}
+                  >
+                    Add
+                  </a>
+                </div>
+              </div>
+            </div>
+            <div className="col-12 mt-4">
+              <h5 className="d-inline me-2 fw-semibold">Config selector</h5>
+              <span className="text-muted fs-7">
+                You can reference one or multiple Configs by their key and
+                value.
+              </span>
+            </div>
+            {addedLabels.length === 0 && (
+              <div className="col-12 mt-2 mb-n1">
+                <i>No configs referenced.</i>
+              </div>
+            )}
+            {addedLabels.map((label) => (
+              <div className="col-12 mt-2" key={label}>
+                <label htmlFor={label} className="form-label">
+                  {label}
+                  <a
+                    className="ms-2 fs-7"
+                    data-label={label}
+                    data-prefix="configSelector"
+                    href="#"
+                    onClick={this.removeLabel}
+                  >
+                    Remove config selector
+                  </a>
+                </label>
+                <input
+                  type="text"
+                  className="form-control"
+                  id={label}
+                  data-prefix="configSelector"
+                  name={label}
+                  onChange={this.handleChange}
+                  value={this.state.stream.configSelector[label] || ""}
+                />
+              </div>
+            ))}
+            <div className="col-12 mt-2">
+              <div className="row">
+                <div className="col-md-3">
+                  <label className="form-label">Key</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    name="labelKey"
+                    onChange={(event) => {
+                      this.updateTempLabel("labelKey", event.target.value);
+                    }}
+                    value={this.state.tempLabel.labelKey || ""}
+                  />
+                </div>
+                <div className="col-md-3">
+                  <label className="form-label">Value</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    name="labelValue"
+                    onChange={(event) => {
+                      this.updateTempLabel("labelValue", event.target.value);
+                    }}
+                    value={this.state.tempLabel.labelValue || ""}
+                  />
+                </div>
+                <div className="col-md-3 d-flex align-items-end">
+                  <a
+                    href="/streams/new"
+                    className="btn btn-outline-primary"
+                    data-prefix="configSelector"
+                    onClick={this.addLabel}
                   >
                     Add
                   </a>

@@ -9,6 +9,10 @@ import ListDeployments from "./deployments/ListDeployments";
 import NewDeployment from "./deployments/NewDeployment";
 import ShowDeployment from "./deployments/ShowDeployment";
 import EditDeployment from "./deployments/EditDeployment";
+import ListConfigs from "./configs/ListConfigs";
+import NewConfig from "./configs/NewConfig";
+import ShowConfig from "./configs/ShowConfig";
+import EditConfig from "./configs/EditConfig";
 import DeploymentLogs from "./deployments/DeploymentLogs";
 import ListPipelines from "./pipelines/ListPipelines";
 import NewPipeline from "./pipelines/NewPipeline";
@@ -106,6 +110,15 @@ class DataCaterApp extends Component {
                 component={EditStream}
               />
               <PrivateRoute exact path="/streams/:id" component={ShowStream} />
+
+              <PrivateRoute exact path="/configs" component={ListConfigs} />
+              <PrivateRoute exact path="/configs/new" component={NewConfig} />
+              <PrivateRoute
+                exact
+                path="/configs/:id/edit"
+                component={EditConfig}
+              />
+              <PrivateRoute exact path="/configs/:id" component={ShowConfig} />
 
               <Route exact path="/404" component={NotFoundError} />
               <Redirect to="/404" />

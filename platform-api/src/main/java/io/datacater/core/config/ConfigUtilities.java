@@ -54,8 +54,12 @@ public class ConfigUtilities {
             .spec()
             .getKafka()
             .putAll(
-                JsonUtilities.toObjectMap(
-                    config.getSpec().get(stream.spec().getKind().name().toLowerCase(Locale.ROOT))));
+                JsonUtilities.combineMaps(
+                    JsonUtilities.toObjectMap(
+                        config
+                            .getSpec()
+                            .get(stream.spec().getKind().name().toLowerCase(Locale.ROOT))),
+                    stream.spec().getKafka()));
       }
     }
     return stream;
