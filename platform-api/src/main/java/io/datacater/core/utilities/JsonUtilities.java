@@ -65,21 +65,35 @@ public class JsonUtilities {
   }
 
   @ExcludeFromGeneratedCoverageReport
+  /**
+   * This method combines two Map<String, Object> with each other. If a value node contains a map,
+   * the `.putAll()` method would overwrite some keys. To avoid this, this method was implemented.
+   * It takes a map, `prio2`, and overwrites the values/adds the keys from another map, `prio1`
+   *
+   * @param prio2 map with the lowest priority
+   * @param prio1 map with the highest priority. Values from this map overwrite values from prio2
+   * @return a combined map
+   */
   public static Map<String, Object> combineMaps(
       Map<String, Object> prio2, Map<String, Object> prio1) {
     Map<String, Object> result = new HashMap<>(prio2);
+    // loop over prio1 map to replace values
     for (Map.Entry<String, Object> entry : prio1.entrySet()) {
       String key = entry.getKey();
       Object value = entry.getValue();
       if (result.containsKey(key)) {
         Object existingValue = result.get(key);
+        // if the value is a map, recursively add sub-nodes so nothing is overwritten with empty
+        // values
         if (existingValue instanceof Map && value instanceof Map) {
           result.put(
-              key, combineMaps((Map<String, Object>) existingValue, (Map<String, Object>) value));
+              key, combineMaps((Map<String, Object>) value, (Map<String, Object>) existingValue));
         } else {
+          // if it is now a map, overwrite the value
           result.put(key, value);
         }
       } else {
+        // add the value if it doesn't exist
         result.put(key, value);
       }
     }
