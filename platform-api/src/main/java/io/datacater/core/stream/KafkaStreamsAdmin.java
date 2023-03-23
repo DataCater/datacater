@@ -105,7 +105,7 @@ public class KafkaStreamsAdmin implements StreamService {
 
   private static Short getReplicationFactor(Map<String, Object> topicConfig) {
     if (topicConfig.get(REPLICATION_FACTOR) instanceof String repFactor
-        && !topicConfig.get(PARTITION_COUNT).toString().isEmpty()) {
+        && !topicConfig.get(REPLICATION_FACTOR).toString().isEmpty()) {
       return Short.valueOf(repFactor);
     }
     return DEFAULT_REPLICATION_FACTOR;
