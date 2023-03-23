@@ -275,7 +275,7 @@ class EditStream extends Component {
                         data-prefix="spec.kafka.topic"
                         name="num.partitions"
                         onChange={this.handleChange}
-                        placeholder="1"
+                        placeholder="3"
                         value={
                           this.state.stream.spec.kafka["topic"][
                             "num.partitions"
@@ -303,7 +303,7 @@ class EditStream extends Component {
                         data-prefix="spec.kafka.topic"
                         name="replication.factor"
                         onChange={this.handleChange}
-                        placeholder="3"
+                        placeholder="1"
                         value={
                           this.state.stream.spec.kafka["topic"][
                             "replication.factor"
