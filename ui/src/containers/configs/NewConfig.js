@@ -348,7 +348,7 @@ class NewConfig extends Component {
             httpMethod="POST"
             requestBody={this.state.config}
             title="Create new config"
-            subTitle="Configs are used to outsource the configuration of streams and deployments."
+            subTitle="Configs outsource the configuration of Streams and other resources."
           />
           <form>
             <div className="row">

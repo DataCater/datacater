@@ -374,7 +374,6 @@ class EditConfig extends Component {
             httpMethod="PUT"
             requestBody={apiPayload}
             title={config.name || "Untitled config"}
-            subTitle="Configs are used to outsource the configuration of streams and deployments."
           />
           <form>
             <div className="row">
