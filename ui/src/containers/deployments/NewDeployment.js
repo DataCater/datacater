@@ -117,7 +117,13 @@ class NewDeployment extends Component {
     const tempLabel = this.state.tempLabel;
     let deployment = this.state.deployment;
     deployment.configSelector[tempLabel.labelKey] = tempLabel.labelValue;
-    this.setState({ deployment: deployment, tempLabel: tempLabel });
+    this.setState({
+      deployment: deployment,
+      tempLabel: {
+        labelKey: "",
+        labelValue: "",
+      },
+    });
   }
 
   removeLabel(event) {
@@ -163,7 +169,7 @@ class NewDeployment extends Component {
           />
           <form>
             <div className="col-12 mt-4">
-              <label htmlFor="name" className="form-label">
+              <label htmlFor="name" className="form-label h5 fw-semibold mb-3">
                 Name
               </label>
               <input
@@ -178,7 +184,7 @@ class NewDeployment extends Component {
               />
             </div>
             <div className="col-12 mt-4">
-              <label className="form-label">Pipeline</label>
+              <label className="form-label h5 fw-semibold mb-3">Pipeline</label>
               <Select
                 isSearchable
                 isClearable
@@ -188,38 +194,44 @@ class NewDeployment extends Component {
                 }}
               />
             </div>
-            {addedLabels.map((labels) => (
-              <div className="col-12 mt-2" key={labels}>
-                <label htmlFor={labels} className="form-label">
-                  {labels}
+            <div className="col-12 mt-4">
+              <h5 className="d-inline me-2 fw-semibold">Config selector</h5>
+              <span className="text-muted fs-7">
+                You can reference one or multiple Configs by their key and
+                value.
+              </span>
+            </div>
+            {addedLabels.length === 0 && (
+              <div className="col-12 mt-2 mb-n1">
+                <i>No configs referenced.</i>
+              </div>
+            )}
+            {addedLabels.map((label) => (
+              <div className="col-12 mt-2" key={label}>
+                <label htmlFor={label} className="form-label">
+                  Key: {label}
                   <a
                     className="ms-2 fs-7"
-                    data-label={labels}
+                    data-label={label}
                     data-prefix="configSelector"
                     href="/deployments/new"
                     onClick={this.removeLabel}
                   >
-                    Remove
+                    Remove config selector
                   </a>
                 </label>
                 <input
                   type="text"
                   className="form-control"
-                  id={labels}
+                  id={label}
                   data-prefix="configSelector"
-                  name={labels}
+                  name={label}
                   onChange={this.handleEventChange}
-                  value={this.state.deployment.configSelector[labels] || ""}
+                  value={this.state.deployment.configSelector[label] || ""}
                 />
               </div>
             ))}
             <div className="col-12 mt-3">
-              <h6 className="d-inline me-2">Add labels</h6>
-              <span className="text-muted fs-7">
-                used for matching the deployment to configs.
-              </span>
-            </div>
-            <div className="col-12 mt-2">
               <div className="row">
                 <div className="col-md-3">
                   <label className="form-label">Key</label>
