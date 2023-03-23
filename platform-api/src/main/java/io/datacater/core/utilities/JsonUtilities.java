@@ -63,4 +63,26 @@ public class JsonUtilities {
     }
     return map;
   }
+
+  @ExcludeFromGeneratedCoverageReport
+  public static Map<String, Object> combineMaps(
+      Map<String, Object> prio2, Map<String, Object> prio1) {
+    Map<String, Object> result = new HashMap<>(prio2);
+    for (Map.Entry<String, Object> entry : prio1.entrySet()) {
+      String key = entry.getKey();
+      Object value = entry.getValue();
+      if (result.containsKey(key)) {
+        Object existingValue = result.get(key);
+        if (existingValue instanceof Map && value instanceof Map) {
+          result.put(
+              key, combineMaps((Map<String, Object>) existingValue, (Map<String, Object>) value));
+        } else {
+          result.put(key, value);
+        }
+      } else {
+        result.put(key, value);
+      }
+    }
+    return result;
+  }
 }
