@@ -176,7 +176,13 @@ class NewStream extends Component {
     const tempLabel = this.state.tempLabel;
     let stream = this.state.stream;
     stream.configSelector[tempLabel.labelKey] = tempLabel.labelValue;
-    this.setState({ stream: stream, tempLabel: tempLabel });
+    this.setState({
+      stream: stream,
+      tempLabel: {
+        labelKey: "",
+        labelValue: "",
+      },
+    });
   }
 
   removeLabel(event) {
@@ -593,37 +599,43 @@ class NewStream extends Component {
                 </div>
               </div>
             </div>
-            {addedLabels.map((labels) => (
-              <div className="col-12 mt-2" key={labels}>
-                <label htmlFor={labels} className="form-label">
-                  {labels}
+            <div className="col-12 mt-4">
+              <h5 className="d-inline me-2 fw-semibold">Config selector</h5>
+              <span className="text-muted fs-7">
+                You can reference one or multiple Configs by their key and
+                value.
+              </span>
+            </div>
+            {addedLabels.length === 0 && (
+              <div className="col-12 mt-2 mb-n1">
+                <i>No configs referenced.</i>
+              </div>
+            )}
+            {addedLabels.map((label) => (
+              <div className="col-12 mt-2" key={label}>
+                <label htmlFor={label} className="form-label">
+                  Key: {label}
                   <a
                     className="ms-2 fs-7"
-                    data-label={labels}
+                    data-label={label}
                     data-prefix="configSelector"
                     href="/streams/new"
                     onClick={this.removeLabel}
                   >
-                    Remove
+                    Remove config selector
                   </a>
                 </label>
                 <input
                   type="text"
                   className="form-control"
-                  id={labels}
+                  id={label}
                   data-prefix="configSelector"
-                  name={labels}
+                  name={label}
                   onChange={this.handleChange}
-                  value={this.state.stream.configSelector[labels] || ""}
+                  value={this.state.stream.configSelector[label] || ""}
                 />
               </div>
             ))}
-            <div className="col-12 mt-3">
-              <h6 className="d-inline me-2">Add labels</h6>
-              <span className="text-muted fs-7">
-                used for matching the stream to configs.
-              </span>
-            </div>
             <div className="col-12 mt-2">
               <div className="row">
                 <div className="col-md-3">
