@@ -29,7 +29,14 @@ class NewConfig extends Component {
         metadata: {
           labels: {},
         },
-        spec: {},
+        spec: {
+          kind: "KAFKA",
+          kafka: {
+            topic: {
+              config: {},
+            },
+          },
+        },
       },
       tempLabel: {
         labelKey: "",
@@ -223,6 +230,7 @@ class NewConfig extends Component {
       config: config,
       errorMessage: undefined,
     });
+    this.updateConfigSpec();
   }
 
   setDefaultKind(field, value) {
@@ -299,7 +307,6 @@ class NewConfig extends Component {
 
     const kindOptions = getConfigKindOptions();
     const config = this.state.config;
-    const defaultKind = "STREAM";
     const addedLabels = Object.keys(config.metadata.labels);
 
     const pipelineOptions = this.props.pipelines.pipelines.map((pipeline) => {
@@ -470,7 +477,7 @@ class NewConfig extends Component {
                       <h5 className="fw-semibold mb-3">Kind</h5>
                       <Creatable
                         defaultValue={kindOptions.find(
-                          (kind) => kind.value === defaultKind
+                          (kind) => kind.value === config.kind
                         )}
                         isSearchable
                         options={kindOptions}
@@ -483,9 +490,7 @@ class NewConfig extends Component {
                 )}
                 {this.state.currentTab === "spec" && (
                   <>
-                    {[undefined, defaultKind].includes(
-                      this.state.config["kind"]
-                    ) && (
+                    {this.state.config["kind"] == "STREAM" && (
                       <>
                         <div className="col-12 mt-4">
                           <h5 className="fw-semibold">Topic configuration</h5>
@@ -867,6 +872,9 @@ class NewConfig extends Component {
                         <div className="col-12">
                           <label className="form-label">Pipeline</label>
                           <Select
+                            defaultValue={pipelineOptions.find(
+                              (kind) => kind.value === config.spec.pipeline
+                            )}
                             isSearchable
                             isClearable
                             options={pipelineOptions}
