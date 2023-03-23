@@ -68,7 +68,8 @@ public class JsonUtilities {
   /**
    * This method combines two Map<String, Object> with each other. If a value node contains a map,
    * the `.putAll()` method would overwrite some keys. To avoid this, this method was implemented.
-   * It takes a map, `lower_priority_map`, and overwrites the values/adds the keys from another map, `higher_priority_map`
+   * It takes a map, `lower_priority_map`, and overwrites the values/adds the keys from another map,
+   * `higher_priority_map`
    *
    * @param lower_priority_map map with the lowest priority
    * @param higher_priority_map map with the highest priority. Values from this map overwrite values
