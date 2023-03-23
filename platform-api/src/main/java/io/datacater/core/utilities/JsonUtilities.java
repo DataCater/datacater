@@ -70,15 +70,16 @@ public class JsonUtilities {
    * the `.putAll()` method would overwrite some keys. To avoid this, this method was implemented.
    * It takes a map, `prio2`, and overwrites the values/adds the keys from another map, `prio1`
    *
-   * @param prio2 map with the lowest priority
-   * @param prio1 map with the highest priority. Values from this map overwrite values from prio2
+   * @param lower_priority_map map with the lowest priority
+   * @param higher_priority_map map with the highest priority. Values from this map overwrite values
+   *     from prio2
    * @return a combined map
    */
   public static Map<String, Object> combineMaps(
-      Map<String, Object> prio2, Map<String, Object> prio1) {
-    Map<String, Object> result = new HashMap<>(prio2);
+      Map<String, Object> lower_priority_map, Map<String, Object> higher_priority_map) {
+    Map<String, Object> result = new HashMap<>(lower_priority_map);
     // loop over prio1 map to replace values
-    for (Map.Entry<String, Object> entry : prio1.entrySet()) {
+    for (Map.Entry<String, Object> entry : higher_priority_map.entrySet()) {
       String key = entry.getKey();
       Object value = entry.getValue();
       if (result.containsKey(key)) {
@@ -89,12 +90,18 @@ public class JsonUtilities {
           result.put(
               key, combineMaps((Map<String, Object>) value, (Map<String, Object>) existingValue));
         } else {
-          // if it is now a map, overwrite the value
-          result.put(key, value);
+          // do not overwrite value if it is empty
+          if (value != "") {
+            // if it is now a map, overwrite the value
+            result.put(key, value);
+          }
         }
       } else {
-        // add the value if it doesn't exist
-        result.put(key, value);
+        // do not add value if it is empty
+        if (value != "") {
+          // add the value if it doesn't exist
+          result.put(key, value);
+        }
       }
     }
     return result;
