@@ -531,7 +531,7 @@ class EditConfig extends Component {
                             data-prefix="stream.spec.kafka.topic"
                             name="num.partitions"
                             onChange={this.handleEventChange}
-                            placeholder="1"
+                            placeholder="3"
                             value={
                               this.state.stream.spec.kafka["topic"][
                                 "num.partitions"
@@ -553,7 +553,7 @@ class EditConfig extends Component {
                             data-prefix="stream.spec.kafka.topic"
                             name="replication.factor"
                             onChange={this.handleEventChange}
-                            placeholder="3"
+                            placeholder="1"
                             value={
                               this.state.stream.spec.kafka["topic"][
                                 "replication.factor"
