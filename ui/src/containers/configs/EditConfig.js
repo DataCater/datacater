@@ -912,6 +912,24 @@ class EditConfig extends Component {
                             }}
                           />
                         </div>
+                        <div className="col-12 mt-2">
+                          <label className="form-label">Replicas</label>
+                          <input
+                            type="text"
+                            className="form-control"
+                            id="replicas"
+                            name="replicas"
+                            onChange={(value) => {
+                              this.handleChange(
+                                "replicas",
+                                value.target.value,
+                                "deployment.spec"
+                              );
+                            }}
+                            placeholder="1"
+                            value={this.state.config.spec["replicas"] || ""}
+                          />
+                        </div>
                       </>
                     )}
                   </>

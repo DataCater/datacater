@@ -214,6 +214,20 @@ class EditDeployment extends Component {
               />
             </div>
             <div className="col-12 mt-4">
+              <label className="form-label h5 fw-semibold mb-3">Replicas</label>
+              <input
+                type="text"
+                className="form-control"
+                id="replicas"
+                name="replicas"
+                onChange={(value) => {
+                  this.handleChange("replicas", value.target.value, "spec");
+                }}
+                placeholder="1"
+                value={this.state.deployment.spec["replicas"] || ""}
+              />
+            </div>
+            <div className="col-12 mt-4">
               <h5 className="d-inline me-2 fw-semibold">Config selector</h5>
               <span className="text-muted fs-7">
                 You can reference one or multiple Configs by their key and
