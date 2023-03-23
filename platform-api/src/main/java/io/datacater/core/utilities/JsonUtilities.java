@@ -78,7 +78,7 @@ public class JsonUtilities {
   public static Map<String, Object> combineMaps(
       Map<String, Object> lower_priority_map, Map<String, Object> higher_priority_map) {
     Map<String, Object> result = new HashMap<>(lower_priority_map);
-    // loop over prio1 map to replace values
+    // loop over higher_priority_map map to replace values
     for (Map.Entry<String, Object> entry : higher_priority_map.entrySet()) {
       String key = entry.getKey();
       Object value = entry.getValue();
