@@ -1,5 +1,6 @@
 package io.datacater.core.deployment;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.datacater.core.authentication.DataCaterSessionFactory;
@@ -7,6 +8,7 @@ import io.datacater.core.config.ConfigEntity;
 import io.datacater.core.config.ConfigUtilities;
 import io.datacater.core.exceptions.*;
 import io.datacater.core.pipeline.PipelineEntity;
+import io.datacater.core.stream.Stream;
 import io.datacater.core.stream.StreamEntity;
 import io.datacater.core.utilities.StringUtilities;
 import io.fabric8.kubernetes.client.KubernetesClient;
@@ -325,7 +327,7 @@ public class DeploymentEndpoint {
                         StaticConfig.LoggerMessages.DEPLOYMENT_NOT_FOUND)));
   }
 
-  private Uni<StreamEntity> getStream(
+  private Uni<Stream> getStream(
       DeploymentSpec spec, String deploymentSpecKey, PipelineEntity pipeline, String key) {
     return dsf.withTransaction(
         (session, transaction) ->
@@ -333,6 +335,30 @@ public class DeploymentEndpoint {
                 .find(
                     StreamEntity.class,
                     getStreamUUID(spec, deploymentSpecKey, pipeline.getMetadata(), key))
+                .onItem()
+                .ifNotNull()
+                .transformToUni(
+                    entity -> {
+                      try {
+                        Stream stream = Stream.from(entity);
+                        Uni<List<ConfigEntity>> configList =
+                            ConfigUtilities.getMappedConfigs(stream.configSelector(), dsf);
+                        return Uni.combine()
+                            .all()
+                            .unis(Uni.createFrom().item(stream), configList)
+                            .asTuple();
+                      } catch (JsonProcessingException ex) {
+                        throw new DatacaterException(ex.getMessage());
+                      }
+                    })
+                .onItem()
+                .ifNotNull()
+                .transform(
+                    tuple -> {
+                      Stream stream = tuple.getItem1();
+                      stream = ConfigUtilities.applyConfigsToStream(stream, tuple.getItem2());
+                      return stream;
+                    })
                 .onItem()
                 .ifNull()
                 .failWith(
@@ -380,8 +406,8 @@ public class DeploymentEndpoint {
 
   private DeploymentEntity createDeployment(
       PipelineEntity pe,
-      StreamEntity streamOut,
-      StreamEntity streamIn,
+      Stream streamOut,
+      Stream streamIn,
       DeploymentSpec deploymentSpec,
       DeploymentEntity de,
       List<ConfigEntity> configList) {
@@ -395,8 +421,8 @@ public class DeploymentEndpoint {
 
   private DeploymentEntity updateDeployment(
       PipelineEntity pe,
-      StreamEntity streamOut,
-      StreamEntity streamIn,
+      Stream streamOut,
+      Stream streamIn,
       DeploymentSpec deploymentSpec,
       DeploymentEntity de,
       List<ConfigEntity> configList) {
