@@ -210,11 +210,10 @@ class EditConfig extends Component {
     if (prefix === "deployment.spec") {
       deployment.spec[name] = value;
     } else if (prefix === "deployment.spec.replicas") {
-      if(!isNaN(value)){
-          deployment.spec[name] = parseInt(value);
+      if (!isNaN(value)) {
+        deployment.spec[name] = parseInt(value);
       }
-   }
-    else {
+    } else {
       config[name] = value;
     }
 

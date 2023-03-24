@@ -200,11 +200,10 @@ class NewConfig extends Component {
     if (prefix === "deployment.spec") {
       deployment.spec[name] = value;
     } else if (prefix === "deployment.spec.replicas") {
-     if(!isNaN(value)){
-         deployment.spec[name] = parseInt(value);
-     }
-  }
-  else {
+      if (!isNaN(value)) {
+        deployment.spec[name] = parseInt(value);
+      }
+    } else {
       config[name] = value;
     }
 

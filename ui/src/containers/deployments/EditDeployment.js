@@ -72,11 +72,10 @@ class EditDeployment extends Component {
     } else if (prefix === "spec") {
       deployment.spec[name] = value;
     } else if (prefix === "spec.replicas") {
-         if(!isNaN(value)){
-             deployment.spec[name] = parseInt(value);
-         }
+      if (!isNaN(value)) {
+        deployment.spec[name] = parseInt(value);
       }
-      else {
+    } else {
       deployment[name] = value;
     }
 
@@ -226,7 +225,11 @@ class EditDeployment extends Component {
                 id="replicas"
                 name="replicas"
                 onChange={(value) => {
-                  this.handleChange("replicas", value.target.value, "spec.replicas");
+                  this.handleChange(
+                    "replicas",
+                    value.target.value,
+                    "spec.replicas"
+                  );
                 }}
                 placeholder="1"
                 value={this.state.deployment.spec["replicas"] || ""}
