@@ -148,8 +148,7 @@ public class StreamEndpoint {
       throws JsonProcessingException {
     ObjectMapper mapper = new ObjectMapper();
     // Perform a deep copy of the stream spec to avoid merging config properties into the original
-    // stream object
-    // and persisting this state
+    // stream object and persisting this state
     StreamSpec copiedSpec =
         mapper.treeToValue(stream.spec().serializeStreamSpec(), StreamSpec.class);
     Stream streamWithConfig = Stream.from(stream.name(), copiedSpec, stream.configSelector());
