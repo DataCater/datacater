@@ -199,7 +199,12 @@ class NewConfig extends Component {
 
     if (prefix === "deployment.spec") {
       deployment.spec[name] = value;
-    } else {
+    } else if (prefix === "deployment.spec.replicas") {
+     if(!isNaN(value)){
+         deployment.spec[name] = parseInt(value);
+     }
+  }
+  else {
       config[name] = value;
     }
 
@@ -898,7 +903,7 @@ class NewConfig extends Component {
                               this.handleChange(
                                 "replicas",
                                 value.target.value,
-                                "deployment.spec"
+                                "deployment.spec.replicas"
                               );
                             }}
                             placeholder="1"
