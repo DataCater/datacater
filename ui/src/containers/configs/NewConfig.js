@@ -891,10 +891,10 @@ class NewConfig extends Component {
                             }}
                           />
                         </div>
-                        <div className="col-12">
+                        <div className="col-12 mt-2">
                           <label className="form-label">Replicas</label>
                           <input
-                            type="text"
+                            type="number"
                             className="form-control"
                             id="replicas"
                             name="replicas"

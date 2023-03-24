@@ -220,7 +220,7 @@ class EditDeployment extends Component {
             <div className="col-12 mt-4">
               <label className="form-label h5 fw-semibold mb-3">Replicas</label>
               <input
-                type="text"
+                type="number"
                 className="form-control"
                 id="replicas"
                 name="replicas"
