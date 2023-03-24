@@ -1,6 +1,7 @@
 package io.datacater.core.stream;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.datacater.core.authentication.DataCaterSessionFactory;
 import io.datacater.core.config.ConfigEntity;
 import io.datacater.core.config.ConfigUtilities;
@@ -103,8 +104,8 @@ public class StreamEndpoint {
                 .onItem()
                 .transform(
                     tuple -> {
-                      updateStreamObject(stream, tuple.getItem2());
                       try {
+                        updateStreamObject(stream, tuple.getItem2());
                         return session.merge((tuple.getItem1()).updateEntity(stream));
                       } catch (JsonProcessingException e) {
                         throw new RuntimeException(e);
@@ -143,10 +144,18 @@ public class StreamEndpoint {
                 .replaceWith(Response.ok().build())));
   }
 
-  private void updateStreamObject(Stream stream, List<ConfigEntity> configList) {
-    stream = ConfigUtilities.applyConfigsToStream(stream, configList);
-    StreamService kafkaAdmin = KafkaStreamsAdmin.from(stream);
-    kafkaAdmin.updateStream(stream.spec());
+  private void updateStreamObject(Stream stream, List<ConfigEntity> configList)
+      throws JsonProcessingException {
+    ObjectMapper mapper = new ObjectMapper();
+    // Perform a deep copy of the stream spec to avoid merging config properties into the original
+    // stream object
+    // and persisting this state
+    StreamSpec copiedSpec =
+        mapper.treeToValue(stream.spec().serializeStreamSpec(), StreamSpec.class);
+    Stream streamWithConfig = Stream.from(stream.name(), copiedSpec, stream.configSelector());
+    streamWithConfig = ConfigUtilities.applyConfigsToStream(streamWithConfig, configList);
+    StreamService kafkaAdmin = KafkaStreamsAdmin.from(streamWithConfig);
+    kafkaAdmin.updateStream(streamWithConfig.spec());
     kafkaAdmin.close();
   }
 
