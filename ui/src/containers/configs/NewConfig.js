@@ -897,6 +897,7 @@ class NewConfig extends Component {
                             type="number"
                             className="form-control"
                             id="replicas"
+                            min="0"
                             name="replicas"
                             onChange={(value) => {
                               this.handleChange(
@@ -906,7 +907,12 @@ class NewConfig extends Component {
                               );
                             }}
                             placeholder="1"
-                            value={this.state.config.spec["replicas"] || ""}
+                            step="1"
+                            value={
+                              !isNaN(this.state.config.spec["replicas"])
+                                ? this.state.config.spec["replicas"]
+                                : ""
+                            }
                           />
                         </div>
                       </>
