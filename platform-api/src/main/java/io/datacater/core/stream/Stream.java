@@ -26,7 +26,6 @@ public record Stream(String name, StreamSpec spec, Map<String, String> configSel
     ObjectMapper mapper = new ObjectMapper();
     StreamSpec copiedSpec =
         mapper.treeToValue(stream.spec().serializeStreamSpec(), StreamSpec.class);
-    StreamSpec spec = mapper.treeToValue(copiedSpec, StreamSpec.class);
-    return new Stream(stream.name(), spec, stream.configSelector());
+    return new Stream(stream.name(), copiedSpec, stream.configSelector());
   }
 }
