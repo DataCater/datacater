@@ -21,4 +21,11 @@ public record Stream(String name, StreamSpec spec, Map<String, String> configSel
     StreamSpec spec = mapper.treeToValue(se.getSpec(), StreamSpec.class);
     return new Stream(se.getName(), spec, JsonUtilities.toStringMap(se.getConfigSelector()));
   }
+
+  public static Stream from(Stream stream) throws JsonProcessingException {
+    ObjectMapper mapper = new ObjectMapper();
+    StreamSpec copiedSpec =
+        mapper.treeToValue(stream.spec().serializeStreamSpec(), StreamSpec.class);
+    return new Stream(stream.name(), copiedSpec, stream.configSelector());
+  }
 }
