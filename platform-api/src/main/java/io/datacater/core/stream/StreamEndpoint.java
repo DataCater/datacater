@@ -103,8 +103,8 @@ public class StreamEndpoint {
                 .onItem()
                 .transform(
                     tuple -> {
-                      updateStreamObject(stream, tuple.getItem2());
                       try {
+                        updateStreamObject(stream, tuple.getItem2());
                         return session.merge((tuple.getItem1()).updateEntity(stream));
                       } catch (JsonProcessingException e) {
                         throw new RuntimeException(e);
@@ -143,10 +143,11 @@ public class StreamEndpoint {
                 .replaceWith(Response.ok().build())));
   }
 
-  private void updateStreamObject(Stream stream, List<ConfigEntity> configList) {
-    stream = ConfigUtilities.applyConfigsToStream(stream, configList);
-    StreamService kafkaAdmin = KafkaStreamsAdmin.from(stream);
-    kafkaAdmin.updateStream(stream.spec());
+  private void updateStreamObject(Stream stream, List<ConfigEntity> configList)
+      throws JsonProcessingException {
+    Stream streamWithConfig = ConfigUtilities.applyConfigsToStream(Stream.from(stream), configList);
+    StreamService kafkaAdmin = KafkaStreamsAdmin.from(streamWithConfig);
+    kafkaAdmin.updateStream(streamWithConfig.spec());
     kafkaAdmin.close();
   }
 
