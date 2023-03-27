@@ -5,6 +5,10 @@ import { addStream } from "../../actions/streams";
 import { connect } from "react-redux";
 import Container from "react-bootstrap/Container";
 import Row from "react-bootstrap/Row";
+import Col from "react-bootstrap/Col";
+
+import "ace-builds/src-noconflict/mode-json";
+import "ace-builds/src-noconflict/theme-xcode";
 
 export class PayloadEditor extends Component {
   constructor(props) {
@@ -36,9 +40,14 @@ export class PayloadEditor extends Component {
 
   render() {
     return (
-      <div className="datacater-code-editor border-start border-end border-top border-bottom border-grey">
-        <Container>
-          <Row>
+      <div className="datacater-code-editor">
+        <Row>
+          <Col>
+            <h5 className="fw-semibold mb-4">Edit payload as JSON</h5>
+          </Col>
+        </Row>
+        <Row>
+          <Col className="mb-2">
             <AceEditor
               placeholder=""
               mode="json"
@@ -59,8 +68,8 @@ export class PayloadEditor extends Component {
               enableLiveAutocompletion={false}
               tabSize={2}
             />
-          </Row>
-        </Container>
+          </Col>
+        </Row>
       </div>
     );
   }

@@ -492,10 +492,12 @@ class NewStream extends Component {
 
   loadPayloadEditor(stream) {
     return (
-      <PayloadEditor
-        apiPath="/streams/"
-        code={this.state.stream}
-      ></PayloadEditor>
+      <div className="col-12 mt-4">
+        <PayloadEditor
+          apiPath="/streams/"
+          code={this.state.stream}
+        ></PayloadEditor>
+      </div>
     );
   }
   handleCreateStream(event) {
