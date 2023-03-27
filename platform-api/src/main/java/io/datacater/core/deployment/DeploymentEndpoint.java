@@ -169,54 +169,52 @@ public class DeploymentEndpoint {
   @Consumes(MediaType.APPLICATION_JSON)
   public Uni<DeploymentEntity> createDeployment(DeploymentSpec spec) {
     DeploymentEntity de = new DeploymentEntity(spec);
-    Uni<List<ConfigEntity>> configList =
-        ConfigUtilities.getMappedConfigs(spec.configSelector(), dsf);
 
     return dsf.withTransaction(
         (session, transaction) ->
             session
                 .persist(de)
                 .onItem()
-                .transform(
-                    voidObject ->
-                        configList
-                            .onItem()
-                            .transform(
-                                configs -> ConfigUtilities.applyConfigsToDeployment(spec, configs)))
-                .onItem()
                 .transformToUni(
-                    combinedSpecUni ->
-                        combinedSpecUni
-                            .onItem()
-                            .transformToUni(
-                                combinedSpec ->
-                                    Uni.combine()
-                                        .all()
-                                        .unis(
-                                            Uni.createFrom().item(combinedSpec),
-                                            getPipeline(combinedSpec))
-                                        .asTuple()))
-                .onItem()
-                .transformToUni(
-                    specAndPipeline ->
+                    entity ->
                         Uni.combine()
                             .all()
                             .unis(
-                                Uni.createFrom().item(specAndPipeline.getItem2()),
+                                ConfigUtilities.getMappedConfigs(spec.configSelector(), session),
+                                Uni.createFrom().item(entity))
+                            .asTuple())
+                .onItem()
+                .transformToUni(
+                    tuple -> {
+                      DeploymentSpec combinedSpec =
+                          ConfigUtilities.applyConfigsToDeployment(spec, tuple.getItem1());
+                      return Uni.combine()
+                          .all()
+                          .unis(
+                              Uni.createFrom().item(combinedSpec),
+                              getPipeline(combinedSpec),
+                              Uni.createFrom().item(tuple.getItem1()))
+                          .asTuple();
+                    })
+                .onItem()
+                .transformToUni(
+                    tuple ->
+                        Uni.combine()
+                            .all()
+                            .unis(
+                                Uni.createFrom().item(tuple.getItem2()),
                                 getStream(
-                                    specAndPipeline.getItem1(),
+                                    tuple.getItem1(),
                                     StaticConfig.STREAM_IN_CONFIG,
-                                    specAndPipeline.getItem2(),
-                                    StaticConfig.STREAM_IN,
-                                    dsf),
+                                    tuple.getItem2(),
+                                    StaticConfig.STREAM_IN),
                                 getStream(
-                                    specAndPipeline.getItem1(),
+                                    tuple.getItem1(),
                                     StaticConfig.STREAM_OUT_CONFIG,
-                                    specAndPipeline.getItem2(),
-                                    StaticConfig.STREAM_OUT,
-                                    dsf),
-                                configList,
-                                Uni.createFrom().item(specAndPipeline.getItem1()))
+                                    tuple.getItem2(),
+                                    StaticConfig.STREAM_OUT),
+                                Uni.createFrom().item(tuple.getItem3()),
+                                Uni.createFrom().item(tuple.getItem1()))
                             .asTuple())
                 .onItem()
                 .transform(
@@ -256,56 +254,76 @@ public class DeploymentEndpoint {
   @Path("{uuid}")
   public Uni<DeploymentEntity> updateDeployment(
       @PathParam("uuid") UUID deploymentUuid, DeploymentSpec spec) {
-    Uni<DeploymentEntity> deploymentUni = getDeploymentUni(deploymentUuid);
-    Uni<List<ConfigEntity>> configList =
-        ConfigUtilities.getMappedConfigs(spec.configSelector(), dsf);
-    return configList
-        .onItem()
-        .transform(configs -> ConfigUtilities.applyConfigsToDeployment(spec, configs))
-        .onItem()
-        .transformToUni(
-            combinedSpec ->
-                Uni.combine()
-                    .all()
-                    .unis(Uni.createFrom().item(combinedSpec), getPipeline(combinedSpec))
-                    .asTuple())
-        .onItem()
-        .transformToUni(
-            specAndPipeline ->
-                Uni.combine()
-                    .all()
-                    .unis(
-                        Uni.createFrom().item(specAndPipeline.getItem2()),
-                        getStream(
-                            specAndPipeline.getItem1(),
-                            StaticConfig.STREAM_IN_CONFIG,
-                            specAndPipeline.getItem2(),
-                            StaticConfig.STREAM_IN,
-                            dsf),
-                        getStream(
-                            specAndPipeline.getItem1(),
-                            StaticConfig.STREAM_OUT_CONFIG,
-                            specAndPipeline.getItem2(),
-                            StaticConfig.STREAM_OUT,
-                            dsf),
-                        deploymentUni,
-                        configList,
-                        Uni.createFrom().item(specAndPipeline.getItem1()))
-                    .asTuple())
-        .onItem()
-        .transform(
-            tuple ->
-                updateDeployment(
-                    tuple.getItem1(),
-                    tuple.getItem3(),
-                    tuple.getItem2(),
-                    tuple.getItem6(),
-                    tuple.getItem4(),
-                    tuple.getItem5()))
-        .onFailure()
-        .transform(
-            ex ->
-                new UpdateDeploymentException(StaticConfig.LoggerMessages.DEPLOYMENT_NOT_UPDATED));
+    return dsf.withTransaction(
+        ((session, transaction) ->
+            session
+                .find(DeploymentEntity.class, deploymentUuid)
+                .onItem()
+                .ifNull()
+                .failWith(
+                    new CreateDeploymentException(StaticConfig.LoggerMessages.DEPLOYMENT_NOT_FOUND))
+                .onItem()
+                .transformToUni(
+                    entity ->
+                        Uni.combine()
+                            .all()
+                            .unis(
+                                ConfigUtilities.getMappedConfigs(spec.configSelector(), session),
+                                Uni.createFrom().item(entity))
+                            .asTuple())
+                .onItem()
+                .transformToUni(
+                    tuple -> {
+                      DeploymentSpec combinedSpec =
+                          ConfigUtilities.applyConfigsToDeployment(spec, tuple.getItem1());
+                      return Uni.combine()
+                          .all()
+                          .unis(
+                              Uni.createFrom().item(combinedSpec),
+                              getPipeline(combinedSpec),
+                              Uni.createFrom().item(tuple.getItem1()),
+                              Uni.createFrom().item(tuple.getItem2()))
+                          .asTuple();
+                    })
+                .onItem()
+                .transformToUni(
+                    tuple ->
+                        Uni.combine()
+                            .all()
+                            .unis(
+                                Uni.createFrom().item(tuple.getItem2()),
+                                getStream(
+                                    tuple.getItem1(),
+                                    StaticConfig.STREAM_IN_CONFIG,
+                                    tuple.getItem2(),
+                                    StaticConfig.STREAM_IN),
+                                getStream(
+                                    tuple.getItem1(),
+                                    StaticConfig.STREAM_OUT_CONFIG,
+                                    tuple.getItem2(),
+                                    StaticConfig.STREAM_OUT),
+                                Uni.createFrom().item(tuple.getItem4()),
+                                Uni.createFrom().item(tuple.getItem3()),
+                                Uni.createFrom().item(tuple.getItem1()))
+                            .asTuple())
+                .onItem()
+                .transform(
+                    tuple -> {
+                      updateDeployment(
+                          tuple.getItem1(),
+                          tuple.getItem3(),
+                          tuple.getItem2(),
+                          tuple.getItem6(),
+                          tuple.getItem4(),
+                          tuple.getItem5());
+                      return session.merge(tuple.getItem4());
+                    })
+                .flatMap(deploymentEntity -> deploymentEntity)
+                .onFailure()
+                .transform(
+                    ex ->
+                        new UpdateDeploymentException(
+                            StaticConfig.LoggerMessages.DEPLOYMENT_NOT_UPDATED))));
   }
 
   private Uni<PipelineEntity> getPipeline(DeploymentSpec deploymentSpec) {
@@ -332,11 +350,7 @@ public class DeploymentEndpoint {
   }
 
   private Uni<Stream> getStream(
-      DeploymentSpec spec,
-      String deploymentSpecKey,
-      PipelineEntity pipeline,
-      String key,
-      DataCaterSessionFactory dsf) {
+      DeploymentSpec spec, String deploymentSpecKey, PipelineEntity pipeline, String key) {
     return dsf.withTransaction(
         (session, transaction) ->
             session
@@ -350,7 +364,7 @@ public class DeploymentEndpoint {
                       try {
                         Stream stream = Stream.from(entity);
                         Uni<List<ConfigEntity>> configList =
-                            ConfigUtilities.getMappedConfigs(stream.configSelector(), dsf);
+                            ConfigUtilities.getMappedConfigs(stream.configSelector(), session);
                         return Uni.combine()
                             .all()
                             .unis(Uni.createFrom().item(stream), configList)

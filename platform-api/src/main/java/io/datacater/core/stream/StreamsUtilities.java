@@ -34,7 +34,7 @@ public class StreamsUtilities {
                       try {
                         Stream stream = Stream.from(entity);
                         Uni<List<ConfigEntity>> configList =
-                            ConfigUtilities.getMappedConfigs(stream.configSelector(), dsf);
+                            ConfigUtilities.getMappedConfigs(stream.configSelector(), session);
                         return Uni.combine()
                             .all()
                             .unis(Uni.createFrom().item(stream), configList)
