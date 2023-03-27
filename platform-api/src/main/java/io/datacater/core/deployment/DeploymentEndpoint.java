@@ -316,9 +316,9 @@ public class DeploymentEndpoint {
                           tuple.getItem6(),
                           tuple.getItem4(),
                           tuple.getItem5());
-                      return session.merge(tuple.getItem4());
+                      return session.merge(tuple.getItem4().updateEntity(spec));
                     })
-                .flatMap(deploymentEntity -> deploymentEntity)
+                .flatMap(entity -> entity)
                 .onFailure()
                 .transform(
                     ex ->
