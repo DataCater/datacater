@@ -63,6 +63,10 @@ class NewDeployment extends Component {
       deployment.metadata[name] = value;
     } else if (prefix === "spec") {
       deployment.spec[name] = value;
+    } else if (prefix === "spec.replicas") {
+      if (!isNaN(value)) {
+        deployment.spec[name] = parseInt(value);
+      }
     } else if (prefix === "configSelector") {
       deployment.configSelector[name] = value;
     } else {
@@ -149,6 +153,9 @@ class NewDeployment extends Component {
       const name = `${pipeline.name || "Untitled pipeline"} (${pipeline.uuid})`;
       return { value: pipeline.uuid, label: name };
     });
+    const replicas = !isNaN(this.state.deployment.spec["replicas"])
+      ? this.state.deployment.spec["replicas"]
+      : "";
 
     return (
       <div className="container">
@@ -192,6 +199,26 @@ class NewDeployment extends Component {
                 onChange={(value) => {
                   this.handleChange("pipeline", value.value, "spec");
                 }}
+              />
+            </div>
+            <div className="col-12 mt-4">
+              <label className="form-label h5 fw-semibold mb-3">Replicas</label>
+              <input
+                type="number"
+                className="form-control"
+                id="replicas"
+                min="0"
+                name="replicas"
+                onChange={(value) => {
+                  this.handleChange(
+                    "replicas",
+                    value.target.value,
+                    "spec.replicas"
+                  );
+                }}
+                placeholder="1"
+                step="1"
+                value={replicas}
               />
             </div>
             <div className="col-12 mt-4">
