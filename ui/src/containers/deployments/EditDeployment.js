@@ -33,11 +33,14 @@ class EditDeployment extends Component {
 
   componentDidMount() {
     this.props
-      .fetchDeployment(this.getDeploymentId())
+      .fetchPipelines()
       .then(() =>
-        this.setState({ deployment: this.props.deployments.deployment })
+        this.props
+          .fetchDeployment(this.getDeploymentId())
+          .then(() =>
+            this.setState({ deployment: this.props.deployments.deployment })
+          )
       );
-    this.props.fetchPipelines();
   }
 
   getDeploymentId() {
