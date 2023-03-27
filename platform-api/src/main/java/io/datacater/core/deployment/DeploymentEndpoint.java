@@ -275,7 +275,8 @@ public class DeploymentEndpoint {
                 .transformToUni(
                     tuple -> {
                       DeploymentSpec combinedSpec =
-                          ConfigUtilities.applyConfigsToDeployment(spec, tuple.getItem1());
+                          ConfigUtilities.applyConfigsToDeployment(
+                              DeploymentSpec.from(spec), tuple.getItem1());
                       return Uni.combine()
                           .all()
                           .unis(
@@ -434,9 +435,10 @@ public class DeploymentEndpoint {
       DeploymentEntity de,
       List<ConfigEntity> configList) {
     K8Deployment k8Deployment = new K8Deployment(client);
-    deploymentSpec = ConfigUtilities.applyConfigsToDeployment(deploymentSpec, configList);
+    DeploymentSpec specWithConfig =
+        ConfigUtilities.applyConfigsToDeployment(DeploymentSpec.from(deploymentSpec), configList);
 
-    k8Deployment.create(pe, streamIn, streamOut, deploymentSpec, de.getId());
+    k8Deployment.create(pe, streamIn, streamOut, specWithConfig, de.getId());
 
     return de;
   }
