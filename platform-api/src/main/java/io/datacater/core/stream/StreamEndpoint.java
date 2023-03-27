@@ -128,17 +128,31 @@ public class StreamEndpoint {
                 .find(StreamEntity.class, uuid)
                 .onItem()
                 .ifNotNull()
-                .call(
-                    se -> {
-                      if (Boolean.TRUE.equals(force)) {
-                        try {
-                          deleteStreamObject(Stream.from(se));
-                        } catch (JsonProcessingException e) {
-                          throw new DatacaterException(
-                              "Could not convert StreamEntity to StreamObject: " + e.getMessage());
-                        }
+                .transformToUni(
+                    entity -> {
+                      try {
+                        Stream stream = Stream.from(entity);
+                        Uni<List<ConfigEntity>> configList =
+                            ConfigUtilities.getMappedConfigs(stream.configSelector(), dsf);
+                        return Uni.combine()
+                            .all()
+                            .unis(
+                                Uni.createFrom().item(stream),
+                                configList,
+                                Uni.createFrom().item(entity))
+                            .asTuple();
+                      } catch (JsonProcessingException ex) {
+                        throw new DatacaterException(ex.getMessage());
                       }
-                      return session.remove(se);
+                    })
+                .onItem()
+                .ifNotNull()
+                .call(
+                    tuple -> {
+                      if (Boolean.TRUE.equals(force)) {
+                        deleteStreamObject(tuple.getItem1(), tuple.getItem2());
+                      }
+                      return session.remove(tuple.getItem3());
                     })
                 .replaceWith(Response.ok().build())));
   }
@@ -150,7 +164,8 @@ public class StreamEndpoint {
     kafkaAdmin.close();
   }
 
-  private void deleteStreamObject(Stream stream) {
+  private void deleteStreamObject(Stream stream, List<ConfigEntity> configList) {
+    stream = ConfigUtilities.applyConfigsToStream(stream, configList);
     StreamService kafkaAdmin = KafkaStreamsAdmin.from(stream);
     try {
       kafkaAdmin.deleteStream().get(KAFKA_API_TIMEOUT_MS, TimeUnit.MILLISECONDS);
