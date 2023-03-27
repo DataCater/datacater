@@ -146,13 +146,7 @@ public class StreamEndpoint {
 
   private void updateStreamObject(Stream stream, List<ConfigEntity> configList)
       throws JsonProcessingException {
-    ObjectMapper mapper = new ObjectMapper();
-    // Perform a deep copy of the stream spec to avoid merging config properties into the original
-    // stream object and persisting this state
-    StreamSpec copiedSpec =
-        mapper.treeToValue(stream.spec().serializeStreamSpec(), StreamSpec.class);
-    Stream streamWithConfig = Stream.from(stream.name(), copiedSpec, stream.configSelector());
-    streamWithConfig = ConfigUtilities.applyConfigsToStream(streamWithConfig, configList);
+    Stream streamWithConfig = ConfigUtilities.applyConfigsToStream(Stream.from(stream), configList);
     StreamService kafkaAdmin = KafkaStreamsAdmin.from(streamWithConfig);
     kafkaAdmin.updateStream(streamWithConfig.spec());
     kafkaAdmin.close();
