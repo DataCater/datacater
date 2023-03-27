@@ -168,6 +168,10 @@ class EditDeployment extends Component {
       return { value: pipeline.uuid, label: name };
     });
 
+    const replicas = !isNaN(this.state.deployment.spec["replicas"])
+      ? this.state.deployment.spec["replicas"]
+      : "";
+
     return (
       <div className="container">
         <div className="row">
@@ -223,6 +227,7 @@ class EditDeployment extends Component {
                 type="number"
                 className="form-control"
                 id="replicas"
+                min="0"
                 name="replicas"
                 onChange={(value) => {
                   this.handleChange(
@@ -232,7 +237,8 @@ class EditDeployment extends Component {
                   );
                 }}
                 placeholder="1"
-                value={this.state.deployment.spec["replicas"] || ""}
+                step="1"
+                value={replicas}
               />
             </div>
             <div className="col-12 mt-4">
