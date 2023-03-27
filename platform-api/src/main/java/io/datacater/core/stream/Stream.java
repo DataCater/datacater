@@ -24,7 +24,9 @@ public record Stream(String name, StreamSpec spec, Map<String, String> configSel
 
   public static Stream from(Stream stream) throws JsonProcessingException {
     ObjectMapper mapper = new ObjectMapper();
-    StreamSpec spec = mapper.treeToValue(stream.spec(), StreamSpec.class);
+    StreamSpec copiedSpec =
+        mapper.treeToValue(stream.spec().serializeStreamSpec(), StreamSpec.class);
+    StreamSpec spec = mapper.treeToValue(copiedSpec, StreamSpec.class);
     return new Stream(stream.name(), spec, stream.configSelector());
   }
 }
