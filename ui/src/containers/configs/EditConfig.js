@@ -209,6 +209,10 @@ class EditConfig extends Component {
 
     if (prefix === "deployment.spec") {
       deployment.spec[name] = value;
+    } else if (prefix === "deployment.spec.replicas") {
+      if (!isNaN(value)) {
+        deployment.spec[name] = parseInt(value);
+      }
     } else {
       config[name] = value;
     }
@@ -910,6 +914,30 @@ class EditConfig extends Component {
                                 "deployment.spec"
                               );
                             }}
+                          />
+                        </div>
+                        <div className="col-12 mt-2">
+                          <label className="form-label">Replicas</label>
+                          <input
+                            type="number"
+                            className="form-control"
+                            id="replicas"
+                            min="0"
+                            name="replicas"
+                            onChange={(value) => {
+                              this.handleChange(
+                                "replicas",
+                                value.target.value,
+                                "deployment.spec.replicas"
+                              );
+                            }}
+                            placeholder="1"
+                            step="1"
+                            value={
+                              !isNaN(this.state.config.spec["replicas"])
+                                ? this.state.config.spec["replicas"]
+                                : ""
+                            }
                           />
                         </div>
                       </>

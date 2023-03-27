@@ -33,11 +33,14 @@ class EditDeployment extends Component {
 
   componentDidMount() {
     this.props
-      .fetchDeployment(this.getDeploymentId())
+      .fetchPipelines()
       .then(() =>
-        this.setState({ deployment: this.props.deployments.deployment })
+        this.props
+          .fetchDeployment(this.getDeploymentId())
+          .then(() =>
+            this.setState({ deployment: this.props.deployments.deployment })
+          )
       );
-    this.props.fetchPipelines();
   }
 
   getDeploymentId() {
@@ -71,6 +74,10 @@ class EditDeployment extends Component {
       deployment.metadata[name] = value;
     } else if (prefix === "spec") {
       deployment.spec[name] = value;
+    } else if (prefix === "spec.replicas") {
+      if (!isNaN(value)) {
+        deployment.spec[name] = parseInt(value);
+      }
     } else {
       deployment[name] = value;
     }
@@ -164,6 +171,10 @@ class EditDeployment extends Component {
       return { value: pipeline.uuid, label: name };
     });
 
+    const replicas = !isNaN(this.state.deployment.spec["replicas"])
+      ? this.state.deployment.spec["replicas"]
+      : "";
+
     return (
       <div className="container">
         <div className="row">
@@ -211,6 +222,26 @@ class EditDeployment extends Component {
                 onChange={(value) => {
                   this.handleChange("pipeline", value.value, "spec");
                 }}
+              />
+            </div>
+            <div className="col-12 mt-4">
+              <label className="form-label h5 fw-semibold mb-3">Replicas</label>
+              <input
+                type="number"
+                className="form-control"
+                id="replicas"
+                min="0"
+                name="replicas"
+                onChange={(value) => {
+                  this.handleChange(
+                    "replicas",
+                    value.target.value,
+                    "spec.replicas"
+                  );
+                }}
+                placeholder="1"
+                step="1"
+                value={replicas}
               />
             </div>
             <div className="col-12 mt-4">
