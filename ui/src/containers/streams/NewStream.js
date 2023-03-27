@@ -1,8 +1,5 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
-import Container from "react-bootstrap/Container";
-import Row from "react-bootstrap/Row";
-import Col from "react-bootstrap/Col";
 import { PayloadEditor } from "../../components/payload-editor/PayloadEditor";
 import { Redirect } from "react-router-dom";
 import Creatable from "react-select/creatable";
@@ -15,7 +12,7 @@ import { getDeserializerOptions } from "../../helpers/getDeserializerOptions";
 import { getSerializerOptions } from "../../helpers/getSerializerOptions";
 import { isStreamHoldingAvroFormat } from "../../helpers/isStreamHoldingAvroFormat";
 import "../../scss/fonts.scss";
-import {Button, Card} from "react-bootstrap";
+import { Button, Card } from "react-bootstrap";
 
 class NewStream extends Component {
   constructor(props) {
@@ -62,7 +59,7 @@ class NewStream extends Component {
 
     tempConfig[field] = value;
 
-    this.setState({tempConfig: tempConfig});
+    this.setState({ tempConfig: tempConfig });
   }
 
   updateConnectionConfig(field, value) {
@@ -70,7 +67,7 @@ class NewStream extends Component {
 
     stream.spec.kafka[field] = value;
 
-    this.setState({stream: stream});
+    this.setState({ stream: stream });
   }
 
   addConfig(event) {
@@ -80,11 +77,11 @@ class NewStream extends Component {
 
     if (event.target.dataset.prefix === "spec.kafka") {
       stream.spec.kafka[tempConfig.connectionName] = tempConfig.connectionValue;
-      this.setState({stream: stream, tempConfig: tempConfig});
+      this.setState({ stream: stream, tempConfig: tempConfig });
     } else if (event.target.dataset.prefix === "spec.kafka.topic.config") {
       stream.spec.kafka.topic.config[tempConfig.topicName] =
         tempConfig.topicValue;
-      this.setState({stream: stream, tempConfig: tempConfig});
+      this.setState({ stream: stream, tempConfig: tempConfig });
     }
   }
 
@@ -100,7 +97,7 @@ class NewStream extends Component {
       delete stream.spec.kafka.topic.config[config];
     }
 
-    this.setState({stream: stream});
+    this.setState({ stream: stream });
   }
 
   loadHTMLForm(stream) {
@@ -135,9 +132,9 @@ class NewStream extends Component {
               Name<span className="text-danger ms-1">*</span>
             </h5>
             <span className="text-muted fs-7 me-2">
-                  Name of the Apache Kafka topic. If the topic does not yet
-                  exist on the broker, we will automatically create it.
-                </span>
+              Name of the Apache Kafka topic. If the topic does not yet exist on
+              the broker, we will automatically create it.
+            </span>
             <a
               className="fs-7"
               href="/streams/new"
@@ -185,17 +182,13 @@ class NewStream extends Component {
                     onChange={this.handleChange}
                     placeholder="1"
                     value={
-                      this.state.stream.spec.kafka["topic"][
-                        "num.partitions"
-                        ] || ""
+                      this.state.stream.spec.kafka["topic"]["num.partitions"] ||
+                      ""
                     }
                   />
                 </div>
                 <div className="col-12 mt-2">
-                  <label
-                    htmlFor="replication.factor"
-                    className="form-label"
-                  >
+                  <label htmlFor="replication.factor" className="form-label">
                     replication.factor
                   </label>
                   <input
@@ -209,7 +202,7 @@ class NewStream extends Component {
                     value={
                       this.state.stream.spec.kafka["topic"][
                         "replication.factor"
-                        ] || ""
+                      ] || ""
                     }
                   />
                 </div>
@@ -237,7 +230,7 @@ class NewStream extends Component {
                       value={
                         this.state.stream.spec.kafka.topic.config[
                           topicConfig
-                          ] || ""
+                        ] || ""
                       }
                     />
                   </div>
@@ -245,15 +238,15 @@ class NewStream extends Component {
                 <div className="col-12 mt-3">
                   <h6 className="d-inline me-2">Add config</h6>
                   <span className="text-muted fs-7">
-              You can here use{" "}
+                    You can here use{" "}
                     <a
                       href="https://kafka.apache.org/documentation/#topicconfigs"
                       target="_blank"
                     >
-              topic-level
-              </a>{" "}
+                      topic-level
+                    </a>{" "}
                     configuration options.
-              </span>
+                  </span>
                 </div>
                 <div className="col-12 mt-2">
                   <div className="row">
@@ -327,10 +320,7 @@ class NewStream extends Component {
             isSearchable
             options={deserializerOptions}
             onChange={(value) => {
-              this.updateConnectionConfig(
-                "value.deserializer",
-                value.value
-              );
+              this.updateConnectionConfig("value.deserializer", value.value);
             }}
           />
         </div>
@@ -429,22 +419,22 @@ class NewStream extends Component {
         <div className="col-12 mt-3">
           <h6 className="d-inline me-2">Add config</h6>
           <span className="text-muted fs-7">
-              You can here use{" "}
+            You can here use{" "}
             <a
               href="https://kafka.apache.org/documentation/#consumerconfigs"
               target="_blank"
             >
               consumer-level
-              </a>{" "}
+            </a>{" "}
             and{" "}
             <a
               href="https://kafka.apache.org/documentation/#producerconfigs"
               target="_blank"
             >
               producer-level
-              </a>{" "}
+            </a>{" "}
             configuration options.
-              </span>
+          </span>
         </div>
         <div className="col-12 mt-2">
           <div className="row">
@@ -465,10 +455,7 @@ class NewStream extends Component {
                 className="form-control"
                 name="topicValue"
                 onChange={(event) => {
-                  this.updateTempConfig(
-                    "connectionValue",
-                    event.target.value
-                  );
+                  this.updateTempConfig("connectionValue", event.target.value);
                 }}
                 value={this.state.tempConfig.connectionValue || ""}
               />
@@ -492,23 +479,24 @@ class NewStream extends Component {
           </div>
         )}
       </form>
-    )
+    );
   }
 
   toggleForm(event) {
     event.preventDefault();
     const showPayloadEditor = !this.state.showPayloadEditor;
     this.setState({
-      showPayloadEditor: showPayloadEditor
+      showPayloadEditor: showPayloadEditor,
     });
   }
 
   loadPayloadEditor(stream) {
-    return(<PayloadEditor
-      apiPath="/streams/"
-      code={this.state.stream}
-    >
-    </PayloadEditor>);
+    return (
+      <PayloadEditor
+        apiPath="/streams/"
+        code={this.state.stream}
+      ></PayloadEditor>
+    );
   }
   handleCreateStream(event) {
     event.preventDefault();
@@ -572,19 +560,18 @@ class NewStream extends Component {
 
   render() {
     if (this.state.streamCreated) {
-      return <Redirect to={"/streams/" + this.props.streams.stream.uuid}/>;
+      return <Redirect to={"/streams/" + this.props.streams.stream.uuid} />;
     }
 
     const stream = this.state.stream;
-    const jsonButtonVariant = this.state.showPayloadEditor ? "success" : "secondary";
 
     return (
       <div className="container">
         <div className="row">
           <Breadcrumb
             items={[
-              {name: "Streams", uri: "/streams"},
-              {name: "New stream"},
+              { name: "Streams", uri: "/streams" },
+              { name: "New stream" },
             ]}
           />
           <Header
@@ -595,25 +582,23 @@ class NewStream extends Component {
             title="Create new stream"
             subTitle="Streams connect Apache Kafka® topics with your pipeline."
           />
-          <Container >
-            <Row>
-              <Col sm={1}>
-                <Button onClick={this.toggleForm} variant={jsonButtonVariant}>JSON</Button>
-              </Col>
-            </Row>
-          </Container>
-          { this.state.showPayloadEditor
-              ? this.loadPayloadEditor(stream)
-              : this.loadHTMLForm(stream)
-            }
-          <div className="col-12 mt-4">
+          {this.state.showPayloadEditor
+            ? this.loadPayloadEditor(stream)
+            : this.loadHTMLForm(stream)}
+          <div className="col-12 my-4">
             <a
               href="/streams/new"
-              className="btn btn-primary text-white mb-4"
+              className="btn btn-primary text-white"
               onClick={this.handleCreateStream}
             >
               Create stream
             </a>
+            <button
+              className="btn btn-outline-primary ms-2"
+              onClick={this.toggleForm}
+            >
+              {this.state.showPayloadEditor ? "Back to form" : "Edit as JSON"}
+            </button>
           </div>
         </div>
       </div>

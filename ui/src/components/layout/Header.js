@@ -20,7 +20,7 @@ class Header extends Component {
     }
 
     this.setState({
-      showApiCall: newShowApiCall
+      showApiCall: newShowApiCall,
     });
   }
 

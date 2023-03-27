@@ -1,31 +1,30 @@
-
 const STREAM = {
-  "kind": "KAFKA",
-  "spec": {
-    "kafka": {},
-    "topic": {}
-  }
+  kind: "KAFKA",
+  spec: {
+    kafka: {},
+    topic: {},
+  },
 };
 
 const PIPELINE = {
-  "kind": "pipeline",
-  "spec": {}
+  kind: "pipeline",
+  spec: {},
 };
 const DEPLOYMENT = {
-  "kind": "deployment",
-  "spec": {}
+  kind: "deployment",
+  spec: {},
 };
 
 const CONFIG = {
-  "kind": "config",
-  "spec": {}
+  kind: "config",
+  spec: {},
 };
 
 const staticMap = new Map([
   ["streams", STREAM],
   ["pipelines", PIPELINE],
   ["deployments", DEPLOYMENT],
-  ["configs", CONFIG]
+  ["configs", CONFIG],
 ]);
 
 Object.freeze(staticMap);
@@ -44,7 +43,7 @@ const getByString = (apiPath) => {
 
   staticMap.set("hello", {});
   return staticMap.get(cleansedPath);
-}
+};
 
 Object.freeze(getByString);
 

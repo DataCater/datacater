@@ -1,20 +1,19 @@
-import React, {Component} from "react";
+import React, { Component } from "react";
 import AceEditor from "react-ace";
 import * as defaults from "./PayloadDefaults";
-import {addStream} from "../../actions/streams";
-import {connect} from "react-redux";
+import { addStream } from "../../actions/streams";
+import { connect } from "react-redux";
 import Container from "react-bootstrap/Container";
 import Row from "react-bootstrap/Row";
 
 export class PayloadEditor extends Component {
-
   constructor(props) {
     super(props);
     this.state = {
       code: JSON.stringify(props.code, null, 2),
       unsavedChanges: false,
       streamCreated: false,
-      stream: props.stream
+      stream: props.stream,
     };
 
     this.getDefault = this.getDefault.bind(this);
@@ -63,7 +62,7 @@ export class PayloadEditor extends Component {
           </Row>
         </Container>
       </div>
-    )
+    );
   }
 }
 
