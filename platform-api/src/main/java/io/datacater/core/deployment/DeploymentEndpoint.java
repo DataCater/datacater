@@ -207,12 +207,14 @@ public class DeploymentEndpoint {
                                     specAndPipeline.getItem1(),
                                     StaticConfig.STREAM_IN_CONFIG,
                                     specAndPipeline.getItem2(),
-                                    StaticConfig.STREAM_IN),
+                                    StaticConfig.STREAM_IN,
+                                    dsf),
                                 getStream(
                                     specAndPipeline.getItem1(),
                                     StaticConfig.STREAM_OUT_CONFIG,
                                     specAndPipeline.getItem2(),
-                                    StaticConfig.STREAM_OUT),
+                                    StaticConfig.STREAM_OUT,
+                                    dsf),
                                 configList,
                                 Uni.createFrom().item(specAndPipeline.getItem1()))
                             .asTuple())
@@ -278,12 +280,14 @@ public class DeploymentEndpoint {
                             specAndPipeline.getItem1(),
                             StaticConfig.STREAM_IN_CONFIG,
                             specAndPipeline.getItem2(),
-                            StaticConfig.STREAM_IN),
+                            StaticConfig.STREAM_IN,
+                            dsf),
                         getStream(
                             specAndPipeline.getItem1(),
                             StaticConfig.STREAM_OUT_CONFIG,
                             specAndPipeline.getItem2(),
-                            StaticConfig.STREAM_OUT),
+                            StaticConfig.STREAM_OUT,
+                            dsf),
                         deploymentUni,
                         configList,
                         Uni.createFrom().item(specAndPipeline.getItem1()))
@@ -328,7 +332,11 @@ public class DeploymentEndpoint {
   }
 
   private Uni<Stream> getStream(
-      DeploymentSpec spec, String deploymentSpecKey, PipelineEntity pipeline, String key) {
+      DeploymentSpec spec,
+      String deploymentSpecKey,
+      PipelineEntity pipeline,
+      String key,
+      DataCaterSessionFactory dsf) {
     return dsf.withTransaction(
         (session, transaction) ->
             session
