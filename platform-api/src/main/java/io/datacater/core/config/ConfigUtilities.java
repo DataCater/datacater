@@ -69,7 +69,11 @@ public class ConfigUtilities {
       for (ConfigEntity config : configList) {
         if (config.getId() != null) {
           verifyKindOfConfig(Kind.DEPLOYMENT, config.getKind());
-          deploymentSpec.deployment().putAll(JsonUtilities.toObjectMap(config.getSpec()));
+          deploymentSpec
+              .deployment()
+              .putAll(
+                  JsonUtilities.combineMaps(
+                      JsonUtilities.toObjectMap(config.getSpec()), deploymentSpec.deployment()));
         }
       }
     }
