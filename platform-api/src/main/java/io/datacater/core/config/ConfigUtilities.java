@@ -1,6 +1,5 @@
 package io.datacater.core.config;
 
-import io.datacater.core.authentication.DataCaterSessionFactory;
 import io.datacater.core.config.enums.Kind;
 import io.datacater.core.deployment.DeploymentSpec;
 import io.datacater.core.exceptions.IncorrectConfigException;
@@ -8,6 +7,7 @@ import io.datacater.core.stream.Stream;
 import io.datacater.core.utilities.JsonUtilities;
 import io.smallrye.mutiny.Uni;
 import java.util.*;
+import org.hibernate.reactive.mutiny.Mutiny;
 
 public class ConfigUtilities {
   static final String LABELS = "labels";
@@ -19,30 +19,27 @@ public class ConfigUtilities {
   private ConfigUtilities() {}
 
   public static Uni<List<ConfigEntity>> getMappedConfigs(
-      Map<String, String> configs, DataCaterSessionFactory dsf) {
+      Map<String, String> configs, Mutiny.Session session) {
 
     if (configs == null) {
       return Uni.createFrom().item(new ArrayList<>());
     }
 
-    return dsf.withTransaction(
-        (session, transaction) ->
-            session
-                .createQuery("from ConfigEntity", ConfigEntity.class)
-                .getResultList()
-                .onItem()
-                .transform(
-                    configEntityList ->
-                        configEntityList.stream()
-                            .filter(
-                                item ->
-                                    stringMapsContainsEqualKey(
-                                        JsonUtilities.toStringMap(item.getMetadata().get(LABELS)),
-                                        configs))
-                            .toList())
-                .onItem()
-                .ifNull()
-                .continueWith(new ArrayList<>()));
+    return session
+        .createQuery("from ConfigEntity", ConfigEntity.class)
+        .getResultList()
+        .onItem()
+        .transform(
+            configEntityList ->
+                configEntityList.stream()
+                    .filter(
+                        item ->
+                            stringMapsContainsEqualKey(
+                                JsonUtilities.toStringMap(item.getMetadata().get(LABELS)), configs))
+                    .toList())
+        .onItem()
+        .ifNull()
+        .continueWith(new ArrayList<>());
   }
 
   public static Stream applyConfigsToStream(Stream stream, List<ConfigEntity> configList) {
