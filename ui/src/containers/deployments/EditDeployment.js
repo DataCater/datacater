@@ -75,8 +75,10 @@ class EditDeployment extends Component {
     } else if (prefix === "spec") {
       deployment.spec[name] = value;
     } else if (prefix === "spec.replicas") {
-      if (!isNaN(value)) {
+      if (!isNaN(parseInt(value))) {
         deployment.spec[name] = parseInt(value);
+      } else {
+        delete deployment.spec[name];
       }
     } else {
       deployment[name] = value;
