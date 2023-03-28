@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.datacater.core.exceptions.DatacaterException;
+import io.datacater.core.exceptions.JsonNotParsableException;
 import java.util.HashMap;
 import java.util.Map;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
@@ -40,7 +40,7 @@ public record DeploymentSpec(
       ObjectMapper mapper = new ObjectMapper();
       copiedMap = mapper.treeToValue(specNode, Map.class);
     } catch (JsonProcessingException e) {
-      throw new DatacaterException(e.getMessage());
+      throw new JsonNotParsableException(e.getMessage());
     }
 
     return new DeploymentSpec(spec.name(), copiedMap, spec.configSelector());
