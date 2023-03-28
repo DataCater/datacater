@@ -146,7 +146,7 @@ spec:
     spec:
       containers:
         - name: nginx
-          image: "datacater/ui:2023.2"
+          image: "datacater/ui:970edc1a471c6e38d47856bf08348880353d592f"
           imagePullPolicy: IfNotPresent
           ports:
             - name: http
@@ -268,7 +268,7 @@ spec:
     spec:
       containers:
         - name: python-runner
-          image: "datacater/python-runner:2023.2"
+          image: "datacater/python-runner:970edc1a471c6e38d47856bf08348880353d592f"
           imagePullPolicy: IfNotPresent
           ports:
             - name: http
@@ -295,10 +295,10 @@ spec:
             timeoutSeconds: 10
           resources:
             limits:
-              memory: 150Mi
+              memory: 100Mi
             requests:
               cpu: 0.05
-              memory: 150Mi
+              memory: 100Mi
 ---
 # Source: datacater/templates/statefulset.yaml
 apiVersion: apps/v1
@@ -332,7 +332,7 @@ spec:
         - name: datacater
           securityContext:
             {}
-          image: "datacater/datacater:2023.2"
+          image: "datacater/datacater:970edc1a471c6e38d47856bf08348880353d592f"
           imagePullPolicy: IfNotPresent
           env:
             - name: QUARKUS_DATASOURCE_REACTIVE_URL
@@ -346,7 +346,7 @@ spec:
                 fieldRef:
                   fieldPath: metadata.namespace
             - name: DATACATER_DEPLOYMENT_IMAGE
-              value: "datacater/pipeline:2023.2"
+              value: "datacater/pipeline:970edc1a471c6e38d47856bf08348880353d592f"
             - name: DATACATER_TRANSFORMS_PATH
               value: "/datacater/transforms"
             - name: DATACATER_FILTERS_PATH
@@ -356,11 +356,11 @@ spec:
             - name: DATACATER_PYTHONRUNNER_IMAGE_NAME
               value: "datacater/python-runner"
             - name: DATACATER_PYTHONRUNNER_IMAGE_VERSION
-              value: "2023.2"
+              value: "970edc1a471c6e38d47856bf08348880353d592f"
             - name: QUARKUS_LOG_CONSOLE_JSON
               value: "false"
             - name: DATACATER_PYTHONRUNNER_IMAGE_NAMESPACE
-              value: default
+              value: datacater
             - name: DATACATER_PYTHONRUNNER_SERVICENAME
               value: "pythonrunner"
           ports:
