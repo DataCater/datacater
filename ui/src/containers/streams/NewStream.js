@@ -5,14 +5,14 @@ import { Redirect } from "react-router-dom";
 import Creatable from "react-select/creatable";
 import Breadcrumb from "../../components/layout/Breadcrumb";
 import Header from "../../components/layout/Header";
-import { addStream } from "../../actions/streams";
-import { getStreamConnectionOptions } from "../../helpers/getStreamConnectionOptions";
-import { getStreamTopicOptions } from "../../helpers/getStreamTopicOptions";
-import { getDeserializerOptions } from "../../helpers/getDeserializerOptions";
-import { getSerializerOptions } from "../../helpers/getSerializerOptions";
-import { isStreamHoldingAvroFormat } from "../../helpers/isStreamHoldingAvroFormat";
+import {addStream} from "../../actions/streams";
+import {getStreamConnectionOptions} from "../../helpers/getStreamConnectionOptions";
+import {getStreamTopicOptions} from "../../helpers/getStreamTopicOptions";
+import {getDeserializerOptions} from "../../helpers/getDeserializerOptions";
+import {getSerializerOptions} from "../../helpers/getSerializerOptions";
+import {isStreamHoldingAvroFormat} from "../../helpers/isStreamHoldingAvroFormat";
 import "../../scss/fonts.scss";
-import { Button, Card } from "react-bootstrap";
+import {Button} from "react-bootstrap";
 
 class NewStream extends Component {
   constructor(props) {
@@ -20,6 +20,8 @@ class NewStream extends Component {
 
     this.state = {
       creatingStreamFailed: false,
+      payloadEditorChanges: false, // indicate, if the payload editor introduced changes
+      payloadEditorCode: "", // payloadEditorCode as string, only valid during editing
       showPayloadEditor: false,
       errorMessages: {},
       showTopicConfig: false,
@@ -52,6 +54,7 @@ class NewStream extends Component {
     this.loadHTMLForm = this.loadHTMLForm.bind(this);
     this.loadPayloadEditor = this.loadPayloadEditor.bind(this);
     this.toggleForm = this.toggleForm.bind(this);
+    this.updateStream = this.updateStream.bind(this);
   }
 
   updateTempConfig(field, value) {
@@ -472,18 +475,26 @@ class NewStream extends Component {
             </div>
           </div>
         </div>
-        {![undefined, ""].includes(this.state.errorMessage) && (
-          <div className="alert alert-danger mt-4">
-            <p className="h6 fs-bolder">API response:</p>
-            {this.state.errorMessage}
-          </div>
-        )}
       </form>
     );
   }
 
   toggleForm(event) {
     event.preventDefault();
+    // when the payloadEditor is active disallow going back to and we recorded changes disallow going back to form
+    console.debug(`ShowPayloadEditor := ${this.state.showPayloadEditor} && PayloadEditorChanges ${this.state.payloadEditorChanges}.`);
+    let confirmation = false;
+    if (this.state.showPayloadEditor && this.state.payloadEditorChanges) {
+      confirmation = window.confirm("Going back to the form will lead to losing all your progress in the Editor!");
+    }
+
+    if (confirmation) {
+      const showPayloadEditor = !this.state.showPayloadEditor;
+      this.setState({
+        payloadEditorChanges: false,
+        showPayloadEditor: showPayloadEditor
+      });
+    }
     const showPayloadEditor = !this.state.showPayloadEditor;
     this.setState({
       showPayloadEditor: showPayloadEditor,
@@ -500,6 +511,39 @@ class NewStream extends Component {
       </div>
     );
   }
+
+  updateStream(stream) {
+    // Verbalizing set updateStream logic
+
+    // 0. Always propagate changes down to PayloadEditor
+    // 1. Do not update `this.state.stream` from Editor immediately use e.g. `this.state.payloadEditorCode`
+
+    // 2. Introduce a flag, if the editor introduced changes e.g. `this.payloadEditorChange`
+    // 3. If the editor introduced changes
+    //    Do not allow to open form again or remove changes
+
+    // 4. If the editor introduced changes
+    //    validate JSON via JSON.parse() before submitting
+    //    No further validation at this point --> might be improved after we introduce jsonSchema for our Endpoints
+    console.debug(`UpdateStream received ${stream}`);
+    this.setState({
+      payloadEditorCode: stream,
+      payloadEditorChanges: true // indicate, if the payload editor introduced changes
+    });
+  }
+
+  loadPayloadEditor(stream) {
+    let streamLocal = this.state.payloadEditorCode;
+    return (
+      <PayloadEditor
+        apiPath="/streams/"
+        code={streamLocal}
+        stateHandler={this.updateStream}
+        submit={this.addStream}
+      >
+      </PayloadEditor>);
+  }
+
   handleCreateStream(event) {
     event.preventDefault();
 

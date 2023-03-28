@@ -31,14 +31,11 @@ export class PayloadEditor extends Component {
   }
 
   handleChange(value, event) {
-    const unsavedChanges = unsavedChanges || value !== this.state.code;
-    this.setState({
-      code: value,
-      unsavedChanges: unsavedChanges,
-    });
+    this.props.stateHandler(value);
   }
 
   render() {
+
     return (
       <div className="datacater-code-editor">
         <Row>
@@ -74,15 +71,3 @@ export class PayloadEditor extends Component {
     );
   }
 }
-
-const mapStateToProps = function (state) {
-  return {
-    streams: state.streams,
-  };
-};
-
-const mapDispatchToProps = {
-  addStream: addStream,
-};
-
-export default connect(mapStateToProps, mapDispatchToProps)(PayloadEditor);
