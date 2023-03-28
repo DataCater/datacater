@@ -5,11 +5,11 @@ kind: ServiceAccount
 metadata:
   name: datacater
   labels:
-    app.kubernetes.io/part-of: datacater-0.1.0
+    app.kubernetes.io/part-of: datacater-0.2.0
     app.kubernetes.io/name: datacater
     app.kubernetes.io/instance: release-name
-    app.kubernetes.io/version: "f27effbb9df8779d8c473cbf54c9c726b24fcb6d"
-    helm.sh/chart: datacater-0.1.0
+    app.kubernetes.io/version: "2023.2"
+    helm.sh/chart: datacater-0.2.0
     app.kubernetes.io/managed-by: Helm
 ---
 # Source: datacater/templates/role.yaml
@@ -44,11 +44,11 @@ kind: Service
 metadata:
   name: pythonrunner
   labels:
-    app.kubernetes.io/part-of: datacater-0.1.0
+    app.kubernetes.io/part-of: datacater-0.2.0
     app.kubernetes.io/name: "python-runner"
     app.kubernetes.io/instance: release-name
-    app.kubernetes.io/version: "f27effbb9df8779d8c473cbf54c9c726b24fcb6d"
-    helm.sh/chart: datacater-0.1.0
+    app.kubernetes.io/version: "2023.2"
+    helm.sh/chart: datacater-0.2.0
     app.kubernetes.io/managed-by: Helm
 spec:
   selector:
@@ -66,11 +66,11 @@ kind: Service
 metadata:
   name: datacater
   labels:
-    app.kubernetes.io/part-of: datacater-0.1.0
+    app.kubernetes.io/part-of: datacater-0.2.0
     app.kubernetes.io/name: datacater
     app.kubernetes.io/instance: release-name
-    app.kubernetes.io/version: "f27effbb9df8779d8c473cbf54c9c726b24fcb6d"
-    helm.sh/chart: datacater-0.1.0
+    app.kubernetes.io/version: "2023.2"
+    helm.sh/chart: datacater-0.2.0
     app.kubernetes.io/managed-by: Helm
 spec:
   type: ClusterIP
@@ -89,11 +89,11 @@ kind: Service
 metadata:
   name: datacater-ui
   labels:
-    app.kubernetes.io/part-of: datacater-0.1.0
+    app.kubernetes.io/part-of: datacater-0.2.0
     app.kubernetes.io/name: datacater
     app.kubernetes.io/instance: release-name
-    app.kubernetes.io/version: "f27effbb9df8779d8c473cbf54c9c726b24fcb6d"
-    helm.sh/chart: datacater-0.1.0
+    app.kubernetes.io/version: "2023.2"
+    helm.sh/chart: datacater-0.2.0
     app.kubernetes.io/managed-by: Helm
 spec:
   selector:
@@ -111,11 +111,11 @@ kind: Deployment
 metadata:
   name: "datacater-ui"
   labels:
-    app.kubernetes.io/part-of: datacater-0.1.0
+    app.kubernetes.io/part-of: datacater-0.2.0
     app.kubernetes.io/name: datacater
     app.kubernetes.io/instance: release-name
-    app.kubernetes.io/version: "f27effbb9df8779d8c473cbf54c9c726b24fcb6d"
-    helm.sh/chart: datacater-0.1.0
+    app.kubernetes.io/version: "2023.2"
+    helm.sh/chart: datacater-0.2.0
     app.kubernetes.io/managed-by: Helm
 spec:
   selector:
@@ -130,7 +130,7 @@ spec:
     spec:
       containers:
         - name: nginx
-          image: "datacater/ui:f27effbb9df8779d8c473cbf54c9c726b24fcb6d"
+          image: "datacater/ui:2023.2"
           imagePullPolicy: IfNotPresent
           ports:
             - name: http
@@ -143,11 +143,11 @@ kind: StatefulSet
 metadata:
   name: python-runner
   labels:
-    app.kubernetes.io/part-of: datacater-0.1.0
+    app.kubernetes.io/part-of: datacater-0.2.0
     app.kubernetes.io/name: "python-runner"
     app.kubernetes.io/instance: release-name
-    app.kubernetes.io/version: "f27effbb9df8779d8c473cbf54c9c726b24fcb6d"
-    helm.sh/chart: datacater-0.1.0
+    app.kubernetes.io/version: "2023.2"
+    helm.sh/chart: datacater-0.2.0
     app.kubernetes.io/managed-by: Helm
 spec:
   serviceName: pythonrunner
@@ -160,16 +160,16 @@ spec:
     metadata:
       name: python-runner
       labels:
-        app.kubernetes.io/part-of: datacater-0.1.0
+        app.kubernetes.io/part-of: datacater-0.2.0
         app.kubernetes.io/name: "python-runner"
         app.kubernetes.io/instance: release-name
-        app.kubernetes.io/version: "f27effbb9df8779d8c473cbf54c9c726b24fcb6d"
-        helm.sh/chart: datacater-0.1.0
+        app.kubernetes.io/version: "2023.2"
+        helm.sh/chart: datacater-0.2.0
         app.kubernetes.io/managed-by: Helm
     spec:
       containers:
         - name: python-runner
-          image: "datacater/python-runner:f27effbb9df8779d8c473cbf54c9c726b24fcb6d"
+          image: "datacater/python-runner:2023.2"
           imagePullPolicy: IfNotPresent
           ports:
             - name: http
@@ -196,10 +196,10 @@ spec:
             timeoutSeconds: 10
           resources:
             limits:
-              memory: 100Mi
+              memory: 150Mi
             requests:
               cpu: 0.05
-              memory: 100Mi
+              memory: 150Mi
 ---
 # Source: datacater/templates/statefulset.yaml
 apiVersion: apps/v1
@@ -207,11 +207,11 @@ kind: StatefulSet
 metadata:
   name: datacater
   labels:
-    app.kubernetes.io/part-of: datacater-0.1.0
+    app.kubernetes.io/part-of: datacater-0.2.0
     app.kubernetes.io/name: datacater
     app.kubernetes.io/instance: release-name
-    app.kubernetes.io/version: "f27effbb9df8779d8c473cbf54c9c726b24fcb6d"
-    helm.sh/chart: datacater-0.1.0
+    app.kubernetes.io/version: "2023.2"
+    helm.sh/chart: datacater-0.2.0
     app.kubernetes.io/managed-by: Helm
 spec:
   serviceName: datacater
@@ -233,7 +233,7 @@ spec:
         - name: datacater
           securityContext:
             {}
-          image: "datacater/datacater:f27effbb9df8779d8c473cbf54c9c726b24fcb6d"
+          image: "datacater/datacater:2023.2"
           imagePullPolicy: IfNotPresent
           env:
             - name: QUARKUS_DATASOURCE_REACTIVE_URL
@@ -247,7 +247,7 @@ spec:
                 fieldRef:
                   fieldPath: metadata.namespace
             - name: DATACATER_DEPLOYMENT_IMAGE
-              value: "datacater/pipeline:f27effbb9df8779d8c473cbf54c9c726b24fcb6d"
+              value: "datacater/pipeline:2023.2"
             - name: DATACATER_TRANSFORMS_PATH
               value: "/datacater/transforms"
             - name: DATACATER_FILTERS_PATH
@@ -257,7 +257,7 @@ spec:
             - name: DATACATER_PYTHONRUNNER_IMAGE_NAME
               value: "datacater/python-runner"
             - name: DATACATER_PYTHONRUNNER_IMAGE_VERSION
-              value: "f27effbb9df8779d8c473cbf54c9c726b24fcb6d"
+              value: "2023.2"
             - name: QUARKUS_LOG_CONSOLE_JSON
               value: "false"
             - name: DATACATER_PYTHONRUNNER_IMAGE_NAMESPACE
