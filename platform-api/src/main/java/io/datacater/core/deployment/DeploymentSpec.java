@@ -3,6 +3,10 @@ package io.datacater.core.deployment;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.datacater.core.exceptions.DatacaterException;
 import java.util.HashMap;
 import java.util.Map;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
@@ -27,5 +31,18 @@ public record DeploymentSpec(
     @JsonProperty(value = "configSelector") Map<String, String> configSelector) {
   public DeploymentSpec(String name, Map<String, Object> deployment) {
     this(name, deployment, new HashMap<>());
+  }
+
+  public static DeploymentSpec from(DeploymentSpec spec) {
+    Map<String, Object> copiedMap = new HashMap<>();
+    try {
+      JsonNode specNode = DeploymentEntity.serializeMap(spec.deployment());
+      ObjectMapper mapper = new ObjectMapper();
+      copiedMap = mapper.treeToValue(specNode, Map.class);
+    } catch (JsonProcessingException e) {
+      throw new DatacaterException(e.getMessage());
+    }
+
+    return new DeploymentSpec(spec.name(), copiedMap, spec.configSelector());
   }
 }

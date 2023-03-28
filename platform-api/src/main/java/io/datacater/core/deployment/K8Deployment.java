@@ -5,10 +5,11 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.datacater.core.exceptions.CreateDeploymentException;
+import io.datacater.core.exceptions.DatacaterException;
 import io.datacater.core.exceptions.DeploymentNotFoundException;
 import io.datacater.core.exceptions.DeploymentReplicaMismatchException;
 import io.datacater.core.pipeline.PipelineEntity;
-import io.datacater.core.stream.StreamEntity;
+import io.datacater.core.stream.Stream;
 import io.datacater.core.utilities.StringUtilities;
 import io.fabric8.kubernetes.api.model.*;
 import io.fabric8.kubernetes.api.model.apps.Deployment;
@@ -33,8 +34,8 @@ public class K8Deployment {
 
   public Map<String, Object> create(
       PipelineEntity pe,
-      StreamEntity streamIn,
-      StreamEntity streamOut,
+      Stream streamIn,
+      Stream streamOut,
       DeploymentSpec deploymentSpec,
       UUID deploymentId) {
 
@@ -289,12 +290,18 @@ public class K8Deployment {
   }
 
   private List<EnvVar> getEnvironmentVariables(
-      StreamEntity streamIn, StreamEntity streamOut, DeploymentSpec deploymentSpec, UUID uuid) {
-
+      Stream streamIn, Stream streamOut, DeploymentSpec deploymentSpec, UUID uuid) {
+    JsonNode streamInSpecNode;
+    JsonNode streamOutSpecNode;
+    try {
+      streamInSpecNode = streamIn.spec().serializeStreamSpec();
+      streamOutSpecNode = streamOut.spec().serializeStreamSpec();
+    } catch (JsonProcessingException e) {
+      throw new DatacaterException(e.getMessage());
+    }
     // Get Apache Kafka-related configs from stream in and stream out
-    Map<String, Object> streamInConfig = nodeToMap(streamIn.getSpec().get(StaticConfig.KAFKA_TAG));
-    Map<String, Object> streamOutConfig =
-        nodeToMap(streamOut.getSpec().get(StaticConfig.KAFKA_TAG));
+    Map<String, Object> streamInConfig = nodeToMap(streamInSpecNode.get(StaticConfig.KAFKA_TAG));
+    Map<String, Object> streamOutConfig = nodeToMap(streamOutSpecNode.get(StaticConfig.KAFKA_TAG));
 
     // Let deployment overwrite config of stream in and stream out
     streamInConfig.putAll(getNode(StaticConfig.STREAMIN_CONFIG_TEXT, deploymentSpec));
@@ -307,24 +314,24 @@ public class K8Deployment {
     // Initialize stream in with default values, if needed
     streamInConfig.putIfAbsent(
         StaticConfig.BOOTSTRAP_SERVERS,
-        getEnvVariableFromNode(streamIn.getSpec(), StaticConfig.BOOTSTRAP_SERVERS));
+        getEnvVariableFromNode(streamInSpecNode, StaticConfig.BOOTSTRAP_SERVERS));
     streamInConfig.putIfAbsent(
         StaticConfig.KEY_DESERIALIZER,
-        getEnvVariableFromNode(streamIn.getSpec(), StaticConfig.KEY_DESERIALIZER));
+        getEnvVariableFromNode(streamInSpecNode, StaticConfig.KEY_DESERIALIZER));
     streamInConfig.putIfAbsent(
         StaticConfig.VALUE_DESERIALIZER,
-        getEnvVariableFromNode(streamIn.getSpec(), StaticConfig.VALUE_DESERIALIZER));
+        getEnvVariableFromNode(streamInSpecNode, StaticConfig.VALUE_DESERIALIZER));
 
     // Initialize stream out with default values, if needed
     streamOutConfig.putIfAbsent(
         StaticConfig.BOOTSTRAP_SERVERS,
-        getEnvVariableFromNode(streamOut.getSpec(), StaticConfig.BOOTSTRAP_SERVERS));
+        getEnvVariableFromNode(streamOutSpecNode, StaticConfig.BOOTSTRAP_SERVERS));
     streamOutConfig.putIfAbsent(
         StaticConfig.KEY_SERIALIZER,
-        getEnvVariableFromNode(streamOut.getSpec(), StaticConfig.KEY_SERIALIZER));
+        getEnvVariableFromNode(streamOutSpecNode, StaticConfig.KEY_SERIALIZER));
     streamOutConfig.putIfAbsent(
         StaticConfig.VALUE_SERIALIZER,
-        getEnvVariableFromNode(streamOut.getSpec(), StaticConfig.VALUE_SERIALIZER));
+        getEnvVariableFromNode(streamOutSpecNode, StaticConfig.VALUE_SERIALIZER));
 
     // Store Serde-related information
     Map<String, Object> dataCaterConfig =
@@ -396,9 +403,9 @@ public class K8Deployment {
 
     // Set topic name of stream in and stream out
     environmentVariables.add(
-        createEnvVariable(StaticConfig.STREAMIN_ENV_PREFIX, "TOPIC", streamIn.getName()));
+        createEnvVariable(StaticConfig.STREAMIN_ENV_PREFIX, "TOPIC", streamIn.name()));
     environmentVariables.add(
-        createEnvVariable(StaticConfig.STREAMOUT_ENV_PREFIX, "TOPIC", streamOut.getName()));
+        createEnvVariable(StaticConfig.STREAMOUT_ENV_PREFIX, "TOPIC", streamOut.name()));
 
     return environmentVariables;
   }
