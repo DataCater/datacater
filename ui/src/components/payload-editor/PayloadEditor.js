@@ -1,9 +1,5 @@
-import React, { Component } from "react";
+import React, {Component} from "react";
 import AceEditor from "react-ace";
-import * as defaults from "./PayloadDefaults";
-import { addStream } from "../../actions/streams";
-import { connect } from "react-redux";
-import Container from "react-bootstrap/Container";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 
@@ -14,28 +10,32 @@ export class PayloadEditor extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      code: JSON.stringify(props.code, null, 2),
-      unsavedChanges: false,
-      streamCreated: false,
-      stream: props.stream,
+      code: JSON.stringify(this.props.code, null, 2),
+      didChange: false,
+      newCode: undefined
     };
 
-    this.getDefault = this.getDefault.bind(this);
+    this.didIntroduceChange = this.didIntroduceChange.bind(this);
     this.handleChange = this.handleChange.bind(this);
+    props.registerCallback(this.didIntroduceChange);
   }
 
-  getDefault() {
-    const apiPath = this.props.apiPath;
-    const stream = this.state.stream;
-    return JSON.stringify(stream);
+  didIntroduceChange() {
+    if (this.state.didChange) {
+      return this.state.newCode;
+    } else {
+      return undefined;
+    }
   }
 
-  handleChange(value, event) {
-    this.props.stateHandler(value);
+  handleChange(value) {
+    this.setState({
+      didChange: true,
+      newCode: value
+    })
   }
 
   render() {
-
     return (
       <div className="datacater-code-editor">
         <Row>
@@ -48,6 +48,7 @@ export class PayloadEditor extends Component {
             <AceEditor
               placeholder=""
               mode="json"
+              setOptions={{useWorker: false}}
               theme="xcode"
               className=""
               onLoad={(editor) => {
