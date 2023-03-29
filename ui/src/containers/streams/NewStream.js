@@ -1,4 +1,4 @@
-import React, { Component, useRef } from "react";
+import React, { Component } from "react";
 import { connect } from "react-redux";
 import { PayloadEditor } from "../../components/payload-editor/PayloadEditor";
 import { Redirect } from "react-router-dom";
@@ -53,7 +53,6 @@ class NewStream extends Component {
     this.loadHTMLForm = this.loadHTMLForm.bind(this);
     this.loadPayloadEditor = this.loadPayloadEditor.bind(this);
     this.toggleForm = this.toggleForm.bind(this);
-    this.updateStream = this.updateStream.bind(this);
     this.registerChangeCallback = this.registerChangeCallback.bind(this);
   }
 
@@ -506,12 +505,11 @@ class NewStream extends Component {
     });
   }
 
-  // useRef allows having state without a re-render https://react.dev/reference/react/useRef
+  editorCallback = undefined;
   registerChangeCallback(callback) {
-    this.changeCallback.current = callback;
+    this.editorCallback = callback;
   }
 
-  changeCallback = useRef(undefined);
   loadPayloadEditor(stream) {
     return (
       <div className="col-12 mt-4">
@@ -519,7 +517,7 @@ class NewStream extends Component {
           apiPath="/streams/"
           registerCallback={this.registerChangeCallback}
           code={this.state.stream}
-          codeChange={this.updateStream}
+          codeChange={() => {console.debug("TBD")}}
         ></PayloadEditor>
       </div>
     );
