@@ -9,6 +9,8 @@ import io.datacater.core.exceptions.*;
 import io.datacater.core.pipeline.PipelineEntity;
 import io.datacater.core.stream.StreamEntity;
 import io.datacater.core.utilities.StringUtilities;
+import io.fabric8.kubernetes.api.model.apps.Deployment;
+import io.fabric8.kubernetes.api.model.apps.DeploymentStatus;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.dsl.ContainerResource;
 import io.fabric8.kubernetes.client.dsl.LogWatch;
@@ -128,6 +130,19 @@ public class DeploymentEndpoint {
                       httpClient.send(req, HttpResponse.BodyHandlers.ofString());
                   return Response.ok().entity(response.body()).build();
                 }));
+  }
+
+  @GET
+  @Path("{uuid}/status")
+  @Produces(MediaType.APPLICATION_JSON)
+  public Uni<DeploymentStatus> getStatusByUuid(@PathParam("uuid") UUID deploymentId) {
+    var status = getDeploymentStatus(deploymentId);
+    return Uni.createFrom()
+        .item(status)
+        .onItem()
+        .ifNull()
+        .failWith(
+            new DeploymentNotFoundException(StaticConfig.LoggerMessages.DEPLOYMENT_NOT_FOUND));
   }
 
   @GET
@@ -452,5 +467,15 @@ public class DeploymentEndpoint {
     }
     is.close();
     lw.close();
+  }
+
+  private DeploymentStatus getDeploymentStatus(UUID uuid) {
+    Deployment k8Deployment = new K8Deployment(client).getDeploymentObject(uuid);
+
+    if (k8Deployment != null) {
+      return k8Deployment.getStatus();
+    }
+
+    return null;
   }
 }

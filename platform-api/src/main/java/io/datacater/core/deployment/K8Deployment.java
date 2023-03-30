@@ -255,6 +255,15 @@ public class K8Deployment {
     }
   }
 
+  public Deployment getDeploymentObject(UUID deploymentId) {
+    return client
+        .apps()
+        .deployments()
+        .inNamespace(StaticConfig.EnvironmentVariables.NAMESPACE)
+        .withName(getDeploymentName(deploymentId))
+        .get();
+  }
+
   public String getDeploymentReplicaIp(UUID deploymentId, int replica) {
     String deploymentName = getDeploymentName(deploymentId);
     Pod pod = getDeploymentPodByReplica(deploymentName, replica);
