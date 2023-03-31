@@ -3,6 +3,7 @@ import { connect } from "react-redux";
 import { Redirect } from "react-router-dom";
 import Breadcrumb from "../../components/layout/Breadcrumb";
 import Header from "../../components/layout/Header";
+import ReplicaSelect from "../../components/deployments/ReplicaSelect";
 import {
   fetchDeployment,
   fetchDeploymentLogs,
@@ -12,6 +13,7 @@ class DeploymentLogs extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      currentReplica: 1,
       followLogs: false,
       logMessages: [],
       wrapLines: false,
@@ -19,6 +21,7 @@ class DeploymentLogs extends Component {
     this.fetchLogs = this.fetchLogs.bind(this);
     this.toggleFollowLogs = this.toggleFollowLogs.bind(this);
     this.toggleWrapLines = this.toggleWrapLines.bind(this);
+    this.updateCurrentReplica = this.updateCurrentReplica.bind(this);
   }
 
   componentDidMount() {
@@ -38,12 +41,15 @@ class DeploymentLogs extends Component {
     });
   }
 
-  fetchLogs() {
-    this.props.fetchDeploymentLogs(this.getDeploymentId()).then(() => {
-      this.setState({
-        logMessages: this.props.deployments.logMessages,
+  fetchLogs(replica = undefined) {
+    const currentReplica = replica || this.state.currentReplica;
+    this.props
+      .fetchDeploymentLogs(this.getDeploymentId(), currentReplica)
+      .then(() => {
+        this.setState({
+          logMessages: this.props.deployments.logMessages,
+        });
       });
-    });
   }
 
   toggleFollowLogs(event) {
@@ -70,6 +76,13 @@ class DeploymentLogs extends Component {
     this.setState({
       wrapLines: !this.state.wrapLines,
     });
+  }
+
+  updateCurrentReplica(replica) {
+    this.setState({
+      currentReplica: replica,
+    });
+    this.fetchLogs(replica);
   }
 
   getDeploymentId() {
@@ -117,7 +130,14 @@ class DeploymentLogs extends Component {
           />
           <Header
             apiDocs="https://docs.datacater.io/docs/api/deployments/"
-            apiPath={`/deployments/${deployment.uuid}/logs`}
+            apiPath={`/deployments/${deployment.uuid}/logs?replica=${this.state.currentReplica}`}
+            buttons={
+              <ReplicaSelect
+                currentReplica={this.state.currentReplica}
+                deployment={deployment}
+                updateCurrentReplicaFunc={this.updateCurrentReplica}
+              />
+            }
             title={deployment.name || "Untitled deployment"}
           />
         </div>

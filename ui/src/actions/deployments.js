@@ -166,7 +166,7 @@ export function deleteDeployment(id) {
   };
 }
 
-export function fetchDeploymentLogs(id) {
+export function fetchDeploymentLogs(id, replica = 1) {
   const requestDeploymentLogs = () => ({
     type: "REQUEST_LOGS_DEPLOYMENT",
   });
@@ -184,7 +184,7 @@ export function fetchDeploymentLogs(id) {
   return function (dispatch) {
     dispatch(requestDeploymentLogs());
 
-    return callApi(`/deployments/${id}/logs`).then(
+    return callApi(`/deployments/${id}/logs?replica=${replica}`).then(
       (response) => dispatch(receivedDeploymentLogs(response.data)),
       (error) => {
         if (error.response.status === 401) {
@@ -202,7 +202,7 @@ export function fetchDeploymentLogs(id) {
   };
 }
 
-export function fetchDeploymentHealth(id) {
+export function fetchDeploymentHealth(id, replica = 1) {
   const requestDeploymentHealth = () => ({
     type: "REQUEST_HEALTH_DEPLOYMENT",
   });
@@ -220,7 +220,7 @@ export function fetchDeploymentHealth(id) {
   return function (dispatch) {
     dispatch(requestDeploymentHealth());
 
-    return callApi(`/deployments/${id}/health`).then(
+    return callApi(`/deployments/${id}/health?replica=${replica}`).then(
       (response) => dispatch(receivedDeploymentHealth(response.data)),
       (error) => {
         if (error.response.status === 401) {
@@ -244,7 +244,7 @@ export function resetDeploymentHealth() {
   };
 }
 
-export function fetchDeploymentMetrics(id) {
+export function fetchDeploymentMetrics(id, replica = 1) {
   const requestDeploymentMetrics = () => ({
     type: "REQUEST_METRICS_DEPLOYMENT",
   });
@@ -262,7 +262,7 @@ export function fetchDeploymentMetrics(id) {
   return function (dispatch) {
     dispatch(requestDeploymentMetrics());
 
-    return callApi(`/deployments/${id}/metrics`).then(
+    return callApi(`/deployments/${id}/metrics?replica=${replica}`).then(
       (response) => dispatch(receivedDeploymentMetrics(response.data)),
       (error) => {
         if (error.response.status === 401) {
