@@ -10,7 +10,11 @@ class ReplicaSelect extends Component {
       deployment.spec === undefined ||
       deployment.spec.replicas < 1
     ) {
-      return <></>;
+      return (
+        <button className="btn btn-light ms-2" disabled={true}>
+          No replicas available
+        </button>
+      );
     }
 
     const replicas =
