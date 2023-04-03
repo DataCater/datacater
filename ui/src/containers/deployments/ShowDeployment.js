@@ -7,6 +7,7 @@ import parsePrometheusTextFormat from "parse-prometheus-text-format";
 import Breadcrumb from "../../components/layout/Breadcrumb";
 import Header from "../../components/layout/Header";
 import ApiCall from "../../components/layout/ApiCall";
+import ReplicaSelect from "../../components/deployments/ReplicaSelect";
 import {
   deleteDeployment,
   fetchDeployment,
@@ -21,6 +22,7 @@ class ShowDeployment extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      currentReplica: 1,
       deploymentDeleted: false,
       showHealthEndpoint: false,
       showMetricsEndpoint: false,
@@ -29,6 +31,7 @@ class ShowDeployment extends Component {
     this.toggleHealthEndpoint = this.toggleHealthEndpoint.bind(this);
     this.toggleMetricsEndpoint = this.toggleMetricsEndpoint.bind(this);
     this.fetchMetricsAndHealth = this.fetchMetricsAndHealth.bind(this);
+    this.updateCurrentReplica = this.updateCurrentReplica.bind(this);
   }
 
   componentDidMount() {
@@ -51,9 +54,10 @@ class ShowDeployment extends Component {
     return this.props.match.params.id;
   }
 
-  fetchMetricsAndHealth() {
-    this.props.fetchDeploymentHealth(this.getDeploymentId());
-    this.props.fetchDeploymentMetrics(this.getDeploymentId());
+  fetchMetricsAndHealth(replica = undefined) {
+    const currentReplica = replica || this.state.currentReplica;
+    this.props.fetchDeploymentHealth(this.getDeploymentId(), currentReplica);
+    this.props.fetchDeploymentMetrics(this.getDeploymentId(), currentReplica);
   }
 
   handleDelete(event) {
@@ -78,6 +82,13 @@ class ShowDeployment extends Component {
     this.setState({
       showMetricsEndpoint: !this.state.showMetricsEndpoint,
     });
+  }
+
+  updateCurrentReplica(replica) {
+    this.setState({
+      currentReplica: replica,
+    });
+    this.fetchMetricsAndHealth(replica);
   }
 
   preProcessPrometheusMetrics(prometheusMetrics, metricsOfInterest) {
@@ -218,12 +229,14 @@ class ShowDeployment extends Component {
                 >
                   Edit
                 </a>
-                <a
-                  href={`/deployments/${deployment.uuid}/logs`}
-                  className="btn btn-light ms-2"
-                >
-                  Logs
-                </a>
+                {deployment.spec !== undefined && deployment.spec.replicas > 0 && (
+                  <a
+                    href={`/deployments/${deployment.uuid}/logs`}
+                    className="btn btn-light ms-2"
+                  >
+                    Logs
+                  </a>
+                )}
                 <a
                   href={`/deployments/${deployment.uuid}`}
                   onClick={this.handleDelete}
@@ -231,6 +244,11 @@ class ShowDeployment extends Component {
                 >
                   <Trash2 className="feather-icon" />
                 </a>
+                <ReplicaSelect
+                  currentReplica={this.state.currentReplica}
+                  deployment={deployment}
+                  updateCurrentReplicaFunc={this.updateCurrentReplica}
+                />
               </>
             }
             title={deployment.name || "Untitled deployment"}
@@ -279,7 +297,7 @@ class ShowDeployment extends Component {
             <div className="mt-n4 mb-4">
               <ApiCall
                 apiDocs="https://docs.datacater.io/docs/api/deployments/"
-                apiPath={`/deployments/${deployment.uuid}/health`}
+                apiPath={`/deployments/${deployment.uuid}/health?replica=${this.state.currentReplica}`}
               />
             </div>
           )}
@@ -304,7 +322,7 @@ class ShowDeployment extends Component {
             <div className="mt-0 mb-4">
               <ApiCall
                 apiDocs="https://docs.datacater.io/docs/api/deployments/"
-                apiPath={`/deployments/${deployment.uuid}/metrics`}
+                apiPath={`/deployments/${deployment.uuid}/metrics?replica=${this.state.currentReplica}`}
               />
             </div>
           )}
