@@ -9,7 +9,6 @@ import "ace-builds/src-noconflict/theme-xcode";
 export class PayloadEditor extends Component {
   constructor(props) {
     super(props);
-    console.debug("How low does this go?");
     this.state = {
       didChange: false,
       newCode: undefined,
@@ -29,10 +28,6 @@ export class PayloadEditor extends Component {
   }
 
   handleChange(value) {
-    // this.setState({
-    //   didChange: true,
-    //   newCode: value
-    // })
     this.props.codeChange(value);
   }
 

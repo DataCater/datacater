@@ -492,42 +492,24 @@ class NewStream extends Component {
 
   toggleForm(event) {
     event.preventDefault();
-    // when the payloadEditor is active disallow going back to the form, if changes are present
     let toggle = !this.state.showPayloadEditor;
 
     if (toggle) {
-      // moving to editor does not have to reset any state, as the state is being kept
       this.setState({
         showPayloadEditor: toggle,
         editorStream: JSON.stringify(this.state.stream, null, 2),
       });
-    } else {
-      // moving to form needs to branched in change and non changes
-      // Can we remove the three-indent level here?
-      if (this.state.payloadEditorChanges) {
-        let confirmation = window.confirm(
-          "Going back will reset all edits in the editor!"
-        );
-        if (confirmation) {
-          this.setState({
-            editorStream: JSON.stringify(this.state.stream, null, 2),
-            showPayloadEditor: toggle,
-            errorMessage: "",
-            payloadEditorChanges: false,
-          });
-        } else {
-          this.setState({
-            showPayloadEditor: true,
-          });
-        }
-      } else {
+    } else if (this.state.payloadEditorChanges && !window.confirm("Going back will reset all edits in the editor!")) {
         this.setState({
-          editorStream: JSON.stringify(this.state.stream, null, 2),
-          showPayloadEditor: toggle,
-          errorMessage: "",
-          payloadEditorChanges: false,
-        });
-      }
+          showPayloadEditor: true,
+      });
+    } else {
+      this.setState({
+        editorStream: JSON.stringify(this.state.stream, null, 2),
+        showPayloadEditor: toggle,
+        errorMessage: "",
+        payloadEditorChanges: false,
+      });
     }
   }
 
@@ -553,7 +535,6 @@ class NewStream extends Component {
   handleCreateStream(event) {
     event.preventDefault();
     if (this.state.showPayloadEditor) {
-      console.debug("Submitting editor content");
       this.submitEditorContent();
     } else {
       this.submitForm();
