@@ -492,7 +492,7 @@ class NewStream extends Component {
 
   toggleForm(event) {
     event.preventDefault();
-    // when the payloadEditor is active disallow going back to and we recorded changes disallow going back to form
+    // when the payloadEditor is active disallow going back to the form, if changes are present
     let toggle = !this.state.showPayloadEditor;
 
     if (toggle) {
@@ -502,7 +502,7 @@ class NewStream extends Component {
         editorStream: JSON.stringify(this.state.stream, null, 2),
       });
     } else {
-      // moving to form from editor needs to branched in change and non changes
+      // moving to form needs to branched in change and non changes
       // Can we remove the three-indent level here?
       if (this.state.payloadEditorChanges) {
         let confirmation = window.confirm(
