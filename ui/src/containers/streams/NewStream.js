@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
-import { PayloadEditor } from "../../components/payload-editor/PayloadEditor";
+import { PayloadEditor } from "../../components/payload_editor/PayloadEditor";
 import { Redirect } from "react-router-dom";
 import Creatable from "react-select/creatable";
 import Breadcrumb from "../../components/layout/Breadcrumb";
