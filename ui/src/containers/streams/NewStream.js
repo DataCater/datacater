@@ -24,6 +24,16 @@ class NewStream extends Component {
       showPayloadEditor: false,
       errorMessages: {},
       showTopicConfig: false,
+      editorStream: {
+        spec: {
+          kind: "KAFKA",
+          kafka: {
+            topic: {
+              config: {},
+            },
+          },
+        },
+      },
       stream: {
         spec: {
           kind: "KAFKA",
@@ -53,7 +63,9 @@ class NewStream extends Component {
     this.loadHTMLForm = this.loadHTMLForm.bind(this);
     this.loadPayloadEditor = this.loadPayloadEditor.bind(this);
     this.toggleForm = this.toggleForm.bind(this);
-    this.registerChangeCallback = this.registerChangeCallback.bind(this);
+    this.handleEditorChange = this.handleEditorChange.bind(this);
+    this.submitForm = this.submitForm.bind(this);
+    this.submitEditorContent = this.submitEditorContent.bind(this);
   }
 
   updateTempConfig(field, value) {
@@ -481,33 +493,49 @@ class NewStream extends Component {
   toggleForm(event) {
     event.preventDefault();
     // when the payloadEditor is active disallow going back to and we recorded changes disallow going back to form
-    console.debug(
-      `ShowPayloadEditor := ${this.state.showPayloadEditor} && PayloadEditorChanges ${this.state.payloadEditorChanges}.`
-    );
-    let confirmation = false;
-    if (this.state.showPayloadEditor && this.state.payloadEditorChanges) {
-      confirmation = window.confirm(
-        "Going back to the form will lead to losing all your progress in the Editor!"
-      );
-    }
+    let toggle = !this.state.showPayloadEditor;
 
-    if (confirmation) {
-      const showPayloadEditor = !this.state.showPayloadEditor;
+    if (toggle) {
+      // moving to editor does not have to reset any state, as the state is being kept
       this.setState({
-        payloadEditorChanges: false,
-        showPayloadEditor: showPayloadEditor,
+        showPayloadEditor: toggle,
+        editorStream: JSON.stringify(this.state.stream, null, 2),
       });
+    } else {
+      // moving to form from editor needs to branched in change and non changes
+      // Can we remove the three-indent level here?
+      if (this.state.payloadEditorChanges) {
+        let confirmation = window.confirm(
+          "Going back will reset all edits in the editor!"
+        );
+        if (confirmation) {
+          this.setState({
+            editorStream: JSON.stringify(this.state.stream, null, 2),
+            showPayloadEditor: toggle,
+            errorMessage: "",
+            payloadEditorChanges: false,
+          });
+        } else {
+          this.setState({
+            showPayloadEditor: true,
+          });
+        }
+      } else {
+        this.setState({
+          editorStream: JSON.stringify(this.state.stream, null, 2),
+          showPayloadEditor: toggle,
+          errorMessage: "",
+          payloadEditorChanges: false,
+        });
+      }
     }
-
-    const showPayloadEditor = !this.state.showPayloadEditor;
-    this.setState({
-      showPayloadEditor: showPayloadEditor,
-    });
   }
 
-  editorCallback = undefined;
-  registerChangeCallback(callback) {
-    this.editorCallback = callback;
+  handleEditorChange(value) {
+    this.setState({
+      editorStream: value,
+      payloadEditorChanges: true,
+    });
   }
 
   loadPayloadEditor(stream) {
@@ -515,9 +543,8 @@ class NewStream extends Component {
       <div className="col-12 mt-4">
         <PayloadEditor
           apiPath="/streams/"
-          registerCallback={this.registerChangeCallback}
-          code={this.state.stream}
-          codeChange={() => {console.debug("TBD")}}
+          code={this.state.editorStream}
+          codeChange={this.handleEditorChange}
         ></PayloadEditor>
       </div>
     );
@@ -525,7 +552,39 @@ class NewStream extends Component {
 
   handleCreateStream(event) {
     event.preventDefault();
+    if (this.state.showPayloadEditor) {
+      console.debug("Submitting editor content");
+      this.submitEditorContent();
+    } else {
+      this.submitForm();
+    }
+  }
 
+  submitEditorContent() {
+    try {
+      let parsedEditorStream = JSON.parse(this.state.editorStream);
+      this.props.addStream(parsedEditorStream).then(() => {
+        if (this.props.streams.errorMessage !== undefined) {
+          this.setState({
+            streamCreated: false,
+            errorMessage: this.props.streams.errorMessage,
+          });
+        } else {
+          this.setState({
+            streamCreated: true,
+            errorMessage: "",
+          });
+        }
+      });
+    } catch (syntaxError) {
+      this.setState({
+        streamCreated: false,
+        errorMessage: syntaxError.message,
+      });
+    }
+  }
+
+  submitForm() {
     this.props.addStream(this.state.stream).then(() => {
       if (this.props.streams.errorMessage !== undefined) {
         this.setState({
@@ -610,6 +669,12 @@ class NewStream extends Component {
           {this.state.showPayloadEditor
             ? this.loadPayloadEditor(stream)
             : this.loadHTMLForm(stream)}
+          {![undefined, ""].includes(this.state.errorMessage) && (
+            <div className="alert alert-danger mt-4">
+              <p className="h6 fs-bolder">API response:</p>
+              {this.state.errorMessage}
+            </div>
+          )}
           <div className="col-12 my-4">
             <a
               href="/streams/new"

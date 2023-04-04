@@ -9,15 +9,15 @@ import "ace-builds/src-noconflict/theme-xcode";
 export class PayloadEditor extends Component {
   constructor(props) {
     super(props);
+    console.debug("How low does this go?");
     this.state = {
-      code: JSON.stringify(this.props.code, null, 2),
       didChange: false,
-      newCode: undefined
+      newCode: undefined,
+      editorCode: ""
     };
 
     this.didIntroduceChange = this.didIntroduceChange.bind(this);
     this.handleChange = this.handleChange.bind(this);
-    props.registerCallback(this.didIntroduceChange);
   }
 
   didIntroduceChange() {
@@ -29,13 +29,15 @@ export class PayloadEditor extends Component {
   }
 
   handleChange(value) {
-    this.setState({
-      didChange: true,
-      newCode: value
-    })
+    // this.setState({
+    //   didChange: true,
+    //   newCode: value
+    // })
+    this.props.codeChange(value);
   }
 
   render() {
+    let content = this.props.code;
     return (
       <div className="datacater-code-editor">
         <Row>
@@ -62,7 +64,7 @@ export class PayloadEditor extends Component {
               showPrintMargin={true}
               showGutter={true}
               highlightActiveLine={true}
-              value={this.state.code}
+              value={content}
               enableLiveAutocompletion={false}
               tabSize={2}
             />
