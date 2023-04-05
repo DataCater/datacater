@@ -26,4 +26,15 @@ public class Error {
   public static Error from(int statusCode, Response.Status status, String message) {
     return new Error(statusCode, status, message);
   }
+
+  @Override
+  public String toString() {
+    return "{\"statusCode\":"
+        + this.statusCode
+        + ",\"status\":\""
+        + this.status.toString()
+        + "\",\"message\":\""
+        + this.message
+        + "\"}";
+  }
 }

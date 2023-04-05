@@ -43,6 +43,11 @@ class NewStream extends Component {
             },
           },
         },
+        configSelector: {},
+      },
+      tempLabel: {
+        labelKey: "",
+        labelValue: "",
       },
       tempConfig: {
         topicName: "",
@@ -66,6 +71,9 @@ class NewStream extends Component {
     this.handleEditorChange = this.handleEditorChange.bind(this);
     this.submitForm = this.submitForm.bind(this);
     this.submitEditorContent = this.submitEditorContent.bind(this);
+    this.addLabel = this.addLabel.bind(this);
+    this.removeLabel = this.removeLabel.bind(this);
+    this.updateTempLabel = this.updateTempLabel.bind(this);
   }
 
   updateTempConfig(field, value) {
@@ -115,6 +123,7 @@ class NewStream extends Component {
   }
 
   loadHTMLForm(stream) {
+    const addedLabels = Object.keys(stream.configSelector);
     const topicOptions = getStreamTopicOptions();
     const connectionOptions = getStreamConnectionOptions();
     const deserializerOptions = getDeserializerOptions(stream);
@@ -167,6 +176,7 @@ class NewStream extends Component {
             value={this.state.stream["name"] || ""}
           />
         </div>
+
         {this.state.showTopicConfig && (
           <>
             <div className="card mt-4">
@@ -194,15 +204,19 @@ class NewStream extends Component {
                     data-prefix="spec.kafka.topic"
                     name="num.partitions"
                     onChange={this.handleChange}
-                    placeholder="1"
+                    placeholder="3"
                     value={
-                      this.state.stream.spec.kafka["topic"]["num.partitions"] ||
-                      ""
+                      this.state.stream.spec.kafka["topic"][
+                        "num.partitions"
+                        ] || ""
                     }
                   />
                 </div>
                 <div className="col-12 mt-2">
-                  <label htmlFor="replication.factor" className="form-label">
+                  <label
+                    htmlFor="replication.factor"
+                    className="form-label"
+                  >
                     replication.factor
                   </label>
                   <input
@@ -212,11 +226,11 @@ class NewStream extends Component {
                     data-prefix="spec.kafka.topic"
                     name="replication.factor"
                     onChange={this.handleChange}
-                    placeholder="3"
+                    placeholder="1"
                     value={
                       this.state.stream.spec.kafka["topic"][
                         "replication.factor"
-                      ] || ""
+                        ] || ""
                     }
                   />
                 </div>
@@ -244,7 +258,7 @@ class NewStream extends Component {
                       value={
                         this.state.stream.spec.kafka.topic.config[
                           topicConfig
-                        ] || ""
+                          ] || ""
                       }
                     />
                   </div>
@@ -252,15 +266,15 @@ class NewStream extends Component {
                 <div className="col-12 mt-3">
                   <h6 className="d-inline me-2">Add config</h6>
                   <span className="text-muted fs-7">
-                    You can here use{" "}
+                        You can here use{" "}
                     <a
                       href="https://kafka.apache.org/documentation/#topicconfigs"
                       target="_blank"
                     >
-                      topic-level
-                    </a>{" "}
+                          topic-level
+                        </a>{" "}
                     configuration options.
-                  </span>
+                      </span>
                 </div>
                 <div className="col-12 mt-2">
                   <div className="row">
@@ -334,7 +348,10 @@ class NewStream extends Component {
             isSearchable
             options={deserializerOptions}
             onChange={(value) => {
-              this.updateConnectionConfig("value.deserializer", value.value);
+              this.updateConnectionConfig(
+                "value.deserializer",
+                value.value
+              );
             }}
           />
         </div>
@@ -433,22 +450,22 @@ class NewStream extends Component {
         <div className="col-12 mt-3">
           <h6 className="d-inline me-2">Add config</h6>
           <span className="text-muted fs-7">
-            You can here use{" "}
+                You can here use{" "}
             <a
               href="https://kafka.apache.org/documentation/#consumerconfigs"
               target="_blank"
             >
-              consumer-level
-            </a>{" "}
+                  consumer-level
+                </a>{" "}
             and{" "}
             <a
               href="https://kafka.apache.org/documentation/#producerconfigs"
               target="_blank"
             >
-              producer-level
-            </a>{" "}
+                  producer-level
+                </a>{" "}
             configuration options.
-          </span>
+              </span>
         </div>
         <div className="col-12 mt-2">
           <div className="row">
@@ -469,7 +486,10 @@ class NewStream extends Component {
                 className="form-control"
                 name="topicValue"
                 onChange={(event) => {
-                  this.updateTempConfig("connectionValue", event.target.value);
+                  this.updateTempConfig(
+                    "connectionValue",
+                    event.target.value
+                  );
                 }}
                 value={this.state.tempConfig.connectionValue || ""}
               />
@@ -480,6 +500,81 @@ class NewStream extends Component {
                 className="btn btn-outline-primary"
                 data-prefix="spec.kafka"
                 onClick={this.addConfig}
+              >
+                Add
+              </a>
+            </div>
+          </div>
+        </div>
+        <div className="col-12 mt-4">
+          <h5 className="d-inline me-2 fw-semibold">Config selector</h5>
+          <span className="text-muted fs-7">
+                You can reference one or multiple Configs by their key and
+                value.
+              </span>
+        </div>
+        {addedLabels.length === 0 && (
+          <div className="col-12 mt-2 mb-n1">
+            <i>No configs referenced.</i>
+          </div>
+        )}
+        {addedLabels.map((label) => (
+          <div className="col-12 mt-2" key={label}>
+            <label htmlFor={label} className="form-label">
+              Key: {label}
+              <a
+                className="ms-2 fs-7"
+                data-label={label}
+                data-prefix="configSelector"
+                href="/streams/new"
+                onClick={this.removeLabel}
+              >
+                Remove config selector
+              </a>
+            </label>
+            <input
+              type="text"
+              className="form-control"
+              id={label}
+              data-prefix="configSelector"
+              name={label}
+              onChange={this.handleChange}
+              value={this.state.stream.configSelector[label] || ""}
+            />
+          </div>
+        ))}
+        <div className="col-12 mt-2">
+          <div className="row">
+            <div className="col-md-3">
+              <label className="form-label">Key</label>
+              <input
+                type="text"
+                className="form-control"
+                name="labelKey"
+                onChange={(event) => {
+                  this.updateTempLabel("labelKey", event.target.value);
+                }}
+                value={this.state.tempLabel.labelKey || ""}
+              />
+            </div>
+            <div className="col-md-3">
+              <label className="form-label">Value</label>
+              <input
+                type="text"
+                className="form-control"
+                name="labelValue"
+                onChange={(event) => {
+                  this.updateTempLabel("labelValue", event.target.value);
+                }}
+                value={this.state.tempLabel.labelValue || ""}
+              />
+            </div>
+            <div className="col-md-3 d-flex align-items-end">
+              <a
+                href="/streams/new"
+                className="btn btn-outline-primary"
+                data-prefix="configSelector"
+                onClick={this.addLabel}
               >
                 Add
               </a>
@@ -603,6 +698,9 @@ class NewStream extends Component {
         stream["spec"]["kafka"]["topic"]["config"][event.target.name] =
           newValue;
         break;
+      case "configSelector":
+        stream.configSelector[event.target.name] = newValue;
+        break;
       default:
         stream[event.target.name] = newValue;
         break;
@@ -621,6 +719,34 @@ class NewStream extends Component {
     this.setState({
       showTopicConfig: !this.state.showTopicConfig,
     });
+  }
+
+  updateTempLabel(field, value) {
+    let tempLabel = this.state.tempLabel;
+    tempLabel[field] = value;
+    this.setState({ tempLabel: tempLabel });
+  }
+
+  addLabel(event) {
+    event.preventDefault();
+    const tempLabel = this.state.tempLabel;
+    let stream = this.state.stream;
+    stream.configSelector[tempLabel.labelKey] = tempLabel.labelValue;
+    this.setState({
+      stream: stream,
+      tempLabel: {
+        labelKey: "",
+        labelValue: "",
+      },
+    });
+  }
+
+  removeLabel(event) {
+    event.preventDefault();
+    let stream = this.state.stream;
+    const label = event.target.dataset.label;
+    delete stream.configSelector[label];
+    this.setState({ stream: stream });
   }
 
   render() {

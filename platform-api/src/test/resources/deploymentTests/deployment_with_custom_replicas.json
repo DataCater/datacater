@@ -1,0 +1,6 @@
+{
+  "spec": {
+      "pipeline": "pipelineUUIDPlaceholder",
+      "replicas": 3
+  }
+}

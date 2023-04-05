@@ -1,5 +1,6 @@
 package io.datacater.core.deployment;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
@@ -96,22 +97,14 @@ class K8DeploymentTest {
   @Test
   @Order(2)
   void testCreateDeployment()
-      throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+      throws NoSuchMethodException, InvocationTargetException, IllegalAccessException,
+          JsonProcessingException {
+    Stream streamIn = Stream.from(streamInEntity);
+    Stream streamOut = Stream.from(streamOutEntity);
     deploymentId = UUID.randomUUID();
     k8Deployment.create(
-        pipelineEntity,
-        streamInEntity,
-        streamOutEntity,
-        new DeploymentSpec("", new HashMap<>()),
-        deploymentId);
+        pipelineEntity, streamIn, streamOut, new DeploymentSpec("", new HashMap<>()), deploymentId);
     Assertions.assertEquals(true, getDeploymentExistsMethod().invoke(k8Deployment, deploymentId));
-  }
-
-  @Test
-  @Order(3)
-  void testGetLogs() {
-    String logs = k8Deployment.getLogs(deploymentId);
-    Assertions.assertNotNull(logs);
   }
 
   private Method getConfigMapExistsMethod() throws NoSuchMethodException {

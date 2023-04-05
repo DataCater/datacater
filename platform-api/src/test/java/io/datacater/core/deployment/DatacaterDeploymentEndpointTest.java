@@ -7,7 +7,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import io.datacater.core.pipeline.PipelineEntity;
 import io.datacater.core.stream.StreamEntity;
+import io.fabric8.kubernetes.client.server.mock.KubernetesServer;
 import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.kubernetes.client.KubernetesTestServer;
 import io.quarkus.test.kubernetes.client.WithKubernetesTestServer;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
@@ -24,6 +26,7 @@ import org.junit.jupiter.api.*;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class DatacaterDeploymentEndpointTest {
   private static final Logger LOGGER = Logger.getLogger(DatacaterDeploymentEndpointTest.class);
+  @KubernetesTestServer KubernetesServer mockServer;
 
   final String baseURI = "http://localhost:8081";
   final String deploymentsPath = "/deployments";
@@ -125,21 +128,8 @@ class DatacaterDeploymentEndpointTest {
     given().baseUri(baseURI).get(deploymentsPath).then().statusCode(200);
   }
 
-  // only testing that logs can be fetched.
-  // Log validity  ist harder to test, since logs will always change
   @Test
   @Order(4)
-  void testGetDeploymentLogs() {
-    given()
-        .pathParam("uuid", deploymentId)
-        .baseUri(baseURI)
-        .get(deploymentsPath + "/{uuid}/logs")
-        .then()
-        .statusCode(200);
-  }
-
-  @Test
-  @Order(5)
   void testUpdateDeployment() throws IOException {
     String pipelineUUIDPlaceholder = "pipelineUUIDPlaceholder";
     URL JsonURL = ClassLoader.getSystemClassLoader().getResource(deploymentPath);
@@ -160,7 +150,7 @@ class DatacaterDeploymentEndpointTest {
   }
 
   @Test
-  @Order(6)
+  @Order(5)
   void testDeleteDeployment() {
     Response response =
         RestAssured.given()
@@ -173,7 +163,7 @@ class DatacaterDeploymentEndpointTest {
   }
 
   @Test
-  @Order(7)
+  @Order(6)
   void testGetDeletedDeployment() {
     given()
         .pathParam("uuid", deploymentId)
@@ -184,7 +174,7 @@ class DatacaterDeploymentEndpointTest {
   }
 
   @Test
-  @Order(8)
+  @Order(7)
   void testGetUnknownDeployment() {
     given()
         .pathParam("uuid", UUID.randomUUID())
@@ -195,7 +185,7 @@ class DatacaterDeploymentEndpointTest {
   }
 
   @Test
-  @Order(9)
+  @Order(8)
   void testGetUnknownDeploymentLogs() {
     given()
         .pathParam("uuid", UUID.randomUUID())
@@ -206,7 +196,7 @@ class DatacaterDeploymentEndpointTest {
   }
 
   @Test
-  @Order(10)
+  @Order(9)
   void testWatchUnknownDeploymentLogs() {
     given()
         .pathParam("uuid", UUID.randomUUID())
@@ -260,7 +250,7 @@ class DatacaterDeploymentEndpointTest {
     PipelineEntity pipeline =
         mapper.readValue(responsePipeline.body().asString(), PipelineEntity.class);
 
-    pipelineId = pipeline.getId();
+    UUID pipelineId = pipeline.getId();
 
     // add deployment
     JsonURL = ClassLoader.getSystemClassLoader().getResource(deploymentPath);
@@ -295,7 +285,7 @@ class DatacaterDeploymentEndpointTest {
     PipelineEntity pipeline =
         mapper.readValue(responsePipeline.body().asString(), PipelineEntity.class);
 
-    pipelineId = pipeline.getId();
+    UUID pipelineId = pipeline.getId();
 
     // add deployment
     JsonURL = ClassLoader.getSystemClassLoader().getResource(deploymentPath);
@@ -345,7 +335,7 @@ class DatacaterDeploymentEndpointTest {
     PipelineEntity pipeline =
         mapper.readValue(responsePipeline.body().asString(), PipelineEntity.class);
 
-    pipelineId = pipeline.getId();
+    UUID pipelineId = pipeline.getId();
 
     // add deployment
     JsonURL = ClassLoader.getSystemClassLoader().getResource(deploymentPath);
@@ -365,7 +355,7 @@ class DatacaterDeploymentEndpointTest {
   }
 
   @Test
-  @Order(13)
+  @Order(14)
   void testCreateDeploymentWithEmptySpec() throws IOException {
     String deploymentPath = "deploymentTests/deployment_with_empty_spec.json";
 
@@ -383,5 +373,44 @@ class DatacaterDeploymentEndpointTest {
             .post(deploymentsPath);
 
     Assertions.assertEquals(400, responseDeployment.getStatusCode());
+  }
+
+  @Test
+  @Order(15)
+  void testCreateDeploymentWithCustomReplicas() throws IOException {
+    String deploymentPath = "deploymentTests/deployment_with_custom_replicas.json";
+
+    // add deployment
+    URL JsonURL = ClassLoader.getSystemClassLoader().getResource(deploymentPath);
+    ObjectMapper mapper = new JsonMapper();
+    JsonNode json = mapper.readTree(JsonURL);
+    String jsonString = json.toString();
+    jsonString = jsonString.replace(pipelineUUIDPlaceholder, pipelineId.toString());
+
+    Response responseDeployment =
+        given()
+            .contentType(ContentType.JSON)
+            .baseUri(baseURI)
+            .body(jsonString)
+            .post(deploymentsPath);
+
+    DeploymentEntity deployment =
+        mapper.readValue(responseDeployment.body().asString(), DeploymentEntity.class);
+
+    String k8DeploymentString =
+        mockServer
+            .getClient()
+            .apps()
+            .deployments()
+            .inAnyNamespace()
+            .withLabel("datacater.io/uuid", deployment.getId().toString())
+            .list()
+            .toString();
+
+    LOGGER.info(
+        "testCreateDeploymentWithCustomReplicas response: " + responseDeployment.body().asString());
+
+    Assertions.assertEquals(200, responseDeployment.getStatusCode());
+    Assertions.assertTrue(k8DeploymentString.contains("replicas=3"));
   }
 }

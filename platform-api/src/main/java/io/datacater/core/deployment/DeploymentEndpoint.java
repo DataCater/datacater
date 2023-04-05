@@ -1,5 +1,6 @@
 package io.datacater.core.deployment;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.datacater.core.authentication.DataCaterSessionFactory;
@@ -7,12 +8,12 @@ import io.datacater.core.config.ConfigEntity;
 import io.datacater.core.config.ConfigUtilities;
 import io.datacater.core.exceptions.*;
 import io.datacater.core.pipeline.PipelineEntity;
+import io.datacater.core.stream.Stream;
 import io.datacater.core.stream.StreamEntity;
 import io.datacater.core.utilities.StringUtilities;
-import io.fabric8.kubernetes.api.model.apps.Deployment;
 import io.fabric8.kubernetes.client.KubernetesClient;
+import io.fabric8.kubernetes.client.dsl.ContainerResource;
 import io.fabric8.kubernetes.client.dsl.LogWatch;
-import io.fabric8.kubernetes.client.dsl.RollableScalableResource;
 import io.quarkus.security.Authenticated;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.unchecked.Unchecked;
@@ -57,16 +58,15 @@ public class DeploymentEndpoint {
             ((session, transaction) -> session.find(DeploymentEntity.class, deploymentId)))
         .onItem()
         .ifNull()
-        .failWith(new DeploymentNotFoundException(StaticConfig.LoggerMessages.DEPLOYMENT_NOT_FOUND))
-        .onItem()
-        .ifNotNull()
-        .transform(this::getK8Deployment);
+        .failWith(
+            new DeploymentNotFoundException(StaticConfig.LoggerMessages.DEPLOYMENT_NOT_FOUND));
   }
 
   @GET
   @Path("{uuid}/logs")
   @Produces(MediaType.APPLICATION_JSON)
-  public Uni<List<String>> getLogs(@PathParam("uuid") UUID deploymentId) {
+  public Uni<List<String>> getLogs(
+      @PathParam("uuid") UUID deploymentId, @DefaultValue("1") @QueryParam("replica") int replica) {
     return dsf.withTransaction(
             ((session, transaction) -> session.find(DeploymentEntity.class, deploymentId)))
         .onItem()
@@ -74,13 +74,15 @@ public class DeploymentEndpoint {
         .failWith(new DeploymentNotFoundException(StaticConfig.LoggerMessages.DEPLOYMENT_NOT_FOUND))
         .onItem()
         .ifNotNull()
-        .transform(Unchecked.function(deployment -> getDeploymentLogsAsList(deployment.getId())));
+        .transform(
+            Unchecked.function(deployment -> getDeploymentLogsAsList(deployment.getId(), replica)));
   }
 
   @GET
   @Path("{uuid}/health")
   @Produces(MediaType.APPLICATION_JSON)
-  public Uni<Response> getHealth(@PathParam("uuid") UUID deploymentId) {
+  public Uni<Response> getHealth(
+      @PathParam("uuid") UUID deploymentId, @DefaultValue("1") @QueryParam("replica") int replica) {
     return dsf.withTransaction(
             ((session, transaction) -> session.find(DeploymentEntity.class, deploymentId)))
         .onItem()
@@ -94,7 +96,9 @@ public class DeploymentEndpoint {
                   HttpClient httpClient = HttpClient.newHttpClient();
                   HttpRequest req =
                       buildDeploymentServiceRequest(
-                          deploymentId, StaticConfig.EnvironmentVariables.DEPLOYMENT_HEALTH_PATH);
+                          deploymentId,
+                          StaticConfig.EnvironmentVariables.DEPLOYMENT_HEALTH_PATH,
+                          replica);
                   HttpResponse<String> response =
                       httpClient.send(req, HttpResponse.BodyHandlers.ofString());
                   return Response.ok().entity(response.body()).build();
@@ -104,7 +108,8 @@ public class DeploymentEndpoint {
   @GET
   @Path("{uuid}/metrics")
   @Produces(MediaType.TEXT_PLAIN)
-  public Uni<Response> getMetrics(@PathParam("uuid") UUID deploymentId) {
+  public Uni<Response> getMetrics(
+      @PathParam("uuid") UUID deploymentId, @DefaultValue("1") @QueryParam("replica") int replica) {
     return dsf.withTransaction(
             ((session, transaction) -> session.find(DeploymentEntity.class, deploymentId)))
         .onItem()
@@ -118,7 +123,9 @@ public class DeploymentEndpoint {
                   HttpClient httpClient = HttpClient.newHttpClient();
                   HttpRequest req =
                       buildDeploymentServiceRequest(
-                          deploymentId, StaticConfig.EnvironmentVariables.DEPLOYMENT_METRICS_PATH);
+                          deploymentId,
+                          StaticConfig.EnvironmentVariables.DEPLOYMENT_METRICS_PATH,
+                          replica);
                   HttpResponse<String> response =
                       httpClient.send(req, HttpResponse.BodyHandlers.ofString());
                   return Response.ok().entity(response.body()).build();
@@ -129,7 +136,10 @@ public class DeploymentEndpoint {
   @Path("{uuid}/watch-logs")
   @Produces(MediaType.SERVER_SENT_EVENTS)
   public Uni<Response> watchLogs(
-      @PathParam("uuid") UUID deploymentId, @Context Sse sse, @Context SseEventSink eventSink) {
+      @PathParam("uuid") UUID deploymentId,
+      @DefaultValue("1") @QueryParam("replica") int replica,
+      @Context Sse sse,
+      @Context SseEventSink eventSink) {
     return dsf.withTransaction(
             ((session, transaction) -> session.find(DeploymentEntity.class, deploymentId)))
         .onItem()
@@ -140,7 +150,7 @@ public class DeploymentEndpoint {
         .transform(
             deployment -> {
               try {
-                watchLogsRunner(deployment.getId(), sse, eventSink);
+                watchLogsRunner(deployment.getId(), replica, sse, eventSink);
               } catch (IOException e) {
                 throw new DatacaterException(StringUtilities.wrapString(e.getMessage()));
               }
@@ -152,63 +162,59 @@ public class DeploymentEndpoint {
   public Uni<List<DeploymentEntity>> getDeployments() {
     return dsf.withSession(
         session ->
-            session
-                .createQuery("from DeploymentEntity", DeploymentEntity.class)
-                .getResultList()
-                .onItem()
-                .transform(this::getK8Deployments));
+            session.createQuery("from DeploymentEntity", DeploymentEntity.class).getResultList());
   }
 
   @POST
   @Consumes(MediaType.APPLICATION_JSON)
   public Uni<DeploymentEntity> createDeployment(DeploymentSpec spec) {
     DeploymentEntity de = new DeploymentEntity(spec);
-    Uni<List<ConfigEntity>> configList =
-        ConfigUtilities.getMappedConfigs(spec.configSelector(), dsf);
 
     return dsf.withTransaction(
         (session, transaction) ->
             session
                 .persist(de)
                 .onItem()
-                .transform(
-                    voidObject ->
-                        configList
-                            .onItem()
-                            .transform(
-                                configs -> ConfigUtilities.applyConfigsToDeployment(spec, configs)))
-                .onItem()
                 .transformToUni(
-                    combinedSpecUni ->
-                        combinedSpecUni
-                            .onItem()
-                            .transformToUni(
-                                combinedSpec ->
-                                    Uni.combine()
-                                        .all()
-                                        .unis(
-                                            Uni.createFrom().item(combinedSpec),
-                                            getPipeline(combinedSpec))
-                                        .asTuple()))
-                .onItem()
-                .transformToUni(
-                    specAndPipeline ->
+                    entity ->
                         Uni.combine()
                             .all()
                             .unis(
-                                Uni.createFrom().item(specAndPipeline.getItem2()),
+                                ConfigUtilities.getMappedConfigs(spec.configSelector(), session),
+                                Uni.createFrom().item(entity))
+                            .asTuple())
+                .onItem()
+                .transformToUni(
+                    tuple -> {
+                      DeploymentSpec combinedSpec =
+                          ConfigUtilities.applyConfigsToDeployment(spec, tuple.getItem1());
+                      return Uni.combine()
+                          .all()
+                          .unis(
+                              Uni.createFrom().item(combinedSpec),
+                              getPipeline(combinedSpec),
+                              Uni.createFrom().item(tuple.getItem1()))
+                          .asTuple();
+                    })
+                .onItem()
+                .transformToUni(
+                    tuple ->
+                        Uni.combine()
+                            .all()
+                            .unis(
+                                Uni.createFrom().item(tuple.getItem2()),
                                 getStream(
-                                    specAndPipeline.getItem1(),
+                                    tuple.getItem1(),
                                     StaticConfig.STREAM_IN_CONFIG,
-                                    specAndPipeline.getItem2(),
+                                    tuple.getItem2(),
                                     StaticConfig.STREAM_IN),
                                 getStream(
-                                    specAndPipeline.getItem1(),
+                                    tuple.getItem1(),
                                     StaticConfig.STREAM_OUT_CONFIG,
-                                    specAndPipeline.getItem2(),
+                                    tuple.getItem2(),
                                     StaticConfig.STREAM_OUT),
-                                configList,
-                                Uni.createFrom().item(specAndPipeline.getItem1()))
+                                Uni.createFrom().item(tuple.getItem3()),
+                                Uni.createFrom().item(tuple.getItem1()))
                             .asTuple())
                 .onItem()
                 .transform(
@@ -248,54 +254,77 @@ public class DeploymentEndpoint {
   @Path("{uuid}")
   public Uni<DeploymentEntity> updateDeployment(
       @PathParam("uuid") UUID deploymentUuid, DeploymentSpec spec) {
-    Uni<DeploymentEntity> deploymentUni = getDeploymentUni(deploymentUuid);
-    Uni<List<ConfigEntity>> configList =
-        ConfigUtilities.getMappedConfigs(spec.configSelector(), dsf);
-    return configList
-        .onItem()
-        .transform(configs -> ConfigUtilities.applyConfigsToDeployment(spec, configs))
-        .onItem()
-        .transformToUni(
-            combinedSpec ->
-                Uni.combine()
-                    .all()
-                    .unis(Uni.createFrom().item(combinedSpec), getPipeline(combinedSpec))
-                    .asTuple())
-        .onItem()
-        .transformToUni(
-            specAndPipeline ->
-                Uni.combine()
-                    .all()
-                    .unis(
-                        Uni.createFrom().item(specAndPipeline.getItem2()),
-                        getStream(
-                            specAndPipeline.getItem1(),
-                            StaticConfig.STREAM_IN_CONFIG,
-                            specAndPipeline.getItem2(),
-                            StaticConfig.STREAM_IN),
-                        getStream(
-                            specAndPipeline.getItem1(),
-                            StaticConfig.STREAM_OUT_CONFIG,
-                            specAndPipeline.getItem2(),
-                            StaticConfig.STREAM_OUT),
-                        deploymentUni,
-                        configList,
-                        Uni.createFrom().item(specAndPipeline.getItem1()))
-                    .asTuple())
-        .onItem()
-        .transform(
-            tuple ->
-                updateDeployment(
-                    tuple.getItem1(),
-                    tuple.getItem3(),
-                    tuple.getItem2(),
-                    tuple.getItem6(),
-                    tuple.getItem4(),
-                    tuple.getItem5()))
-        .onFailure()
-        .transform(
-            ex ->
-                new UpdateDeploymentException(StaticConfig.LoggerMessages.DEPLOYMENT_NOT_UPDATED));
+    return dsf.withTransaction(
+        ((session, transaction) ->
+            session
+                .find(DeploymentEntity.class, deploymentUuid)
+                .onItem()
+                .ifNull()
+                .failWith(
+                    new CreateDeploymentException(StaticConfig.LoggerMessages.DEPLOYMENT_NOT_FOUND))
+                .onItem()
+                .transformToUni(
+                    entity ->
+                        Uni.combine()
+                            .all()
+                            .unis(
+                                ConfigUtilities.getMappedConfigs(spec.configSelector(), session),
+                                Uni.createFrom().item(entity))
+                            .asTuple())
+                .onItem()
+                .transformToUni(
+                    tuple -> {
+                      DeploymentSpec combinedSpec =
+                          ConfigUtilities.applyConfigsToDeployment(
+                              DeploymentSpec.from(spec), tuple.getItem1());
+                      return Uni.combine()
+                          .all()
+                          .unis(
+                              Uni.createFrom().item(combinedSpec),
+                              getPipeline(combinedSpec),
+                              Uni.createFrom().item(tuple.getItem1()),
+                              Uni.createFrom().item(tuple.getItem2()))
+                          .asTuple();
+                    })
+                .onItem()
+                .transformToUni(
+                    tuple ->
+                        Uni.combine()
+                            .all()
+                            .unis(
+                                Uni.createFrom().item(tuple.getItem2()),
+                                getStream(
+                                    tuple.getItem1(),
+                                    StaticConfig.STREAM_IN_CONFIG,
+                                    tuple.getItem2(),
+                                    StaticConfig.STREAM_IN),
+                                getStream(
+                                    tuple.getItem1(),
+                                    StaticConfig.STREAM_OUT_CONFIG,
+                                    tuple.getItem2(),
+                                    StaticConfig.STREAM_OUT),
+                                Uni.createFrom().item(tuple.getItem4()),
+                                Uni.createFrom().item(tuple.getItem3()),
+                                Uni.createFrom().item(tuple.getItem1()))
+                            .asTuple())
+                .onItem()
+                .transform(
+                    tuple -> {
+                      updateDeployment(
+                          tuple.getItem1(),
+                          tuple.getItem3(),
+                          tuple.getItem2(),
+                          tuple.getItem6(),
+                          tuple.getItem4(),
+                          tuple.getItem5());
+                      return session.merge(tuple.getItem4().updateEntity(spec));
+                    })
+                .flatMap(entity -> entity)
+                .onFailure()
+                .transform(
+                    ex ->
+                        new UpdateDeploymentException(
+                            StaticConfig.LoggerMessages.DEPLOYMENT_NOT_UPDATED))));
   }
 
   private Uni<PipelineEntity> getPipeline(DeploymentSpec deploymentSpec) {
@@ -321,7 +350,7 @@ public class DeploymentEndpoint {
                         StaticConfig.LoggerMessages.DEPLOYMENT_NOT_FOUND)));
   }
 
-  private Uni<StreamEntity> getStream(
+  private Uni<Stream> getStream(
       DeploymentSpec spec, String deploymentSpecKey, PipelineEntity pipeline, String key) {
     return dsf.withTransaction(
         (session, transaction) ->
@@ -330,27 +359,50 @@ public class DeploymentEndpoint {
                     StreamEntity.class,
                     getStreamUUID(spec, deploymentSpecKey, pipeline.getMetadata(), key))
                 .onItem()
+                .ifNotNull()
+                .transformToUni(
+                    entity -> {
+                      try {
+                        Stream stream = Stream.from(entity);
+                        Uni<List<ConfigEntity>> configList =
+                            ConfigUtilities.getMappedConfigs(stream.configSelector(), session);
+                        return Uni.combine()
+                            .all()
+                            .unis(Uni.createFrom().item(stream), configList)
+                            .asTuple();
+                      } catch (JsonProcessingException ex) {
+                        throw new DatacaterException(ex.getMessage());
+                      }
+                    })
+                .onItem()
+                .ifNotNull()
+                .transform(
+                    tuple -> {
+                      Stream stream = tuple.getItem1();
+                      stream = ConfigUtilities.applyConfigsToStream(stream, tuple.getItem2());
+                      return stream;
+                    })
+                .onItem()
                 .ifNull()
                 .failWith(
                     new CreateDeploymentException(
                         String.format(StaticConfig.LoggerMessages.STREAM_NOT_FOUND, key))));
   }
 
-  private List<String> getDeploymentLogsAsList(UUID deploymentId) {
+  private List<String> getDeploymentLogsAsList(UUID deploymentId, int replica) {
     K8Deployment k8Deployment = new K8Deployment(client);
-    return Arrays.asList(k8Deployment.getLogs(deploymentId).split("\n"));
+    return Arrays.asList(k8Deployment.getLogs(deploymentId, replica).split("\n"));
   }
 
-  private HttpRequest buildDeploymentServiceRequest(UUID deploymentId, String path) {
+  private HttpRequest buildDeploymentServiceRequest(UUID deploymentId, String path, int replica) {
     K8Deployment k8Deployment = new K8Deployment(client);
-    String clusterIp = k8Deployment.getClusterIp(deploymentId);
+    String ip = k8Deployment.getDeploymentReplicaIp(deploymentId, replica).replace(".", "-");
+    String namespace = StaticConfig.EnvironmentVariables.NAMESPACE;
+    int port = StaticConfig.EnvironmentVariables.DEPLOYMENT_CONTAINER_PORT;
+    String protocol = StaticConfig.EnvironmentVariables.DEPLOYMENT_CONTAINER_PROTOCOL;
+
     String uriReady =
-        String.format(
-            "%s://%s:%d%s",
-            StaticConfig.EnvironmentVariables.DEPLOYMENT_CONTAINER_PROTOCOL,
-            clusterIp,
-            StaticConfig.EnvironmentVariables.DEPLOYMENT_CONTAINER_PORT,
-            path);
+        String.format("%s://%s.%s.pod.cluster.local:%d%s", protocol, ip, namespace, port, path);
 
     return HttpRequest.newBuilder()
         .GET()
@@ -359,26 +411,9 @@ public class DeploymentEndpoint {
         .build();
   }
 
-  private RollableScalableResource<Deployment> watchDeploymentLogs(UUID deploymentId) {
+  private ContainerResource watchDeploymentLogs(UUID deploymentId, int replica) {
     K8Deployment k8Deployment = new K8Deployment(client);
-    return k8Deployment.watchLogs(deploymentId);
-  }
-
-  private List<DeploymentEntity> getK8Deployments(List<DeploymentEntity> deployments) {
-    K8Deployment k8Deployment = new K8Deployment(client);
-    for (DeploymentEntity deployment : deployments) {
-      deployment.setStatus(
-          DeploymentEntity.serializeMap(k8Deployment.getDeployment(deployment.getId())));
-    }
-    return deployments;
-  }
-
-  private DeploymentEntity getK8Deployment(DeploymentEntity deployment) {
-    K8Deployment k8Deployment = new K8Deployment(client);
-    Map<String, Object> map = k8Deployment.getDeployment(deployment.getId());
-    JsonNode node = DeploymentEntity.serializeMap(map);
-    deployment.setStatus(node);
-    return deployment;
+    return k8Deployment.watchLogs(deploymentId, replica);
   }
 
   private void deleteK8Deployment(UUID deploymentId) {
@@ -394,23 +429,24 @@ public class DeploymentEndpoint {
 
   private DeploymentEntity createDeployment(
       PipelineEntity pe,
-      StreamEntity streamOut,
-      StreamEntity streamIn,
+      Stream streamOut,
+      Stream streamIn,
       DeploymentSpec deploymentSpec,
       DeploymentEntity de,
       List<ConfigEntity> configList) {
     K8Deployment k8Deployment = new K8Deployment(client);
-    deploymentSpec = ConfigUtilities.applyConfigsToDeployment(deploymentSpec, configList);
-    de.setStatus(
-        DeploymentEntity.serializeMap(
-            k8Deployment.create(pe, streamIn, streamOut, deploymentSpec, de.getId())));
+    DeploymentSpec specWithConfig =
+        ConfigUtilities.applyConfigsToDeployment(DeploymentSpec.from(deploymentSpec), configList);
+
+    k8Deployment.create(pe, streamIn, streamOut, specWithConfig, de.getId());
+
     return de;
   }
 
   private DeploymentEntity updateDeployment(
       PipelineEntity pe,
-      StreamEntity streamOut,
-      StreamEntity streamIn,
+      Stream streamOut,
+      Stream streamIn,
       DeploymentSpec deploymentSpec,
       DeploymentEntity de,
       List<ConfigEntity> configList) {
@@ -452,12 +488,10 @@ public class DeploymentEndpoint {
     }
   }
 
-  private void watchLogsRunner(UUID deploymentId, @Context Sse sse, @Context SseEventSink eventSink)
+  private void watchLogsRunner(
+      UUID deploymentId, int replica, @Context Sse sse, @Context SseEventSink eventSink)
       throws IOException {
-    LogWatch lw =
-        watchDeploymentLogs(deploymentId)
-            .inContainer(StaticConfig.DEPLOYMENT_NAME_PREFIX + deploymentId)
-            .watchLog();
+    LogWatch lw = watchDeploymentLogs(deploymentId, replica).watchLog();
     InputStream is = lw.getOutput();
     BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(is));
     String line;

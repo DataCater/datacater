@@ -182,6 +182,24 @@ class StreamEndpointTest {
     Assertions.assertEquals(200, response.getStatusCode());
   }
 
+  void testCreateStreamWithInvalidReplicationFactor() throws IOException {
+    URL streamJsonURL =
+        ClassLoader.getSystemClassLoader()
+            .getResource("streamTestFiles/stream-test-json-format-invalid-replication-factor.json");
+    ObjectMapper mapper = new JsonMapper();
+    JsonNode streamJson = mapper.readTree(streamJsonURL);
+    RequestSpecification request = given();
+    String json = streamJson.toString();
+
+    request.header("Content-Type", "application/json");
+    request.body(json);
+
+    Response response = request.post();
+    StreamEntity se = mapper.readValue(response.body().asString(), StreamEntity.class);
+    alreadyCreatedID = se.getId();
+    Assertions.assertEquals(400, response.getStatusCode());
+  }
+
   @Test
   void testUpdateStreamThatExists() throws IOException {
     URL streamJsonURL =
