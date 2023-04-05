@@ -31,10 +31,13 @@ class NewPipeline extends Component {
 
     this.handleCreatePipeline = this.handleCreatePipeline.bind(this);
     this.handleChange = this.handleChange.bind(this);
-    this.loadPayloadEditor = this.loadPayloadEditor.bind(this);
+    // payloadEditor specific functions
     this.loadHTMLForm = this.loadHTMLForm.bind(this);
+    this.loadPayloadEditor = this.loadPayloadEditor.bind(this);
     this.toggleForm = this.toggleForm.bind(this);
     this.handleEditorChange = this.handleEditorChange.bind(this);
+    this.submitForm = this.submitForm.bind(this);
+    this.submitEditorContent = this.submitEditorContent.bind(this);
   }
 
   componentDidMount() {
