@@ -7,6 +7,7 @@ import Header from "../../components/layout/Header";
 import { addPipeline } from "../../actions/pipelines";
 import { fetchStreams } from "../../actions/streams";
 import "../../scss/fonts.scss";
+import { PayloadEditor } from "../../components/payload_editor/PayloadEditor";
 
 class NewPipeline extends Component {
   constructor(props) {
@@ -20,10 +21,20 @@ class NewPipeline extends Component {
         spec: {},
       },
       pipelineCreated: false,
+      payloadEditorChanges: false,
+      showPayloadEditor: false,
+      editorPipeline: {
+        metadata: {},
+        spec: {},
+      },
     };
 
     this.handleCreatePipeline = this.handleCreatePipeline.bind(this);
     this.handleChange = this.handleChange.bind(this);
+    this.loadPayloadEditor = this.loadPayloadEditor.bind(this);
+    this.loadHTMLForm = this.loadHTMLForm.bind(this);
+    this.toggleForm = this.toggleForm.bind(this);
+    this.handleEditorChange = this.handleEditorChange.bind(this);
   }
 
   componentDidMount() {
@@ -33,6 +44,14 @@ class NewPipeline extends Component {
   handleCreatePipeline(event) {
     event.preventDefault();
 
+    if (this.state.showPayloadEditor) {
+      this.submitEditorContent();
+    } else {
+      this.submitForm();
+    }
+  }
+
+  submitForm() {
     this.props.addPipeline(this.state.pipeline).then(() => {
       if (this.props.pipelines.errorMessage !== undefined) {
         this.setState({
@@ -46,6 +65,31 @@ class NewPipeline extends Component {
         });
       }
     });
+
+  }
+
+  submitEditorContent() {
+    try {
+      let parsedEditorStream = JSON.parse(this.state.editorPipeline);
+      this.props.addPipeline(parsedEditorStream).then(() => {
+        if (this.props.pipelines.errorMessage !== undefined) {
+          this.setState({
+            pipelineCreated: false,
+            errorMessage: this.props.pipelines.errorMessage,
+          });
+        } else {
+          this.setState({
+            pipelineCreated: true,
+            errorMessage: "",
+          });
+        }
+      });
+    } catch (syntaxError) {
+      this.setState({
+        pipelineCreated: false,
+        errorMessage: syntaxError.message,
+      });
+    }
   }
 
   handleChange(name, value, prefix) {
@@ -64,6 +108,99 @@ class NewPipeline extends Component {
     });
   }
 
+  toggleForm(event) {
+    event.preventDefault();
+    let toggle = !this.state.showPayloadEditor;
+
+    if (toggle) {
+      this.setState({
+        showPayloadEditor: toggle,
+        editorPipeline: JSON.stringify(this.state.pipeline, null, 2),
+      });
+    } else if (this.state.payloadEditorChanges && !window.confirm("Going back will reset all edits in the editor!")) {
+      this.setState({
+        showPayloadEditor: true,
+      });
+    } else {
+      this.setState({
+        editorPipeline: JSON.stringify(this.state.pipeline, null, 2),
+        showPayloadEditor: toggle,
+        errorMessage: "",
+        payloadEditorChanges: false,
+      });
+    }
+  }
+
+  handleEditorChange(value) {
+    this.setState({
+      editorPipeline: value,
+      payloadEditorChanges: true,
+    });
+  }
+
+  loadPayloadEditor() {
+    return (
+      <div className="col-12 mt-4">
+        <PayloadEditor
+          apiPath="/pipeline/"
+          code={this.state.editorPipeline}
+          codeChange={this.handleEditorChange}
+        ></PayloadEditor>
+      </div>
+    );
+  }
+
+  loadHTMLForm() {
+    const pipeline = this.state.pipeline;
+
+    const streamOptions = this.props.streams.streams.map((stream) => {
+      const name = `${stream.name || "Untitled stream"} (${stream.uuid})`;
+      return { value: stream.uuid, label: name };
+    });
+
+    return (
+      <form>
+        <div className="col-12 mt-4">
+          <label htmlFor="name" className="form-label">
+            Name
+          </label>
+          <input
+            type="text"
+            className="form-control"
+            id="name"
+            name="name"
+            onChange={(event) => {
+              this.handleChange("name", event.target.value);
+            }}
+            value={this.state.pipeline["name"] || ""}
+          />
+        </div>
+        <div className="col-12 mt-4">
+          <label className="form-label">Source stream</label>
+          <Select
+            isSearchable
+            isClearable
+            options={streamOptions}
+            onChange={(value) => {
+              this.handleChange("stream-in", value.value, "metadata");
+            }}
+          />
+        </div>
+        <div className="col-12 mt-4">
+          <label className="form-label">Sink stream</label>
+          <Select
+            isSearchable
+            isClearable
+            options={streamOptions}
+            onChange={(value) => {
+              this.handleChange("stream-out", value.value, "metadata");
+            }}
+          />
+        </div>
+      </form>
+    );
+  }
+
   render() {
     if (this.state.pipelineCreated) {
       return (
@@ -71,12 +208,6 @@ class NewPipeline extends Component {
       );
     }
 
-    const pipeline = this.state.pipeline;
-
-    const streamOptions = this.props.streams.streams.map((stream) => {
-      const name = `${stream.name || "Untitled stream"} (${stream.uuid})`;
-      return { value: stream.uuid, label: name };
-    });
 
     return (
       <div className="container">
@@ -95,60 +226,31 @@ class NewPipeline extends Component {
             title="Create new pipeline"
             subTitle="Pipelines stream records between your Streams and can apply filters and transforms on the way."
           />
-          <form>
-            <div className="col-12 mt-4">
-              <label htmlFor="name" className="form-label">
-                Name
-              </label>
-              <input
-                type="text"
-                className="form-control"
-                id="name"
-                name="name"
-                onChange={(event) => {
-                  this.handleChange("name", event.target.value);
-                }}
-                value={this.state.pipeline["name"] || ""}
-              />
+          {this.state.showPayloadEditor
+            ? this.loadPayloadEditor()
+            : this.loadHTMLForm()
+          }
+          {![undefined, ""].includes(this.state.errorMessage) && (
+            <div className="alert alert-danger mt-4">
+              <p className="h6 fs-bolder">API response:</p>
+              {this.state.errorMessage}
             </div>
-            <div className="col-12 mt-4">
-              <label className="form-label">Source stream</label>
-              <Select
-                isSearchable
-                isClearable
-                options={streamOptions}
-                onChange={(value) => {
-                  this.handleChange("stream-in", value.value, "metadata");
-                }}
-              />
-            </div>
-            <div className="col-12 mt-4">
-              <label className="form-label">Sink stream</label>
-              <Select
-                isSearchable
-                isClearable
-                options={streamOptions}
-                onChange={(value) => {
-                  this.handleChange("stream-out", value.value, "metadata");
-                }}
-              />
-            </div>
-            {![undefined, ""].includes(this.state.errorMessage) && (
-              <div className="alert alert-danger mt-4">
-                <p className="h6 fs-bolder">API response:</p>
-                {this.state.errorMessage}
-              </div>
-            )}
-            <div className="col-12 mt-4">
-              <a
-                href="/pipelines/new"
-                className="btn btn-primary text-white mb-4"
-                onClick={this.handleCreatePipeline}
-              >
-                Create pipeline
-              </a>
-            </div>
-          </form>
+          )}
+          <div className="col-12 mt-4">
+            <a
+              href="/pipelines/new"
+              className="btn btn-primary text-white"
+              onClick={this.handleCreatePipeline}
+            >
+              Create pipeline
+            </a>
+            <button
+              className="btn btn-outline-primary ms-2"
+              onClick={this.toggleForm}
+            >
+              {this.state.showPayloadEditor ? "Back to form" : "Edit as JSON"}
+            </button>
+          </div>
         </div>
       </div>
     );
