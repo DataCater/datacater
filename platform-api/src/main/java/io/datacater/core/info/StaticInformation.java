@@ -5,12 +5,11 @@ import org.eclipse.microprofile.config.ConfigProvider;
 public class StaticInformation {
   private StaticInformation() {}
 
-  static final String API_DOCUMENTATION_PATH_PREFIX = "https://docs.datacater.io/docs/api";
-  static final String STREAMS_SUFFIX = "/streams";
-  static final String DEPLOYMENTS_SUFFIX = "/deployments";
-  static final String CONFIGS_SUFFIX = "/configs";
-  static final String PIPELINES_SUFFIX = "/pipelines";
-  static final String SYSTEM_PROPERTY_OS_ARCH_TEXT = "os.arch";
+  static final String API_DOCUMENTATION_PATH_PREFIX = "https://docs.datacater.io/docs/api/";
+  static final String STREAMS_SUFFIX = "streams";
+  static final String DEPLOYMENTS_SUFFIX = "deployments";
+  static final String CONFIGS_SUFFIX = "configs";
+  static final String PIPELINES_SUFFIX = "pipelines";
 
   static class EnvironmentVariables {
     private EnvironmentVariables() {}
@@ -18,21 +17,6 @@ public class StaticInformation {
     static final String VERSION =
         ConfigProvider.getConfig()
             .getOptionalValue("quarkus.application.version", String.class)
-            .orElse("");
-
-    static final String GIT_COMMIT_VERSION =
-        ConfigProvider.getConfig()
-            .getOptionalValue("quarkus.application.git-version", String.class)
-            .orElse("");
-
-    static final String BUILD_DATE =
-        ConfigProvider.getConfig()
-            .getOptionalValue("quarkus.application.build-date", String.class)
-            .orElse("");
-
-    static final String PLATFORM =
-        ConfigProvider.getConfig()
-            .getOptionalValue("quarkus.application.platform", String.class)
             .orElse("");
 
     static final String CONTACT_EMAIL =
