@@ -15,6 +15,7 @@ class NewDeployment extends Component {
 
     this.state = {
       creatingDeploymentFailed: false,
+      errorMessage: "",
       errorMessages: {},
       deployment: {
         spec: {},
@@ -79,7 +80,7 @@ class NewDeployment extends Component {
       });
     } catch (syntaxError) {
       this.setState({
-        pipelineCreated: false,
+        deploymentCreated: false,
         errorMessage: syntaxError.message,
       });
     }
@@ -215,7 +216,7 @@ class NewDeployment extends Component {
     });
   }
 
-  loadPayloadEditor(stream) {
+  loadPayloadEditor() {
     return (
       <div className="col-12 mt-4">
         <PayloadEditor
