@@ -111,7 +111,7 @@ class NewConfig extends Component {
       config.spec = deployment.spec;
     }
 
-    this.setState({ config: config });
+    this.setState({ config: config, editorConfig: config });
   }
 
   updateTempStreamConfig(field, value) {
@@ -358,7 +358,7 @@ class NewConfig extends Component {
     if (toggle) {
       this.setState({
         showPayloadEditor: toggle,
-        editorConfig: JSON.stringify(this.state.deployment, null, 2),
+        editorConfig: JSON.stringify(this.state.config, null, 2),
       });
     } else if (this.state.payloadEditorChanges && !window.confirm("Going back will reset all edits in the editor!")) {
       this.setState({
@@ -366,7 +366,7 @@ class NewConfig extends Component {
       });
     } else {
       this.setState({
-        editorConfig: JSON.stringify(this.state.deployment, null, 2),
+        editorConfig: JSON.stringify(this.state.config, null, 2),
         showPayloadEditor: toggle,
         payloadEditorChanges: false,
         errorMessage: "",
