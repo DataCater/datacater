@@ -10,8 +10,10 @@ public record Info(
     this(
         VersionInfo.from(
             StaticInformation.EnvironmentVariables.VERSION,
-            StaticInformation.EnvironmentVariables.BASE_IMAGE
-                + StaticInformation.EnvironmentVariables.VERSION,
+            StaticInformation.EnvironmentVariables.BUILD_DATE,
+            System.getProperty(StaticInformation.SYSTEM_PROPERTY_OS_ARCH_TEXT),
+            StaticInformation.EnvironmentVariables.GIT_COMMIT_VERSION,
+            StaticInformation.EnvironmentVariables.BASE_IMAGE,
             StaticInformation.EnvironmentVariables.PIPELINE_IMAGE,
             StaticInformation.EnvironmentVariables.PYTHON_RUNNER_IMAGE
                 + ":"
