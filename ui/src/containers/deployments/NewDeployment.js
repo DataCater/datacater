@@ -28,10 +28,7 @@ class NewDeployment extends Component {
       deploymentCreated: false,
       payloadEditorChanges: false,
       showPayloadEditor: false,
-      editorDeployment: {
-        spec: {},
-        configSelector: {},
-      },
+      editorDeployment: "",
     };
 
     this.handleCreateDeployment = this.handleCreateDeployment.bind(this);
@@ -63,8 +60,17 @@ class NewDeployment extends Component {
   }
 
   submitEditorContent() {
+    let parsedDeployment = undefined;
     try {
-      let parsedDeployment = JSON.parse(this.state.editorDeployment, null, 2);
+      parsedDeployment = JSON.parse(this.state.editorDeployment, null, 2);
+    } catch (syntaxError) {
+      this.setState({
+        deploymentCreated: false,
+        errorMessage: syntaxError.message,
+      });
+    }
+
+    if (paresedDeployment !== undefined) {
       this.props.addDeployment(parsedDeployment).then(() => {
         if (this.props.deployments.errorMessage !== undefined) {
           this.setState({
@@ -77,11 +83,6 @@ class NewDeployment extends Component {
             errorMessage: "",
           });
         }
-      });
-    } catch (syntaxError) {
-      this.setState({
-        deploymentCreated: false,
-        errorMessage: syntaxError.message,
       });
     }
   }
@@ -188,11 +189,11 @@ class NewDeployment extends Component {
 
   toggleForm(event) {
     event.preventDefault();
-    let toggle = !this.state.showPayloadEditor;
+    let isShowingPayloadEditor = !this.state.showPayloadEditor;
 
-    if (toggle) {
+    if (isShowingPayloadEditor) {
       this.setState({
-        showPayloadEditor: toggle,
+        showPayloadEditor: isShowingPayloadEditor,
         editorDeployment: JSON.stringify(this.state.deployment, null, 2),
       });
     } else if (this.state.payloadEditorChanges && !window.confirm("Going back will reset all edits in the editor!")) {
@@ -202,7 +203,7 @@ class NewDeployment extends Component {
     } else {
       this.setState({
         editorDeployment: JSON.stringify(this.state.deployment, null, 2),
-        showPayloadEditor: toggle,
+        showPayloadEditor: isShowingPayloadEditor,
         errorMessage: "",
         payloadEditorChanges: false,
       });

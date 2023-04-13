@@ -23,10 +23,7 @@ class NewPipeline extends Component {
       pipelineCreated: false,
       payloadEditorChanges: false,
       showPayloadEditor: false,
-      editorPipeline: {
-        metadata: {},
-        spec: {},
-      },
+      editorPipeline: "",
     };
 
     this.handleCreatePipeline = this.handleCreatePipeline.bind(this);
@@ -72,8 +69,17 @@ class NewPipeline extends Component {
   }
 
   submitEditorContent() {
+    let parsedEditorStream = undefined;
     try {
-      let parsedEditorStream = JSON.parse(this.state.editorPipeline);
+      parsedEditorStream = JSON.parse(this.state.editorPipeline);
+    } catch (syntaxError) {
+      this.setState({
+        pipelineCreated: false,
+        errorMessage: syntaxError.message,
+      });
+    }
+
+    if (parsedEditorStream !== undefined) {
       this.props.addPipeline(parsedEditorStream).then(() => {
         if (this.props.pipelines.errorMessage !== undefined) {
           this.setState({
@@ -86,11 +92,6 @@ class NewPipeline extends Component {
             errorMessage: "",
           });
         }
-      });
-    } catch (syntaxError) {
-      this.setState({
-        pipelineCreated: false,
-        errorMessage: syntaxError.message,
       });
     }
   }
@@ -113,11 +114,11 @@ class NewPipeline extends Component {
 
   toggleForm(event) {
     event.preventDefault();
-    let toggle = !this.state.showPayloadEditor;
+    let isShowingPayloadEditor = !this.state.showPayloadEditor;
 
-    if (toggle) {
+    if (isShowingPayloadEditor) {
       this.setState({
-        showPayloadEditor: toggle,
+        showPayloadEditor: isShowingPayloadEditor,
         editorPipeline: JSON.stringify(this.state.pipeline, null, 2),
       });
     } else if (this.state.payloadEditorChanges && !window.confirm("Going back will reset all edits in the editor!")) {
@@ -127,7 +128,7 @@ class NewPipeline extends Component {
     } else {
       this.setState({
         editorPipeline: JSON.stringify(this.state.pipeline, null, 2),
-        showPayloadEditor: toggle,
+        showPayloadEditor: isShowingPayloadEditor,
         errorMessage: "",
         payloadEditorChanges: false,
       });

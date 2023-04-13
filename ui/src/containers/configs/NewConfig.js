@@ -65,20 +65,7 @@ class NewConfig extends Component {
       configCreated: false,
       showPayloadEditor: false,
       payloadEditorChanges: false,
-      editorConfig: {
-        kind: "STREAM",
-        metadata: {
-          labels: {},
-        },
-        spec: {
-          kind: "KAFKA",
-          kafka: {
-            topic: {
-              config: {},
-            },
-          },
-        },
-      },
+      editorConfig: "",
     };
 
     this.handleCreateConfig = this.handleCreateConfig.bind(this);
@@ -155,8 +142,17 @@ class NewConfig extends Component {
   }
 
   submitEditorContent() {
+    let parsedConfig = undefined;
     try {
-      let parsedConfig = JSON.parse(this.state.editorConfig, null, 2);
+      parsedConfig = JSON.parse(this.state.editorConfig, null, 2);
+    } catch (syntaxError) {
+      this.setState({
+        configCreated: false,
+        errorMessage: syntaxError.message,
+      });
+    }
+
+    if (parsedConfig !== undefined) {
       this.props.addDeployment(parsedConfig).then(() => {
         if (this.props.configs.errorMessage !== undefined) {
           this.setState({
@@ -169,11 +165,6 @@ class NewConfig extends Component {
             errorMessage: "",
           });
         }
-      });
-    } catch (syntaxError) {
-      this.setState({
-        configCreated: false,
-        errorMessage: syntaxError.message,
       });
     }
   }
@@ -353,11 +344,11 @@ class NewConfig extends Component {
 
   toggleForm(event) {
     event.preventDefault();
-    let toggle = !this.state.showPayloadEditor;
+    let isShowingPayloadEditor = !this.state.showPayloadEditor;
 
-    if (toggle) {
+    if (isShowingPayloadEditor) {
       this.setState({
-        showPayloadEditor: toggle,
+        showPayloadEditor: isShowingPayloadEditor,
         editorConfig: JSON.stringify(this.state.config, null, 2),
       });
     } else if (this.state.payloadEditorChanges && !window.confirm("Going back will reset all edits in the editor!")) {
@@ -367,7 +358,7 @@ class NewConfig extends Component {
     } else {
       this.setState({
         editorConfig: JSON.stringify(this.state.config, null, 2),
-        showPayloadEditor: toggle,
+        showPayloadEditor: isShowingPayloadEditor,
         payloadEditorChanges: false,
         errorMessage: "",
       });

@@ -10,21 +10,10 @@ export class PayloadEditor extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      didChange: false,
-      newCode: undefined,
-      editorCode: ""
+      editorCode: "",
     };
 
-    this.didIntroduceChange = this.didIntroduceChange.bind(this);
     this.handleChange = this.handleChange.bind(this);
-  }
-
-  didIntroduceChange() {
-    if (this.state.didChange) {
-      return this.state.newCode;
-    } else {
-      return undefined;
-    }
   }
 
   handleChange(value) {

@@ -24,16 +24,7 @@ class NewStream extends Component {
       showPayloadEditor: false,
       errorMessages: {},
       showTopicConfig: false,
-      editorStream: {
-        spec: {
-          kind: "KAFKA",
-          kafka: {
-            topic: {
-              config: {},
-            },
-          },
-        },
-      },
+      editorStream: "",
       stream: {
         spec: {
           kind: "KAFKA",
@@ -589,11 +580,11 @@ class NewStream extends Component {
 
   toggleForm(event) {
     event.preventDefault();
-    let toggle = !this.state.showPayloadEditor;
+    let isShowingPayloadEditor = !this.state.showPayloadEditor;
 
-    if (toggle) {
+    if (isShowingPayloadEditor) {
       this.setState({
-        showPayloadEditor: toggle,
+        showPayloadEditor: isShowingPayloadEditor,
         editorStream: JSON.stringify(this.state.stream, null, 2),
       });
     } else if (this.state.payloadEditorChanges && !window.confirm("Going back will reset all edits in the editor!")) {
@@ -603,7 +594,7 @@ class NewStream extends Component {
     } else {
       this.setState({
         editorStream: JSON.stringify(this.state.stream, null, 2),
-        showPayloadEditor: toggle,
+        showPayloadEditor: isShowingPayloadEditor,
         errorMessage: "",
         payloadEditorChanges: false,
       });
@@ -617,7 +608,7 @@ class NewStream extends Component {
     });
   }
 
-  loadPayloadEditor(stream) {
+  loadPayloadEditor() {
     return (
       <div className="col-12 mt-4">
         <PayloadEditor
@@ -639,8 +630,17 @@ class NewStream extends Component {
   }
 
   submitEditorContent() {
+    let parsedEditorStream = undefined;
     try {
-      let parsedEditorStream = JSON.parse(this.state.editorStream);
+      parsedEditorStream = JSON.parse(this.state.editorStream);
+    } catch (syntaxError) {
+      this.setState({
+        streamCreated: false,
+        errorMessage: syntaxError.message,
+      });
+    }
+
+    if (parsedEditorStream !== null) {
       this.props.addStream(parsedEditorStream).then(() => {
         if (this.props.streams.errorMessage !== undefined) {
           this.setState({
@@ -653,11 +653,6 @@ class NewStream extends Component {
             errorMessage: "",
           });
         }
-      });
-    } catch (syntaxError) {
-      this.setState({
-        streamCreated: false,
-        errorMessage: syntaxError.message,
       });
     }
   }
