@@ -8,15 +8,13 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
-import org.jboss.logging.Logger;
 
 @Path("/")
 @Produces(MediaType.APPLICATION_JSON)
 public class InfoEndpoint {
-  static final Logger LOGGER = Logger.getLogger(InfoEndpoint.class);
 
   @GET
-  public Uni<Info> getDeployments(@Context UriInfo uriInfo) {
+  public Uni<Info> getInfo(@Context UriInfo uriInfo) {
     final URI requestUri = uriInfo.getRequestUri();
     return Uni.createFrom().item(new Info(requestUri.toASCIIString()));
   }

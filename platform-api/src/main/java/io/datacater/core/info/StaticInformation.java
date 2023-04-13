@@ -6,10 +6,10 @@ public class StaticInformation {
   private StaticInformation() {}
 
   static final String API_DOCUMENTATION_PATH_PREFIX = "https://docs.datacater.io/docs/api";
-  static final String STREAMS_SUFFIX = "/streams";
-  static final String DEPLOYMENTS_SUFFIX = "/deployments";
-  static final String CONFIGS_SUFFIX = "/configs";
-  static final String PIPELINES_SUFFIX = "/pipelines";
+  static final String STREAMS_SUFFIX = "streams";
+  static final String DEPLOYMENTS_SUFFIX = "deployments";
+  static final String CONFIGS_SUFFIX = "configs";
+  static final String PIPELINES_SUFFIX = "pipelines";
   static final String SYSTEM_PROPERTY_OS_ARCH_TEXT = "os.arch";
 
   static class EnvironmentVariables {
@@ -64,5 +64,14 @@ public class StaticInformation {
         ConfigProvider.getConfig()
             .getOptionalValue("datacater.pythonrunner.image.version", String.class)
             .orElse("");
+  }
+
+  public static String mapUrlAndResource(String url, String resource) {
+    String fullURL = url;
+    if (!fullURL.endsWith("/")) {
+      fullURL += "/";
+    }
+    fullURL += resource;
+    return fullURL;
   }
 }

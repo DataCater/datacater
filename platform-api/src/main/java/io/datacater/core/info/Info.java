@@ -20,20 +20,25 @@ public record Info(
                 + StaticInformation.EnvironmentVariables.PYTHON_RUNNER_IMAGE_VERSION),
         ResourceInfo.from(
             ResourceItem.from(
-                path + StaticInformation.STREAMS_SUFFIX,
-                StaticInformation.API_DOCUMENTATION_PATH_PREFIX + StaticInformation.STREAMS_SUFFIX),
+                StaticInformation.mapUrlAndResource(path, StaticInformation.STREAMS_SUFFIX),
+                StaticInformation.mapUrlAndResource(
+                    StaticInformation.API_DOCUMENTATION_PATH_PREFIX,
+                    StaticInformation.STREAMS_SUFFIX)),
             ResourceItem.from(
-                path + StaticInformation.DEPLOYMENTS_SUFFIX,
-                StaticInformation.API_DOCUMENTATION_PATH_PREFIX
-                    + StaticInformation.DEPLOYMENTS_SUFFIX),
+                StaticInformation.mapUrlAndResource(path, StaticInformation.DEPLOYMENTS_SUFFIX),
+                StaticInformation.mapUrlAndResource(
+                    StaticInformation.API_DOCUMENTATION_PATH_PREFIX,
+                    StaticInformation.DEPLOYMENTS_SUFFIX)),
             ResourceItem.from(
-                path + StaticInformation.PIPELINES_SUFFIX,
-                StaticInformation.API_DOCUMENTATION_PATH_PREFIX
-                    + StaticInformation.PIPELINES_SUFFIX),
+                StaticInformation.mapUrlAndResource(path, StaticInformation.PIPELINES_SUFFIX),
+                StaticInformation.mapUrlAndResource(
+                    StaticInformation.API_DOCUMENTATION_PATH_PREFIX,
+                    StaticInformation.PIPELINES_SUFFIX)),
             ResourceItem.from(
-                path + StaticInformation.CONFIGS_SUFFIX,
-                StaticInformation.API_DOCUMENTATION_PATH_PREFIX
-                    + StaticInformation.CONFIGS_SUFFIX)),
+                StaticInformation.mapUrlAndResource(path, StaticInformation.CONFIGS_SUFFIX),
+                StaticInformation.mapUrlAndResource(
+                    StaticInformation.API_DOCUMENTATION_PATH_PREFIX,
+                    StaticInformation.CONFIGS_SUFFIX))),
         ContactInfo.from(
             StaticInformation.EnvironmentVariables.CONTACT_NAME,
             StaticInformation.EnvironmentVariables.CONTACT_EMAIL,
