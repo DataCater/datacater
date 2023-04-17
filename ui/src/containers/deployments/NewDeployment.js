@@ -70,7 +70,7 @@ class NewDeployment extends Component {
       });
     }
 
-    if (paresedDeployment !== undefined) {
+    if (parsedDeployment !== undefined) {
       this.props.addDeployment(parsedDeployment).then(() => {
         if (this.props.deployments.errorMessage !== undefined) {
           this.setState({
