@@ -2,7 +2,7 @@
 quarkus  :
   application:
     name: datacater
-    version: '2023.1'
+    version: '2023.2'
   datasource:
     db-kind: postgresql
     jdbc: false
