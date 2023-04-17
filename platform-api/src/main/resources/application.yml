@@ -71,7 +71,7 @@ datacater:
   pythonrunner:
     image:
       name: datacater/python-runner
-      version: alpha-20221101
+      version: 2023.2
   authorization:
     basic: true
     oidc: false
@@ -94,7 +94,7 @@ datacater:
     pythonrunner:
       image:
         name: datacater/python-runner
-        version: alpha-20221117
+        version: 2023.2
   quarkus:
     oidc:
       enabled: true
@@ -160,7 +160,7 @@ datacater:
     pythonrunner:
       image:
         name: datacater/python-runner
-        version: alpha-20221117
+        version: 2023.2
   quarkus:
     log:
       level: INFO
