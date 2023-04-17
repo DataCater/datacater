@@ -48,12 +48,12 @@ public class StaticInformation {
     static final String BASE_IMAGE =
         ConfigProvider.getConfig()
             .getOptionalValue("datacater.application.base-image", String.class)
-            .orElse("");
+            .orElse("datacater/datacater");
 
     static final String PIPELINE_IMAGE =
         ConfigProvider.getConfig()
             .getOptionalValue("datacater.deployment.image", String.class)
-            .orElse("");
+            .orElse("datacater/pipeline");
 
     static final String PYTHON_RUNNER_IMAGE =
         ConfigProvider.getConfig()
