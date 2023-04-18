@@ -10,8 +10,8 @@ import io.datacater.core.pipeline.PipelineEntity;
 import io.datacater.core.stream.StreamEntity;
 import io.datacater.core.utilities.StringUtilities;
 import io.fabric8.kubernetes.api.model.apps.Deployment;
-import io.fabric8.kubernetes.api.model.apps.DeploymentStatus;
 import io.fabric8.kubernetes.client.KubernetesClient;
+import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.kubernetes.client.dsl.ContainerResource;
 import io.fabric8.kubernetes.client.dsl.LogWatch;
 import io.quarkus.security.Authenticated;
@@ -135,10 +135,24 @@ public class DeploymentEndpoint {
   @GET
   @Path("{uuid}/status")
   @Produces(MediaType.APPLICATION_JSON)
-  public Uni<DeploymentStatus> getStatusByUuid(@PathParam("uuid") UUID deploymentId) {
-    var status = getDeploymentStatus(deploymentId);
-    return Uni.createFrom()
-        .item(status)
+  public Uni<DataCaterDeploymentStatus> getStatusByUuid(@PathParam("uuid") UUID deploymentId) {
+    return dsf.withTransaction(
+            ((session, transaction) -> session.find(DeploymentEntity.class, deploymentId)))
+        .onItem()
+        .ifNull()
+        .failWith(new DeploymentNotFoundException(StaticConfig.LoggerMessages.DEPLOYMENT_NOT_FOUND))
+        .onItem()
+        .ifNotNull()
+        .transform(
+            deploymentEntity -> {
+              try {
+                Deployment deployment = new K8Deployment(client).getDeploymentObject(deploymentId);
+                var test = new K8Deployment(client).getDeployment(deploymentId);
+                return DataCaterDeploymentStatus.from(deployment);
+              } catch (KubernetesClientException e) {
+                return null;
+              }
+            })
         .onItem()
         .ifNull()
         .failWith(
@@ -469,7 +483,9 @@ public class DeploymentEndpoint {
     lw.close();
   }
 
+  /*
   private DeploymentStatus getDeploymentStatus(UUID uuid) {
+
     Deployment k8Deployment = new K8Deployment(client).getDeploymentObject(uuid);
 
     if (k8Deployment != null) {
@@ -478,4 +494,6 @@ public class DeploymentEndpoint {
 
     return null;
   }
+
+   */
 }

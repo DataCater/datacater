@@ -239,13 +239,7 @@ public class K8Deployment {
 
   public Map<String, Object> getDeployment(UUID deploymentId) {
     try {
-      return deploymentToMetaDataMap(
-          client
-              .apps()
-              .deployments()
-              .inNamespace(StaticConfig.EnvironmentVariables.NAMESPACE)
-              .withName(getDeploymentName(deploymentId))
-              .get());
+      return deploymentToMetaDataMap(getDeploymentObject(deploymentId));
     } catch (DeploymentNotFoundException ex) {
       Map<String, Object> errorMap = new HashMap<>();
       Map<String, Object> messageMap = new HashMap<>();
@@ -255,7 +249,7 @@ public class K8Deployment {
     }
   }
 
-  public Deployment getDeploymentObject(UUID deploymentId) {
+  public Deployment getDeploymentObject(UUID deploymentId) throws KubernetesClientException {
     return client
         .apps()
         .deployments()
