@@ -257,7 +257,7 @@ class EditStream extends Component {
     return (
       <div className="col-12 mt-4">
         <PayloadEditor
-          apiPath="/configs/"
+          apiPath="/streams/"
           code={this.state.editorStream}
           codeChange={this.handleEditorChange}
         ></PayloadEditor>
