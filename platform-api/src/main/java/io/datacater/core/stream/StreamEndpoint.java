@@ -81,7 +81,7 @@ public class StreamEndpoint {
   @PUT
   @Path("{uuid}")
   @RequestBody
-  @Consumes(MediaType.APPLICATION_JSON)
+  @Consumes({MediaType.APPLICATION_JSON, YAMLMediaTypes.APPLICATION_JACKSON_YAML})
   public Uni<StreamEntity> updateStream(@PathParam("uuid") UUID uuid, Stream stream) {
 
     return dsf.withTransaction(
