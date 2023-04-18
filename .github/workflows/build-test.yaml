@@ -147,7 +147,7 @@ jobs       :
                 -Dquarkus.container-image.push=true \
                 -Dquarkus.container-image.registry=docker.io \
                 -Dquarkus.container-image.username=datacater \
-                -Dquarkus.container-image.password=${{ secrets.DOCKERHUB_TOKEN }}
+                -Dquarkus.container-image.password=${{ secrets.DOCKERHUB_TOKEN }} \
                 -Dquarkus.jib.jvm-arguments="-Ddatacater.application.build-date=${{ steps.date.outputs.date }},-Ddatacater.application.git-version=${GITHUB_SHA},-Ddatacater.application.base-image=datacater/datacater:nightly"
     -   name: Push datacater/datacater to Docker Hub
         if: github.event.action == 'released' || github.event.action == 'prereleased'
@@ -159,7 +159,7 @@ jobs       :
                 -Dquarkus.container-image.push=true \
                 -Dquarkus.container-image.registry=docker.io \
                 -Dquarkus.container-image.username=datacater \
-                -Dquarkus.container-image.password=${{ secrets.DOCKERHUB_TOKEN }}
+                -Dquarkus.container-image.password=${{ secrets.DOCKERHUB_TOKEN }} \
                 -Dquarkus.jib.jvm-arguments="-Ddatacater.application.build-date=${{ steps.date.outputs.date }},-Ddatacater.application.git-version=${GITHUB_SHA},-Ddatacater.application.base-image=datacater/datacater:${RELEASE_VERSION}"
   push_pipeline:
     if: github.ref_name == 'main' || github.ref_type == 'tag' || github.base_ref == 'main'
