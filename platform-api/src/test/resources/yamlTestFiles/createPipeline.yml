@@ -1,11 +1,11 @@
 ---
-name: pipeline-test
+name    : pipeline-test
 metadata:
   stream-in: streamUUIDPlaceholder
   stream-out: streamUUIDPlaceholder
-spec:
+spec    :
   steps:
-    - kind: Field
+  -   kind: Field
       name: First step
       fields:
         age:
@@ -13,7 +13,7 @@ spec:
             key: less-than
             config:
               value: 50
-    - kind: Field
+  -   kind: Field
       name: Second step
       fields:
         email:
