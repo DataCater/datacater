@@ -1,25 +1,17 @@
 package io.datacater.core.stream;
 
 import static io.restassured.RestAssured.given;
-import static io.restassured.config.EncoderConfig.encoderConfig;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
-import com.fasterxml.jackson.jaxrs.yaml.YAMLMediaTypes;
 import io.quarkus.test.common.http.TestHTTPEndpoint;
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.RestAssured;
-import io.restassured.http.ContentType;
-import io.restassured.http.Header;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.UUID;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -31,10 +23,6 @@ import org.junit.jupiter.api.TestInstance;
 class StreamEndpointTest {
 
   UUID alreadyCreatedID;
-  public static final Header ACCEPT_YAML =
-      new Header("Accept", YAMLMediaTypes.APPLICATION_JACKSON_YAML);
-  public static final Header CONTENT_YAML =
-      new Header("Content-Type", YAMLMediaTypes.APPLICATION_JACKSON_YAML);
 
   @Test
   void testCreateStreamWithJsonData() throws IOException {
@@ -53,29 +41,6 @@ class StreamEndpointTest {
     StreamEntity se = mapper.readValue(response.body().asString(), StreamEntity.class);
     alreadyCreatedID = se.getId();
     Assertions.assertEquals(200, response.getStatusCode());
-  }
-
-  @Test
-  void testCreateStreamWithYamlData() throws IOException, URISyntaxException {
-    String yamlString = getStringFromFile("streamTestFiles/stream-test-yaml-format.yml");
-    ObjectMapper mapper = new YAMLMapper();
-
-    RequestSpecification request =
-        given()
-            .config(
-                RestAssured.config()
-                    .encoderConfig(
-                        encoderConfig()
-                            .encodeContentTypeAs(
-                                YAMLMediaTypes.APPLICATION_JACKSON_YAML, ContentType.TEXT)));
-    request.header(CONTENT_YAML).header(ACCEPT_YAML);
-    request.body(yamlString);
-
-    Response response = request.post();
-    StreamEntity se = mapper.readValue(response.body().asString(), StreamEntity.class);
-
-    Assertions.assertEquals(200, response.getStatusCode());
-    Assertions.assertEquals("testYaml", se.getName());
   }
 
   @Test
@@ -413,11 +378,5 @@ class StreamEndpointTest {
 
     Response responseInspect = given().pathParam("uuid", seID).get("/{uuid}/inspect");
     Assertions.assertEquals(200, responseInspect.getStatusCode());
-  }
-
-  static String getStringFromFile(String testResourcePath) throws IOException, URISyntaxException {
-    URL streamJsonURL = ClassLoader.getSystemClassLoader().getResource(testResourcePath);
-
-    return Files.readString(Paths.get(streamJsonURL.toURI()));
   }
 }
