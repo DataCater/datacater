@@ -147,9 +147,9 @@ public class DeploymentEndpoint {
             deploymentEntity -> {
               try {
                 Deployment deployment = new K8Deployment(client).getDeploymentObject(deploymentId);
-                var test = new K8Deployment(client).getDeployment(deploymentId);
                 return DataCaterDeploymentStatus.from(deployment);
               } catch (KubernetesClientException e) {
+                LOGGER.warn(StaticConfig.LoggerMessages.DEPLOYMENT_NOT_FOUND, e);
                 return null;
               }
             })
