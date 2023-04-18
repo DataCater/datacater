@@ -19,7 +19,7 @@ import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
 import org.jboss.logging.Logger;
 
 @Path("/streams")
-@Produces(MediaType.APPLICATION_JSON)
+@Produces({MediaType.APPLICATION_JSON, YAMLMediaTypes.APPLICATION_JACKSON_YAML})
 public class StreamEndpoint {
   private static final Logger LOGGER = Logger.getLogger(StreamEndpoint.class);
   private static final Integer KAFKA_API_TIMEOUT_MS =
