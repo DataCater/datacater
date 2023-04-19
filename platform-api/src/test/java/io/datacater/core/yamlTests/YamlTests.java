@@ -27,6 +27,7 @@ import org.junit.jupiter.api.*;
 @QuarkusTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @TestClassOrder(ClassOrderer.OrderAnnotation.class)
+@WithKubernetesTestServer
 public class YamlTests {
   private static final Logger LOGGER = Logger.getLogger(YamlTests.class);
   ObjectMapper mapper = new YAMLMapper();
@@ -169,7 +170,6 @@ public class YamlTests {
   @TestHTTPEndpoint(DeploymentEndpoint.class)
   @TestInstance(TestInstance.Lifecycle.PER_CLASS)
   @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-  @WithKubernetesTestServer
   @Order(4)
   class DeploymentTests {
 
