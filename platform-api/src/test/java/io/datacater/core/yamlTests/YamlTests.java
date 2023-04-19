@@ -14,6 +14,7 @@ import io.datacater.core.stream.StreamEndpoint;
 import io.datacater.core.stream.StreamEntity;
 import io.quarkus.test.common.http.TestHTTPEndpoint;
 import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.kubernetes.client.WithKubernetesTestServer;
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
@@ -168,6 +169,7 @@ public class YamlTests {
   @TestHTTPEndpoint(DeploymentEndpoint.class)
   @TestInstance(TestInstance.Lifecycle.PER_CLASS)
   @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+  @WithKubernetesTestServer
   @Order(4)
   class DeploymentTests {
 
