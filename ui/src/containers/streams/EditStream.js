@@ -812,7 +812,7 @@ className="ms-2 fs-7"
 
           { this.state.showPayloadEditor
             ? this.loadPayloadEditor()
-            : this.loadHTMLForm(stream, apiPayload)
+            : this.loadHTMLForm(deployment, apiPayload)
           }
         {![undefined, ""].includes(this.state.errorMessage) && (
           <div className="alert alert-danger mt-4">
