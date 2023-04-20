@@ -64,7 +64,7 @@ class EditDeployment extends Component {
     if (this.state.showPayloadEditor) {
       this.submitEditorContent();
     } else {
-      this.submitForm()
+      this.submitForm();
     }
   }
 
@@ -212,7 +212,10 @@ class EditDeployment extends Component {
         showPayloadEditor: isShowingPayloadEditor,
         editorDeployment: JSON.stringify(this.state.deployment, null, 2),
       });
-    } else if (this.state.payloadEditorChanges && !window.confirm("Going back will reset all edits in the editor!")) {
+    } else if (
+      this.state.payloadEditorChanges &&
+      !window.confirm("Going back will reset all edits in the editor!")
+    ) {
       this.setState({
         showPayloadEditor: true,
       });
@@ -235,7 +238,7 @@ class EditDeployment extends Component {
           codeChange={this.handleEditorChange}
         ></PayloadEditor>
       </div>
-    )
+    );
   }
 
   loadHTMLForm(deployment) {
@@ -306,8 +309,7 @@ class EditDeployment extends Component {
         <div className="col-12 mt-4">
           <h5 className="d-inline me-2 fw-semibold">Config selector</h5>
           <span className="text-muted fs-7">
-            You can reference one or multiple Configs by their key and
-            value.
+            You can reference one or multiple Configs by their key and value.
           </span>
         </div>
         {addedLabels.length === 0 && (
@@ -374,12 +376,12 @@ class EditDeployment extends Component {
                 onClick={this.addLabel}
               >
                 Add
-  </a>
+              </a>
             </div>
           </div>
         </div>
       </form>
-    )
+    );
   }
 
   render() {
@@ -416,10 +418,9 @@ class EditDeployment extends Component {
             requestBody={apiPayload}
             title={deployment.name || "Untitled deployment"}
           />
-          { this.state.showPayloadEditor
+          {this.state.showPayloadEditor
             ? this.loadPayloadEditor(deployment)
-            : this.loadHTMLForm(deployment, apiPayload)
-          }
+            : this.loadHTMLForm(deployment, apiPayload)}
           {![undefined, ""].includes(this.state.errorMessage) && (
             <div className="alert alert-danger mt-4">
               <p className="h6 fs-bolder">API response:</p>

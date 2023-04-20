@@ -199,17 +199,13 @@ class NewStream extends Component {
                     onChange={this.handleChange}
                     placeholder="3"
                     value={
-                      this.state.stream.spec.kafka["topic"][
-                        "num.partitions"
-                        ] || ""
+                      this.state.stream.spec.kafka["topic"]["num.partitions"] ||
+                      ""
                     }
                   />
                 </div>
                 <div className="col-12 mt-2">
-                  <label
-                    htmlFor="replication.factor"
-                    className="form-label"
-                  >
+                  <label htmlFor="replication.factor" className="form-label">
                     replication.factor
                   </label>
                   <input
@@ -223,7 +219,7 @@ class NewStream extends Component {
                     value={
                       this.state.stream.spec.kafka["topic"][
                         "replication.factor"
-                        ] || ""
+                      ] || ""
                     }
                   />
                 </div>
@@ -251,7 +247,7 @@ class NewStream extends Component {
                       value={
                         this.state.stream.spec.kafka.topic.config[
                           topicConfig
-                          ] || ""
+                        ] || ""
                       }
                     />
                   </div>
@@ -259,15 +255,15 @@ class NewStream extends Component {
                 <div className="col-12 mt-3">
                   <h6 className="d-inline me-2">Add config</h6>
                   <span className="text-muted fs-7">
-                        You can here use{" "}
+                    You can here use{" "}
                     <a
                       href="https://kafka.apache.org/documentation/#topicconfigs"
                       target="_blank"
                     >
-                          topic-level
-                        </a>{" "}
+                      topic-level
+                    </a>{" "}
                     configuration options.
-                      </span>
+                  </span>
                 </div>
                 <div className="col-12 mt-2">
                   <div className="row">
@@ -341,10 +337,7 @@ class NewStream extends Component {
             isSearchable
             options={deserializerOptions}
             onChange={(value) => {
-              this.updateConnectionConfig(
-                "value.deserializer",
-                value.value
-              );
+              this.updateConnectionConfig("value.deserializer", value.value);
             }}
           />
         </div>
@@ -443,22 +436,22 @@ class NewStream extends Component {
         <div className="col-12 mt-3">
           <h6 className="d-inline me-2">Add config</h6>
           <span className="text-muted fs-7">
-                You can here use{" "}
+            You can here use{" "}
             <a
               href="https://kafka.apache.org/documentation/#consumerconfigs"
               target="_blank"
             >
-                  consumer-level
-                </a>{" "}
+              consumer-level
+            </a>{" "}
             and{" "}
             <a
               href="https://kafka.apache.org/documentation/#producerconfigs"
               target="_blank"
             >
-                  producer-level
-                </a>{" "}
+              producer-level
+            </a>{" "}
             configuration options.
-              </span>
+          </span>
         </div>
         <div className="col-12 mt-2">
           <div className="row">
@@ -479,10 +472,7 @@ class NewStream extends Component {
                 className="form-control"
                 name="topicValue"
                 onChange={(event) => {
-                  this.updateTempConfig(
-                    "connectionValue",
-                    event.target.value
-                  );
+                  this.updateTempConfig("connectionValue", event.target.value);
                 }}
                 value={this.state.tempConfig.connectionValue || ""}
               />
@@ -502,9 +492,8 @@ class NewStream extends Component {
         <div className="col-12 mt-4">
           <h5 className="d-inline me-2 fw-semibold">Config selector</h5>
           <span className="text-muted fs-7">
-                You can reference one or multiple Configs by their key and
-                value.
-              </span>
+            You can reference one or multiple Configs by their key and value.
+          </span>
         </div>
         {addedLabels.length === 0 && (
           <div className="col-12 mt-2 mb-n1">
@@ -587,9 +576,12 @@ class NewStream extends Component {
         showPayloadEditor: isShowingPayloadEditor,
         editorStream: JSON.stringify(this.state.stream, null, 2),
       });
-    } else if (this.state.payloadEditorChanges && !window.confirm("Going back will reset all edits in the editor!")) {
-        this.setState({
-          showPayloadEditor: true,
+    } else if (
+      this.state.payloadEditorChanges &&
+      !window.confirm("Going back will reset all edits in the editor!")
+    ) {
+      this.setState({
+        showPayloadEditor: true,
       });
     } else {
       this.setState({

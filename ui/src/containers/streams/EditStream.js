@@ -262,7 +262,7 @@ class EditStream extends Component {
           codeChange={this.handleEditorChange}
         ></PayloadEditor>
       </div>
-    )
+    );
   }
 
   toggleForm(event) {
@@ -274,7 +274,10 @@ class EditStream extends Component {
         showPayloadEditor: isShowingPayloadEditor,
         editorStream: JSON.stringify(this.state.stream, null, 2),
       });
-    } else if (this.state.payloadEditorChanges && !window.confirm("Going back will reset all edits in the editor!")) {
+    } else if (
+      this.state.payloadEditorChanges &&
+      !window.confirm("Going back will reset all edits in the editor!")
+    ) {
       this.setState({
         showPayloadEditor: true,
       });
@@ -367,8 +370,8 @@ class EditStream extends Component {
                     num.partitions
                     <span className="text-muted fs-7 ms-2">
                       You cannot update the topic configuration{" "}
-                      <i>num.partitions</i> of existing streams. Please
-                      create a new stream instead.
+                      <i>num.partitions</i> of existing streams. Please create a
+                      new stream instead.
                     </span>
                   </label>
                   <input
@@ -381,17 +384,13 @@ class EditStream extends Component {
                     onChange={this.handleChange}
                     placeholder="3"
                     value={
-                      this.state.stream.spec.kafka["topic"][
-                        "num.partitions"
-                      ] || ""
+                      this.state.stream.spec.kafka["topic"]["num.partitions"] ||
+                      ""
                     }
                   />
                 </div>
                 <div className="col-12 mt-2">
-                  <label
-                    htmlFor="replication.factor"
-                    className="form-label"
-                  >
+                  <label htmlFor="replication.factor" className="form-label">
                     replication.factor
                     <span className="text-muted fs-7 ms-2">
                       You cannot update the topic configuration{" "}
@@ -450,10 +449,10 @@ class EditStream extends Component {
                     You can here use{" "}
                     <a
                       href="https://kafka.apache.org/documentation/#topicconfigs"
-target="_blank"
->
-topic-level
-</a>{" "}
+                      target="_blank"
+                    >
+                      topic-level
+                    </a>{" "}
                     configuration options.
                   </span>
                 </div>
@@ -476,12 +475,12 @@ topic-level
                         className="form-control"
                         name="topicValue"
                         onChange={(event) => {
-  this.updateTempConfig(
-"topicValue",
-event.target.value
-);
-}}
-        value={this.state.tempConfig.topicValue || ""}
+                          this.updateTempConfig(
+                            "topicValue",
+                            event.target.value
+                          );
+                        }}
+                        value={this.state.tempConfig.topicValue || ""}
                       />
                     </div>
                     <div className="col-md-3 d-flex align-items-end">
@@ -492,27 +491,26 @@ event.target.value
                         onClick={this.addConfig}
                       >
                         Add
-</a>
+                      </a>
                     </div>
                   </div>
-</div>
-</div>
-</div>
-</>
-)}
-<div className="col-12 mt-4">
-<h5 className="fw-semibold">Data format</h5>
-</div>
-<div className="col-12">
-<label htmlFor="key.deserializer" className="form-label">
-key.deserializer
-</label>
-<Creatable
-defaultValue={deserializerOptions.find(
+                </div>
+              </div>
+            </div>
+          </>
+        )}
+        <div className="col-12 mt-4">
+          <h5 className="fw-semibold">Data format</h5>
+        </div>
+        <div className="col-12">
+          <label htmlFor="key.deserializer" className="form-label">
+            key.deserializer
+          </label>
+          <Creatable
+            defaultValue={deserializerOptions.find(
               (option) =>
                 option.value ===
-                  (stream.spec.kafka["key.deserializer"] ||
-                    defaultDeserializer)
+                (stream.spec.kafka["key.deserializer"] || defaultDeserializer)
             )}
             isSearchable
             options={deserializerOptions}
@@ -529,28 +527,24 @@ defaultValue={deserializerOptions.find(
             defaultValue={deserializerOptions.find(
               (option) =>
                 option.value ===
-                  (stream.spec.kafka["value.deserializer"] ||
-                    defaultDeserializer)
+                (stream.spec.kafka["value.deserializer"] || defaultDeserializer)
             )}
             isSearchable
             options={deserializerOptions}
-onChange={(value) => {
-  this.updateConnectionConfig(
-    "value.deserializer",
-value.value
-);
-}}
-/>
-</div>
+            onChange={(value) => {
+              this.updateConnectionConfig("value.deserializer", value.value);
+            }}
+          />
+        </div>
         <div className="col-12 mt-2">
-<label htmlFor="key.serializer" className="form-label">
-key.serializer
+          <label htmlFor="key.serializer" className="form-label">
+            key.serializer
           </label>
-<Creatable
+          <Creatable
             defaultValue={serializerOptions.find(
               (option) =>
-option.value ===
-                  (stream.spec.kafka["key.serializer"] || defaultSerializer)
+                option.value ===
+                (stream.spec.kafka["key.serializer"] || defaultSerializer)
             )}
             isSearchable
             options={serializerOptions}
@@ -567,11 +561,11 @@ option.value ===
             defaultValue={serializerOptions.find(
               (option) =>
                 option.value ===
-                  (stream.spec.kafka["value.serializer"] || defaultSerializer)
+                (stream.spec.kafka["value.serializer"] || defaultSerializer)
             )}
             isSearchable
             options={serializerOptions}
-onChange={(value) => {
+            onChange={(value) => {
               this.updateConnectionConfig("value.serializer", value.value);
             }}
           />
@@ -595,7 +589,7 @@ onChange={(value) => {
               />
             </div>
           </>
-)}
+        )}
         <div className="col-12 mt-4">
           <h5 className="fw-semibold">Connection</h5>
         </div>
@@ -620,11 +614,11 @@ onChange={(value) => {
               <a
                 className="ms-2 fs-7"
                 data-config={connectionConfig}
-data-prefix="spec.kafka"
-href="/streams/new"
-onClick={this.removeConfig}
->
-Remove
+                data-prefix="spec.kafka"
+                href="/streams/new"
+                onClick={this.removeConfig}
+              >
+                Remove
               </a>
             </label>
             <input
@@ -649,40 +643,37 @@ Remove
               consumer-level
             </a>{" "}
             and{" "}
-<a
-href="https://kafka.apache.org/documentation/#producerconfigs"
-target="_blank"
->
-producer-level
-</a>{" "}
-configuration options.
-</span>
-</div>
-<div className="col-12 mt-2">
-<div className="row">
-<div className="col-md-3">
-<label className="form-label">Name</label>
-<Creatable
-isSearchable
-options={connectionOptions}
-onChange={(value) => {
+            <a
+              href="https://kafka.apache.org/documentation/#producerconfigs"
+              target="_blank"
+            >
+              producer-level
+            </a>{" "}
+            configuration options.
+          </span>
+        </div>
+        <div className="col-12 mt-2">
+          <div className="row">
+            <div className="col-md-3">
+              <label className="form-label">Name</label>
+              <Creatable
+                isSearchable
+                options={connectionOptions}
+                onChange={(value) => {
                   this.updateTempConfig("connectionName", value.value);
                 }}
               />
             </div>
             <div className="col-md-3">
               <label className="form-label">Value</label>
-<input
+              <input
                 type="text"
-  className="form-control"
+                className="form-control"
                 name="topicValue"
                 onChange={(event) => {
-                  this.updateTempConfig(
-"connectionValue",
-event.target.value
-);
-}}
-value={this.state.tempConfig.connectionValue || ""}
+                  this.updateTempConfig("connectionValue", event.target.value);
+                }}
+                value={this.state.tempConfig.connectionValue || ""}
               />
             </div>
             <div className="col-md-3 d-flex align-items-end">
@@ -695,26 +686,25 @@ value={this.state.tempConfig.connectionValue || ""}
                 Add
               </a>
             </div>
-</div>
-</div>
-<div className="col-12 mt-4">
-<h5 className="d-inline me-2 fw-semibold">Config selector</h5>
-<span className="text-muted fs-7">
-            You can reference one or multiple Configs by their key and
-value.
-</span>
-</div>
-{addedLabels.length === 0 && (
-  <div className="col-12 mt-2 mb-n1">
-<i>No configs referenced.</i>
-</div>
-)}
-{addedLabels.map((label) => (
-  <div className="col-12 mt-2" key={label}>
-<label htmlFor={label} className="form-label">
-{label}
-<a
-className="ms-2 fs-7"
+          </div>
+        </div>
+        <div className="col-12 mt-4">
+          <h5 className="d-inline me-2 fw-semibold">Config selector</h5>
+          <span className="text-muted fs-7">
+            You can reference one or multiple Configs by their key and value.
+          </span>
+        </div>
+        {addedLabels.length === 0 && (
+          <div className="col-12 mt-2 mb-n1">
+            <i>No configs referenced.</i>
+          </div>
+        )}
+        {addedLabels.map((label) => (
+          <div className="col-12 mt-2" key={label}>
+            <label htmlFor={label} className="form-label">
+              {label}
+              <a
+                className="ms-2 fs-7"
                 data-label={label}
                 data-prefix="configSelector"
                 href="#"
@@ -737,7 +727,7 @@ className="ms-2 fs-7"
         <div className="col-12 mt-2">
           <div className="row">
             <div className="col-md-3">
-<label className="form-label">Key</label>
+              <label className="form-label">Key</label>
               <input
                 type="text"
                 className="form-control"
@@ -770,7 +760,7 @@ className="ms-2 fs-7"
                 Add
               </a>
             </div>
-</div>
+          </div>
         </div>
       </form>
     );
@@ -810,31 +800,30 @@ className="ms-2 fs-7"
             title={stream.name || "Untitled stream"}
           />
 
-          { this.state.showPayloadEditor
+          {this.state.showPayloadEditor
             ? this.loadPayloadEditor()
-            : this.loadHTMLForm(deployment, apiPayload)
-          }
-        {![undefined, ""].includes(this.state.errorMessage) && (
-          <div className="alert alert-danger mt-4">
-            <p className="h6 fs-bolder">API response:</p>
-            {this.state.errorMessage}
+            : this.loadHTMLForm(deployment, apiPayload)}
+          {![undefined, ""].includes(this.state.errorMessage) && (
+            <div className="alert alert-danger mt-4">
+              <p className="h6 fs-bolder">API response:</p>
+              {this.state.errorMessage}
+            </div>
+          )}
+          <div className="col-12 mt-4 mb-4">
+            <a
+              href={`/streams/${stream.uuid}`}
+              className="btn btn-primary text-white"
+              onClick={this.handleUpdateStream}
+            >
+              Update stream
+            </a>
+            <button
+              className="btn btn-outline-primary ms-2"
+              onClick={this.toggleForm}
+            >
+              {this.state.showPayloadEditor ? "Back to form" : "Edit as JSON"}
+            </button>
           </div>
-        )}
-        <div className="col-12 mt-4 mb-4">
-          <a
-href={`/streams/${stream.uuid}`}
-            className="btn btn-primary text-white"
-            onClick={this.handleUpdateStream}
-          >
-            Update stream
-          </a>
-          <button
-            className="btn btn-outline-primary ms-2"
-            onClick={this.toggleForm}
-          >
-            {this.state.showPayloadEditor ? "Back to form" : "Edit as JSON"}
-          </button>
-        </div>
         </div>
       </div>
     );

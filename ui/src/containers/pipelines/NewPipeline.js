@@ -65,7 +65,6 @@ class NewPipeline extends Component {
         });
       }
     });
-
   }
 
   submitEditorContent() {
@@ -121,7 +120,10 @@ class NewPipeline extends Component {
         showPayloadEditor: isShowingPayloadEditor,
         editorPipeline: JSON.stringify(this.state.pipeline, null, 2),
       });
-    } else if (this.state.payloadEditorChanges && !window.confirm("Going back will reset all edits in the editor!")) {
+    } else if (
+      this.state.payloadEditorChanges &&
+      !window.confirm("Going back will reset all edits in the editor!")
+    ) {
       this.setState({
         showPayloadEditor: true,
       });
@@ -212,7 +214,6 @@ class NewPipeline extends Component {
       );
     }
 
-
     return (
       <div className="container">
         <div className="row">
@@ -232,8 +233,7 @@ class NewPipeline extends Component {
           />
           {this.state.showPayloadEditor
             ? this.loadPayloadEditor()
-            : this.loadHTMLForm()
-          }
+            : this.loadHTMLForm()}
           {![undefined, ""].includes(this.state.errorMessage) && (
             <div className="alert alert-danger mt-4">
               <p className="h6 fs-bolder">API response:</p>

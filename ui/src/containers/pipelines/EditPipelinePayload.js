@@ -66,8 +66,8 @@ class EditPipelinePayload extends Component {
       parsedPipeline = JSON.parse(this.state.editorPipeline, null, 2);
     } catch (syntaxError) {
       this.setState({
-        errorMessage: syntaxError.message
-      })
+        errorMessage: syntaxError.message,
+      });
     }
 
     if (this.state.unpersistedChanges && parsedPipeline !== undefined) {
@@ -86,7 +86,7 @@ class EditPipelinePayload extends Component {
   render() {
     const pipeline = this.state.pipeline;
     if (pipeline == null) {
-      return (<></>);
+      return <></>;
     }
 
     const header = (
@@ -110,8 +110,7 @@ class EditPipelinePayload extends Component {
                     {pipeline.name || "Untitled pipeline"}
                   </h4>
                 </div>
-                <div className="col-4 d-flex align-items-center justify-content-end">
-                </div>
+                <div className="col-4 d-flex align-items-center justify-content-end"></div>
               </div>
             </div>
           </div>
@@ -166,7 +165,7 @@ class EditPipelinePayload extends Component {
             </div>
           </div>
         </div>
-      )
+      );
     }
   }
 }
@@ -189,4 +188,7 @@ const mapDispatchToProps = {
   updatePipeline: updatePipeline,
 };
 
-export default connect(mapStateToProps, mapDispatchToProps)(EditPipelinePayload);
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(EditPipelinePayload);

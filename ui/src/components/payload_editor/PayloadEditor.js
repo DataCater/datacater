@@ -1,4 +1,4 @@
-import React, {Component} from "react";
+import React, { Component } from "react";
 import AceEditor from "react-ace";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
@@ -34,7 +34,7 @@ export class PayloadEditor extends Component {
             <AceEditor
               placeholder=""
               mode="json"
-              setOptions={{useWorker: false}}
+              setOptions={{ useWorker: false }}
               theme="xcode"
               className=""
               onLoad={(editor) => {

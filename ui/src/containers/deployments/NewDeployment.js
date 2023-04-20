@@ -53,9 +53,9 @@ class NewDeployment extends Component {
   handleCreateDeployment(event) {
     event.preventDefault();
     if (this.state.showPayloadEditor) {
-      this.submitEditorContent()
+      this.submitEditorContent();
     } else {
-      this.submitForm()
+      this.submitForm();
     }
   }
 
@@ -196,7 +196,10 @@ class NewDeployment extends Component {
         showPayloadEditor: isShowingPayloadEditor,
         editorDeployment: JSON.stringify(this.state.deployment, null, 2),
       });
-    } else if (this.state.payloadEditorChanges && !window.confirm("Going back will reset all edits in the editor!")) {
+    } else if (
+      this.state.payloadEditorChanges &&
+      !window.confirm("Going back will reset all edits in the editor!")
+    ) {
       this.setState({
         showPayloadEditor: true,
       });
@@ -291,9 +294,8 @@ class NewDeployment extends Component {
         <div className="col-12 mt-4">
           <h5 className="d-inline me-2 fw-semibold">Config selector</h5>
           <span className="text-muted fs-7">
-                You can reference one or multiple Configs by their key and
-                value.
-              </span>
+            You can reference one or multiple Configs by their key and value.
+          </span>
         </div>
         {addedLabels.length === 0 && (
           <div className="col-12 mt-2 mb-n1">
@@ -395,8 +397,7 @@ class NewDeployment extends Component {
           />
           {this.state.showPayloadEditor
             ? this.loadPayloadEditor()
-            : this.loadHTMLForm()
-          }
+            : this.loadHTMLForm()}
           {![undefined, ""].includes(this.state.errorMessage) && (
             <div className="alert alert-danger mt-4">
               <p className="h6 fs-bolder">API response:</p>

@@ -141,7 +141,8 @@ class NewConfig extends Component {
     });
   }
 
-  submitEditorContent() {
+  submitEditorContent(event) {
+    event.preventDefault();
     let parsedConfig = undefined;
     try {
       parsedConfig = JSON.parse(this.state.editorConfig, null, 2);
@@ -153,7 +154,7 @@ class NewConfig extends Component {
     }
 
     if (parsedConfig !== undefined) {
-      this.props.addDeployment(parsedConfig).then(() => {
+      this.props.addConfig(parsedConfig).then(() => {
         if (this.props.configs.errorMessage !== undefined) {
           this.setState({
             configCreated: false,
@@ -351,7 +352,10 @@ class NewConfig extends Component {
         showPayloadEditor: isShowingPayloadEditor,
         editorConfig: JSON.stringify(this.state.config, null, 2),
       });
-    } else if (this.state.payloadEditorChanges && !window.confirm("Going back will reset all edits in the editor!")) {
+    } else if (
+      this.state.payloadEditorChanges &&
+      !window.confirm("Going back will reset all edits in the editor!")
+    ) {
       this.setState({
         showPayloadEditor: true,
       });
@@ -396,7 +400,7 @@ class NewConfig extends Component {
           </button>
         </div>
       </div>
-    )
+    );
   }
 
   loadHTMLForm() {
@@ -468,8 +472,8 @@ class NewConfig extends Component {
                 <div className="col-12 mt-4">
                   <h5 className="d-inline me-2 fw-semibold">Labels</h5>
                   <span className="text-muted fs-7">
-                    Configs can be referenced by other resources, e.g.,
-                    Streams, via their labels.
+                    Configs can be referenced by other resources, e.g., Streams,
+                    via their labels.
                   </span>
                 </div>
                 {addedLabels.length === 0 && (
@@ -499,9 +503,7 @@ class NewConfig extends Component {
                         data-prefix="metadata.labels"
                         name={label}
                         onChange={this.handleEventChange}
-                        value={
-                          this.state.config.metadata.labels[label] || ""
-                        }
+                        value={this.state.config.metadata.labels[label] || ""}
                       />
                     </div>
                   ))}
@@ -517,10 +519,7 @@ class NewConfig extends Component {
                         className="form-control"
                         name="labelKey"
                         onChange={(event) => {
-                          this.updateTempLabel(
-                            "labelKey",
-                            event.target.value
-                          );
+                          this.updateTempLabel("labelKey", event.target.value);
                         }}
                         value={this.state.tempLabel.labelKey || ""}
                       />
@@ -575,10 +574,7 @@ class NewConfig extends Component {
                       <h5 className="fw-semibold">Topic configuration</h5>
                     </div>
                     <div className="col-12 mt-2">
-                      <label
-                        htmlFor="num.partitions"
-                        className="form-label"
-                      >
+                      <label htmlFor="num.partitions" className="form-label">
                         num.partitions
                       </label>
                       <input
@@ -687,9 +683,7 @@ class NewConfig extends Component {
                                 event.target.value
                               );
                             }}
-                            value={
-                              this.state.tempStreamConfig.topicValue || ""
-                            }
+                            value={this.state.tempStreamConfig.topicValue || ""}
                           />
                         </div>
                         <div className="col-md-3 d-flex align-items-end">
@@ -708,10 +702,7 @@ class NewConfig extends Component {
                       <h5 className="fw-semibold">Data format</h5>
                     </div>
                     <div className="col-12">
-                      <label
-                        htmlFor="key.deserializer"
-                        className="form-label"
-                      >
+                      <label htmlFor="key.deserializer" className="form-label">
                         key.deserializer
                       </label>
                       <Creatable
@@ -752,10 +743,7 @@ class NewConfig extends Component {
                       />
                     </div>
                     <div className="col-12 mt-2">
-                      <label
-                        htmlFor="key.serializer"
-                        className="form-label"
-                      >
+                      <label htmlFor="key.serializer" className="form-label">
                         key.serializer
                       </label>
                       <Creatable
@@ -774,10 +762,7 @@ class NewConfig extends Component {
                       />
                     </div>
                     <div className="col-12 mt-2">
-                      <label
-                        htmlFor="value.serializer"
-                        className="form-label"
-                      >
+                      <label htmlFor="value.serializer" className="form-label">
                         value.serializer
                       </label>
                       <Creatable
@@ -824,10 +809,7 @@ class NewConfig extends Component {
                       <h5 className="fw-semibold">Connection</h5>
                     </div>
                     <div className="col-12 mt-2">
-                      <label
-                        htmlFor="bootstrap.servers"
-                        className="form-label"
-                      >
+                      <label htmlFor="bootstrap.servers" className="form-label">
                         bootstrap.servers
                       </label>
                       <input
@@ -838,9 +820,8 @@ class NewConfig extends Component {
                         name="bootstrap.servers"
                         onChange={this.handleEventChange}
                         value={
-                          this.state.stream.spec.kafka[
-                            "bootstrap.servers"
-                          ] || ""
+                          this.state.stream.spec.kafka["bootstrap.servers"] ||
+                          ""
                         }
                       />
                     </div>
@@ -869,9 +850,7 @@ class NewConfig extends Component {
                           name={connectionConfig}
                           onChange={this.handleEventChange}
                           value={
-                            this.state.stream.spec.kafka[
-                              connectionConfig
-                            ] || ""
+                            this.state.stream.spec.kafka[connectionConfig] || ""
                           }
                         />
                       </div>
@@ -924,8 +903,7 @@ class NewConfig extends Component {
                               );
                             }}
                             value={
-                              this.state.tempStreamConfig.connectionValue ||
-                                ""
+                              this.state.tempStreamConfig.connectionValue || ""
                             }
                           />
                         </div>
@@ -1018,14 +996,13 @@ class NewConfig extends Component {
           </div>
         </div>
       </form>
-    )
+    );
   }
 
   render() {
     if (this.state.configCreated) {
       return <Redirect to={"/configs/" + this.props.configs.config.uuid} />;
     }
-
 
     return (
       <div className="container">
@@ -1044,10 +1021,9 @@ class NewConfig extends Component {
             title="Create new config"
             subTitle="Configs outsource the configuration of Streams and other resources."
           />
-          { this.state.showPayloadEditor
+          {this.state.showPayloadEditor
             ? this.loadPayloadEditor()
-            : this.loadHTMLForm()
-          }
+            : this.loadHTMLForm()}
         </div>
       </div>
     );
