@@ -162,7 +162,7 @@ class EditDeployment extends Component {
     }
 
     if (parsedDeployment !== undefined) {
-      this.props.updateDeployment(parsedDeployment).then(() => {
+      this.props.updateDeployment(this.getDeploymentId(), parsedDeployment).then(() => {
         if (this.props.deployments.errorMessage !== undefined) {
           this.setState({
             deploymentUpdated: false,

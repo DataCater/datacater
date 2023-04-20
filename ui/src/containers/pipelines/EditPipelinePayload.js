@@ -17,8 +17,6 @@ class EditPipelinePayload extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      // storing, whether a new column has been added, in the state
-      // is a bit nasty but will speed up the componentDidMount function
       unpersistedChanges: false,
       errorMessage: "",
       editorPipeline: "",
@@ -76,6 +74,7 @@ class EditPipelinePayload extends Component {
         .then(() => {
           this.setState({
             unpersistedChanges: false,
+            pipelineUpdated: true,
           });
         });
     } else {
@@ -87,6 +86,10 @@ class EditPipelinePayload extends Component {
     const pipeline = this.state.pipeline;
     if (pipeline == null) {
       return <></>;
+    }
+
+    if (this.state.pipelineUpdated) {
+      return <Redirect to={`/pipelines/${this.getPipelineId()}`} />;
     }
 
     const header = (

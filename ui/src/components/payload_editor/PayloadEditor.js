@@ -9,9 +9,6 @@ import "ace-builds/src-noconflict/theme-xcode";
 export class PayloadEditor extends Component {
   constructor(props) {
     super(props);
-    this.state = {
-      editorCode: "",
-    };
 
     this.handleChange = this.handleChange.bind(this);
   }

@@ -221,7 +221,7 @@ class EditStream extends Component {
     }
 
     if (parsedStream !== undefined) {
-      this.props.updateStream(parsedStream).then(() => {
+      this.props.updateStream(this.getStreamId(), parsedStream).then(() => {
         if (this.props.streams.errorMessage !== undefined) {
           this.setState({
             streamUpdated: false,
@@ -802,7 +802,7 @@ class EditStream extends Component {
 
           {this.state.showPayloadEditor
             ? this.loadPayloadEditor()
-            : this.loadHTMLForm(deployment, apiPayload)}
+            : this.loadHTMLForm(stream, apiPayload)}
           {![undefined, ""].includes(this.state.errorMessage) && (
             <div className="alert alert-danger mt-4">
               <p className="h6 fs-bolder">API response:</p>

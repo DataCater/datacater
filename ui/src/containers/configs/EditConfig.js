@@ -961,11 +961,11 @@ class EditConfig extends Component {
     }
 
     if (parsedConfig !== undefined) {
-      this.props.updateConfig(parsedConfig).then(() => {
+      this.props.updateConfig(this.getConfigId(), parsedConfig).then(() => {
         if (this.props.configs.errorMessage !== undefined) {
           this.setState({
             configCreated: false,
-            errorMessage: this.props.config.errorMessage,
+            errorMessage: this.props.configs.errorMessage,
           });
         } else {
           this.setState({
