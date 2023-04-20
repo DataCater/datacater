@@ -1,5 +1,9 @@
 ---
 quarkus  :
+  kubernetes-client:
+    devservices:
+      flavor: kind
+      override-kubeconfig: true
   application:
     name: datacater
     version: '2023.2'
@@ -47,6 +51,9 @@ quarkus  :
       generation: update
   oidc:
     enabled: true
+kubernetes:
+  auth:
+    tryKubeConfig: false
 smallrye :
   jwt:
     sign:
