@@ -147,6 +147,7 @@ class NewConfig extends Component {
     try {
       parsedConfig = JSON.parse(this.state.editorConfig, null, 2);
     } catch (syntaxError) {
+      console.debug("JSON parse SyntaxError");
       this.setState({
         configCreated: false,
         errorMessage: syntaxError.message,
@@ -384,6 +385,12 @@ class NewConfig extends Component {
           code={this.state.editorConfig}
           codeChange={this.handleEditorChange}
         ></PayloadEditor>
+        {![undefined, ""].includes(this.state.errorMessage) && (
+          <div className="alert alert-danger mt-4">
+            <p className="h6 fs-bolder">Error:</p>
+            {this.state.errorMessage}
+          </div>
+        )}
         <div className="col-12 mt-4">
           <a
             href="/configs/new"

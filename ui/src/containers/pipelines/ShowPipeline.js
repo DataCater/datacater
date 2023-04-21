@@ -76,7 +76,7 @@ class ShowPipeline extends Component {
               <>
                 <a
                   href={`/pipelines/${pipeline.uuid}/edit-payload`}
-                  className="btn btn-secondary text-white ms-2"
+                  className="btn btn-light btn-secondary ms-2"
                 >
                   Edit as JSON
                 </a>

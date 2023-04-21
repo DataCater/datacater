@@ -162,19 +162,21 @@ class EditDeployment extends Component {
     }
 
     if (parsedDeployment !== undefined) {
-      this.props.updateDeployment(this.getDeploymentId(), parsedDeployment).then(() => {
-        if (this.props.deployments.errorMessage !== undefined) {
-          this.setState({
-            deploymentUpdated: false,
-            errorMessage: this.props.deployments.errorMessage,
-          });
-        } else {
-          this.setState({
-            deploymentUpdated: true,
-            errorMessage: "",
-          });
-        }
-      });
+      this.props
+        .updateDeployment(this.getDeploymentId(), parsedDeployment)
+        .then(() => {
+          if (this.props.deployments.errorMessage !== undefined) {
+            this.setState({
+              deploymentUpdated: false,
+              errorMessage: this.props.deployments.errorMessage,
+            });
+          } else {
+            this.setState({
+              deploymentUpdated: true,
+              errorMessage: "",
+            });
+          }
+        });
     }
   }
 
