@@ -12,6 +12,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import javax.ws.rs.core.MediaType;
 
 public class Utilities {
 
@@ -19,6 +20,9 @@ public class Utilities {
       new Header("Accept", YAMLMediaTypes.APPLICATION_JACKSON_YAML);
   public static final Header CONTENT_YAML =
       new Header("Content-Type", YAMLMediaTypes.APPLICATION_JACKSON_YAML);
+
+  public static final Header ACCEPT_JSON = new Header("Accept", MediaType.APPLICATION_JSON);
+  public static final Header CONTENT_JSON = new Header("Content-Type", MediaType.APPLICATION_JSON);
 
   public static final RestAssuredConfig restAssuredConfig =
       RestAssured.config()
