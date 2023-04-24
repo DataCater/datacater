@@ -147,7 +147,6 @@ class NewConfig extends Component {
     try {
       parsedConfig = JSON.parse(this.state.editorConfig, null, 2);
     } catch (syntaxError) {
-      console.debug("JSON parse SyntaxError");
       this.setState({
         configCreated: false,
         errorMessage: syntaxError.message,
@@ -159,7 +158,7 @@ class NewConfig extends Component {
         if (this.props.configs.errorMessage !== undefined) {
           this.setState({
             configCreated: false,
-            errorMessage: this.props.config.errorMessage,
+            errorMessage: this.props.configs.errorMessage,
           });
         } else {
           this.setState({
