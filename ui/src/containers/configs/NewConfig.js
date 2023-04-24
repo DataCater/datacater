@@ -513,8 +513,8 @@ class NewConfig extends Component {
                       />
                     </div>
                   ))}
-                <div class="col-12 mt-3">
-                  <h6 class="d-inline me-2">Add label</h6>
+                <div className="col-12 mt-3">
+                  <h6 className="d-inline me-2">Add label</h6>
                 </div>
                 <div className="col-12 mt-1">
                   <div className="row">
