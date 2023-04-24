@@ -3,6 +3,7 @@ package io.datacater.core.deployment;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.jaxrs.yaml.YAMLMediaTypes;
 import io.datacater.core.authentication.DataCaterSessionFactory;
 import io.datacater.core.config.ConfigEntity;
 import io.datacater.core.config.ConfigUtilities;
@@ -42,7 +43,7 @@ import org.jboss.logging.Logger;
 
 @Path("/deployments")
 @Authenticated
-@Produces(MediaType.APPLICATION_JSON)
+@Produces({MediaType.APPLICATION_JSON, YAMLMediaTypes.APPLICATION_JACKSON_YAML})
 @SecurityRequirement(name = "apiToken")
 @RequestScoped
 public class DeploymentEndpoint {
@@ -195,7 +196,7 @@ public class DeploymentEndpoint {
   }
 
   @POST
-  @Consumes(MediaType.APPLICATION_JSON)
+  @Consumes({MediaType.APPLICATION_JSON, YAMLMediaTypes.APPLICATION_JACKSON_YAML})
   public Uni<DeploymentEntity> createDeployment(DeploymentSpec spec) {
     DeploymentEntity de = new DeploymentEntity(spec);
 
@@ -281,6 +282,7 @@ public class DeploymentEndpoint {
 
   @PUT
   @Path("{uuid}")
+  @Consumes({MediaType.APPLICATION_JSON, YAMLMediaTypes.APPLICATION_JACKSON_YAML})
   public Uni<DeploymentEntity> updateDeployment(
       @PathParam("uuid") UUID deploymentUuid, DeploymentSpec spec) {
     return dsf.withTransaction(

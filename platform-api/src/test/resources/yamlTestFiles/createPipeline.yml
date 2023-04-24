@@ -1,0 +1,28 @@
+---
+name    : pipeline-test
+metadata:
+  stream-in: streamUUIDPlaceholder
+  stream-out: streamUUIDPlaceholder
+spec    :
+  steps:
+  -   kind: Field
+      name: First step
+      fields:
+        age:
+          filter:
+            key: less-than
+            config:
+              value: 50
+  -   kind: Field
+      name: Second step
+      fields:
+        email:
+          transform:
+            key: hash
+            config:
+              algorithm: sha1
+        name:
+          transform:
+            key: trim
+          filter:
+            key: not-empty
