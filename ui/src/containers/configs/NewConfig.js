@@ -7,6 +7,7 @@ import Breadcrumb from "../../components/layout/Breadcrumb";
 import { getConfigKindOptions } from "../../helpers/getConfigKindOptions";
 import Header from "../../components/layout/Header";
 import Tabs from "../../components/configs/Tabs";
+import { PayloadEditor } from "../../components/payload_editor/PayloadEditor";
 import { addConfig } from "../../actions/configs";
 import { fetchPipelines } from "../../actions/pipelines";
 import { getStreamConnectionOptions } from "../../helpers/getStreamConnectionOptions";
@@ -62,6 +63,9 @@ class NewConfig extends Component {
         connectionValue: "",
       },
       configCreated: false,
+      showPayloadEditor: false,
+      payloadEditorChanges: false,
+      editorConfig: "",
     };
 
     this.handleCreateConfig = this.handleCreateConfig.bind(this);
@@ -74,6 +78,12 @@ class NewConfig extends Component {
     this.removeStreamConfig = this.removeStreamConfig.bind(this);
     this.updateConfigSpec = this.updateConfigSpec.bind(this);
     this.updateTab = this.updateTab.bind(this);
+    // payloadEditor specific functions
+    this.loadHTMLForm = this.loadHTMLForm.bind(this);
+    this.loadPayloadEditor = this.loadPayloadEditor.bind(this);
+    this.toggleForm = this.toggleForm.bind(this);
+    this.handleEditorChange = this.handleEditorChange.bind(this);
+    this.submitEditorContent = this.submitEditorContent.bind(this);
   }
 
   updateConfigSpec() {
@@ -88,7 +98,7 @@ class NewConfig extends Component {
       config.spec = deployment.spec;
     }
 
-    this.setState({ config: config });
+    this.setState({ config: config, editorConfig: config });
   }
 
   updateTempStreamConfig(field, value) {
@@ -129,6 +139,35 @@ class NewConfig extends Component {
         labelValue: "",
       },
     });
+  }
+
+  submitEditorContent(event) {
+    event.preventDefault();
+    let parsedConfig = undefined;
+    try {
+      parsedConfig = JSON.parse(this.state.editorConfig, null, 2);
+    } catch (syntaxError) {
+      this.setState({
+        configCreated: false,
+        errorMessage: syntaxError.message,
+      });
+    }
+
+    if (parsedConfig !== undefined) {
+      this.props.addConfig(parsedConfig).then(() => {
+        if (this.props.configs.errorMessage !== undefined) {
+          this.setState({
+            configCreated: false,
+            errorMessage: this.props.configs.errorMessage,
+          });
+        } else {
+          this.setState({
+            configCreated: true,
+            errorMessage: "",
+          });
+        }
+      });
+    }
   }
 
   handleCreateConfig(event) {
@@ -304,11 +343,73 @@ class NewConfig extends Component {
     });
   }
 
-  render() {
-    if (this.state.configCreated) {
-      return <Redirect to={"/configs/" + this.props.configs.config.uuid} />;
-    }
+  toggleForm(event) {
+    event.preventDefault();
+    let isShowingPayloadEditor = !this.state.showPayloadEditor;
 
+    if (isShowingPayloadEditor) {
+      this.setState({
+        showPayloadEditor: isShowingPayloadEditor,
+        editorConfig: JSON.stringify(this.state.config, null, 2),
+      });
+    } else if (
+      this.state.payloadEditorChanges &&
+      !window.confirm("Going back will reset all edits in the editor!")
+    ) {
+      this.setState({
+        showPayloadEditor: true,
+      });
+    } else {
+      this.setState({
+        editorConfig: JSON.stringify(this.state.config, null, 2),
+        showPayloadEditor: isShowingPayloadEditor,
+        payloadEditorChanges: false,
+        errorMessage: "",
+      });
+    }
+  }
+
+  handleEditorChange(value) {
+    this.setState({
+      editorConfig: value,
+      payloadEditorChanges: true,
+    });
+  }
+
+  loadPayloadEditor() {
+    return (
+      <div className="col-12 mt-4">
+        <PayloadEditor
+          apiPath="/configs/"
+          code={this.state.editorConfig}
+          codeChange={this.handleEditorChange}
+        ></PayloadEditor>
+        {![undefined, ""].includes(this.state.errorMessage) && (
+          <div className="alert alert-danger mt-4">
+            <p className="h6 fs-bolder">Error:</p>
+            {this.state.errorMessage}
+          </div>
+        )}
+        <div className="col-12 mt-4">
+          <a
+            href="/configs/new"
+            className="btn btn-primary text-white"
+            onClick={this.submitEditorContent}
+          >
+            Create config
+          </a>
+          <button
+            className="btn btn-outline-primary ms-2"
+            onClick={this.toggleForm}
+          >
+            Back to form
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  loadHTMLForm() {
     const kindOptions = getConfigKindOptions();
     const config = this.state.config;
     const addedLabels = Object.keys(config.metadata.labels);
@@ -345,6 +446,571 @@ class NewConfig extends Component {
     const streamHoldsAvroFormat = isStreamHoldingAvroFormat(stream);
 
     return (
+      <form>
+        <div className="row">
+          <div className="col-4 col-md-3 col-lg-2">
+            <Tabs
+              currentTab={this.state.currentTab}
+              updateTabFunc={this.updateTab}
+            />
+          </div>
+          <div className="col-8 col-md-9 col-lg-10">
+            {this.state.currentTab === "config" && (
+              <>
+                <div className="col-12 mt-4">
+                  <label
+                    htmlFor="name"
+                    className="form-label h5 fw-semibold mb-3"
+                  >
+                    Name
+                  </label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    id="name"
+                    name="name"
+                    onChange={(event) => {
+                      this.handleChange("name", event.target.value);
+                    }}
+                    value={this.state.config["name"] || ""}
+                  />
+                </div>
+                <div className="col-12 mt-4">
+                  <h5 className="d-inline me-2 fw-semibold">Labels</h5>
+                  <span className="text-muted fs-7">
+                    Configs can be referenced by other resources, e.g., Streams,
+                    via their labels.
+                  </span>
+                </div>
+                {addedLabels.length === 0 && (
+                  <div className="col-12 mt-2 mb-n1">
+                    <i>No labels defined.</i>
+                  </div>
+                )}
+                {addedLabels.length > 0 &&
+                  addedLabels.map((label) => (
+                    <div className="col-12 mt-2" key={label}>
+                      <label htmlFor={label} className="form-label">
+                        Key: {label}
+                        <a
+                          className="ms-2 fs-7"
+                          data-label={label}
+                          data-prefix="metadata.labels"
+                          href="/configs/new"
+                          onClick={this.removeLabel}
+                        >
+                          Remove label
+                        </a>
+                      </label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        id={label}
+                        data-prefix="metadata.labels"
+                        name={label}
+                        onChange={this.handleEventChange}
+                        value={this.state.config.metadata.labels[label] || ""}
+                      />
+                    </div>
+                  ))}
+                <div class="col-12 mt-3">
+                  <h6 class="d-inline me-2">Add label</h6>
+                </div>
+                <div className="col-12 mt-1">
+                  <div className="row">
+                    <div className="col-md-3">
+                      <label className="form-label">Key</label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        name="labelKey"
+                        onChange={(event) => {
+                          this.updateTempLabel("labelKey", event.target.value);
+                        }}
+                        value={this.state.tempLabel.labelKey || ""}
+                      />
+                    </div>
+                    <div className="col-md-3">
+                      <label className="form-label">Value</label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        name="labelValue"
+                        onChange={(event) => {
+                          this.updateTempLabel(
+                            "labelValue",
+                            event.target.value
+                          );
+                        }}
+                        value={this.state.tempLabel.labelValue || ""}
+                      />
+                    </div>
+                    <div className="col-md-3 d-flex align-items-end">
+                      <a
+                        href="/configs/new"
+                        className="btn btn-outline-primary"
+                        data-prefix="metadata.labels"
+                        onClick={this.addLabel}
+                      >
+                        Add
+                      </a>
+                    </div>
+                  </div>
+                </div>
+                <div className="col-12 mt-4">
+                  <h5 className="fw-semibold mb-3">Kind</h5>
+                  <Creatable
+                    defaultValue={kindOptions.find(
+                      (kind) => kind.value === config.kind
+                    )}
+                    isSearchable
+                    options={kindOptions}
+                    onChange={(kind) => {
+                      this.updateKindOption("kind", kind.value);
+                    }}
+                  />
+                </div>
+              </>
+            )}
+            {this.state.currentTab === "spec" && (
+              <>
+                {this.state.config["kind"] == "STREAM" && (
+                  <>
+                    <div className="col-12 mt-4">
+                      <h5 className="fw-semibold">Topic configuration</h5>
+                    </div>
+                    <div className="col-12 mt-2">
+                      <label htmlFor="num.partitions" className="form-label">
+                        num.partitions
+                      </label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        id="num.partitions"
+                        data-prefix="stream.spec.kafka.topic"
+                        name="num.partitions"
+                        onChange={this.handleEventChange}
+                        placeholder="3"
+                        value={
+                          this.state.stream.spec.kafka["topic"][
+                            "num.partitions"
+                          ] || ""
+                        }
+                      />
+                    </div>
+                    <div className="col-12 mt-2">
+                      <label
+                        htmlFor="replication.factor"
+                        className="form-label"
+                      >
+                        replication.factor
+                      </label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        id="replication.factor"
+                        data-prefix="stream.spec.kafka.topic"
+                        name="replication.factor"
+                        onChange={this.handleEventChange}
+                        placeholder="1"
+                        value={
+                          this.state.stream.spec.kafka["topic"][
+                            "replication.factor"
+                          ] || ""
+                        }
+                      />
+                    </div>
+                    {addedTopicConfigs.map((topicConfig) => (
+                      <div className="col-12 mt-2" key={topicConfig}>
+                        <label htmlFor={topicConfig} className="form-label">
+                          {topicConfig}
+                          <a
+                            className="ms-2 fs-7"
+                            data-config={topicConfig}
+                            data-prefix="stream.spec.kafka.topic.config"
+                            href="/configs/new"
+                            onClick={this.removeStreamConfig}
+                          >
+                            Remove
+                          </a>
+                        </label>
+                        <input
+                          type="text"
+                          className="form-control"
+                          id={topicConfig}
+                          data-prefix="stream.spec.kafka.topic.config"
+                          name={topicConfig}
+                          onChange={this.handleEventChange}
+                          value={
+                            this.state.stream.spec.kafka.topic.config[
+                              topicConfig
+                            ] || ""
+                          }
+                        />
+                      </div>
+                    ))}
+                    <div className="col-12 mt-3">
+                      <h6 className="d-inline me-2">Add config</h6>
+                      <span className="text-muted fs-7">
+                        You can here use{" "}
+                        <a
+                          href="https://kafka.apache.org/documentation/#topicconfigs"
+                          target="_blank"
+                        >
+                          topic-level
+                        </a>{" "}
+                        configuration options.
+                      </span>
+                    </div>
+                    <div className="col-12 mt-2">
+                      <div className="row">
+                        <div className="col-md-3">
+                          <label className="form-label">Name</label>
+                          <Creatable
+                            isSearchable
+                            options={topicOptions}
+                            onChange={(value) => {
+                              this.updateTempStreamConfig(
+                                "topicName",
+                                value.value
+                              );
+                            }}
+                          />
+                        </div>
+                        <div className="col-md-3">
+                          <label className="form-label">Value</label>
+                          <input
+                            type="text"
+                            className="form-control"
+                            name="topicValue"
+                            onChange={(event) => {
+                              this.updateTempStreamConfig(
+                                "topicValue",
+                                event.target.value
+                              );
+                            }}
+                            value={this.state.tempStreamConfig.topicValue || ""}
+                          />
+                        </div>
+                        <div className="col-md-3 d-flex align-items-end">
+                          <a
+                            href="/configs/new"
+                            className="btn btn-outline-primary"
+                            data-prefix="stream.spec.kafka.topic.config"
+                            onClick={this.addStreamConfig}
+                          >
+                            Add
+                          </a>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="col-12 mt-4">
+                      <h5 className="fw-semibold">Data format</h5>
+                    </div>
+                    <div className="col-12">
+                      <label htmlFor="key.deserializer" className="form-label">
+                        key.deserializer
+                      </label>
+                      <Creatable
+                        defaultValue={deserializerOptions.find(
+                          (deserializer) =>
+                            deserializer.value === defaultDeserializer
+                        )}
+                        isSearchable
+                        options={deserializerOptions}
+                        onChange={(value) => {
+                          this.updateConnectionConfig(
+                            "key.deserializer",
+                            value.value
+                          );
+                        }}
+                      />
+                    </div>
+                    <div className="col-12 mt-2">
+                      <label
+                        htmlFor="value.deserializer"
+                        className="form-label"
+                      >
+                        value.deserializer
+                      </label>
+                      <Creatable
+                        defaultValue={deserializerOptions.find(
+                          (deserializer) =>
+                            deserializer.value === defaultDeserializer
+                        )}
+                        isSearchable
+                        options={deserializerOptions}
+                        onChange={(value) => {
+                          this.updateConnectionConfig(
+                            "value.deserializer",
+                            value.value
+                          );
+                        }}
+                      />
+                    </div>
+                    <div className="col-12 mt-2">
+                      <label htmlFor="key.serializer" className="form-label">
+                        key.serializer
+                      </label>
+                      <Creatable
+                        defaultValue={serializerOptions.find(
+                          (deserializer) =>
+                            deserializer.value === defaultSerializer
+                        )}
+                        isSearchable
+                        options={serializerOptions}
+                        onChange={(value) => {
+                          this.updateConnectionConfig(
+                            "key.serializer",
+                            value.value
+                          );
+                        }}
+                      />
+                    </div>
+                    <div className="col-12 mt-2">
+                      <label htmlFor="value.serializer" className="form-label">
+                        value.serializer
+                      </label>
+                      <Creatable
+                        defaultValue={serializerOptions.find(
+                          (deserializer) =>
+                            deserializer.value === defaultSerializer
+                        )}
+                        isSearchable
+                        options={serializerOptions}
+                        onChange={(value) => {
+                          this.updateConnectionConfig(
+                            "value.serializer",
+                            value.value
+                          );
+                        }}
+                      />
+                    </div>
+                    {streamHoldsAvroFormat && (
+                      <>
+                        <div className="col-12 mt-2">
+                          <label
+                            htmlFor="schema.registry.url"
+                            className="form-label"
+                          >
+                            schema.registry.url
+                          </label>
+                          <input
+                            type="text"
+                            className="form-control"
+                            id="schema.registry.url"
+                            data-prefix="stream.spec.kafka"
+                            name="schema.registry.url"
+                            onChange={this.handleEventChange}
+                            value={
+                              this.state.stream.spec.kafka[
+                                "schema.registry.url"
+                              ] || ""
+                            }
+                          />
+                        </div>
+                      </>
+                    )}
+                    <div className="col-12 mt-4">
+                      <h5 className="fw-semibold">Connection</h5>
+                    </div>
+                    <div className="col-12 mt-2">
+                      <label htmlFor="bootstrap.servers" className="form-label">
+                        bootstrap.servers
+                      </label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        id="bootstrap.servers"
+                        data-prefix="stream.spec.kafka"
+                        name="bootstrap.servers"
+                        onChange={this.handleEventChange}
+                        value={
+                          this.state.stream.spec.kafka["bootstrap.servers"] ||
+                          ""
+                        }
+                      />
+                    </div>
+                    {addedConnectionConfigs.map((connectionConfig) => (
+                      <div className="col-12 mt-2" key={connectionConfig}>
+                        <label
+                          htmlFor={connectionConfig}
+                          className="form-label"
+                        >
+                          {connectionConfig}
+                          <a
+                            className="ms-2 fs-7"
+                            data-config={connectionConfig}
+                            data-prefix="stream.spec.kafka"
+                            href="/configs/new"
+                            onClick={this.removeStreamConfig}
+                          >
+                            Remove
+                          </a>
+                        </label>
+                        <input
+                          type="text"
+                          className="form-control"
+                          id={connectionConfig}
+                          data-prefix="stream.spec.kafka"
+                          name={connectionConfig}
+                          onChange={this.handleEventChange}
+                          value={
+                            this.state.stream.spec.kafka[connectionConfig] || ""
+                          }
+                        />
+                      </div>
+                    ))}
+                    <div className="col-12 mt-3">
+                      <h6 className="d-inline me-2">Add config</h6>
+                      <span className="text-muted fs-7">
+                        You can here use{" "}
+                        <a
+                          href="https://kafka.apache.org/documentation/#consumerconfigs"
+                          target="_blank"
+                        >
+                          consumer-level
+                        </a>{" "}
+                        and{" "}
+                        <a
+                          href="https://kafka.apache.org/documentation/#producerconfigs"
+                          target="_blank"
+                        >
+                          producer-level
+                        </a>{" "}
+                        configuration options.
+                      </span>
+                    </div>
+                    <div className="col-12 mt-2">
+                      <div className="row">
+                        <div className="col-md-3">
+                          <label className="form-label">Name</label>
+                          <Creatable
+                            isSearchable
+                            options={connectionOptions}
+                            onChange={(value) => {
+                              this.updateTempStreamConfig(
+                                "connectionName",
+                                value.value
+                              );
+                            }}
+                          />
+                        </div>
+                        <div className="col-md-3">
+                          <label className="form-label">Value</label>
+                          <input
+                            type="text"
+                            className="form-control"
+                            name="topicValue"
+                            onChange={(event) => {
+                              this.updateTempStreamConfig(
+                                "connectionValue",
+                                event.target.value
+                              );
+                            }}
+                            value={
+                              this.state.tempStreamConfig.connectionValue || ""
+                            }
+                          />
+                        </div>
+                        <div className="col-md-3 d-flex align-items-end">
+                          <a
+                            href="/configs/new"
+                            className="btn btn-outline-primary"
+                            data-prefix="stream.spec.kafka"
+                            onClick={this.addStreamConfig}
+                          >
+                            Add
+                          </a>
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                )}
+                {this.state.config["kind"] == "DEPLOYMENT" && (
+                  <>
+                    <div className="col-12 mt-4">
+                      <h5 className="fw-semibold">Deployment config</h5>
+                    </div>
+                    <div className="col-12">
+                      <label className="form-label">Pipeline</label>
+                      <Select
+                        defaultValue={pipelineOptions.find(
+                          (kind) => kind.value === config.spec.pipeline
+                        )}
+                        isSearchable
+                        isClearable
+                        options={pipelineOptions}
+                        onChange={(value) => {
+                          this.handleChange(
+                            "pipeline",
+                            value.value,
+                            "deployment.spec"
+                          );
+                        }}
+                      />
+                    </div>
+                    <div className="col-12 mt-2">
+                      <label className="form-label">Replicas</label>
+                      <input
+                        type="number"
+                        className="form-control"
+                        id="replicas"
+                        min="0"
+                        name="replicas"
+                        onChange={(value) => {
+                          this.handleChange(
+                            "replicas",
+                            value.target.value,
+                            "deployment.spec.replicas"
+                          );
+                        }}
+                        placeholder="1"
+                        step="1"
+                        value={
+                          !isNaN(this.state.config.spec["replicas"])
+                            ? this.state.config.spec["replicas"]
+                            : ""
+                        }
+                      />
+                    </div>
+                  </>
+                )}
+              </>
+            )}
+            {![undefined, ""].includes(this.state.errorMessage) && (
+              <div className="alert alert-danger mt-4">
+                <p className="h6 fs-bolder">API response:</p>
+                {this.state.errorMessage}
+              </div>
+            )}
+            <div className="col-12 mt-4">
+              <a
+                href="/configs/new"
+                className="btn btn-primary text-white"
+                onClick={this.handleCreateConfig}
+              >
+                Create config
+              </a>
+              <button
+                className="btn btn-outline-primary ms-2"
+                onClick={this.toggleForm}
+              >
+                Edit as JSON
+              </button>
+            </div>
+          </div>
+        </div>
+      </form>
+    );
+  }
+
+  render() {
+    if (this.state.configCreated) {
+      return <Redirect to={"/configs/" + this.props.configs.config.uuid} />;
+    }
+
+    return (
       <div className="container">
         <div className="row">
           <Breadcrumb
@@ -361,582 +1027,9 @@ class NewConfig extends Component {
             title="Create new config"
             subTitle="Configs outsource the configuration of Streams and other resources."
           />
-          <form>
-            <div className="row">
-              <div className="col-4 col-md-3 col-lg-2">
-                <Tabs
-                  currentTab={this.state.currentTab}
-                  updateTabFunc={this.updateTab}
-                />
-              </div>
-              <div className="col-8 col-md-9 col-lg-10">
-                {this.state.currentTab === "config" && (
-                  <>
-                    <div className="col-12 mt-4">
-                      <label
-                        htmlFor="name"
-                        className="form-label h5 fw-semibold mb-3"
-                      >
-                        Name
-                      </label>
-                      <input
-                        type="text"
-                        className="form-control"
-                        id="name"
-                        name="name"
-                        onChange={(event) => {
-                          this.handleChange("name", event.target.value);
-                        }}
-                        value={this.state.config["name"] || ""}
-                      />
-                    </div>
-                    <div className="col-12 mt-4">
-                      <h5 className="d-inline me-2 fw-semibold">Labels</h5>
-                      <span className="text-muted fs-7">
-                        Configs can be referenced by other resources, e.g.,
-                        Streams, via their labels.
-                      </span>
-                    </div>
-                    {addedLabels.length === 0 && (
-                      <div className="col-12 mt-2 mb-n1">
-                        <i>No labels defined.</i>
-                      </div>
-                    )}
-                    {addedLabels.length > 0 &&
-                      addedLabels.map((label) => (
-                        <div className="col-12 mt-2" key={label}>
-                          <label htmlFor={label} className="form-label">
-                            Key: {label}
-                            <a
-                              className="ms-2 fs-7"
-                              data-label={label}
-                              data-prefix="metadata.labels"
-                              href="/configs/new"
-                              onClick={this.removeLabel}
-                            >
-                              Remove label
-                            </a>
-                          </label>
-                          <input
-                            type="text"
-                            className="form-control"
-                            id={label}
-                            data-prefix="metadata.labels"
-                            name={label}
-                            onChange={this.handleEventChange}
-                            value={
-                              this.state.config.metadata.labels[label] || ""
-                            }
-                          />
-                        </div>
-                      ))}
-                    <div class="col-12 mt-3">
-                      <h6 class="d-inline me-2">Add label</h6>
-                    </div>
-                    <div className="col-12 mt-1">
-                      <div className="row">
-                        <div className="col-md-3">
-                          <label className="form-label">Key</label>
-                          <input
-                            type="text"
-                            className="form-control"
-                            name="labelKey"
-                            onChange={(event) => {
-                              this.updateTempLabel(
-                                "labelKey",
-                                event.target.value
-                              );
-                            }}
-                            value={this.state.tempLabel.labelKey || ""}
-                          />
-                        </div>
-                        <div className="col-md-3">
-                          <label className="form-label">Value</label>
-                          <input
-                            type="text"
-                            className="form-control"
-                            name="labelValue"
-                            onChange={(event) => {
-                              this.updateTempLabel(
-                                "labelValue",
-                                event.target.value
-                              );
-                            }}
-                            value={this.state.tempLabel.labelValue || ""}
-                          />
-                        </div>
-                        <div className="col-md-3 d-flex align-items-end">
-                          <a
-                            href="/configs/new"
-                            className="btn btn-outline-primary"
-                            data-prefix="metadata.labels"
-                            onClick={this.addLabel}
-                          >
-                            Add
-                          </a>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="col-12 mt-4">
-                      <h5 className="fw-semibold mb-3">Kind</h5>
-                      <Creatable
-                        defaultValue={kindOptions.find(
-                          (kind) => kind.value === config.kind
-                        )}
-                        isSearchable
-                        options={kindOptions}
-                        onChange={(kind) => {
-                          this.updateKindOption("kind", kind.value);
-                        }}
-                      />
-                    </div>
-                  </>
-                )}
-                {this.state.currentTab === "spec" && (
-                  <>
-                    {this.state.config["kind"] == "STREAM" && (
-                      <>
-                        <div className="col-12 mt-4">
-                          <h5 className="fw-semibold">Topic configuration</h5>
-                        </div>
-                        <div className="col-12 mt-2">
-                          <label
-                            htmlFor="num.partitions"
-                            className="form-label"
-                          >
-                            num.partitions
-                          </label>
-                          <input
-                            type="text"
-                            className="form-control"
-                            id="num.partitions"
-                            data-prefix="stream.spec.kafka.topic"
-                            name="num.partitions"
-                            onChange={this.handleEventChange}
-                            placeholder="3"
-                            value={
-                              this.state.stream.spec.kafka["topic"][
-                                "num.partitions"
-                              ] || ""
-                            }
-                          />
-                        </div>
-                        <div className="col-12 mt-2">
-                          <label
-                            htmlFor="replication.factor"
-                            className="form-label"
-                          >
-                            replication.factor
-                          </label>
-                          <input
-                            type="text"
-                            className="form-control"
-                            id="replication.factor"
-                            data-prefix="stream.spec.kafka.topic"
-                            name="replication.factor"
-                            onChange={this.handleEventChange}
-                            placeholder="1"
-                            value={
-                              this.state.stream.spec.kafka["topic"][
-                                "replication.factor"
-                              ] || ""
-                            }
-                          />
-                        </div>
-                        {addedTopicConfigs.map((topicConfig) => (
-                          <div className="col-12 mt-2" key={topicConfig}>
-                            <label htmlFor={topicConfig} className="form-label">
-                              {topicConfig}
-                              <a
-                                className="ms-2 fs-7"
-                                data-config={topicConfig}
-                                data-prefix="stream.spec.kafka.topic.config"
-                                href="/configs/new"
-                                onClick={this.removeStreamConfig}
-                              >
-                                Remove
-                              </a>
-                            </label>
-                            <input
-                              type="text"
-                              className="form-control"
-                              id={topicConfig}
-                              data-prefix="stream.spec.kafka.topic.config"
-                              name={topicConfig}
-                              onChange={this.handleEventChange}
-                              value={
-                                this.state.stream.spec.kafka.topic.config[
-                                  topicConfig
-                                ] || ""
-                              }
-                            />
-                          </div>
-                        ))}
-                        <div className="col-12 mt-3">
-                          <h6 className="d-inline me-2">Add config</h6>
-                          <span className="text-muted fs-7">
-                            You can here use{" "}
-                            <a
-                              href="https://kafka.apache.org/documentation/#topicconfigs"
-                              target="_blank"
-                            >
-                              topic-level
-                            </a>{" "}
-                            configuration options.
-                          </span>
-                        </div>
-                        <div className="col-12 mt-2">
-                          <div className="row">
-                            <div className="col-md-3">
-                              <label className="form-label">Name</label>
-                              <Creatable
-                                isSearchable
-                                options={topicOptions}
-                                onChange={(value) => {
-                                  this.updateTempStreamConfig(
-                                    "topicName",
-                                    value.value
-                                  );
-                                }}
-                              />
-                            </div>
-                            <div className="col-md-3">
-                              <label className="form-label">Value</label>
-                              <input
-                                type="text"
-                                className="form-control"
-                                name="topicValue"
-                                onChange={(event) => {
-                                  this.updateTempStreamConfig(
-                                    "topicValue",
-                                    event.target.value
-                                  );
-                                }}
-                                value={
-                                  this.state.tempStreamConfig.topicValue || ""
-                                }
-                              />
-                            </div>
-                            <div className="col-md-3 d-flex align-items-end">
-                              <a
-                                href="/configs/new"
-                                className="btn btn-outline-primary"
-                                data-prefix="stream.spec.kafka.topic.config"
-                                onClick={this.addStreamConfig}
-                              >
-                                Add
-                              </a>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="col-12 mt-4">
-                          <h5 className="fw-semibold">Data format</h5>
-                        </div>
-                        <div className="col-12">
-                          <label
-                            htmlFor="key.deserializer"
-                            className="form-label"
-                          >
-                            key.deserializer
-                          </label>
-                          <Creatable
-                            defaultValue={deserializerOptions.find(
-                              (deserializer) =>
-                                deserializer.value === defaultDeserializer
-                            )}
-                            isSearchable
-                            options={deserializerOptions}
-                            onChange={(value) => {
-                              this.updateConnectionConfig(
-                                "key.deserializer",
-                                value.value
-                              );
-                            }}
-                          />
-                        </div>
-                        <div className="col-12 mt-2">
-                          <label
-                            htmlFor="value.deserializer"
-                            className="form-label"
-                          >
-                            value.deserializer
-                          </label>
-                          <Creatable
-                            defaultValue={deserializerOptions.find(
-                              (deserializer) =>
-                                deserializer.value === defaultDeserializer
-                            )}
-                            isSearchable
-                            options={deserializerOptions}
-                            onChange={(value) => {
-                              this.updateConnectionConfig(
-                                "value.deserializer",
-                                value.value
-                              );
-                            }}
-                          />
-                        </div>
-                        <div className="col-12 mt-2">
-                          <label
-                            htmlFor="key.serializer"
-                            className="form-label"
-                          >
-                            key.serializer
-                          </label>
-                          <Creatable
-                            defaultValue={serializerOptions.find(
-                              (deserializer) =>
-                                deserializer.value === defaultSerializer
-                            )}
-                            isSearchable
-                            options={serializerOptions}
-                            onChange={(value) => {
-                              this.updateConnectionConfig(
-                                "key.serializer",
-                                value.value
-                              );
-                            }}
-                          />
-                        </div>
-                        <div className="col-12 mt-2">
-                          <label
-                            htmlFor="value.serializer"
-                            className="form-label"
-                          >
-                            value.serializer
-                          </label>
-                          <Creatable
-                            defaultValue={serializerOptions.find(
-                              (deserializer) =>
-                                deserializer.value === defaultSerializer
-                            )}
-                            isSearchable
-                            options={serializerOptions}
-                            onChange={(value) => {
-                              this.updateConnectionConfig(
-                                "value.serializer",
-                                value.value
-                              );
-                            }}
-                          />
-                        </div>
-                        {streamHoldsAvroFormat && (
-                          <>
-                            <div className="col-12 mt-2">
-                              <label
-                                htmlFor="schema.registry.url"
-                                className="form-label"
-                              >
-                                schema.registry.url
-                              </label>
-                              <input
-                                type="text"
-                                className="form-control"
-                                id="schema.registry.url"
-                                data-prefix="stream.spec.kafka"
-                                name="schema.registry.url"
-                                onChange={this.handleEventChange}
-                                value={
-                                  this.state.stream.spec.kafka[
-                                    "schema.registry.url"
-                                  ] || ""
-                                }
-                              />
-                            </div>
-                          </>
-                        )}
-                        <div className="col-12 mt-4">
-                          <h5 className="fw-semibold">Connection</h5>
-                        </div>
-                        <div className="col-12 mt-2">
-                          <label
-                            htmlFor="bootstrap.servers"
-                            className="form-label"
-                          >
-                            bootstrap.servers
-                          </label>
-                          <input
-                            type="text"
-                            className="form-control"
-                            id="bootstrap.servers"
-                            data-prefix="stream.spec.kafka"
-                            name="bootstrap.servers"
-                            onChange={this.handleEventChange}
-                            value={
-                              this.state.stream.spec.kafka[
-                                "bootstrap.servers"
-                              ] || ""
-                            }
-                          />
-                        </div>
-                        {addedConnectionConfigs.map((connectionConfig) => (
-                          <div className="col-12 mt-2" key={connectionConfig}>
-                            <label
-                              htmlFor={connectionConfig}
-                              className="form-label"
-                            >
-                              {connectionConfig}
-                              <a
-                                className="ms-2 fs-7"
-                                data-config={connectionConfig}
-                                data-prefix="stream.spec.kafka"
-                                href="/configs/new"
-                                onClick={this.removeStreamConfig}
-                              >
-                                Remove
-                              </a>
-                            </label>
-                            <input
-                              type="text"
-                              className="form-control"
-                              id={connectionConfig}
-                              data-prefix="stream.spec.kafka"
-                              name={connectionConfig}
-                              onChange={this.handleEventChange}
-                              value={
-                                this.state.stream.spec.kafka[
-                                  connectionConfig
-                                ] || ""
-                              }
-                            />
-                          </div>
-                        ))}
-                        <div className="col-12 mt-3">
-                          <h6 className="d-inline me-2">Add config</h6>
-                          <span className="text-muted fs-7">
-                            You can here use{" "}
-                            <a
-                              href="https://kafka.apache.org/documentation/#consumerconfigs"
-                              target="_blank"
-                            >
-                              consumer-level
-                            </a>{" "}
-                            and{" "}
-                            <a
-                              href="https://kafka.apache.org/documentation/#producerconfigs"
-                              target="_blank"
-                            >
-                              producer-level
-                            </a>{" "}
-                            configuration options.
-                          </span>
-                        </div>
-                        <div className="col-12 mt-2">
-                          <div className="row">
-                            <div className="col-md-3">
-                              <label className="form-label">Name</label>
-                              <Creatable
-                                isSearchable
-                                options={connectionOptions}
-                                onChange={(value) => {
-                                  this.updateTempStreamConfig(
-                                    "connectionName",
-                                    value.value
-                                  );
-                                }}
-                              />
-                            </div>
-                            <div className="col-md-3">
-                              <label className="form-label">Value</label>
-                              <input
-                                type="text"
-                                className="form-control"
-                                name="topicValue"
-                                onChange={(event) => {
-                                  this.updateTempStreamConfig(
-                                    "connectionValue",
-                                    event.target.value
-                                  );
-                                }}
-                                value={
-                                  this.state.tempStreamConfig.connectionValue ||
-                                  ""
-                                }
-                              />
-                            </div>
-                            <div className="col-md-3 d-flex align-items-end">
-                              <a
-                                href="/configs/new"
-                                className="btn btn-outline-primary"
-                                data-prefix="stream.spec.kafka"
-                                onClick={this.addStreamConfig}
-                              >
-                                Add
-                              </a>
-                            </div>
-                          </div>
-                        </div>
-                      </>
-                    )}
-                    {this.state.config["kind"] == "DEPLOYMENT" && (
-                      <>
-                        <div className="col-12 mt-4">
-                          <h5 className="fw-semibold">Deployment config</h5>
-                        </div>
-                        <div className="col-12">
-                          <label className="form-label">Pipeline</label>
-                          <Select
-                            defaultValue={pipelineOptions.find(
-                              (kind) => kind.value === config.spec.pipeline
-                            )}
-                            isSearchable
-                            isClearable
-                            options={pipelineOptions}
-                            onChange={(value) => {
-                              this.handleChange(
-                                "pipeline",
-                                value.value,
-                                "deployment.spec"
-                              );
-                            }}
-                          />
-                        </div>
-                        <div className="col-12 mt-2">
-                          <label className="form-label">Replicas</label>
-                          <input
-                            type="number"
-                            className="form-control"
-                            id="replicas"
-                            min="0"
-                            name="replicas"
-                            onChange={(value) => {
-                              this.handleChange(
-                                "replicas",
-                                value.target.value,
-                                "deployment.spec.replicas"
-                              );
-                            }}
-                            placeholder="1"
-                            step="1"
-                            value={
-                              !isNaN(this.state.config.spec["replicas"])
-                                ? this.state.config.spec["replicas"]
-                                : ""
-                            }
-                          />
-                        </div>
-                      </>
-                    )}
-                  </>
-                )}
-                {![undefined, ""].includes(this.state.errorMessage) && (
-                  <div className="alert alert-danger mt-4">
-                    <p className="h6 fs-bolder">API response:</p>
-                    {this.state.errorMessage}
-                  </div>
-                )}
-                <div className="col-12 mt-4">
-                  <a
-                    href="/configs/new"
-                    className="btn btn-primary text-white mb-4"
-                    onClick={this.handleCreateConfig}
-                  >
-                    Create config
-                  </a>
-                </div>
-              </div>
-            </div>
-          </form>
+          {this.state.showPayloadEditor
+            ? this.loadPayloadEditor()
+            : this.loadHTMLForm()}
         </div>
       </div>
     );
