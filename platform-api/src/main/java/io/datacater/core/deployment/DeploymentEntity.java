@@ -73,15 +73,15 @@ public class DeploymentEntity {
     this.spec = spec;
   }
 
-  protected UUID getId() {
+  public UUID getId() {
     return this.id;
   }
 
-  protected JsonNode getSpec() {
+  public JsonNode getSpec() {
     return this.spec;
   }
 
-  protected JsonNode getConfigSelector() {
+  public JsonNode getConfigSelector() {
     return configSelector;
   }
 }

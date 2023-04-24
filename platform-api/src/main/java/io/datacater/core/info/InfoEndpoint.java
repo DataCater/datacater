@@ -1,5 +1,6 @@
 package io.datacater.core.info;
 
+import com.fasterxml.jackson.jaxrs.yaml.YAMLMediaTypes;
 import io.smallrye.mutiny.Uni;
 import java.net.URI;
 import javax.ws.rs.GET;
@@ -10,7 +11,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 
 @Path("/")
-@Produces(MediaType.APPLICATION_JSON)
+@Produces({MediaType.APPLICATION_JSON, YAMLMediaTypes.APPLICATION_JACKSON_YAML})
 public class InfoEndpoint {
 
   @GET
