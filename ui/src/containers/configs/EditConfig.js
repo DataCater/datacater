@@ -425,7 +425,7 @@ class EditConfig extends Component {
                       />
                     </div>
                   ))}
-                <div class="col-12 mt-3">
+                <div className="col-12 mt-3">
                   <h6 className="d-inline me-2">Add label</h6>
                 </div>
                 <div className="col-12 mt-1">
