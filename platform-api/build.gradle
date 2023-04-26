@@ -35,7 +35,6 @@ dependencies {
     // REST related stuff
     implementation 'io.quarkus:quarkus-resteasy-reactive'
     implementation 'io.quarkus:quarkus-resteasy-reactive-jackson'
-    implementation 'com.fasterxml.jackson.jaxrs:jackson-jaxrs-yaml-provider'
 
     // SmallRye for Rest and messaging, micrometer for monitoring
     implementation 'io.quarkus:quarkus-smallrye-openapi'

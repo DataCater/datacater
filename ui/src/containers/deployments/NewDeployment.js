@@ -7,7 +7,6 @@ import Header from "../../components/layout/Header";
 import { addDeployment } from "../../actions/deployments";
 import { fetchPipelines } from "../../actions/pipelines";
 import "../../scss/fonts.scss";
-import { PayloadEditor } from "../../components/payload_editor/PayloadEditor";
 
 class NewDeployment extends Component {
   constructor(props) {
@@ -15,7 +14,6 @@ class NewDeployment extends Component {
 
     this.state = {
       creatingDeploymentFailed: false,
-      errorMessage: "",
       errorMessages: {},
       deployment: {
         spec: {},
@@ -26,9 +24,6 @@ class NewDeployment extends Component {
         labelValue: "",
       },
       deploymentCreated: false,
-      payloadEditorChanges: false,
-      showPayloadEditor: false,
-      editorDeployment: "",
     };
 
     this.handleCreateDeployment = this.handleCreateDeployment.bind(this);
@@ -37,13 +32,6 @@ class NewDeployment extends Component {
     this.addLabel = this.addLabel.bind(this);
     this.removeLabel = this.removeLabel.bind(this);
     this.updateTempLabel = this.updateTempLabel.bind(this);
-    // payloadEditor specific functions
-    this.loadHTMLForm = this.loadHTMLForm.bind(this);
-    this.loadPayloadEditor = this.loadPayloadEditor.bind(this);
-    this.toggleForm = this.toggleForm.bind(this);
-    this.handleEditorChange = this.handleEditorChange.bind(this);
-    this.submitForm = this.submitForm.bind(this);
-    this.submitEditorContent = this.submitEditorContent.bind(this);
   }
 
   componentDidMount() {
@@ -52,42 +40,7 @@ class NewDeployment extends Component {
 
   handleCreateDeployment(event) {
     event.preventDefault();
-    if (this.state.showPayloadEditor) {
-      this.submitEditorContent();
-    } else {
-      this.submitForm();
-    }
-  }
 
-  submitEditorContent() {
-    let parsedDeployment = undefined;
-    try {
-      parsedDeployment = JSON.parse(this.state.editorDeployment, null, 2);
-    } catch (syntaxError) {
-      this.setState({
-        deploymentCreated: false,
-        errorMessage: syntaxError.message,
-      });
-    }
-
-    if (parsedDeployment !== undefined) {
-      this.props.addDeployment(parsedDeployment).then(() => {
-        if (this.props.deployments.errorMessage !== undefined) {
-          this.setState({
-            deploymentCreated: false,
-            errorMessage: this.props.deployments.errorMessage,
-          });
-        } else {
-          this.setState({
-            deploymentCreated: true,
-            errorMessage: "",
-          });
-        }
-      });
-    }
-  }
-
-  submitForm() {
     this.props.addDeployment(this.state.deployment).then(() => {
       if (this.props.deployments.errorMessage !== undefined) {
         this.setState({
@@ -187,52 +140,15 @@ class NewDeployment extends Component {
     this.setState({ deployment: deployment });
   }
 
-  toggleForm(event) {
-    event.preventDefault();
-    let isShowingPayloadEditor = !this.state.showPayloadEditor;
-
-    if (isShowingPayloadEditor) {
-      this.setState({
-        showPayloadEditor: isShowingPayloadEditor,
-        editorDeployment: JSON.stringify(this.state.deployment, null, 2),
-      });
-    } else if (
-      this.state.payloadEditorChanges &&
-      !window.confirm("Going back will reset all edits in the editor!")
-    ) {
-      this.setState({
-        showPayloadEditor: true,
-      });
-    } else {
-      this.setState({
-        editorDeployment: JSON.stringify(this.state.deployment, null, 2),
-        showPayloadEditor: isShowingPayloadEditor,
-        errorMessage: "",
-        payloadEditorChanges: false,
-      });
+  render() {
+    if (this.state.deploymentCreated) {
+      return (
+        <Redirect
+          to={"/deployments/" + this.props.deployments.deployment.uuid}
+        />
+      );
     }
-  }
 
-  handleEditorChange(value) {
-    this.setState({
-      editorDeployment: value,
-      payloadEditorChanges: true,
-    });
-  }
-
-  loadPayloadEditor() {
-    return (
-      <div className="col-12 mt-4">
-        <PayloadEditor
-          apiPath="/deployments/"
-          code={this.state.editorDeployment}
-          codeChange={this.handleEditorChange}
-        ></PayloadEditor>
-      </div>
-    );
-  }
-
-  loadHTMLForm() {
     const deployment = this.state.deployment;
     const addedLabels = Object.keys(deployment.configSelector);
     const pipelineOptions = this.props.pipelines.pipelines.map((pipeline) => {
@@ -242,141 +158,6 @@ class NewDeployment extends Component {
     const replicas = !isNaN(this.state.deployment.spec["replicas"])
       ? this.state.deployment.spec["replicas"]
       : "";
-
-    return (
-      <form>
-        <div className="col-12 mt-4">
-          <label htmlFor="name" className="form-label h5 fw-semibold mb-3">
-            Name
-          </label>
-          <input
-            type="text"
-            className="form-control"
-            id="name"
-            name="name"
-            onChange={(event) => {
-              this.handleChange("name", event.target.value);
-            }}
-            value={this.state.deployment["name"] || ""}
-          />
-        </div>
-        <div className="col-12 mt-4">
-          <label className="form-label h5 fw-semibold mb-3">Pipeline</label>
-          <Select
-            isSearchable
-            isClearable
-            options={pipelineOptions}
-            onChange={(value) => {
-              this.handleChange("pipeline", value.value, "spec");
-            }}
-          />
-        </div>
-        <div className="col-12 mt-4">
-          <label className="form-label h5 fw-semibold mb-3">Replicas</label>
-          <input
-            type="number"
-            className="form-control"
-            id="replicas"
-            min="0"
-            name="replicas"
-            onChange={(value) => {
-              this.handleChange(
-                "replicas",
-                value.target.value,
-                "spec.replicas"
-              );
-            }}
-            placeholder="1"
-            step="1"
-            value={replicas}
-          />
-        </div>
-        <div className="col-12 mt-4">
-          <h5 className="d-inline me-2 fw-semibold">Config selector</h5>
-          <span className="text-muted fs-7">
-            You can reference one or multiple Configs by their key and value.
-          </span>
-        </div>
-        {addedLabels.length === 0 && (
-          <div className="col-12 mt-2 mb-n1">
-            <i>No configs referenced.</i>
-          </div>
-        )}
-        {addedLabels.map((label) => (
-          <div className="col-12 mt-2" key={label}>
-            <label htmlFor={label} className="form-label">
-              Key: {label}
-              <a
-                className="ms-2 fs-7"
-                data-label={label}
-                data-prefix="configSelector"
-                href="/deployments/new"
-                onClick={this.removeLabel}
-              >
-                Remove config selector
-              </a>
-            </label>
-            <input
-              type="text"
-              className="form-control"
-              id={label}
-              data-prefix="configSelector"
-              name={label}
-              onChange={this.handleEventChange}
-              value={this.state.deployment.configSelector[label] || ""}
-            />
-          </div>
-        ))}
-        <div className="col-12 mt-3">
-          <div className="row">
-            <div className="col-md-3">
-              <label className="form-label">Key</label>
-              <input
-                type="text"
-                className="form-control"
-                name="labelKey"
-                onChange={(event) => {
-                  this.updateTempLabel("labelKey", event.target.value);
-                }}
-                value={this.state.tempLabel.labelKey || ""}
-              />
-            </div>
-            <div className="col-md-3">
-              <label className="form-label">Value</label>
-              <input
-                type="text"
-                className="form-control"
-                name="labelValue"
-                onChange={(event) => {
-                  this.updateTempLabel("labelValue", event.target.value);
-                }}
-                value={this.state.tempLabel.labelValue || ""}
-              />
-            </div>
-            <div className="col-md-3 d-flex align-items-end">
-              <a
-                href="/deployments/new"
-                className="btn btn-outline-primary"
-                data-prefix="configSelector"
-                onClick={this.addLabel}
-              >
-                Add
-              </a>
-            </div>
-          </div>
-        </div>
-      </form>
-    );
-  }
-
-  render() {
-    if (this.state.deploymentCreated) {
-      return (
-        <Redirect
-          to={"/deployments/" + this.props.deployments.deployment.uuid}
-        />
-      );
-    }
 
     return (
       <div className="container">
@@ -395,30 +176,144 @@ class NewDeployment extends Component {
             title="Create new deployment"
             subTitle="Deployments operate Pipelines."
           />
-          {this.state.showPayloadEditor
-            ? this.loadPayloadEditor()
-            : this.loadHTMLForm()}
-          {![undefined, ""].includes(this.state.errorMessage) && (
-            <div className="alert alert-danger mt-4">
-              <p className="h6 fs-bolder">API response:</p>
-              {this.state.errorMessage}
+          <form>
+            <div className="col-12 mt-4">
+              <label htmlFor="name" className="form-label h5 fw-semibold mb-3">
+                Name
+              </label>
+              <input
+                type="text"
+                className="form-control"
+                id="name"
+                name="name"
+                onChange={(event) => {
+                  this.handleChange("name", event.target.value);
+                }}
+                value={this.state.deployment["name"] || ""}
+              />
             </div>
-          )}
-          <div className="col-12 mt-4">
-            <a
-              href="/deployments/new"
-              className="btn btn-primary text-white"
-              onClick={this.handleCreateDeployment}
-            >
-              Create deployment
-            </a>
-            <button
-              className="btn btn-outline-primary ms-2"
-              onClick={this.toggleForm}
-            >
-              {this.state.showPayloadEditor ? "Back to form" : "Edit as JSON"}
-            </button>
-          </div>
+            <div className="col-12 mt-4">
+              <label className="form-label h5 fw-semibold mb-3">Pipeline</label>
+              <Select
+                isSearchable
+                isClearable
+                options={pipelineOptions}
+                onChange={(value) => {
+                  this.handleChange("pipeline", value.value, "spec");
+                }}
+              />
+            </div>
+            <div className="col-12 mt-4">
+              <label className="form-label h5 fw-semibold mb-3">Replicas</label>
+              <input
+                type="number"
+                className="form-control"
+                id="replicas"
+                min="0"
+                name="replicas"
+                onChange={(value) => {
+                  this.handleChange(
+                    "replicas",
+                    value.target.value,
+                    "spec.replicas"
+                  );
+                }}
+                placeholder="1"
+                step="1"
+                value={replicas}
+              />
+            </div>
+            <div className="col-12 mt-4">
+              <h5 className="d-inline me-2 fw-semibold">Config selector</h5>
+              <span className="text-muted fs-7">
+                You can reference one or multiple Configs by their key and
+                value.
+              </span>
+            </div>
+            {addedLabels.length === 0 && (
+              <div className="col-12 mt-2 mb-n1">
+                <i>No configs referenced.</i>
+              </div>
+            )}
+            {addedLabels.map((label) => (
+              <div className="col-12 mt-2" key={label}>
+                <label htmlFor={label} className="form-label">
+                  Key: {label}
+                  <a
+                    className="ms-2 fs-7"
+                    data-label={label}
+                    data-prefix="configSelector"
+                    href="/deployments/new"
+                    onClick={this.removeLabel}
+                  >
+                    Remove config selector
+                  </a>
+                </label>
+                <input
+                  type="text"
+                  className="form-control"
+                  id={label}
+                  data-prefix="configSelector"
+                  name={label}
+                  onChange={this.handleEventChange}
+                  value={this.state.deployment.configSelector[label] || ""}
+                />
+              </div>
+            ))}
+            <div className="col-12 mt-3">
+              <div className="row">
+                <div className="col-md-3">
+                  <label className="form-label">Key</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    name="labelKey"
+                    onChange={(event) => {
+                      this.updateTempLabel("labelKey", event.target.value);
+                    }}
+                    value={this.state.tempLabel.labelKey || ""}
+                  />
+                </div>
+                <div className="col-md-3">
+                  <label className="form-label">Value</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    name="labelValue"
+                    onChange={(event) => {
+                      this.updateTempLabel("labelValue", event.target.value);
+                    }}
+                    value={this.state.tempLabel.labelValue || ""}
+                  />
+                </div>
+                <div className="col-md-3 d-flex align-items-end">
+                  <a
+                    href="/deployments/new"
+                    className="btn btn-outline-primary"
+                    data-prefix="configSelector"
+                    onClick={this.addLabel}
+                  >
+                    Add
+                  </a>
+                </div>
+              </div>
+            </div>
+            {![undefined, ""].includes(this.state.errorMessage) && (
+              <div className="alert alert-danger mt-4">
+                <p className="h6 fs-bolder">API response:</p>
+                {this.state.errorMessage}
+              </div>
+            )}
+            <div className="col-12 mt-4">
+              <a
+                href="/deployments/new"
+                className="btn btn-primary text-white mb-4"
+                onClick={this.handleCreateDeployment}
+              >
+                Create deployment
+              </a>
+            </div>
+          </form>
         </div>
       </div>
     );

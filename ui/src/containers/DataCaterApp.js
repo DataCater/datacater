@@ -19,7 +19,6 @@ import NewPipeline from "./pipelines/NewPipeline";
 import ShowPipeline from "./pipelines/ShowPipeline";
 import PipelineSettings from "./pipelines/PipelineSettings";
 import EditPipeline from "./pipelines/EditPipeline";
-import EditPipelinePayload from "./pipelines/EditPipelinePayload";
 import ListStreams from "./streams/ListStreams";
 import ShowStream from "./streams/ShowStream";
 import InspectStream from "./streams/InspectStream";
@@ -91,11 +90,6 @@ class DataCaterApp extends Component {
                 exact
                 path="/pipelines/:id/edit"
                 component={EditPipeline}
-              />
-              <PrivateRoute
-                exact
-                path="/pipelines/:id/edit-payload"
-                component={EditPipelinePayload}
               />
               <PrivateRoute
                 exact

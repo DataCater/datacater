@@ -5,12 +5,12 @@ class Tabs extends Component {
     const { currentTab, updateTabFunc } = this.props;
 
     return (
-      <ul className="nav flex-column nav-pills mt-4">
+      <ul class="nav flex-column nav-pills mt-4">
         {currentTab === "config" && (
           <>
-            <li className="nav-item">
+            <li class="nav-item">
               <a
-                className="nav-link active"
+                class="nav-link active"
                 href="#"
                 data-tab="config"
                 onClick={updateTabFunc}
@@ -18,9 +18,9 @@ class Tabs extends Component {
                 Config
               </a>
             </li>
-            <li className="nav-item mt-2">
+            <li class="nav-item mt-2">
               <a
-                className="nav-link"
+                class="nav-link"
                 href="#"
                 data-tab="spec"
                 onClick={updateTabFunc}
@@ -32,9 +32,9 @@ class Tabs extends Component {
         )}
         {currentTab === "spec" && (
           <>
-            <li className="nav-item">
+            <li class="nav-item">
               <a
-                className="nav-link"
+                class="nav-link"
                 href="#"
                 data-tab="config"
                 onClick={updateTabFunc}
@@ -42,9 +42,9 @@ class Tabs extends Component {
                 Config
               </a>
             </li>
-            <li className="nav-item mt-2">
+            <li class="nav-item mt-2">
               <a
-                className="nav-link active"
+                class="nav-link active"
                 href="#"
                 data-tab="spec"
                 onClick={updateTabFunc}

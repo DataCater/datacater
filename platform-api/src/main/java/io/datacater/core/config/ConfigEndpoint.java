@@ -1,7 +1,6 @@
 package io.datacater.core.config;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.jaxrs.yaml.YAMLMediaTypes;
 import io.datacater.core.exceptions.ConfigNotFoundException;
 import io.quarkus.security.Authenticated;
 import io.smallrye.mutiny.Uni;
@@ -17,7 +16,7 @@ import org.hibernate.reactive.mutiny.Mutiny.SessionFactory;
 
 @Path("/configs")
 @Authenticated
-@Produces({MediaType.APPLICATION_JSON, YAMLMediaTypes.APPLICATION_JACKSON_YAML})
+@Produces(MediaType.APPLICATION_JSON)
 @SecurityRequirement(name = "apiToken")
 public class ConfigEndpoint {
   private static final String UUID_NOT_FOUND_ERROR_MESSAGE = "No config found for uuid %s";
@@ -52,7 +51,7 @@ public class ConfigEndpoint {
 
   @POST
   @RequestBody
-  @Consumes({MediaType.APPLICATION_JSON, YAMLMediaTypes.APPLICATION_JACKSON_YAML})
+  @Consumes(MediaType.APPLICATION_JSON)
   public Uni<ConfigEntity> createConfig(Config config) throws JsonProcessingException {
     ConfigEntity configEntity =
         ConfigEntity.from(config.name(), config.kind(), config.metadata(), config.spec());
@@ -64,7 +63,7 @@ public class ConfigEndpoint {
   @PUT
   @Path("{uuid}")
   @RequestBody
-  @Consumes({MediaType.APPLICATION_JSON, YAMLMediaTypes.APPLICATION_JACKSON_YAML})
+  @Consumes(MediaType.APPLICATION_JSON)
   public Uni<ConfigEntity> updateConfig(@PathParam("uuid") UUID uuid, Config config) {
     return sf.withTransaction(
         ((session, transaction) ->

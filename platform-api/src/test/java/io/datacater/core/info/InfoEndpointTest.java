@@ -5,8 +5,6 @@ import static io.restassured.RestAssured.given;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
-import io.datacater.core.yamlTests.Utilities;
 import io.quarkus.test.common.http.TestHTTPEndpoint;
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.response.Response;
@@ -30,17 +28,6 @@ public class InfoEndpointTest {
     info = mapper.readValue(response.body().asString(), Info.class);
 
     Assertions.assertEquals(expectedResponseCode, response.getStatusCode());
-  }
-
-  @Test
-  void testGetInfoAsYaml() throws JsonProcessingException {
-    final int expectedResponseCode = 200;
-    ObjectMapper mapper = new YAMLMapper();
-    response = given().header(Utilities.ACCEPT_YAML).get();
-    Info infoFromYaml = mapper.readValue(response.body().asString(), Info.class);
-
-    Assertions.assertEquals(expectedResponseCode, response.getStatusCode());
-    Assertions.assertNotNull(infoFromYaml);
   }
 
   @Test

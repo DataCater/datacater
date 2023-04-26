@@ -29,7 +29,6 @@
     "sass": "^1.55.0"
   },
   "scripts": {
-    "prettier": "prettier ./src --write",
     "ci": "CI=false npm test && CI=false npm run build",
     "cypress:open": "cypress open",
     "cypress:run": "cypress run",
