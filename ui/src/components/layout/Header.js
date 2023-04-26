@@ -46,6 +46,7 @@ class Header extends Component {
                   <p className="text-white mb-0">{subTitle}</p>
                 )}
               </div>
+
               <div className="col-12 col-lg-6 d-flex align-items-center justify-content-lg-end">
                 <div>
                   <a

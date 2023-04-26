@@ -1,11 +1,11 @@
 package io.datacater.core.stream;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.jaxrs.yaml.YAMLMediaTypes;
 import io.datacater.core.authentication.DataCaterSessionFactory;
 import io.datacater.core.config.ConfigEntity;
 import io.datacater.core.config.ConfigUtilities;
 import io.datacater.core.exceptions.*;
-import io.quarkus.security.Authenticated;
 import io.smallrye.mutiny.Uni;
 import java.util.List;
 import java.util.UUID;
@@ -16,13 +16,10 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import org.eclipse.microprofile.config.ConfigProvider;
 import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
-import org.eclipse.microprofile.openapi.annotations.security.SecurityRequirement;
 import org.jboss.logging.Logger;
 
 @Path("/streams")
-@Authenticated
-@Produces(MediaType.APPLICATION_JSON)
-@SecurityRequirement(name = "apiToken")
+@Produces({MediaType.APPLICATION_JSON, YAMLMediaTypes.APPLICATION_JACKSON_YAML})
 public class StreamEndpoint {
   private static final Logger LOGGER = Logger.getLogger(StreamEndpoint.class);
   private static final Integer KAFKA_API_TIMEOUT_MS =
@@ -58,7 +55,7 @@ public class StreamEndpoint {
 
   @POST
   @RequestBody
-  @Consumes(MediaType.APPLICATION_JSON)
+  @Consumes({MediaType.APPLICATION_JSON, YAMLMediaTypes.APPLICATION_JACKSON_YAML})
   public Uni<Response> createStream(Stream stream) throws JsonProcessingException {
     StreamEntity se = new StreamEntity(stream.name(), stream.spec(), stream.configSelector());
     return dsf.withTransaction(
@@ -84,7 +81,7 @@ public class StreamEndpoint {
   @PUT
   @Path("{uuid}")
   @RequestBody
-  @Consumes(MediaType.APPLICATION_JSON)
+  @Consumes({MediaType.APPLICATION_JSON, YAMLMediaTypes.APPLICATION_JACKSON_YAML})
   public Uni<StreamEntity> updateStream(@PathParam("uuid") UUID uuid, Stream stream) {
 
     return dsf.withTransaction(
