@@ -1,5 +1,9 @@
 ---
 quarkus   :
+  index-dependency:
+    yaml:
+      group-id: com.fasterxml.jackson.jaxrs
+      artifact-id: jackson-jaxrs-yaml-provider
   application:
     name: datacater
     version: '2023.2'
