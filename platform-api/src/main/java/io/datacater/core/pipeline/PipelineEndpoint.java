@@ -2,6 +2,7 @@ package io.datacater.core.pipeline;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.jaxrs.yaml.YAMLMediaTypes;
 import io.datacater.core.authentication.DataCaterSessionFactory;
 import io.datacater.core.exceptions.DatacaterException;
 import io.datacater.core.exceptions.PipelineNotFoundException;
@@ -42,7 +43,7 @@ import org.jboss.logging.Logger;
 
 @Path("/pipelines")
 @Authenticated
-@Produces(MediaType.APPLICATION_JSON)
+@Produces({MediaType.APPLICATION_JSON, YAMLMediaTypes.APPLICATION_JACKSON_YAML})
 @SecurityRequirement(name = "apiToken")
 public class PipelineEndpoint {
 
@@ -75,7 +76,7 @@ public class PipelineEndpoint {
 
   @POST
   @RequestBody
-  @Consumes(MediaType.APPLICATION_JSON)
+  @Consumes({MediaType.APPLICATION_JSON, YAMLMediaTypes.APPLICATION_JACKSON_YAML})
   public Uni<PipelineEntity> createPipeline(Pipeline pipeline) throws JsonProcessingException {
     PipelineEntity pe =
         PipelineEntity.from(
@@ -88,7 +89,7 @@ public class PipelineEndpoint {
   @PUT
   @Path("{uuid}")
   @RequestBody
-  @Consumes(MediaType.APPLICATION_JSON)
+  @Consumes({MediaType.APPLICATION_JSON, YAMLMediaTypes.APPLICATION_JACKSON_YAML})
   public Uni<PipelineEntity> updatePipeline(@PathParam("uuid") UUID uuid, Pipeline pipeline) {
     return dsf.withTransaction(
         ((session, transaction) ->
