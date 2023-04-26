@@ -408,7 +408,20 @@ class DatacaterDeploymentEndpointTest {
     LOGGER.info(
         "testCreateDeploymentWithCustomReplicas response: " + responseDeployment.body().asString());
 
+    int replicaAmount =
+        client
+            .apps()
+            .replicaSets()
+            .inAnyNamespace()
+            .withLabel("datacater.io/uuid", deployment.getId().toString())
+            .list()
+            .getItems()
+            .get(0)
+            .getSpec()
+            .getReplicas();
+
     Assertions.assertEquals(200, responseDeployment.getStatusCode());
     Assertions.assertTrue(k8DeploymentString.contains("replicas=3"));
+    Assertions.assertEquals(3, replicaAmount);
   }
 }

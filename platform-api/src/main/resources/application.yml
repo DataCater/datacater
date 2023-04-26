@@ -1,9 +1,5 @@
 ---
 quarkus   :
-  kubernetes-client:
-    devservices:
-      flavor: kind
-      override-kubeconfig: true
   application:
     name: datacater
     version: '2023.2'
@@ -169,6 +165,10 @@ datacater :
         name: datacater/python-runner
         version: 2023.2
   quarkus:
+    kubernetes-client:
+      devservices:
+        flavor: kind
+        override-kubeconfig: true
     log:
       level: INFO
       console:
