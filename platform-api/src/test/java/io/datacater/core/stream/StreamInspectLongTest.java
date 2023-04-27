@@ -12,10 +12,6 @@ import io.restassured.specification.RequestSpecification;
 import java.io.IOException;
 import java.net.URL;
 import java.util.UUID;
-import java.util.concurrent.CompletionStage;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import javax.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.kafka.clients.producer.ProducerRecord;
@@ -37,18 +33,16 @@ class StreamInspectLongTest {
   UUID uuid;
 
   @Test
-  void testLongDeserializer()
-      throws IOException, InterruptedException, ExecutionException, TimeoutException {
+  void testLongDeserializer() throws IOException, InterruptedException {
     start();
     int expectedRecordCount = 3;
 
     for (long i = 0L; i <= 300L; i++) {
       producer.send(new ProducerRecord<>("testLongDeserializer", i, i));
     }
-    CompletionStage<Void> lastMessageToWaitOn =
-        producer.send(new ProducerRecord<>("testLongDeserializer", 1000L, 2000L));
 
-    lastMessageToWaitOn.toCompletableFuture().get(1000, TimeUnit.MILLISECONDS);
+    // wait on records to finish
+    Thread.sleep(1000);
 
     Response response =
         given()

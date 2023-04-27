@@ -36,8 +36,7 @@ class StreamInspectJsonTest {
   UUID uuid;
 
   @Test
-  void testJsonDeserializer()
-      throws IOException, InterruptedException, ExecutionException, TimeoutException {
+  void testJsonDeserializer() throws IOException, InterruptedException {
     start();
 
     for (int i = 0; i <= 300; i++) {
@@ -47,12 +46,9 @@ class StreamInspectJsonTest {
               buildJson("test" + i, 1000 + i),
               buildJson("test" + i, 2000 + i)));
     }
-    CompletionStage<Void> lastMessageToWaitOn =
-        producer.send(
-            new ProducerRecord<>(
-                "testJsonDeserializer", buildJson("test", 1000), buildJson("test", 2000)));
 
-    lastMessageToWaitOn.toCompletableFuture().get(1000, TimeUnit.MILLISECONDS);
+    // wait on records to finish
+    Thread.sleep(1000);
 
     Response response =
         given().pathParam("uuid", uuid.toString()).queryParam("limit", "3").get("/{uuid}/inspect");

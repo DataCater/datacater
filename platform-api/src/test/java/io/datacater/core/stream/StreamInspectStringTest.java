@@ -12,10 +12,6 @@ import io.restassured.specification.RequestSpecification;
 import java.io.IOException;
 import java.net.URL;
 import java.util.UUID;
-import java.util.concurrent.CompletionStage;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import javax.inject.Inject;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.eclipse.microprofile.reactive.messaging.Channel;
@@ -36,8 +32,7 @@ class StreamInspectStringTest {
   UUID uuid;
 
   @Test
-  void testStringDeserializer()
-      throws IOException, InterruptedException, ExecutionException, TimeoutException {
+  void testStringDeserializer() throws IOException, InterruptedException {
     start();
 
     for (int i = 0; i <= 300; i++) {
@@ -45,14 +40,9 @@ class StreamInspectStringTest {
           new ProducerRecord<>(
               "testStringDeserializer", String.format("test %d", i), String.format("test %d", i)));
     }
-    CompletionStage<Void> lastMessageToWaitOn =
-        producer.send(
-            new ProducerRecord<>(
-                "testStringDeserializer",
-                String.format("test %d", 1000),
-                String.format("test %d", 2000)));
 
-    lastMessageToWaitOn.toCompletableFuture().get(1000, TimeUnit.MILLISECONDS);
+    // wait on records to finish
+    Thread.sleep(1000);
 
     Response response =
         given()

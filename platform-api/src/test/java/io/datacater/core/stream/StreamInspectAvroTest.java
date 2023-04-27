@@ -45,8 +45,7 @@ class StreamInspectAvroTest {
   UUID uuid;
 
   @Test
-  void testAvroDeserializerWithRegistry()
-      throws IOException, InterruptedException, ExecutionException, TimeoutException {
+  void testAvroDeserializerWithRegistry() throws IOException, InterruptedException {
     startWithRegistry();
 
     for (int i = 0; i <= 300; i++) {
@@ -56,12 +55,9 @@ class StreamInspectAvroTest {
               buildRecord("test" + i, 1000 + i),
               buildRecord("test" + i, 2000 + i)));
     }
-    CompletionStage<Void> lastMessageToWaitOn =
-        producerWithRegistry.send(
-            new ProducerRecord<>(
-                "streamTestWithRegistry", buildRecord("test", 1000), buildRecord("test", 2000)));
 
-    lastMessageToWaitOn.toCompletableFuture().get(2000, TimeUnit.MILLISECONDS);
+    // wait on records to finish
+    Thread.sleep(1000);
 
     Response response =
         given().pathParam("uuid", uuid.toString()).queryParam("limit", "3").get("/{uuid}/inspect");
@@ -71,8 +67,7 @@ class StreamInspectAvroTest {
   }
 
   @Test
-  void testAvroDeserializerWithSchema()
-      throws IOException, InterruptedException, ExecutionException, TimeoutException {
+  void testAvroDeserializerWithSchema() throws IOException, InterruptedException {
     startWithoutRegistry();
 
     for (int i = 1; i <= 300; i++) {
@@ -80,11 +75,9 @@ class StreamInspectAvroTest {
           new ProducerRecord(
               "streamTest", buildRecord("test" + i, 1000 + i), buildRecord("test" + i, 2000 + i)));
     }
-    Future<?> lastMessageToWaitOn =
-        producerWithSchema.send(
-            new ProducerRecord("streamTest", buildRecord("test", 1000), buildRecord("test", 2000)));
 
-    lastMessageToWaitOn.get(1000, TimeUnit.MILLISECONDS);
+    // wait on records to finish
+    Thread.sleep(1000);
 
     Response response =
         given().pathParam("uuid", uuid.toString()).queryParam("limit", "3").get("/{uuid}/inspect");
