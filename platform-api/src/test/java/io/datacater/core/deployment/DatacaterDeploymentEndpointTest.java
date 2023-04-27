@@ -1,6 +1,7 @@
 package io.datacater.core.deployment;
 
 import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -123,25 +124,12 @@ class DatacaterDeploymentEndpointTest {
 
   @Test
   @Order(3)
-  void testGetDeploymentStatusByInvalidUuid() {
-    UUID invalidUuid = UUID.randomUUID();
-
-    given()
-        .pathParam("uuid", invalidUuid)
-        .baseUri(baseURI)
-        .get(deploymentsPath + "/{uuid}/status")
-        .then()
-        .statusCode(404);
-  }
-
-  @Test
-  @Order(4)
   void testGetDeployments() {
     given().baseUri(baseURI).get(deploymentsPath).then().statusCode(200);
   }
 
   @Test
-  @Order(5)
+  @Order(4)
   void testUpdateDeployment() throws IOException {
     String pipelineUUIDPlaceholder = "pipelineUUIDPlaceholder";
     URL JsonURL = ClassLoader.getSystemClassLoader().getResource(deploymentPath);
@@ -162,7 +150,42 @@ class DatacaterDeploymentEndpointTest {
   }
 
   @Test
+  @Order(5)
+  void testGetDeploymentStatus() {
+    given()
+        .pathParam("uuid", deploymentId)
+        .baseUri(baseURI)
+        .when()
+        .get(deploymentsPath + "/{uuid}/status")
+        .then()
+        .statusCode(200)
+        .contentType(ContentType.JSON)
+        .body("additionalProperties", is(notNullValue()))
+        .body("availableReplicas", is(notNullValue()))
+        .body("collisionCount", is(notNullValue()))
+        .body("conditions", is(notNullValue()))
+        .body("observedGeneration", is(notNullValue()))
+        .body("readyReplicas", is(notNullValue()))
+        .body("replicas", is(notNullValue()))
+        .body("unavailableReplicas", is(notNullValue()))
+        .body("updatedReplicas", is(notNullValue()));
+  }
+
+  @Test
   @Order(6)
+  void testGetDeploymentStatusByInvalidUuid() {
+    UUID invalidUuid = UUID.randomUUID();
+
+    given()
+        .pathParam("uuid", invalidUuid)
+        .baseUri(baseURI)
+        .get(deploymentsPath + "/{uuid}/status")
+        .then()
+        .statusCode(404);
+  }
+
+  @Test
+  @Order(7)
   void testDeleteDeployment() {
     Response response =
         RestAssured.given()
@@ -175,7 +198,7 @@ class DatacaterDeploymentEndpointTest {
   }
 
   @Test
-  @Order(7)
+  @Order(8)
   void testGetDeletedDeployment() {
     given()
         .pathParam("uuid", deploymentId)
@@ -186,7 +209,7 @@ class DatacaterDeploymentEndpointTest {
   }
 
   @Test
-  @Order(8)
+  @Order(9)
   void testGetUnknownDeployment() {
     given()
         .pathParam("uuid", UUID.randomUUID())
@@ -197,7 +220,7 @@ class DatacaterDeploymentEndpointTest {
   }
 
   @Test
-  @Order(9)
+  @Order(10)
   void testGetUnknownDeploymentLogs() {
     given()
         .pathParam("uuid", UUID.randomUUID())
@@ -208,7 +231,7 @@ class DatacaterDeploymentEndpointTest {
   }
 
   @Test
-  @Order(10)
+  @Order(11)
   void testWatchUnknownDeploymentLogs() {
     given()
         .pathParam("uuid", UUID.randomUUID())
@@ -219,7 +242,7 @@ class DatacaterDeploymentEndpointTest {
   }
 
   @Test
-  @Order(11)
+  @Order(12)
   void testDeleteUnknownDeployment() {
     given()
         .contentType(ContentType.JSON)
@@ -231,7 +254,7 @@ class DatacaterDeploymentEndpointTest {
   }
 
   @Test
-  @Order(12)
+  @Order(13)
   void testCreateDeploymentWithNoStreamsInPipeline() throws IOException {
     String streamPath = "deploymentTests/streamin.json";
     String pipelinePath = "deploymentTests/pipeline_no_streams.json";
@@ -283,7 +306,7 @@ class DatacaterDeploymentEndpointTest {
   }
 
   @Test
-  @Order(13)
+  @Order(14)
   void testCreateDeploymentWithNoStream() throws IOException {
     String pipelinePath = "deploymentTests/pipeline_no_streams.json";
 
@@ -316,7 +339,7 @@ class DatacaterDeploymentEndpointTest {
   }
 
   @Test
-  @Order(14)
+  @Order(15)
   void testCreateDeploymentWithNoStreamOut() throws IOException {
     String streamPath = "deploymentTests/streamin.json";
     String pipelinePath = "deploymentTests/pipeline_no_streams.json";
@@ -367,7 +390,7 @@ class DatacaterDeploymentEndpointTest {
   }
 
   @Test
-  @Order(15)
+  @Order(16)
   void testCreateDeploymentWithEmptySpec() throws IOException {
     String deploymentPath = "deploymentTests/deployment_with_empty_spec.json";
 
@@ -388,7 +411,7 @@ class DatacaterDeploymentEndpointTest {
   }
 
   @Test
-  @Order(16)
+  @Order(17)
   void testCreateDeploymentWithCustomReplicas() throws IOException {
     String deploymentPath = "deploymentTests/deployment_with_custom_replicas.json";
 
