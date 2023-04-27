@@ -7,26 +7,25 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import io.datacater.core.pipeline.PipelineEntity;
 import io.datacater.core.stream.StreamEntity;
-import io.fabric8.kubernetes.client.server.mock.KubernetesServer;
+import io.fabric8.kubernetes.client.KubernetesClient;
 import io.quarkus.test.junit.QuarkusTest;
-import io.quarkus.test.kubernetes.client.KubernetesTestServer;
-import io.quarkus.test.kubernetes.client.WithKubernetesTestServer;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import java.io.IOException;
 import java.net.URL;
 import java.util.UUID;
+import javax.inject.Inject;
 import org.jboss.logging.Logger;
 import org.junit.jupiter.api.*;
 
 @QuarkusTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@WithKubernetesTestServer
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class DatacaterDeploymentEndpointTest {
   private static final Logger LOGGER = Logger.getLogger(DatacaterDeploymentEndpointTest.class);
-  @KubernetesTestServer KubernetesServer mockServer;
+
+  @Inject KubernetesClient client;
 
   final String baseURI = "http://localhost:8081";
   final String deploymentsPath = "/deployments";
@@ -411,8 +410,7 @@ class DatacaterDeploymentEndpointTest {
         mapper.readValue(responseDeployment.body().asString(), DeploymentEntity.class);
 
     String k8DeploymentString =
-        mockServer
-            .getClient()
+        client
             .apps()
             .deployments()
             .inAnyNamespace()
@@ -423,7 +421,20 @@ class DatacaterDeploymentEndpointTest {
     LOGGER.info(
         "testCreateDeploymentWithCustomReplicas response: " + responseDeployment.body().asString());
 
+    int replicaAmount =
+        client
+            .apps()
+            .replicaSets()
+            .inAnyNamespace()
+            .withLabel("datacater.io/uuid", deployment.getId().toString())
+            .list()
+            .getItems()
+            .get(0)
+            .getSpec()
+            .getReplicas();
+
     Assertions.assertEquals(200, responseDeployment.getStatusCode());
     Assertions.assertTrue(k8DeploymentString.contains("replicas=3"));
+    Assertions.assertEquals(3, replicaAmount);
   }
 }

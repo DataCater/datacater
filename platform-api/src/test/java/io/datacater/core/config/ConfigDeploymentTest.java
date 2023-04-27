@@ -9,7 +9,6 @@ import com.fasterxml.jackson.databind.json.JsonMapper;
 import io.datacater.core.pipeline.PipelineEntity;
 import io.datacater.core.stream.StreamEntity;
 import io.quarkus.test.junit.QuarkusTest;
-import io.quarkus.test.kubernetes.client.WithKubernetesTestServer;
 import io.restassured.response.Response;
 import java.io.IOException;
 import java.net.URL;
@@ -19,7 +18,6 @@ import org.junit.jupiter.api.*;
 
 @QuarkusTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@WithKubernetesTestServer
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class ConfigDeploymentTest {
   private static final Logger LOGGER = Logger.getLogger(ConfigDeploymentTest.class);

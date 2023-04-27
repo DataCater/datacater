@@ -9,10 +9,7 @@ import io.datacater.core.pipeline.PipelineEntity;
 import io.datacater.core.stream.Stream;
 import io.datacater.core.stream.StreamEntity;
 import io.fabric8.kubernetes.client.KubernetesClient;
-import io.fabric8.kubernetes.client.server.mock.KubernetesServer;
 import io.quarkus.test.junit.QuarkusTest;
-import io.quarkus.test.kubernetes.client.KubernetesTestServer;
-import io.quarkus.test.kubernetes.client.WithKubernetesTestServer;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -24,7 +21,6 @@ import javax.inject.Inject;
 import org.jboss.logging.Logger;
 import org.junit.jupiter.api.*;
 
-@WithKubernetesTestServer
 @QuarkusTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
@@ -32,8 +28,6 @@ class K8DeploymentTest {
   private static final Logger LOGGER = Logger.getLogger(K8DeploymentTest.class);
 
   @Inject KubernetesClient client;
-
-  @KubernetesTestServer KubernetesServer mockServer;
 
   K8Deployment k8Deployment;
   PipelineEntity pipelineEntity;

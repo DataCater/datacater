@@ -19,7 +19,6 @@ import javax.inject.Inject;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.eclipse.microprofile.reactive.messaging.Channel;
 import org.eclipse.microprofile.reactive.messaging.Emitter;
-import org.junit.Ignore;
 import org.junit.jupiter.api.*;
 
 @QuarkusTest
@@ -138,7 +137,7 @@ class PipelineEndpointTest {
     Assertions.assertEquals(200, response.getStatusCode());
   }
 
-  @Ignore
+  @Disabled
   void testPipelineInspect() throws IOException {
     URL streamJson =
         ClassLoader.getSystemClassLoader()
@@ -178,7 +177,7 @@ class PipelineEndpointTest {
     Assertions.assertEquals(200, pipelineInspection.statusCode());
   }
 
-  @Ignore
+  @Disabled
   void testPipelinePreview() throws IOException {
     URL pipelinePreview = ClassLoader.getSystemClassLoader().getResource("pipeline_preview.json");
 
