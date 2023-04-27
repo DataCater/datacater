@@ -14,7 +14,6 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.Properties;
 import java.util.UUID;
-import java.util.concurrent.*;
 import javax.inject.Inject;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData;
