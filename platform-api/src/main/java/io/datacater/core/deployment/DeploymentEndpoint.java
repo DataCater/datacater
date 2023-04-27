@@ -534,18 +534,4 @@ public class DeploymentEndpoint {
     is.close();
     lw.close();
   }
-
-  /*
-  private DeploymentStatus getDeploymentStatus(UUID uuid) {
-
-    Deployment k8Deployment = new K8Deployment(client).getDeploymentObject(uuid);
-
-    if (k8Deployment != null) {
-      return k8Deployment.getStatus();
-    }
-
-    return null;
-  }
-
-   */
 }

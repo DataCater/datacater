@@ -1,18 +1,12 @@
 package io.datacater.core.deployment;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.fabric8.kubernetes.api.model.apps.Deployment;
 import io.fabric8.kubernetes.api.model.apps.DeploymentCondition;
 import io.fabric8.kubernetes.api.model.apps.DeploymentStatus;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class DataCaterDeploymentStatus {
-
   @JsonProperty("availableReplicas")
   private Integer availableReplicas;
 
@@ -20,8 +14,7 @@ public class DataCaterDeploymentStatus {
   private Integer collisionCount;
 
   @JsonProperty("conditions")
-  @JsonInclude(JsonInclude.Include.NON_EMPTY)
-  private List<DeploymentCondition> conditions = new ArrayList<DeploymentCondition>();
+  private List<DeploymentCondition> conditions;
 
   @JsonProperty("observedGeneration")
   private Long observedGeneration;
@@ -38,35 +31,35 @@ public class DataCaterDeploymentStatus {
   @JsonProperty("updatedReplicas")
   private Integer updatedReplicas;
 
-  @JsonIgnore private Map<String, Object> additionalProperties = new HashMap<String, Object>();
+  @JsonProperty private Map<String, Object> additionalProperties;
 
   public static DataCaterDeploymentStatus from(Deployment deployment) {
     if (deployment == null) {
       return null;
     }
 
-    // getstatus returns null in tests
     DeploymentStatus deploymentStatus = deployment.getStatus();
 
     if (deploymentStatus == null) {
       return null;
     }
 
-    DataCaterDeploymentStatus self = new DataCaterDeploymentStatus();
-
-    // TODO add default values
-    self.availableReplicas = deploymentStatus.getAvailableReplicas();
-    self.collisionCount = deploymentStatus.getCollisionCount();
-    self.conditions = deploymentStatus.getConditions();
-    self.observedGeneration = deploymentStatus.getObservedGeneration();
-    self.readyReplicas = deploymentStatus.getReadyReplicas();
-    self.replicas = deploymentStatus.getReplicas();
-    self.unavailableReplicas = deploymentStatus.getUnavailableReplicas();
-    self.updatedReplicas = deploymentStatus.getUpdatedReplicas();
-    self.additionalProperties = deploymentStatus.getAdditionalProperties();
-
-    return self;
+    return new DataCaterDeploymentStatus(deploymentStatus);
   }
 
-  private DataCaterDeploymentStatus() {}
+  private DataCaterDeploymentStatus(DeploymentStatus deploymentStatus) {
+    this.availableReplicas = Optional.ofNullable(deploymentStatus.getAvailableReplicas()).orElse(0);
+    this.collisionCount = Optional.ofNullable(deploymentStatus.getCollisionCount()).orElse(0);
+    this.conditions =
+        Optional.ofNullable(deploymentStatus.getConditions()).orElse(new ArrayList<>());
+    this.observedGeneration =
+        Optional.ofNullable(deploymentStatus.getObservedGeneration()).orElse(0L);
+    this.readyReplicas = Optional.ofNullable(deploymentStatus.getReadyReplicas()).orElse(0);
+    this.replicas = Optional.ofNullable(deploymentStatus.getReplicas()).orElse(0);
+    this.unavailableReplicas =
+        Optional.ofNullable(deploymentStatus.getUnavailableReplicas()).orElse(0);
+    this.updatedReplicas = Optional.ofNullable(deploymentStatus.getUpdatedReplicas()).orElse(0);
+    this.additionalProperties =
+        Optional.ofNullable(deploymentStatus.getAdditionalProperties()).orElse(new HashMap<>());
+  }
 }
