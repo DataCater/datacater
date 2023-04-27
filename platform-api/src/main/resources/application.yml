@@ -1,5 +1,5 @@
 ---
-quarkus  :
+quarkus   :
   index-dependency:
     yaml:
       group-id: com.fasterxml.jackson.jaxrs
@@ -51,20 +51,23 @@ quarkus  :
       generation: update
   oidc:
     enabled: true
-smallrye :
+kubernetes:
+  auth:
+    tryKubeConfig: false
+smallrye  :
   jwt:
     sign:
       key:
         location: key.pem
     new-token:
       lifespan: 604800
-mp       :
+mp        :
   jwt:
     verify:
       issuer: https://datacater.io
       publickey:
         location: cert.pem
-datacater:
+datacater :
   deployment:
     resources:
       requests:
@@ -86,7 +89,7 @@ datacater:
       timeout:
         ms: 5000
 
-'%dev'   :
+'%dev'    :
   datacater:
     authorization:
       basic: true
@@ -152,7 +155,7 @@ datacater:
       new-token:
         lifespan: 604800
 
-'%test'  :
+'%test'   :
   datacater:
     transforms:
       path: /home/runner/work/cloud-platform/cloud-platform/transforms
@@ -166,6 +169,10 @@ datacater:
         name: datacater/python-runner
         version: 2023.2
   quarkus:
+    kubernetes-client:
+      devservices:
+        flavor: kind
+        override-kubeconfig: true
     log:
       level: INFO
       console:

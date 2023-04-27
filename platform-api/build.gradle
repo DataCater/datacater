@@ -69,7 +69,6 @@ dependencies {
     testImplementation 'io.quarkus:quarkus-jacoco'
     testImplementation 'io.quarkus:quarkus-junit5'
     testImplementation 'io.rest-assured:rest-assured:5.2.0'
-    testImplementation 'io.quarkus:quarkus-test-kubernetes-client'
 }
 
 group 'io.datacater'
