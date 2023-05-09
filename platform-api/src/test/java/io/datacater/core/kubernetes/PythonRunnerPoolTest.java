@@ -4,11 +4,8 @@ import io.datacater.core.kubernetes.KubernetesTestProfiles.PythonRunnerPoolTestP
 import io.datacater.core.kubernetes.PythonRunnerPool.NamedPod;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodBuilder;
-import io.fabric8.kubernetes.client.server.mock.KubernetesServer;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.TestProfile;
-import io.quarkus.test.kubernetes.client.KubernetesTestServer;
-import io.quarkus.test.kubernetes.client.WithKubernetesTestServer;
 import io.smallrye.mutiny.helpers.test.UniAssertSubscriber;
 import java.util.Deque;
 import javax.inject.Inject;
@@ -18,12 +15,9 @@ import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
 
 @QuarkusTest
-@WithKubernetesTestServer
 @TestProfile(PythonRunnerPoolTestProfile.class)
 @TestInstance(Lifecycle.PER_CLASS)
 class PythonRunnerPoolTest {
-
-  @KubernetesTestServer KubernetesServer testServer;
 
   @Inject PythonRunnerPool runnerPool;
 

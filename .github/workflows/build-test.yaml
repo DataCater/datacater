@@ -103,6 +103,9 @@ jobs       :
     runs-on: ubuntu-latest
     steps:
     -   uses: actions/checkout@v3
+    -   name: Get current date
+        id: date
+        run: echo "::set-output name=date::$(date +'%Y-%m-%d')"
     -   name: Set RELEASE_VERSION
         run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
     -   name: Set up JDK 17 and gradle cache
@@ -131,7 +134,8 @@ jobs       :
                 -Dquarkus.container-image.push=true \
                 -Dquarkus.container-image.registry=ghcr.io \
                 -Dquarkus.container-image.username=${{ github.actor }} \
-                -Dquarkus.container-image.password=${{ secrets.GITHUB_TOKEN }}
+                -Dquarkus.container-image.password=${{ secrets.GITHUB_TOKEN }} \
+                -Dquarkus.jib.jvm-arguments="-Ddatacater.application.build-date=${{ steps.date.outputs.date }},-Ddatacater.application.git-version=${GITHUB_SHA},-Ddatacater.application.base-image=datacater/datacater:${GITHUB_SHA}"
     -   name: Push datacater/datacater:nightly to Docker Hub
         if: github.ref_name == 'main'
         run: |
@@ -143,7 +147,8 @@ jobs       :
                 -Dquarkus.container-image.push=true \
                 -Dquarkus.container-image.registry=docker.io \
                 -Dquarkus.container-image.username=datacater \
-                -Dquarkus.container-image.password=${{ secrets.DOCKERHUB_TOKEN }}
+                -Dquarkus.container-image.password=${{ secrets.DOCKERHUB_TOKEN }} \
+                -Dquarkus.jib.jvm-arguments="-Ddatacater.application.build-date=${{ steps.date.outputs.date }},-Ddatacater.application.git-version=${GITHUB_SHA},-Ddatacater.application.base-image=datacater/datacater:nightly"
     -   name: Push datacater/datacater to Docker Hub
         if: github.event.action == 'released' || github.event.action == 'prereleased'
         run: |
@@ -154,7 +159,8 @@ jobs       :
                 -Dquarkus.container-image.push=true \
                 -Dquarkus.container-image.registry=docker.io \
                 -Dquarkus.container-image.username=datacater \
-                -Dquarkus.container-image.password=${{ secrets.DOCKERHUB_TOKEN }}
+                -Dquarkus.container-image.password=${{ secrets.DOCKERHUB_TOKEN }} \
+                -Dquarkus.jib.jvm-arguments="-Ddatacater.application.build-date=${{ steps.date.outputs.date }},-Ddatacater.application.git-version=${GITHUB_SHA},-Ddatacater.application.base-image=datacater/datacater:${RELEASE_VERSION}"
   push_pipeline:
     if: github.ref_name == 'main' || github.ref_type == 'tag' || github.base_ref == 'main'
     name: Build and push pipeline image

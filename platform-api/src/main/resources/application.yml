@@ -1,8 +1,12 @@
 ---
-quarkus  :
+quarkus   :
+  index-dependency:
+    yaml:
+      group-id: com.fasterxml.jackson.jaxrs
+      artifact-id: jackson-jaxrs-yaml-provider
   application:
     name: datacater
-    version: '2023.1'
+    version: '2023.2'
   datasource:
     db-kind: postgresql
     jdbc: false
@@ -47,20 +51,23 @@ quarkus  :
       generation: update
   oidc:
     enabled: true
-smallrye :
+kubernetes:
+  auth:
+    tryKubeConfig: false
+smallrye  :
   jwt:
     sign:
       key:
         location: key.pem
     new-token:
       lifespan: 604800
-mp       :
+mp        :
   jwt:
     verify:
       issuer: https://datacater.io
       publickey:
         location: cert.pem
-datacater:
+datacater :
   deployment:
     resources:
       requests:
@@ -71,7 +78,7 @@ datacater:
   pythonrunner:
     image:
       name: datacater/python-runner
-      version: alpha-20221101
+      version: 2023.2
   authorization:
     basic: true
     oidc: false
@@ -82,7 +89,7 @@ datacater:
       timeout:
         ms: 5000
 
-'%dev'   :
+'%dev'    :
   datacater:
     authorization:
       basic: true
@@ -94,7 +101,7 @@ datacater:
     pythonrunner:
       image:
         name: datacater/python-runner
-        version: alpha-20221117
+        version: 2023.2
   quarkus:
     oidc:
       enabled: true
@@ -148,7 +155,7 @@ datacater:
       new-token:
         lifespan: 604800
 
-'%test'  :
+'%test'   :
   datacater:
     transforms:
       path: /home/runner/work/cloud-platform/cloud-platform/transforms
@@ -160,8 +167,12 @@ datacater:
     pythonrunner:
       image:
         name: datacater/python-runner
-        version: alpha-20221117
+        version: 2023.2
   quarkus:
+    kubernetes-client:
+      devservices:
+        flavor: kind
+        override-kubeconfig: true
     log:
       level: INFO
       console:
