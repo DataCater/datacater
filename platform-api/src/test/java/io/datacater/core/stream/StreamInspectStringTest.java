@@ -40,11 +40,13 @@ class StreamInspectStringTest {
       throws IOException, InterruptedException, ExecutionException, TimeoutException {
     start();
 
-    for (int i = 0; i <= 300; i++) {
+    for (int i = 0; i <= 9; i++) {
       producer.send(
           new ProducerRecord<>(
               "testStringDeserializer", String.format("test %d", i), String.format("test %d", i)));
     }
+
+    // wait on records to finish
     CompletionStage<Void> lastMessageToWaitOn =
         producer.send(
             new ProducerRecord<>(

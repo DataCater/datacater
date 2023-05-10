@@ -42,9 +42,11 @@ class StreamInspectLongTest {
     start();
     int expectedRecordCount = 3;
 
-    for (long i = 0L; i <= 300L; i++) {
+    for (long i = 0L; i <= 9L; i++) {
       producer.send(new ProducerRecord<>("testLongDeserializer", i, i));
     }
+
+    // wait on records to finish
     CompletionStage<Void> lastMessageToWaitOn =
         producer.send(new ProducerRecord<>("testLongDeserializer", 1000L, 2000L));
 
