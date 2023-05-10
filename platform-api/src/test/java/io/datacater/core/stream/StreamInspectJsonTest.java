@@ -15,6 +15,10 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.CompletionStage;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import javax.inject.Inject;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.eclipse.microprofile.reactive.messaging.Channel;
@@ -35,10 +39,11 @@ class StreamInspectJsonTest {
   UUID uuid;
 
   @Test
-  void testJsonDeserializer() throws IOException, InterruptedException {
+  void testJsonDeserializer()
+      throws IOException, InterruptedException, ExecutionException, TimeoutException {
     start();
 
-    for (int i = 0; i <= 300; i++) {
+    for (int i = 0; i <= 9; i++) {
       producer.send(
           new ProducerRecord<>(
               "testJsonDeserializer",
@@ -47,7 +52,12 @@ class StreamInspectJsonTest {
     }
 
     // wait on records to finish
-    Thread.sleep(1000);
+    CompletionStage<Void> lastMessageToWaitOn =
+        producer.send(
+            new ProducerRecord<>(
+                "testJsonDeserializer", buildJson("test", 1000), buildJson("test", 2000)));
+
+    lastMessageToWaitOn.toCompletableFuture().get(1000, TimeUnit.MILLISECONDS);
 
     Response response =
         given().pathParam("uuid", uuid.toString()).queryParam("limit", "3").get("/{uuid}/inspect");

@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.Properties;
 import java.util.UUID;
+import java.util.concurrent.*;
 import javax.inject.Inject;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData;
@@ -44,10 +45,11 @@ class StreamInspectAvroTest {
   UUID uuid;
 
   @Test
-  void testAvroDeserializerWithRegistry() throws IOException, InterruptedException {
+  void testAvroDeserializerWithRegistry()
+      throws IOException, InterruptedException, ExecutionException, TimeoutException {
     startWithRegistry();
 
-    for (int i = 0; i <= 300; i++) {
+    for (int i = 0; i <= 9; i++) {
       producerWithRegistry.send(
           new ProducerRecord<>(
               "streamTestWithRegistry",
@@ -56,7 +58,12 @@ class StreamInspectAvroTest {
     }
 
     // wait on records to finish
-    Thread.sleep(1000);
+    CompletionStage<Void> lastMessageToWaitOn =
+        producerWithRegistry.send(
+            new ProducerRecord<>(
+                "streamTestWithRegistry", buildRecord("test", 1000), buildRecord("test", 2000)));
+
+    lastMessageToWaitOn.toCompletableFuture().get(2000, TimeUnit.MILLISECONDS);
 
     Response response =
         given().pathParam("uuid", uuid.toString()).queryParam("limit", "3").get("/{uuid}/inspect");
@@ -66,17 +73,22 @@ class StreamInspectAvroTest {
   }
 
   @Test
-  void testAvroDeserializerWithSchema() throws IOException, InterruptedException {
+  void testAvroDeserializerWithSchema()
+      throws IOException, InterruptedException, ExecutionException, TimeoutException {
     startWithoutRegistry();
 
-    for (int i = 1; i <= 300; i++) {
+    for (int i = 1; i <= 9; i++) {
       producerWithSchema.send(
           new ProducerRecord(
               "streamTest", buildRecord("test" + i, 1000 + i), buildRecord("test" + i, 2000 + i)));
     }
 
     // wait on records to finish
-    Thread.sleep(1000);
+    Future<?> lastMessageToWaitOn =
+        producerWithSchema.send(
+            new ProducerRecord("streamTest", buildRecord("test", 1000), buildRecord("test", 2000)));
+
+    lastMessageToWaitOn.get(1000, TimeUnit.MILLISECONDS);
 
     Response response =
         given().pathParam("uuid", uuid.toString()).queryParam("limit", "3").get("/{uuid}/inspect");
