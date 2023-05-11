@@ -251,12 +251,16 @@ public class K8Deployment {
   }
 
   public Deployment getDeploymentObject(UUID deploymentId) throws KubernetesClientException {
-    return client
-        .apps()
-        .deployments()
-        .inNamespace(StaticConfig.EnvironmentVariables.NAMESPACE)
-        .withName(getDeploymentName(deploymentId))
-        .get();
+    try {
+      return client
+          .apps()
+          .deployments()
+          .inNamespace(StaticConfig.EnvironmentVariables.NAMESPACE)
+          .withName(getDeploymentName(deploymentId))
+          .get();
+    } catch (KubernetesClientException e) {
+      throw new DeploymentNotFoundException(StaticConfig.LoggerMessages.DEPLOYMENT_NOT_FOUND);
+    }
   }
 
   public String getDeploymentReplicaIp(UUID deploymentId, int replica) {

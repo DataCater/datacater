@@ -14,7 +14,6 @@ import io.datacater.core.stream.StreamEntity;
 import io.datacater.core.utilities.StringUtilities;
 import io.fabric8.kubernetes.api.model.apps.Deployment;
 import io.fabric8.kubernetes.client.KubernetesClient;
-import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.kubernetes.client.dsl.ContainerResource;
 import io.fabric8.kubernetes.client.dsl.LogWatch;
 import io.quarkus.security.Authenticated;
@@ -148,18 +147,9 @@ public class DeploymentEndpoint {
         .ifNotNull()
         .transform(
             deploymentEntity -> {
-              try {
-                Deployment deployment = new K8Deployment(client).getDeploymentObject(deploymentId);
-                return DataCaterDeploymentStatus.from(deployment);
-              } catch (KubernetesClientException e) {
-                LOGGER.warn(StaticConfig.LoggerMessages.DEPLOYMENT_NOT_FOUND, e);
-                return null;
-              }
-            })
-        .onItem()
-        .ifNull()
-        .failWith(
-            new DeploymentNotFoundException(StaticConfig.LoggerMessages.DEPLOYMENT_NOT_FOUND));
+              Deployment deployment = new K8Deployment(client).getDeploymentObject(deploymentId);
+              return DataCaterDeploymentStatus.from(deployment);
+            });
   }
 
   @GET
