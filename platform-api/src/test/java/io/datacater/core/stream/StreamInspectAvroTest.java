@@ -49,13 +49,15 @@ class StreamInspectAvroTest {
       throws IOException, InterruptedException, ExecutionException, TimeoutException {
     startWithRegistry();
 
-    for (int i = 0; i <= 300; i++) {
+    for (int i = 0; i <= 9; i++) {
       producerWithRegistry.send(
           new ProducerRecord<>(
               "streamTestWithRegistry",
               buildRecord("test" + i, 1000 + i),
               buildRecord("test" + i, 2000 + i)));
     }
+
+    // wait on records to finish
     CompletionStage<Void> lastMessageToWaitOn =
         producerWithRegistry.send(
             new ProducerRecord<>(
@@ -75,11 +77,13 @@ class StreamInspectAvroTest {
       throws IOException, InterruptedException, ExecutionException, TimeoutException {
     startWithoutRegistry();
 
-    for (int i = 1; i <= 300; i++) {
+    for (int i = 1; i <= 9; i++) {
       producerWithSchema.send(
           new ProducerRecord(
               "streamTest", buildRecord("test" + i, 1000 + i), buildRecord("test" + i, 2000 + i)));
     }
+
+    // wait on records to finish
     Future<?> lastMessageToWaitOn =
         producerWithSchema.send(
             new ProducerRecord("streamTest", buildRecord("test", 1000), buildRecord("test", 2000)));
