@@ -2,18 +2,16 @@ import React, { Component } from "react";
 import { Link, Redirect } from "react-router-dom";
 import { connect } from "react-redux";
 import { fetchInfo } from "../../actions/info";
-import {
-  Info,
-  BookOpen,
-  User,
-} from "react-feather";
+import { Info, BookOpen, User } from "react-feather";
 import "../../scss/nav.scss";
-
 
 class Footer extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      showVersion: false,
+      showDocumentation: false,
+      showContact: false,
       errorMessage: "",
       errorMessages: {},
       info: {
@@ -22,27 +20,57 @@ class Footer extends Component {
         contact: {},
       },
     };
+    this.toggleFooterDropdown = this.toggleFooterDropdown.bind(this);
   }
 
-    renderNavItem(label, href, icon) {
-      let classNames = "nav-link d-flex align-items-center";
-      classNames = "nav-item";
-      if (
-        window.location.pathname !== undefined &&
-        window.location.pathname.includes(href)
-      ) {
-        classNames += " active";
-      }
+  renderFooterNavDropdownSelector(label, actionItem, icon) {
+    let classNames = "nav-item";
+    return (
+      <ul className={classNames}>
+        <a
+          className="nav-link text-muted"
+          onClick={() => this.toggleFooterDropdown(actionItem)}
+          role="button"
+        >
+          {icon}
+          {label}
+        </a>
+      </ul>
+    );
+  }
 
-      return (
-        <ul className={classNames}>
-          <Link className="nav-link text-black" to={href} role="button">
-            {icon}
-            {label}
-          </Link>
-        </ul>
-      );
+  toggleFooterDropdown(item) {
+    switch (item) {
+      case "version":
+        this.setState({
+          showVersion: !this.state.showVersion,
+          showDocumentation: false,
+          showContact: false,
+        });
+        break;
+      case "documentation":
+        this.setState({
+          showVersion: false,
+          showDocumentation: !this.state.showDocumentation,
+          showContact: false,
+        });
+        break;
+      case "contact":
+        this.setState({
+          showVersion: false,
+          showDocumentation: false,
+          showContact: !this.state.showContact,
+        });
+        break;
+      default:
+        this.setState({
+          showVersion: false,
+          showDocumentation: false,
+          showContact: false,
+        });
+        break;
     }
+  }
 
   componentDidMount() {
     this.props
@@ -51,33 +79,83 @@ class Footer extends Component {
   }
 
   render() {
-      const info = this.state.info;
+    const info = this.state.info;
 
-      if (info == null) {
-        return <></>;
-      }
+    if (info == null) {
+      return <></>;
+    }
 
     return (
-          <nav
-            id="bottomnav"
-            className="navbar navbar-expand-lg navbar-light justify-content-center"
-          >
-          {this.renderNavItem(
+      <div>
+        <nav
+          id="bottomnav"
+          className="navbar navbar-expand-lg navbar-light justify-content-center"
+        >
+          {this.renderFooterNavDropdownSelector(
             "Version",
-            "/",
+            "version",
             <Info className="feather-icon me-2" />
           )}
-          {this.renderNavItem(
+          {this.renderFooterNavDropdownSelector(
             "Documentation",
-            "/",
+            "documentation",
             <BookOpen className="feather-icon me-2" />
           )}
-          {this.renderNavItem(
+          {this.renderFooterNavDropdownSelector(
             "Contact",
-            "/",
+            "contact",
             <User className="feather-icon me-2" />
           )}
- </nav>
+        </nav>
+        <div
+          id="version"
+          style={this.state.showVersion ? {} : { display: "none" }}
+        >
+          <ul className="list-inline text-center d-flex justify-content-center align-items-center text-muted">
+            <li className="mx-3">Version: {info.version.version}</li>
+            <li className="mx-3">Base Image: {info.version.baseImage}</li>
+            <li className="mx-3">
+              Pipeline Image: {info.version.pipelineImage}
+            </li>
+            <li className="mx-3">
+              Python-Runner Image: {info.version.pythonRunnerImage}
+            </li>
+          </ul>
+        </div>
+        <div
+          id="documentation"
+          style={this.state.showDocumentation ? {} : { display: "none" }}
+        >
+          <ul className="list-inline text-center d-flex justify-content-center align-items-center text-muted">
+            <li className="mx-3">
+              <a href="{info.resources.streams.documentationUrl}">streams</a>
+            </li>
+            <li className="mx-3">
+              <a href="{info.resources.deployments.documentationUrl}">
+                deployments
+              </a>
+            </li>
+            <li className="mx-3">
+              <a href="{info.resources.pipelines.documentationUrl}">
+                pipelines
+              </a>
+            </li>
+            <li className="mx-3">
+              <a href="{info.resources.configs.documentationUrl}">configs</a>
+            </li>
+          </ul>
+        </div>
+        <div
+          id="contact"
+          style={this.state.showContact ? {} : { display: "none" }}
+        >
+          <ul className="list-inline text-center d-flex justify-content-center align-items-center text-muted">
+            <li className="mx-3">Name: {info.contact.name}</li>
+            <li className="mx-3">E-Mail: {info.contact.email}</li>
+            <li className="mx-3">URL: {info.contact.url}</li>
+          </ul>
+        </div>
+      </div>
     );
   }
 }
@@ -93,26 +171,3 @@ const mapDispatchToProps = {
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(Footer);
-/*
-       <div>
-          <div>
-              <p>version info:</p>
-              <p>version: {info.version.version}</p>
-              <p>base image: {info.version.baseImage}</p>
-              <p>pipeline image: {info.version.pipelineImage}</p>
-              <p>python-runner image: {info.version.pythonRunnerImage}</p>
-          </div>
-          <div>
-              <p>documentation:</p>
-              <p><a href="{info.resources.streams.documentationUrl}">streams</a></p>
-              <p><a href="{info.resources.deployments.documentationUrl}">deployments</a></p>
-              <p><a href="{info.resources.pipelines.documentationUrl}">pipelines</a></p>
-              <p><a href="{info.resources.configs.documentationUrl}">configs</a></p>
-          </div>
-          <div>
-                <p>contact:</p>
-                <p>name: {info.contact.name}</p>
-                <p>email: {info.contact.email}</p>
-                <p>url: {info.contact.url}</p>
-            </div>
-      </div> */
