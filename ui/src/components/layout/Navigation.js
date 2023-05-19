@@ -1,6 +1,10 @@
 import React, { Component } from "react";
 import { Link, Redirect } from "react-router-dom";
 import { signOut } from "../../actions/user_sessions";
+import { fetchInfo } from "../../actions/info";
+import { connect } from "react-redux";
+import Dropdown from "react-bootstrap/Dropdown";
+import DropdownButton from "react-bootstrap/DropdownButton";
 import {
   Book,
   Code,
@@ -10,14 +14,29 @@ import {
   PlayCircle,
   Wind,
   Tool,
+  Info,
 } from "react-feather";
 import "../../scss/nav.scss";
 
 class Navigation extends Component {
   constructor(props) {
     super(props);
-    this.state = {};
+    this.state = {
+      errorMessage: "",
+      errorMessages: {},
+      info: {
+        version: {},
+        resources: {},
+        contact: {},
+      },
+    };
     this.handleSignOut = this.handleSignOut.bind(this);
+  }
+
+  componentDidMount() {
+    this.props
+      .fetchInfo()
+      .then(() => this.setState({ info: this.props.info.info }));
   }
 
   renderNavItem(label, href, icon) {
@@ -49,6 +68,12 @@ class Navigation extends Component {
   render() {
     if (this.state.signedOut === true) {
       return <Redirect to="/sign_in" />;
+    }
+
+    const info = this.state.info;
+
+    if (info == null) {
+      return <></>;
     }
 
     return (
@@ -105,6 +130,25 @@ class Navigation extends Component {
                 <Tool className="feather-icon me-2" />
               )}
             </ul>
+            <DropdownButton
+              className="me-2"
+              variant="Primary"
+              id="dropdown-basic-button"
+              title={<Info className="feather-icon" />}
+            >
+              <Dropdown.Item disabled>
+                <small>Base Image: {info.version.baseImage}</small>
+              </Dropdown.Item>
+              <Dropdown.Item disabled>
+                <small>Pipeline Image: {info.version.pipelineImage}</small>
+              </Dropdown.Item>
+              <Dropdown.Item disabled>
+                <small>
+                  Python-Runner Image: {info.version.pythonRunnerImage}
+                </small>
+              </Dropdown.Item>
+            </DropdownButton>
+
             <div className="my-2 my-md-0">
               <a
                 href="/sign_out/"
@@ -122,4 +166,14 @@ class Navigation extends Component {
   }
 }
 
-export default Navigation;
+const mapStateToProps = function (state) {
+  return {
+    info: state.info,
+  };
+};
+
+const mapDispatchToProps = {
+  fetchInfo: fetchInfo,
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(Navigation);

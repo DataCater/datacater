@@ -1,6 +1,5 @@
 import React, { Component } from "react";
 import Navigation from "./Navigation";
-import Footer from "./Footer";
 
 class MainLayout extends Component {
   render() {
@@ -16,7 +15,6 @@ class MainLayout extends Component {
       <React.Fragment>
         <Navigation />
         {this.props.children}
-        <Footer />
       </React.Fragment>
     );
   }
