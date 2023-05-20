@@ -24,27 +24,20 @@ class Navigation extends Component {
     this.state = {
       errorMessage: "",
       errorMessages: {},
-      info: {
-        version: {},
-        resources: {},
-        contact: {},
-      },
     };
     this.handleSignOut = this.handleSignOut.bind(this);
   }
 
   componentDidMount() {
-    this.props
-      .fetchInfo()
-      .then(() => this.setState({ info: this.props.info.info }));
+    this.props.fetchInfo();
   }
 
   renderNavItem(label, href, icon) {
     let classNames = "nav-link d-flex align-items-center";
     classNames = "nav-item";
     if (
-      window.location.pathname !== undefined &&
-      window.location.pathname.includes(href)
+      this.props.pathname !== undefined &&
+      this.props.pathname.includes(href)
     ) {
       classNames += " active";
     }
@@ -70,11 +63,7 @@ class Navigation extends Component {
       return <Redirect to="/sign_in" />;
     }
 
-    const info = this.state.info;
-
-    if (info == null) {
-      return <></>;
-    }
+    const info = this.props.info.info;
 
     return (
       <nav
@@ -130,25 +119,26 @@ class Navigation extends Component {
                 <Tool className="feather-icon me-2" />
               )}
             </ul>
-            <DropdownButton
-              className="me-2"
-              variant="Primary"
-              id="dropdown-basic-button"
-              title={<Info className="feather-icon" />}
-            >
-              <Dropdown.Item disabled>
-                <small>Base Image: {info.version.baseImage}</small>
-              </Dropdown.Item>
-              <Dropdown.Item disabled>
-                <small>Pipeline Image: {info.version.pipelineImage}</small>
-              </Dropdown.Item>
-              <Dropdown.Item disabled>
-                <small>
-                  Python-Runner Image: {info.version.pythonRunnerImage}
-                </small>
-              </Dropdown.Item>
-            </DropdownButton>
-
+            {info !== undefined && info.version !== undefined && (
+              <DropdownButton
+                className="me-2"
+                variant="Primary"
+                id="dropdown-basic-button"
+                title={<Info className="feather-icon" />}
+              >
+                <Dropdown.Item disabled>
+                  <small>Base Image: {info.version.baseImage}</small>
+                </Dropdown.Item>
+                <Dropdown.Item disabled>
+                  <small>Pipeline Image: {info.version.pipelineImage}</small>
+                </Dropdown.Item>
+                <Dropdown.Item disabled>
+                  <small>
+                    Python-Runner Image: {info.version.pythonRunnerImage}
+                  </small>
+                </Dropdown.Item>
+              </DropdownButton>
+            )}
             <div className="my-2 my-md-0">
               <a
                 href="/sign_out/"
