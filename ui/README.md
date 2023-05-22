@@ -32,6 +32,8 @@ Run `npx cypress run-ct` to run component tests (ct).
 
 Run `npx cypress open-ct` to open the test suite for components and manually trigger the component test.
 
+Run `npx prettier --write src` to format the code before committing.
+
 ### Release
 ```
 npm install       # Fetch dependencies
