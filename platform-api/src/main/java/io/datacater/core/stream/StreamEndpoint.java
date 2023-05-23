@@ -24,8 +24,11 @@ import org.jboss.logging.Logger;
 @Authenticated
 @SecurityRequirement(name = "apiToken")
 @Produces({MediaType.APPLICATION_JSON, YAMLMediaTypes.APPLICATION_JACKSON_YAML})
+//TODO doesnt need apitoken but deployments does
 public class StreamEndpoint {
+  //TODO move static declarations out of the endpoint class
   private static final Logger LOGGER = Logger.getLogger(StreamEndpoint.class);
+
   private static final Integer KAFKA_API_TIMEOUT_MS =
       ConfigProvider.getConfig()
           .getOptionalValue("kafka.api.timeout.ms", Integer.class)
@@ -39,6 +42,7 @@ public class StreamEndpoint {
     return dsf.withTransaction(((session, transaction) -> session.find(StreamEntity.class, uuid)))
         .onItem()
         .ifNull()
+            //TODO no magic strings
         .failWith(new StreamNotFoundException("Stream not found."));
   }
 
@@ -68,6 +72,7 @@ public class StreamEndpoint {
                     .persist(se)
                     .onItem()
                     .transformToUni(
+                            //TODO is voidobject needed here?
                         voidObject ->
                             ConfigUtilities.getMappedConfigs(stream.configSelector(), session))
                     .onItem()
@@ -108,6 +113,7 @@ public class StreamEndpoint {
                         updateStreamObject(stream, tuple.getItem2());
                         return session.merge((tuple.getItem1()).updateEntity(stream));
                       } catch (JsonProcessingException e) {
+                        //TODO dont throw generic exceptions
                         throw new RuntimeException(e);
                       }
                     })
@@ -143,6 +149,7 @@ public class StreamEndpoint {
                                 Uni.createFrom().item(entity))
                             .asTuple();
                       } catch (JsonProcessingException ex) {
+                        //TODO dont throw generic exception
                         throw new DatacaterException(ex.getMessage());
                       }
                     })
@@ -158,6 +165,7 @@ public class StreamEndpoint {
                 .replaceWith(Response.ok().build())));
   }
 
+  //TODO move worker methods to new class
   private void updateStreamObject(Stream stream, List<ConfigEntity> configList)
       throws JsonProcessingException {
     Stream streamWithConfig = ConfigUtilities.applyConfigsToStream(Stream.from(stream), configList);
@@ -172,11 +180,15 @@ public class StreamEndpoint {
     try {
       kafkaAdmin.deleteStream().get(KAFKA_API_TIMEOUT_MS, TimeUnit.MILLISECONDS);
     } catch (ExecutionException e) {
+      //TODO remove gerneric exception
       throw new DatacaterException(e.getMessage());
     } catch (InterruptedException e) {
+      //TODO remove generic exception
       Thread.currentThread().interrupt();
       throw new DatacaterException(e.getMessage());
     } catch (TimeoutException e) {
+      //TODO no magic string
+      //TODO is it ok to drop exception instead of handling it?
       LOGGER.info("Stream deletion was called without errors but has not finished yet.");
     }
   }
@@ -188,6 +200,7 @@ public class StreamEndpoint {
     kafkaAdmin.close();
   }
 
+  //TODO move this method to generic utility class
   private static String exceptionCauseMessageIfAvailable(Exception ex) {
     if (ex.getCause() == null) {
       return ex.getMessage();

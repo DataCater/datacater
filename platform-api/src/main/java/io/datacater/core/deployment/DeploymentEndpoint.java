@@ -43,6 +43,7 @@ import org.jboss.logging.Logger;
 @Path("/deployments")
 @Authenticated
 @Produces({MediaType.APPLICATION_JSON, YAMLMediaTypes.APPLICATION_JACKSON_YAML})
+//TODO needs apitoken but streams doesn't
 @SecurityRequirement(name = "apiToken")
 @RequestScoped
 public class DeploymentEndpoint {
