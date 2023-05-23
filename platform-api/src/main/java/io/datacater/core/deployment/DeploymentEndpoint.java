@@ -136,7 +136,6 @@ public class DeploymentEndpoint {
 
   @GET
   @Path("{uuid}/status")
-  @Produces(MediaType.APPLICATION_JSON)
   public Uni<DataCaterDeploymentStatus> getStatusByUuid(@PathParam("uuid") UUID deploymentId) {
     return dsf.withTransaction(
             ((session, transaction) -> session.find(DeploymentEntity.class, deploymentId)))
