@@ -66,7 +66,7 @@ public class DeploymentEndpoint {
 
   @GET
   @Path("{uuid}/logs")
-  //TODO remove this produces
+  // TODO remove this produces
   @Produces(MediaType.APPLICATION_JSON)
   public Uni<List<String>> getLogs(
       @PathParam("uuid") UUID deploymentId, @DefaultValue("1") @QueryParam("replica") int replica) {
@@ -83,7 +83,7 @@ public class DeploymentEndpoint {
 
   @GET
   @Path("{uuid}/health")
-  //TODO remove this produces
+  // TODO remove this produces
   @Produces(MediaType.APPLICATION_JSON)
   public Uni<Response> getHealth(
       @PathParam("uuid") UUID deploymentId, @DefaultValue("1") @QueryParam("replica") int replica) {
@@ -173,7 +173,7 @@ public class DeploymentEndpoint {
               try {
                 watchLogsRunner(deployment.getId(), replica, sse, eventSink);
               } catch (IOException e) {
-                //TODO remove generic exception
+                // TODO remove generic exception
                 throw new DatacaterException(StringUtilities.wrapString(e.getMessage()));
               }
               return Response.ok().build();
@@ -345,14 +345,13 @@ public class DeploymentEndpoint {
                 .flatMap(entity -> entity)
                 .onFailure()
                 .transform(
-                        //TODO add logger statement for e.message
+                    // TODO add logger statement for e.message
                     ex ->
                         new UpdateDeploymentException(
                             StaticConfig.LoggerMessages.DEPLOYMENT_NOT_UPDATED))));
   }
 
-
-  //TODO move worker methods to new class(s)
+  // TODO move worker methods to new class(s)
   private Uni<PipelineEntity> getPipeline(DeploymentSpec deploymentSpec) {
     return dsf.withTransaction(
         (session, transaction) ->
@@ -397,7 +396,7 @@ public class DeploymentEndpoint {
                             .unis(Uni.createFrom().item(stream), configList)
                             .asTuple();
                       } catch (JsonProcessingException ex) {
-                        //TODO remove generic exception
+                        // TODO remove generic exception
                         throw new DatacaterException(ex.getMessage());
                       }
                     })
@@ -448,7 +447,7 @@ public class DeploymentEndpoint {
       K8Deployment k8Deployment = new K8Deployment(client);
       k8Deployment.delete(deploymentId);
     } catch (DeploymentNotFoundException e) {
-      //TODO should we handle this error?
+      // TODO should we handle this error?
       LOGGER.error(
           String.format("Could not find Kubernetes deployment with id %s", deploymentId.toString()),
           e);
