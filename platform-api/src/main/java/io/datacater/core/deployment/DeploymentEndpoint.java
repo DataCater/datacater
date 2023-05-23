@@ -12,6 +12,7 @@ import io.datacater.core.pipeline.PipelineEntity;
 import io.datacater.core.stream.Stream;
 import io.datacater.core.stream.StreamEntity;
 import io.datacater.core.utilities.StringUtilities;
+import io.fabric8.kubernetes.api.model.apps.Deployment;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.dsl.ContainerResource;
 import io.fabric8.kubernetes.client.dsl.LogWatch;
@@ -23,10 +24,7 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.ws.rs.*;
@@ -160,10 +158,21 @@ public class DeploymentEndpoint {
   }
 
   @GET
-  public Uni<List<DeploymentEntity>> getDeployments() {
-    return dsf.withSession(
-        session ->
-            session.createQuery("from DeploymentEntity", DeploymentEntity.class).getResultList());
+  public Uni<List<DeploymentEntity>> getDeployments(
+      @QueryParam("in-cluster") @DefaultValue("false") boolean inCluster) {
+    if (!inCluster) {
+      return dsf.withSession(
+          session ->
+              session.createQuery("from DeploymentEntity", DeploymentEntity.class).getResultList());
+    }
+
+    return dsf.withTransaction(
+            (session, transaction) ->
+                session
+                    .createQuery("from DeploymentEntity", DeploymentEntity.class)
+                    .getResultList())
+        .onItem()
+        .transform(this::mergeDeploymentEntitiesWithCluster);
   }
 
   @POST
@@ -504,5 +513,47 @@ public class DeploymentEndpoint {
     }
     is.close();
     lw.close();
+  }
+
+  private List<Deployment> getDeploymentsInCluster() {
+    return client
+        .apps()
+        .deployments()
+        .inNamespace(StaticConfig.EnvironmentVariables.NAMESPACE)
+        .withLabel(StaticConfig.APP)
+        .list()
+        .getItems();
+  }
+
+  private List<DeploymentEntity> mergeDeploymentEntitiesWithCluster(
+      List<DeploymentEntity> dbDeployments) {
+    List<Deployment> clusterDeployments = getDeploymentsInCluster();
+    List<DeploymentEntity> resultList = new ArrayList<>();
+
+    for (Deployment clusterDeployment : clusterDeployments) {
+      Optional<DeploymentEntity> matchingDeploymentFromDb =
+          findMatchingDeployment(dbDeployments, clusterDeployment);
+
+      if (matchingDeploymentFromDb.isPresent()) {
+        resultList.add(matchingDeploymentFromDb.get());
+      } else {
+        resultList.add(DeploymentEntity.fromClusterOnly(clusterDeployment));
+      }
+    }
+
+    return resultList;
+  }
+
+  private Optional<DeploymentEntity> findMatchingDeployment(
+      List<DeploymentEntity> dbDeployments, Deployment clusterDeployment) {
+    try {
+      UUID uuid =
+          UUID.fromString(clusterDeployment.getMetadata().getLabels().get(StaticConfig.UUID_TEXT));
+      return dbDeployments.stream()
+          .filter(dbDeployment -> dbDeployment.getId().equals(uuid))
+          .findFirst();
+    } catch (IllegalArgumentException | NullPointerException e) {
+      return Optional.empty();
+    }
   }
 }
