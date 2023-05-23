@@ -12,6 +12,7 @@ import io.datacater.core.pipeline.PipelineEntity;
 import io.datacater.core.stream.Stream;
 import io.datacater.core.stream.StreamEntity;
 import io.datacater.core.utilities.StringUtilities;
+import io.fabric8.kubernetes.api.model.apps.Deployment;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.dsl.ContainerResource;
 import io.fabric8.kubernetes.client.dsl.LogWatch;
@@ -131,6 +132,23 @@ public class DeploymentEndpoint {
                       httpClient.send(req, HttpResponse.BodyHandlers.ofString());
                   return Response.ok().entity(response.body()).build();
                 }));
+  }
+
+  @GET
+  @Path("{uuid}/status")
+  public Uni<DataCaterDeploymentStatus> getStatusByUuid(@PathParam("uuid") UUID deploymentId) {
+    return dsf.withTransaction(
+            ((session, transaction) -> session.find(DeploymentEntity.class, deploymentId)))
+        .onItem()
+        .ifNull()
+        .failWith(new DeploymentNotFoundException(StaticConfig.LoggerMessages.DEPLOYMENT_NOT_FOUND))
+        .onItem()
+        .ifNotNull()
+        .transform(
+            deploymentEntity -> {
+              Deployment deployment = new K8Deployment(client).getDeploymentObject(deploymentId);
+              return DataCaterDeploymentStatus.from(deployment);
+            });
   }
 
   @GET
