@@ -259,7 +259,7 @@ public class K8Deployment {
           .withName(getDeploymentName(deploymentId))
           .get();
     } catch (KubernetesClientException e) {
-      throw new DeploymentNotFoundException(StaticConfig.LoggerMessages.DEPLOYMENT_NOT_FOUND);
+      throw new DeploymentNotFoundException(e.getMessage());
     }
   }
 
