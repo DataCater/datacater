@@ -15,7 +15,6 @@ import org.apache.kafka.common.KafkaFuture;
 import org.apache.kafka.common.PartitionInfo;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.config.ConfigResource;
-import org.eclipse.microprofile.config.ConfigProvider;
 import org.jboss.logging.Logger;
 
 /**
@@ -34,28 +33,8 @@ import org.jboss.logging.Logger;
 public class KafkaStreamsAdmin implements StreamService {
 
   private static final Logger LOGGER = Logger.getLogger(KafkaStreamsAdmin.class);
-
-  private static final String PARTITION_COUNT = "num.partitions";
-  private static final String REPLICATION_FACTOR = "replication.factor";
   private final Admin admin;
   private final KafkaConsumer<Object, Object> consumer;
-
-  private static final Optional<String> DEFAULT_TOPIC_NAME =
-      ConfigProvider.getConfig()
-          .getOptionalValue("datacater.kafka.default-topic-name", String.class);
-  private static final Integer DEFAULT_NUM_PARTITIONS =
-      ConfigProvider.getConfig()
-          .getOptionalValue("datacater.kafka.default-num-partitions", Integer.class)
-          .orElse(3);
-  private static final Short DEFAULT_REPLICATION_FACTOR =
-      ConfigProvider.getConfig()
-          .getOptionalValue("datacater.kafka.default-replication-factor", Short.class)
-          .orElse((short) 1);
-
-  private static final Integer KAFKA_API_TIMEOUT_MS =
-      ConfigProvider.getConfig()
-          .getOptionalValue("datacater.kafka.api.timeout.ms", Integer.class)
-          .orElse(5000);
 
   private final String name;
   private final Integer partitions;
@@ -78,11 +57,13 @@ public class KafkaStreamsAdmin implements StreamService {
     stream
         .spec()
         .getKafka()
-        .putIfAbsent("value.deserializer", io.datacater.core.serde.JsonDeserializer.class);
+        .putIfAbsent(
+            StaticConfig.VALUE_DESERIALIZER_TEXT, io.datacater.core.serde.JsonDeserializer.class);
     stream
         .spec()
         .getKafka()
-        .putIfAbsent("key.deserializer", io.datacater.core.serde.JsonDeserializer.class);
+        .putIfAbsent(
+            StaticConfig.KEY_DESERIALIZER_TEXT, io.datacater.core.serde.JsonDeserializer.class);
     Admin admin = Admin.create(stream.spec().getKafka());
     KafkaConsumer<Object, Object> consumer = new KafkaConsumer<>(stream.spec().getKafka());
 
@@ -96,30 +77,34 @@ public class KafkaStreamsAdmin implements StreamService {
   }
 
   private static int getPartitions(Map<String, Object> topicConfig) {
-    if (topicConfig.get(PARTITION_COUNT) instanceof String partitions
-        && !topicConfig.get(PARTITION_COUNT).toString().isEmpty()) {
+    if (topicConfig.get(StaticConfig.PARTITION_COUNT) instanceof String partitions
+        && !topicConfig.get(StaticConfig.PARTITION_COUNT).toString().isEmpty()) {
       return Integer.parseInt(partitions);
     }
-    return DEFAULT_NUM_PARTITIONS;
+    return StaticConfig.EnvironmentVariables.DEFAULT_NUM_PARTITIONS;
   }
 
   private static Short getReplicationFactor(Map<String, Object> topicConfig) {
-    if (topicConfig.get(REPLICATION_FACTOR) instanceof String repFactor
-        && !topicConfig.get(REPLICATION_FACTOR).toString().isEmpty()) {
+    if (topicConfig.get(StaticConfig.REPLICATION_FACTOR) instanceof String repFactor
+        && !topicConfig.get(StaticConfig.REPLICATION_FACTOR).toString().isEmpty()) {
       return Short.valueOf(repFactor);
     }
-    return DEFAULT_REPLICATION_FACTOR;
+    return StaticConfig.EnvironmentVariables.DEFAULT_REPLICATION_FACTOR;
   }
 
   void createDefaultChannel() {
     NewTopic newTopic =
-        new NewTopic(getDefaultStreamName(), DEFAULT_NUM_PARTITIONS, DEFAULT_REPLICATION_FACTOR);
+        new NewTopic(
+            getDefaultStreamName(),
+            StaticConfig.EnvironmentVariables.DEFAULT_NUM_PARTITIONS,
+            StaticConfig.EnvironmentVariables.DEFAULT_REPLICATION_FACTOR);
     admin.createTopics(List.of(newTopic));
   }
 
   public Boolean isValidConfig(Map<String, String> config) {
-    Optional<String> newPartitions = Optional.ofNullable(config.get(PARTITION_COUNT));
-    Optional<String> newReplicationFactor = Optional.ofNullable(config.get(REPLICATION_FACTOR));
+    Optional<String> newPartitions = Optional.ofNullable(config.get(StaticConfig.PARTITION_COUNT));
+    Optional<String> newReplicationFactor =
+        Optional.ofNullable(config.get(StaticConfig.REPLICATION_FACTOR));
     if (streamExists()
         && newReplicationFactor.isPresent()
         && !Short.valueOf(newReplicationFactor.get()).equals(this.replication)) {
@@ -167,11 +152,12 @@ public class KafkaStreamsAdmin implements StreamService {
               try {
                 return kafkaConfigToMap(entry.getValue().get()).entrySet().stream();
               } catch (ExecutionException e) {
-                throw new DatacaterException("Kafka topic metadata could not be mapped.");
+                throw new DatacaterException(
+                    StaticConfig.LoggerMessages.KAFKA_TOPIC_METADATA_NOT_MAPPED);
               } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
                 throw new DatacaterException(
-                    "Kafka topic metadata could not be mapped. The execution thread was interrupted.");
+                    StaticConfig.LoggerMessages.KAFKA_TOPIC_METADATA_NOT_MAPPED_INTERRUPTED);
               }
             })
         .collect(toMap(Map.Entry::getKey, Map.Entry::getValue));
@@ -208,7 +194,7 @@ public class KafkaStreamsAdmin implements StreamService {
     }
 
     ConsumerRecords<Object, Object> consumerRecords =
-        consumer.poll(Duration.ofMillis(KAFKA_API_TIMEOUT_MS));
+        consumer.poll(Duration.ofMillis(StaticConfig.EnvironmentVariables.KAFKA_API_TIMEOUT_MS));
 
     consumerRecords.forEach(item -> messageList.add(recordToStreamMessage(item)));
     return messageList.stream().limit(limit).toList();
@@ -251,9 +237,9 @@ public class KafkaStreamsAdmin implements StreamService {
 
   private StreamMessage recordToStreamMessage(ConsumerRecord<Object, Object> item) {
     Map<String, Object> metadata = new HashMap<>();
-    metadata.put("partition", item.partition());
-    metadata.put("offset", item.offset());
-    metadata.put("timestamp", item.timestamp());
+    metadata.put(StaticConfig.PARTITION_TEXT, item.partition());
+    metadata.put(StaticConfig.OFFSET_TEXT, item.offset());
+    metadata.put(StaticConfig.TIMESTAMP_TEXT, item.timestamp());
     return new StreamMessage(item.key(), item.value(), metadata);
   }
 
@@ -273,7 +259,11 @@ public class KafkaStreamsAdmin implements StreamService {
 
   private boolean streamExists() {
     try {
-      return admin.listTopics().names().get(KAFKA_API_TIMEOUT_MS, TimeUnit.MILLISECONDS).stream()
+      return admin
+          .listTopics()
+          .names()
+          .get(StaticConfig.EnvironmentVariables.KAFKA_API_TIMEOUT_MS, TimeUnit.MILLISECONDS)
+          .stream()
           .anyMatch(topicName -> topicName.equalsIgnoreCase(this.name));
     } catch (ExecutionException e) {
       return false;
@@ -282,13 +272,13 @@ public class KafkaStreamsAdmin implements StreamService {
       return false;
     } catch (TimeoutException e) {
       close();
-      throw new KafkaConnectionException(
-          "Connection to node could not be established. Broker may not be available.");
+      throw new KafkaConnectionException(StaticConfig.LoggerMessages.KAFKA_BROKER_UNAVAILABLE);
     }
   }
 
   private static String getDefaultStreamName() {
-    return DEFAULT_TOPIC_NAME.orElse("datacater-" + UUID.randomUUID());
+    return StaticConfig.EnvironmentVariables.DEFAULT_TOPIC_NAME.orElse(
+        StaticConfig.DATACATER_PREFIX + UUID.randomUUID());
   }
 
   private Map<ConfigResource, Collection<AlterConfigOp>> convertConfigs(
@@ -308,9 +298,11 @@ public class KafkaStreamsAdmin implements StreamService {
       KafkaFuture<Void> alterTopicConfigFuture =
           admin.incrementalAlterConfigs(convertConfigs(spec.getConfig())).all();
       try {
-        alterTopicConfigFuture.get(KAFKA_API_TIMEOUT_MS.longValue(), TimeUnit.MILLISECONDS);
+        alterTopicConfigFuture.get(
+            StaticConfig.EnvironmentVariables.KAFKA_API_TIMEOUT_MS.longValue(),
+            TimeUnit.MILLISECONDS);
       } catch (InterruptedException e) {
-        LOGGER.error("Thread got interrupted: ", e);
+        LOGGER.error(StaticConfig.LoggerMessages.THREAD_INTERRUPTED, e);
         Thread.currentThread().interrupt();
       } catch (ExecutionException e) {
         throw new KafkaConnectionException(
@@ -318,8 +310,8 @@ public class KafkaStreamsAdmin implements StreamService {
       } catch (TimeoutException e) {
         throw new KafkaConnectionException(
             String.format(
-                "Exceeded timeout of %d ms when updating the config of the Apache Kafka topic.",
-                KAFKA_API_TIMEOUT_MS));
+                StaticConfig.LoggerMessages.TOPIC_UPDATE_TIMEOUT_FORMATTED,
+                StaticConfig.EnvironmentVariables.KAFKA_API_TIMEOUT_MS));
       }
     }
     return spec;
@@ -331,9 +323,11 @@ public class KafkaStreamsAdmin implements StreamService {
       newTopic.configs(spec.getConfig());
       KafkaFuture<Void> createTopicConfigFuture = admin.createTopics(List.of(newTopic)).all();
       try {
-        createTopicConfigFuture.get(KAFKA_API_TIMEOUT_MS.longValue(), TimeUnit.MILLISECONDS);
+        createTopicConfigFuture.get(
+            StaticConfig.EnvironmentVariables.KAFKA_API_TIMEOUT_MS.longValue(),
+            TimeUnit.MILLISECONDS);
       } catch (InterruptedException e) {
-        LOGGER.error("Thread got interrupted: ", e);
+        LOGGER.error(StaticConfig.LoggerMessages.THREAD_INTERRUPTED, e);
         Thread.currentThread().interrupt();
       } catch (ExecutionException e) {
         throw new KafkaConnectionException(
@@ -341,14 +335,14 @@ public class KafkaStreamsAdmin implements StreamService {
       } catch (TimeoutException e) {
         throw new KafkaConnectionException(
             String.format(
-                "Exceeded timeout of %d ms when creating Apache Kafka topic.",
-                KAFKA_API_TIMEOUT_MS));
+                StaticConfig.LoggerMessages.TOPIC_UPDATE_TIMEOUT_FORMATTED,
+                StaticConfig.EnvironmentVariables.KAFKA_API_TIMEOUT_MS));
       }
       return spec;
     }
     Map<String, String> actualMetaData = getMetadata();
     Map<String, String> configDifferences = compareConfigs(spec.getConfig(), actualMetaData);
-    if (configDifferences.containsValue("false")) {
+    if (configDifferences.containsValue(StaticConfig.FALSE)) {
       throw new DatacaterException(
           getCreateExistingStreamErrorMessage(actualMetaData, configDifferences));
     }
@@ -359,7 +353,7 @@ public class KafkaStreamsAdmin implements StreamService {
       Map<String, String> actualMetaData, Map<String, String> configDifferences) {
     StringBuilder inconsistentConfigBuilder = new StringBuilder();
     for (Map.Entry<String, String> item : configDifferences.entrySet()) {
-      if (item.getValue().equals("false")) {
+      if (item.getValue().equals(StaticConfig.FALSE)) {
         inconsistentConfigBuilder
             .append(item.getKey())
             .append(": ")
@@ -368,7 +362,7 @@ public class KafkaStreamsAdmin implements StreamService {
       }
     }
     return String.format(
-        "Could not create stream as it already exists on the Cluster and the given metadata doesn't match the actual metadata: %s",
+        StaticConfig.LoggerMessages.STREAM_NOT_CREATED_METADATA_MISMATCH_FORMATTED,
         inconsistentConfigBuilder);
   }
 

@@ -26,7 +26,7 @@ import org.jboss.logging.Logger;
 public class StreamEndpoint {
   private static final Logger LOGGER = Logger.getLogger(StreamEndpoint.class);
   @Inject DataCaterSessionFactory dsf;
-  @Inject StreamsUtilities streamsUtil;
+  @Inject StreamUtilities streamUtil;
 
   @GET
   @Path("{uuid}")
@@ -34,7 +34,7 @@ public class StreamEndpoint {
     return dsf.withTransaction(((session, transaction) -> session.find(StreamEntity.class, uuid)))
         .onItem()
         .ifNull()
-        .failWith(new StreamNotFoundException(StreamsUtilities.streamNotFoundMessage));
+        .failWith(new StreamNotFoundException(StaticConfig.LoggerMessages.streamNotFoundMessage));
   }
 
   @GET
@@ -43,7 +43,7 @@ public class StreamEndpoint {
       @PathParam("uuid") UUID uuid,
       @DefaultValue("100") @QueryParam("limit") Long limit,
       @DefaultValue("SEQUENCED") @QueryParam("sampleMethod") SampleMethod sampleMethod) {
-    return streamsUtil.getStreamMessages(uuid, limit, sampleMethod);
+    return streamUtil.getStreamMessages(uuid, limit, sampleMethod);
   }
 
   @GET
@@ -68,7 +68,7 @@ public class StreamEndpoint {
                     .onItem()
                     .transform(
                         configEntities -> {
-                          streamsUtil.createStreamObject(stream, configEntities);
+                          streamUtil.createStreamObject(stream, configEntities);
                           return configEntities;
                         })
                     .replaceWith(Response.ok(se).build()))
@@ -105,7 +105,7 @@ public class StreamEndpoint {
                 .transform(
                     tuple -> {
                       try {
-                        streamsUtil.updateStreamObject(stream, tuple.getItem2());
+                        streamUtil.updateStreamObject(stream, tuple.getItem2());
                         return session.merge((tuple.getItem1()).updateEntity(stream));
                       } catch (JsonProcessingException e) {
                         LoggerUtilities.logExceptionMessage(
@@ -160,7 +160,7 @@ public class StreamEndpoint {
                 .call(
                     tuple -> {
                       if (Boolean.TRUE.equals(force)) {
-                        streamsUtil.deleteStreamObject(tuple.getItem1(), tuple.getItem2());
+                        streamUtil.deleteStreamObject(tuple.getItem1(), tuple.getItem2());
                       }
                       return session.remove(tuple.getItem3());
                     })

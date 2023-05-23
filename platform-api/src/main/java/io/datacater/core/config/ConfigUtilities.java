@@ -7,14 +7,11 @@ import io.datacater.core.stream.Stream;
 import io.datacater.core.utilities.JsonUtilities;
 import io.smallrye.mutiny.Uni;
 import java.util.*;
+import javax.enterprise.context.ApplicationScoped;
 import org.hibernate.reactive.mutiny.Mutiny;
 
+@ApplicationScoped
 public class ConfigUtilities {
-  static final String LABELS = "labels";
-  static final String KIND_DOES_NOT_MATCH_EXCEPTION_MESSAGE =
-      "The Config kind '%s' does not match that of the given resource '%s'";
-  static final String KEY_EXISTS_TWICE_EXCEPTION_MESSAGE =
-      "The key '%s' was found in at least two given Configs";
 
   private ConfigUtilities() {}
 
@@ -35,7 +32,9 @@ public class ConfigUtilities {
                     .filter(
                         item ->
                             stringMapsContainsEqualKey(
-                                JsonUtilities.toStringMap(item.getMetadata().get(LABELS)), configs))
+                                JsonUtilities.toStringMap(
+                                    item.getMetadata().get(StaticConfig.LABELS)),
+                                configs))
                     .toList())
         .onItem()
         .ifNull()
@@ -83,7 +82,10 @@ public class ConfigUtilities {
   private static void verifyKindOfConfig(Kind expected, Kind actual) {
     if (expected != actual) {
       String exceptionMessage =
-          String.format(KIND_DOES_NOT_MATCH_EXCEPTION_MESSAGE, actual, expected);
+          String.format(
+              StaticConfig.LoggerMessages.KIND_DOES_NOT_MATCH_EXCEPTION_MESSAGE_FORMATTED,
+              actual,
+              expected);
       throw new IncorrectConfigException(exceptionMessage);
     }
   }
@@ -105,7 +107,9 @@ public class ConfigUtilities {
               String duplicateKey = mapsContainsEqualKey(givenMap, currentMap);
               if (duplicateKey != null) {
                 String exceptionMessage =
-                    String.format(KEY_EXISTS_TWICE_EXCEPTION_MESSAGE, duplicateKey);
+                    String.format(
+                        StaticConfig.LoggerMessages.KEY_EXISTS_TWICE_EXCEPTION_MESSAGE,
+                        duplicateKey);
                 throw new IncorrectConfigException(exceptionMessage);
               }
             });

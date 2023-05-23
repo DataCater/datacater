@@ -56,11 +56,12 @@ public class StreamSpec {
 
   @JsonIgnore
   public Map<String, Object> getTopic() {
-    return (Map<String, Object>) kafka.getOrDefault("topic", Collections.emptyMap());
+    return (Map<String, Object>) kafka.getOrDefault(StaticConfig.TOPIC_KEY, Collections.emptyMap());
   }
 
   @JsonIgnore
   public Map<String, String> getConfig() {
-    return (Map<String, String>) getTopic().getOrDefault("config", Collections.emptyMap());
+    return (Map<String, String>)
+        getTopic().getOrDefault(StaticConfig.CONFIG_KEY, Collections.emptyMap());
   }
 }
