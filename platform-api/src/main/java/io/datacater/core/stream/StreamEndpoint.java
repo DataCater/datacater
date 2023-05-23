@@ -77,6 +77,7 @@ public class StreamEndpoint {
                             ConfigUtilities.getMappedConfigs(stream.configSelector(), session))
                     .onItem()
                     .transform(
+                            //TODO can refactor createStreamObject to return the configentities, for a one-liner?
                         configEntities -> {
                           createStreamObject(stream, configEntities);
                           return configEntities;
@@ -84,6 +85,7 @@ public class StreamEndpoint {
                     .replaceWith(Response.ok(se).build()))
         .onFailure()
         .transform(
+                //TODO add logger statement for e.message
             ex -> new CreateStreamException(exceptionCauseMessageIfAvailable((Exception) ex)));
   }
 
@@ -114,6 +116,7 @@ public class StreamEndpoint {
                         return session.merge((tuple.getItem1()).updateEntity(stream));
                       } catch (JsonProcessingException e) {
                         //TODO dont throw generic exceptions
+                        //TODO add logger statement for e.message
                         throw new RuntimeException(e);
                       }
                     })
@@ -121,6 +124,7 @@ public class StreamEndpoint {
                 .onFailure()
                 .transform(
                     ex ->
+                            //TODO add logger statement for e.message
                         new UpdateStreamException(
                             exceptionCauseMessageIfAvailable((Exception) ex)))));
   }
@@ -189,6 +193,7 @@ public class StreamEndpoint {
     } catch (TimeoutException e) {
       //TODO no magic string
       //TODO is it ok to drop exception instead of handling it?
+      //TODO add logger statement for e.message
       LOGGER.info("Stream deletion was called without errors but has not finished yet.");
     }
   }
@@ -202,6 +207,7 @@ public class StreamEndpoint {
 
   //TODO move this method to generic utility class
   private static String exceptionCauseMessageIfAvailable(Exception ex) {
+    //TODO add logger statement for e.message
     if (ex.getCause() == null) {
       return ex.getMessage();
     }
