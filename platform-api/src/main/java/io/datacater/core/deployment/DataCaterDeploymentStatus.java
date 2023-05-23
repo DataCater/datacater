@@ -13,6 +13,14 @@ public class DataCaterDeploymentStatus {
   @JsonProperty("collisionCount")
   private Integer collisionCount;
 
+  /*
+   DeploymentCondition is json serializable, but ignores additionalProperties. These are properties, which might occur
+   due to changes in the K8s API. Mapping this class to one of our own seems like duplicating the inherent logic of
+   DeploymentCondition.
+
+   Reference:
+   https://github.com/fabric8io/kubernetes-client/blob/master/kubernetes-model-generator/kubernetes-model-apps/src/generated/java/io/fabric8/kubernetes/api/model/apps/DeploymentCondition.java#L77
+  */
   @JsonProperty("conditions")
   private List<DeploymentCondition> conditions;
 
