@@ -1,6 +1,7 @@
 package io.datacater.core.config;
 
 import io.datacater.core.config.enums.Kind;
+import io.datacater.core.connector.ConnectorSpec;
 import io.datacater.core.deployment.DeploymentSpec;
 import io.datacater.core.exceptions.IncorrectConfigException;
 import io.datacater.core.stream.Stream;
@@ -77,6 +78,24 @@ public class ConfigUtilities {
       }
     }
     return deploymentSpec;
+  }
+
+  public static ConnectorSpec applyConfigsToConnector(
+      ConnectorSpec connectorSpec, List<ConfigEntity> configList) {
+    if (!configList.isEmpty()) {
+      depthSearchConfigsForDuplicateKeys(configList);
+      for (ConfigEntity config : configList) {
+        if (config.getId() != null) {
+          verifyKindOfConfig(Kind.DEPLOYMENT, config.getKind());
+          connectorSpec
+              .connector()
+              .putAll(
+                  JsonUtilities.combineMaps(
+                      JsonUtilities.toObjectMap(config.getSpec()), connectorSpec.connector()));
+        }
+      }
+    }
+    return connectorSpec;
   }
 
   private static void verifyKindOfConfig(Kind expected, Kind actual) {

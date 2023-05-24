@@ -8,6 +8,7 @@ import DropdownButton from "react-bootstrap/DropdownButton";
 import {
   Book,
   Code,
+  Database,
   Home,
   Mail,
   LogOut,
@@ -112,6 +113,11 @@ class Navigation extends Component {
                 "Deployments",
                 "/deployments",
                 <PlayCircle className="feather-icon me-2" />
+              )}
+              {this.renderNavItem(
+                "Connectors",
+                "/connectors",
+                <Database className="feather-icon me-2" />
               )}
               {this.renderNavItem(
                 "Configs",

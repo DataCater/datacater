@@ -5,6 +5,8 @@ import { PrivateRoute } from "../components/PrivateRoute";
 import MainLayout from "../components/layout/MainLayout";
 import Home from "./Home";
 import Login from "./Login";
+import ListConnectors from "./connectors/ListConnectors";
+import ShowConnector from "./connectors/ShowConnector";
 import ListDeployments from "./deployments/ListDeployments";
 import NewDeployment from "./deployments/NewDeployment";
 import ShowDeployment from "./deployments/ShowDeployment";
@@ -48,6 +50,17 @@ class DataCaterApp extends Component {
                 exact
                 path="/sign_in"
                 render={(props) => <Login {...props} />}
+              />
+
+              <PrivateRoute
+                exact
+                path="/connectors"
+                component={ListConnectors}
+              />
+              <PrivateRoute
+                exact
+                path="/connectors/:id"
+                component={ShowConnector}
               />
 
               <PrivateRoute
