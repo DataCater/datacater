@@ -51,6 +51,7 @@ dependencies {
 
     //datacater SerDe
     implementation project(':serde')
+    implementation project(':base')
 
     //Dev-Services Schema registry
     quarkusDev 'io.quarkus:quarkus-confluent-registry-avro'
