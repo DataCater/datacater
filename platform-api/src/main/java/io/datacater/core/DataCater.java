@@ -22,5 +22,4 @@ import org.eclipse.microprofile.openapi.annotations.security.SecuritySchemes;
           scheme = "bearer",
           bearerFormat = "JWT")
     })
-@ExcludeFromGeneratedCoverageReport
 public class DataCater extends Application {}

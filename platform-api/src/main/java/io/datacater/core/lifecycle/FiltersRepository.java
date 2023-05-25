@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.DatabindException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
-import io.datacater.core.ExcludeFromGeneratedCoverageReport;
 import io.datacater.core.filter.FilterSpec;
 import io.quarkus.runtime.StartupEvent;
 import java.io.File;
@@ -25,7 +24,6 @@ public class FiltersRepository {
   @ConfigProperty(name = "datacater.filters.path")
   private String filterSourceURL;
 
-  @ExcludeFromGeneratedCoverageReport
   private void loadFilters(@Observes StartupEvent event) {
     List<File> fileList = ImportHelper.listFiles(filterSourceURL, ImportHelper.ImportItem.FILTER);
     ObjectMapper mapper =

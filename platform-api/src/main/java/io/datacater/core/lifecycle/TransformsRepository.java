@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.DatabindException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
-import io.datacater.core.ExcludeFromGeneratedCoverageReport;
 import io.datacater.core.transform.TransformSpec;
 import io.quarkus.runtime.StartupEvent;
 import java.io.File;
@@ -25,7 +24,6 @@ public class TransformsRepository {
   @ConfigProperty(name = "datacater.transforms.path")
   private String transformSourceURL;
 
-  @ExcludeFromGeneratedCoverageReport
   private void loadTransforms(@Observes StartupEvent event) {
     List<File> fileList =
         ImportHelper.listFiles(transformSourceURL, ImportHelper.ImportItem.TRANSFORM);
