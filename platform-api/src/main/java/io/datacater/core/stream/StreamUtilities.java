@@ -30,7 +30,8 @@ public class StreamUtilities {
   @Inject DataCaterSessionFactory dsf;
 
   public Uni<List<StreamMessage>> getStreamMessages(UUID uuid) {
-    return getStreamMessages(uuid, 100L, SampleMethod.SEQUENCED);
+    return getStreamMessages(
+        uuid, StaticConfig.STREAM_AMOUNT_MESSAGE_LIMIT, SampleMethod.SEQUENCED);
   }
 
   public void updateStreamObject(Stream stream, List<ConfigEntity> configList)

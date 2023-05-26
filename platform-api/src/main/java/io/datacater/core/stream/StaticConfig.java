@@ -18,6 +18,7 @@ public class StaticConfig {
   static final String OFFSET_TEXT = "offset";
   static final String TIMESTAMP_TEXT = "timestamp";
   static final String MAX_POLL_RECORDS = "max.poll.records";
+  static final Long STREAM_AMOUNT_MESSAGE_LIMIT = 100L;
 
   static class EnvironmentVariables {
     static final Optional<String> DEFAULT_TOPIC_NAME =
