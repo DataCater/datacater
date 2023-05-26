@@ -4,6 +4,8 @@ import org.jboss.logging.Logger;
 
 public class LoggerUtilities {
 
+  private LoggerUtilities() {}
+
   /**
    * Log an exception thrown with an added context
    *
