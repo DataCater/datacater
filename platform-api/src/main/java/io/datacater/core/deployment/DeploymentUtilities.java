@@ -33,9 +33,9 @@ public class DeploymentUtilities {
 
   @Inject KubernetesClient client;
 
-  public List<String> getDeploymentLogsAsList(UUID deploymentId, int replica) {
+  public List<String> getDeploymentLogsAsList(UUID deploymentId, int replica, int tailingLines) {
     K8Deployment k8Deployment = new K8Deployment(client);
-    return Arrays.asList(k8Deployment.getLogs(deploymentId, replica).split("\n"));
+    return Arrays.asList(k8Deployment.getLogs(deploymentId, replica, tailingLines).split("\n"));
   }
 
   public HttpRequest buildDeploymentServiceRequest(UUID deploymentId, String path, int replica) {

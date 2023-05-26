@@ -167,7 +167,7 @@ public class K8Deployment {
     return new ConfigMapVolumeSourceBuilder().withName(deploymentName).build();
   }
 
-  public String getLogs(UUID deploymentId, int replica) {
+  public String getLogs(UUID deploymentId, int replica, int tailingLines) {
 
     String deploymentName = getDeploymentName(deploymentId);
     Pod pod = getDeploymentPodByReplica(deploymentName, replica);
@@ -177,6 +177,7 @@ public class K8Deployment {
         .inNamespace(StaticConfig.EnvironmentVariables.NAMESPACE)
         .withName(pod.getMetadata().getName())
         .inContainer(StaticConfig.DEPLOYMENT_NAME_PREFIX + deploymentId)
+        .tailingLines(tailingLines)
         .getLog(true);
   }
 
