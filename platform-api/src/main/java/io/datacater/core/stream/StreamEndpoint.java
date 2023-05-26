@@ -34,7 +34,8 @@ public class StreamEndpoint {
     return dsf.withTransaction(((session, transaction) -> session.find(StreamEntity.class, uuid)))
         .onItem()
         .ifNull()
-        .failWith(new StreamNotFoundException(StaticConfig.LoggerMessages.streamNotFoundMessage));
+        .failWith(
+            new StreamNotFoundException(StaticConfig.LoggerMessages.STREAM_NOT_FOUND_MESSAGE));
   }
 
   @GET

@@ -4,6 +4,8 @@ import java.util.Optional;
 import org.eclipse.microprofile.config.ConfigProvider;
 
 public class StaticConfig {
+  private StaticConfig() {}
+
   static final String DATACATER_PREFIX = "datacater-";
   static final String PARTITION_COUNT = "num.partitions";
   static final String REPLICATION_FACTOR = "replication.factor";
@@ -21,6 +23,8 @@ public class StaticConfig {
   static final Long STREAM_AMOUNT_MESSAGE_LIMIT = 100L;
 
   static class EnvironmentVariables {
+    private EnvironmentVariables() {}
+
     static final Optional<String> DEFAULT_TOPIC_NAME =
         ConfigProvider.getConfig()
             .getOptionalValue("datacater.kafka.default-topic-name", String.class);
@@ -40,9 +44,11 @@ public class StaticConfig {
   }
 
   static class LoggerMessages {
-    static final String streamDeleteNotFinishedMessage =
+    private LoggerMessages() {}
+
+    static final String STREAM_DELETE_NOT_FINISHED_MESSAGE =
         "Stream deletion was called without errors but has not finished yet.";
-    static final String streamNotFoundMessage = "Stream not found.";
+    static final String STREAM_NOT_FOUND_MESSAGE = "Stream not found.";
     static final String STREAM_NOT_FOUND = "The referenced %s UUID could not be found";
     static final String KAFKA_TOPIC_METADATA_NOT_MAPPED =
         "Kafka topic metadata could not be mapped.";

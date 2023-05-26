@@ -131,8 +131,8 @@ public class K8Deployment {
         .withImagePullPolicy(StaticConfig.EnvironmentVariables.PULL_POLICY)
         .withEnv(variables)
         .withNewResources()
-        .withRequests(StaticConfig.RESOURCE_REQUESTS)
-        .withLimits(StaticConfig.RESOURCE_LIMITS)
+        .withRequests(StaticConfig.EnvironmentVariables.RESOURCE_REQUESTS)
+        .withLimits(StaticConfig.EnvironmentVariables.RESOURCE_LIMITS)
         .endResources()
         .withPorts(this.containerPort(StaticConfig.EnvironmentVariables.DEPLOYMENT_CONTAINER_PORT))
         .withVolumeMounts(

@@ -57,7 +57,7 @@ public class StreamUtilities {
     } catch (TimeoutException e) {
       LoggerUtilities.logExceptionMessage(
           LOGGER, new Throwable().getStackTrace()[0].getMethodName(), e.getMessage());
-      LOGGER.info(StaticConfig.LoggerMessages.streamDeleteNotFinishedMessage);
+      LOGGER.info(StaticConfig.LoggerMessages.STREAM_DELETE_NOT_FINISHED_MESSAGE);
     }
   }
 
