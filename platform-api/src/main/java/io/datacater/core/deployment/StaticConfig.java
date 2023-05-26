@@ -27,6 +27,26 @@ public class StaticConfig {
   public static final String MEMORY = "memory";
   public static final String CPU = "cpu";
 
+  static final Map<String, Quantity> RESOURCE_REQUESTS =
+      Map.of(
+          CPU,
+          new Quantity(EnvironmentVariables.DEPLOYMENT_RESOURCES_REQUESTS_CPU),
+          MEMORY,
+          new Quantity(EnvironmentVariables.DEPLOYMENT_RESOURCES_REQUESTS_MEMORY));
+  static final Map<String, Quantity> RESOURCE_LIMITS = getLimits();
+
+  static Map<String, Quantity> getLimits() {
+    if (EnvironmentVariables.DEPLOYMENT_RESOURCES_LIMITS_CPU.isPresent()
+        && !EnvironmentVariables.DEPLOYMENT_RESOURCES_LIMITS_CPU.get().isEmpty()) {
+      return Map.of(
+          CPU,
+          new Quantity(EnvironmentVariables.DEPLOYMENT_RESOURCES_LIMITS_CPU.get()),
+          MEMORY,
+          new Quantity(EnvironmentVariables.DEPLOYMENT_RESOURCES_LIMITS_MEMORY));
+    }
+    return Map.of(MEMORY, new Quantity(EnvironmentVariables.DEPLOYMENT_RESOURCES_LIMITS_MEMORY));
+  }
+
   static final String DEPLOYMENT_NAME_PREFIX = "datacater-deployment-";
   static final String CONFIGMAP_NAME_PREFIX = "datacater-configmap-";
   static final String CONFIGMAP_VOLUME_NAME_PREFIX = "datacater-volume-";
@@ -58,26 +78,6 @@ public class StaticConfig {
 
   static class EnvironmentVariables {
     private EnvironmentVariables() {}
-
-    static final Map<String, Quantity> RESOURCE_REQUESTS =
-        Map.of(
-            CPU,
-            new Quantity(EnvironmentVariables.DEPLOYMENT_RESOURCES_REQUESTS_CPU),
-            MEMORY,
-            new Quantity(EnvironmentVariables.DEPLOYMENT_RESOURCES_REQUESTS_MEMORY));
-    static final Map<String, Quantity> RESOURCE_LIMITS = getLimits();
-
-    static Map<String, Quantity> getLimits() {
-      if (EnvironmentVariables.DEPLOYMENT_RESOURCES_LIMITS_CPU.isPresent()
-          && !EnvironmentVariables.DEPLOYMENT_RESOURCES_LIMITS_CPU.get().isEmpty()) {
-        return Map.of(
-            CPU,
-            new Quantity(EnvironmentVariables.DEPLOYMENT_RESOURCES_LIMITS_CPU.get()),
-            MEMORY,
-            new Quantity(EnvironmentVariables.DEPLOYMENT_RESOURCES_LIMITS_MEMORY));
-      }
-      return Map.of(MEMORY, new Quantity(EnvironmentVariables.DEPLOYMENT_RESOURCES_LIMITS_MEMORY));
-    }
 
     static final String NAMESPACE =
         ConfigProvider.getConfig()
