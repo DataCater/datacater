@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.datacater.core.utilities.JsonUtilities;
-import io.fabric8.kubernetes.api.model.apps.Deployment;
 import io.quarkiverse.hibernate.types.json.JsonBinaryType;
 import io.quarkiverse.hibernate.types.json.JsonType;
 import io.quarkiverse.hibernate.types.json.JsonTypes;
@@ -68,12 +67,6 @@ public class DeploymentEntity {
     this.spec = DeploymentEntity.serializeMap(spec.deployment());
     this.configSelector = JsonUtilities.convertStringMap(spec.configSelector());
     return this;
-  }
-
-  public static DeploymentEntity fromClusterOnly(Deployment deployment) {
-    DeploymentEntity entity = new DeploymentEntity();
-    entity.name = deployment.getMetadata().getLabels().get(StaticConfig.DEPLOYMENT_NAME_TEXT);
-    return entity;
   }
 
   protected void setSpec(JsonNode spec) {

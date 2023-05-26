@@ -531,14 +531,7 @@ public class DeploymentEndpoint {
     List<DeploymentEntity> resultList = new ArrayList<>();
 
     for (Deployment clusterDeployment : clusterDeployments) {
-      Optional<DeploymentEntity> matchingDeploymentFromDb =
-          findMatchingDeployment(dbDeployments, clusterDeployment);
-
-      if (matchingDeploymentFromDb.isPresent()) {
-        resultList.add(matchingDeploymentFromDb.get());
-      } else {
-        resultList.add(DeploymentEntity.fromClusterOnly(clusterDeployment));
-      }
+      findMatchingDeployment(dbDeployments, clusterDeployment).ifPresent(resultList::add);
     }
 
     return resultList;
