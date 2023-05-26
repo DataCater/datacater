@@ -182,12 +182,22 @@ class DeploymentLogs extends Component {
                       >
                         {this.state.logMessages.map((logMessage, idx) => (
                           <React.Fragment key={idx}>
-                            <span className="me-2" style={{ color: "#ae75e6" }}>
-                              {logMessage.timestamp}
-                            </span>
-                            <span className="me-2" style={{ color: "#b4d2ea" }}>
-                              {logMessage.loggerName}
-                            </span>
+                            {logMessage.timestamp !== undefined && (
+                              <span
+                                className="me-2"
+                                style={{ color: "#ae75e6" }}
+                              >
+                                {logMessage.timestamp}
+                              </span>
+                            )}
+                            {logMessage.loggerName !== undefined && (
+                              <span
+                                className="me-2"
+                                style={{ color: "#b4d2ea" }}
+                              >
+                                {logMessage.loggerName}
+                              </span>
+                            )}
                             {logMessage.message} <br />
                           </React.Fragment>
                         ))}
