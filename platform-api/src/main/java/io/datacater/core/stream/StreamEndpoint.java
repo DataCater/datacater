@@ -6,16 +6,15 @@ import io.datacater.core.authentication.DataCaterSessionFactory;
 import io.datacater.core.config.ConfigEntity;
 import io.datacater.core.config.ConfigUtilities;
 import io.datacater.core.exceptions.*;
+import io.datacater.core.utilities.LoggerUtilities;
 import io.quarkus.security.Authenticated;
 import io.smallrye.mutiny.Uni;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.*;
 import javax.inject.Inject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import org.eclipse.microprofile.config.ConfigProvider;
 import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
 import org.eclipse.microprofile.openapi.annotations.security.SecurityRequirement;
 import org.jboss.logging.Logger;
@@ -26,12 +25,8 @@ import org.jboss.logging.Logger;
 @Produces({MediaType.APPLICATION_JSON, YAMLMediaTypes.APPLICATION_JACKSON_YAML})
 public class StreamEndpoint {
   private static final Logger LOGGER = Logger.getLogger(StreamEndpoint.class);
-  private static final Integer KAFKA_API_TIMEOUT_MS =
-      ConfigProvider.getConfig()
-          .getOptionalValue("kafka.api.timeout.ms", Integer.class)
-          .orElse(5000);
   @Inject DataCaterSessionFactory dsf;
-  @Inject StreamsUtilities streamsUtil;
+  @Inject StreamUtilities streamUtil;
 
   @GET
   @Path("{uuid}")
@@ -39,7 +34,8 @@ public class StreamEndpoint {
     return dsf.withTransaction(((session, transaction) -> session.find(StreamEntity.class, uuid)))
         .onItem()
         .ifNull()
-        .failWith(new StreamNotFoundException("Stream not found."));
+        .failWith(
+            new StreamNotFoundException(StaticConfig.LoggerMessages.STREAM_NOT_FOUND_MESSAGE));
   }
 
   @GET
@@ -48,7 +44,7 @@ public class StreamEndpoint {
       @PathParam("uuid") UUID uuid,
       @DefaultValue("100") @QueryParam("limit") Long limit,
       @DefaultValue("SEQUENCED") @QueryParam("sampleMethod") SampleMethod sampleMethod) {
-    return streamsUtil.getStreamMessages(uuid, limit, sampleMethod);
+    return streamUtil.getStreamMessages(uuid, limit, sampleMethod);
   }
 
   @GET
@@ -73,13 +69,18 @@ public class StreamEndpoint {
                     .onItem()
                     .transform(
                         configEntities -> {
-                          createStreamObject(stream, configEntities);
+                          streamUtil.createStreamObject(stream, configEntities);
                           return configEntities;
                         })
                     .replaceWith(Response.ok(se).build()))
         .onFailure()
         .transform(
-            ex -> new CreateStreamException(exceptionCauseMessageIfAvailable((Exception) ex)));
+            ex -> {
+              LoggerUtilities.logExceptionMessage(
+                  LOGGER, new Throwable().getStackTrace()[0].getMethodName(), ex.getMessage());
+              return new CreateStreamException(
+                  LoggerUtilities.getExceptionCauseIfAvailable((Exception) ex));
+            });
   }
 
   @PUT
@@ -105,9 +106,14 @@ public class StreamEndpoint {
                 .transform(
                     tuple -> {
                       try {
-                        updateStreamObject(stream, tuple.getItem2());
+                        streamUtil.updateStreamObject(stream, tuple.getItem2());
                         return session.merge((tuple.getItem1()).updateEntity(stream));
                       } catch (JsonProcessingException e) {
+                        LoggerUtilities.logExceptionMessage(
+                            LOGGER,
+                            new Throwable().getStackTrace()[0].getMethodName(),
+                            e.getMessage());
+                        // A generic Exception is thrown to be caught further down.
                         throw new RuntimeException(e);
                       }
                     })
@@ -116,7 +122,7 @@ public class StreamEndpoint {
                 .transform(
                     ex ->
                         new UpdateStreamException(
-                            exceptionCauseMessageIfAvailable((Exception) ex)))));
+                            LoggerUtilities.getExceptionCauseIfAvailable((Exception) ex)))));
   }
 
   @DELETE
@@ -143,7 +149,11 @@ public class StreamEndpoint {
                                 Uni.createFrom().item(entity))
                             .asTuple();
                       } catch (JsonProcessingException ex) {
-                        throw new DatacaterException(ex.getMessage());
+                        LoggerUtilities.logExceptionMessage(
+                            LOGGER,
+                            new Throwable().getStackTrace()[0].getMethodName(),
+                            ex.getMessage());
+                        throw new DeleteStreamException(ex.getMessage());
                       }
                     })
                 .onItem()
@@ -151,47 +161,10 @@ public class StreamEndpoint {
                 .call(
                     tuple -> {
                       if (Boolean.TRUE.equals(force)) {
-                        deleteStreamObject(tuple.getItem1(), tuple.getItem2());
+                        streamUtil.deleteStreamObject(tuple.getItem1(), tuple.getItem2());
                       }
                       return session.remove(tuple.getItem3());
                     })
                 .replaceWith(Response.ok().build())));
-  }
-
-  private void updateStreamObject(Stream stream, List<ConfigEntity> configList)
-      throws JsonProcessingException {
-    Stream streamWithConfig = ConfigUtilities.applyConfigsToStream(Stream.from(stream), configList);
-    StreamService kafkaAdmin = KafkaStreamsAdmin.from(streamWithConfig);
-    kafkaAdmin.updateStream(streamWithConfig.spec());
-    kafkaAdmin.close();
-  }
-
-  private void deleteStreamObject(Stream stream, List<ConfigEntity> configList) {
-    stream = ConfigUtilities.applyConfigsToStream(stream, configList);
-    StreamService kafkaAdmin = KafkaStreamsAdmin.from(stream);
-    try {
-      kafkaAdmin.deleteStream().get(KAFKA_API_TIMEOUT_MS, TimeUnit.MILLISECONDS);
-    } catch (ExecutionException e) {
-      throw new DatacaterException(e.getMessage());
-    } catch (InterruptedException e) {
-      Thread.currentThread().interrupt();
-      throw new DatacaterException(e.getMessage());
-    } catch (TimeoutException e) {
-      LOGGER.info("Stream deletion was called without errors but has not finished yet.");
-    }
-  }
-
-  private void createStreamObject(Stream stream, List<ConfigEntity> configList) {
-    stream = ConfigUtilities.applyConfigsToStream(stream, configList);
-    StreamService kafkaAdmin = KafkaStreamsAdmin.from(stream);
-    kafkaAdmin.createStream(stream.spec());
-    kafkaAdmin.close();
-  }
-
-  private static String exceptionCauseMessageIfAvailable(Exception ex) {
-    if (ex.getCause() == null) {
-      return ex.getMessage();
-    }
-    return ex.getCause().getMessage();
   }
 }

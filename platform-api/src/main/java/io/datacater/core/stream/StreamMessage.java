@@ -20,7 +20,7 @@ public record StreamMessage(Object key, Object value, Map<String, Object> metada
   public String toRecordJsonString() throws JsonProcessingException {
     ObjectMapper mapper = new ObjectMapper();
     ObjectNode rootNode = mapper.createObjectNode();
-    ObjectNode all = rootNode.putPOJO("record", this);
+    ObjectNode all = rootNode.putPOJO(StaticConfig.RECORD_TAG, this);
     return mapper.writeValueAsString(all);
   }
 }

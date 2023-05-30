@@ -20,7 +20,6 @@ import org.hibernate.reactive.mutiny.Mutiny.SessionFactory;
 @Produces({MediaType.APPLICATION_JSON, YAMLMediaTypes.APPLICATION_JACKSON_YAML})
 @SecurityRequirement(name = "apiToken")
 public class ConfigEndpoint {
-  private static final String UUID_NOT_FOUND_ERROR_MESSAGE = "No config found for uuid %s";
 
   @Inject SessionFactory sf;
 
@@ -47,7 +46,9 @@ public class ConfigEndpoint {
                 .ifNull()
                 .failWith(
                     new ConfigNotFoundException(
-                        String.format(UUID_NOT_FOUND_ERROR_MESSAGE, uuid.toString()))));
+                        String.format(
+                            StaticConfig.LoggerMessages.UUID_NOT_FOUND_ERROR_MESSAGE_FORMATTED,
+                            uuid.toString()))));
   }
 
   @POST
@@ -77,7 +78,9 @@ public class ConfigEndpoint {
                 .ifNull()
                 .failWith(
                     new ConfigNotFoundException(
-                        String.format(UUID_NOT_FOUND_ERROR_MESSAGE, uuid.toString())))));
+                        String.format(
+                            StaticConfig.LoggerMessages.UUID_NOT_FOUND_ERROR_MESSAGE_FORMATTED,
+                            uuid.toString())))));
   }
 
   @DELETE
@@ -91,7 +94,9 @@ public class ConfigEndpoint {
                 .ifNull()
                 .failWith(
                     new ConfigNotFoundException(
-                        String.format(UUID_NOT_FOUND_ERROR_MESSAGE, uuid.toString())))
+                        String.format(
+                            StaticConfig.LoggerMessages.UUID_NOT_FOUND_ERROR_MESSAGE_FORMATTED,
+                            uuid.toString())))
                 .onItem()
                 .ifNotNull()
                 .call(session::remove)
