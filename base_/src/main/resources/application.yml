@@ -1,4 +1,0 @@
----
-quarkus:
-  log:
-    level: INFO
