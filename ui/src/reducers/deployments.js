@@ -97,7 +97,17 @@ const deployments = (state, action) => {
       };
     case "RECEIVE_LOGS_DEPLOYMENT":
       const logMessages = action.logMessages.slice(-101, -1).map((logLine) => {
-        return JSON.parse(logLine);
+        // By default, the API returns log messages in the JSON format
+        //
+        // In rare cases, Kubernetes mixes the JSON format with a pure text format.
+        // In such a case, we need to manually construct JSON objects, so we do not break the UI
+        try {
+          return JSON.parse(logLine);
+        } catch (error) {
+          return {
+            message: logLine,
+          };
+        }
       });
       return {
         ...state,
