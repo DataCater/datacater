@@ -38,7 +38,7 @@ mvn install -DskipTests
 ```
 add the dependency to your `build.gradle` file in your Quarkus application.
 ```
-implementation 'io.datacater:base-deployment:1.0-SNAPSHOT'
+implementation 'io.datacater:base-deployment:0.1'
 ```
 Gradlew searches your local mvn repository for dependencies, hence you are good to go.
 
