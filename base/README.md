@@ -1,4 +1,4 @@
-# DataCater EE extension
+# DataCater Base extension
 
 This quarkus extension contains shareable code and resources for DataCater. Quarkus extensions allow
 to manipulate build and runtime of quarkus applications like DataCater.
