@@ -1,20 +1,15 @@
 package io.datacater.core.pipeline;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.jaxrs.yaml.YAMLMediaTypes;
 import io.datacater.core.authentication.DataCaterSessionFactory;
 import io.datacater.core.exceptions.DatacaterException;
 import io.datacater.core.exceptions.PipelineNotFoundException;
 import io.datacater.core.kubernetes.DataCaterK8sConfig;
-import io.datacater.core.kubernetes.PythonRunnerPool;
 import io.datacater.core.kubernetes.PythonRunnerPool.NamedPod;
-import io.datacater.core.stream.StreamMessage;
-import io.datacater.core.stream.StreamsUtilities;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.quarkus.security.Authenticated;
 import io.smallrye.mutiny.Uni;
-import io.smallrye.mutiny.tuples.Tuple3;
 import io.smallrye.mutiny.unchecked.Unchecked;
 import io.vertx.mutiny.core.Vertx;
 import io.vertx.mutiny.ext.web.client.WebClient;
@@ -25,7 +20,6 @@ import java.net.http.HttpResponse.BodyHandlers;
 import java.time.Duration;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -48,8 +42,7 @@ import org.jboss.logging.Logger;
 public class PipelineEndpoint {
 
   static final Logger LOGGER = Logger.getLogger(PipelineEndpoint.class);
-  @Inject StreamsUtilities streamsUtil;
-  @Inject PythonRunnerPool runnerPool;
+  @Inject PipelineUtilities pipelineUtil;
   @Inject KubernetesClient kubernetesClient;
   @Inject DataCaterSessionFactory dsf;
   WebClient client;
@@ -71,7 +64,7 @@ public class PipelineEndpoint {
     return dsf.withTransaction(((session, transaction) -> session.find(PipelineEntity.class, uuid)))
         .onItem()
         .ifNull()
-        .failWith(new PipelineNotFoundException("Pipeline not found."));
+        .failWith(new PipelineNotFoundException(StaticConfig.PIPELINE_NOT_FOUND));
   }
 
   @POST
@@ -118,14 +111,14 @@ public class PipelineEndpoint {
   public Uni<Response> preview(String payload) {
     LOGGER.debug(payload);
     HttpClient httpClient = HttpClient.newHttpClient();
-    Uni<NamedPod> namedPod = runnerPool.getPod();
+    Uni<NamedPod> namedPod = pipelineUtil.runnerPool.getPod();
 
     return namedPod
         .onItem()
         .transform(
             Unchecked.function(
                 pod -> {
-                  HttpRequest preview = pod.buildPost(payload, "/preview");
+                  HttpRequest preview = pod.buildPost(payload, StaticConfig.PREVIEW_PATH);
                   HttpResponse<String> previewSend =
                       httpClient.send(preview, BodyHandlers.ofString());
 
@@ -139,69 +132,13 @@ public class PipelineEndpoint {
             () ->
                 new DatacaterException(
                     String.format(
-                        "Calling the Python runner exceeded the timeout of datacater.pythonrunner.preview.timeout=%d.",
+                        StaticConfig.FormattedMessages.PYTHON_RUNNER_TIMEOUT_FORMATTED_MSG,
                         DataCaterK8sConfig.PYTHON_RUNNER_PREVIEW_TIMEOUT)));
   }
 
   @GET
   @Path("{uuid}/inspect")
   public Uni<String> inspect(@PathParam("uuid") UUID uuid) {
-    return transformMessages(uuid);
-  }
-
-  // TODO: rework with inspect endpoints
-  private Uni<String> transformMessages(UUID uuid) {
-    HttpClient httpClient = HttpClient.newHttpClient();
-
-    Uni<PipelineEntity> pe = dsf.withSession(session -> session.find(PipelineEntity.class, uuid));
-    Uni<List<StreamMessage>> messages =
-        pe.flatMap(
-            pipelineEntity -> {
-              JsonNode streamIn = pipelineEntity.getMetadata().get("stream-in");
-              UUID streamUUID = UUID.fromString(streamIn.asText());
-              return streamsUtil.getStreamMessages(streamUUID);
-            });
-
-    Uni<NamedPod> namedPodAsync = runnerPool.getStaticPod();
-    Uni<Tuple3<PipelineEntity, List<StreamMessage>, NamedPod>> combinedPeMsg =
-        Uni.combine().all().unis(pe, messages, namedPodAsync).asTuple();
-
-    return combinedPeMsg.flatMap(
-        Unchecked.function(
-            peMsg -> {
-              PipelineEntity entity = peMsg.getItem1();
-              List<StreamMessage> msgs = peMsg.getItem2();
-              NamedPod namedPod = peMsg.getItem3();
-
-              HttpRequest specPost = namedPod.buildPost(entity.asJsonString(), "/pipeline");
-              CompletableFuture<HttpResponse<String>> specResponse =
-                  httpClient.sendAsync(specPost, BodyHandlers.ofString());
-
-              LOGGER.info(specPost.uri().toString());
-              StreamMessage recordMessagePayload = msgs.get(0);
-              String messagesPayload = recordMessagePayload.toRecordJsonString();
-              HttpRequest transformPost = namedPod.buildPost(messagesPayload);
-
-              LOGGER.info("Will send following payload after spec update");
-              LOGGER.info(messagesPayload);
-              CompletableFuture<HttpResponse<String>> transformResponse =
-                  httpClient.sendAsync(transformPost, BodyHandlers.ofString());
-
-              Uni<HttpResponse<String>> transform =
-                  Uni.createFrom().completionStage(transformResponse);
-              return Uni.createFrom()
-                  .completionStage(specResponse)
-                  .map(
-                      response -> {
-                        String message =
-                            String.format(
-                                "Received response from %s with status %d",
-                                response.request().uri(), response.statusCode());
-                        LOGGER.info(message);
-                        return response.body();
-                      })
-                  .flatMap(specPostResponse -> transform)
-                  .map(HttpResponse::body);
-            }));
+    return pipelineUtil.transformMessages(uuid);
   }
 }

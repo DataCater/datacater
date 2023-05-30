@@ -2,7 +2,7 @@
 
 | Dependency           | Version | License                            |
 | :----------          | :------ | :------------                      |
-| Python               | 3.10.6  | [PSF License Agreement](https://docs.python.org/3/license.html#psf-license) |
+| Python               | 3.11.0  | [PSF License Agreement](https://docs.python.org/3/license.html#psf-license) |
 | pip                  |         | [MIT](https://opensource.org/licenses/MIT) |
 | fastapi              | 0.80.0  | [MIT](https://opensource.org/licenses/MIT) |
 | uvicorn              | 0.18.2  | [MIT](https://opensource.org/licenses/MIT) |

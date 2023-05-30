@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public record ResourceItem(
     @JsonProperty("url") String url, @JsonProperty("documentationUrl") String documentationUrl) {
-
   @JsonCreator
   static ResourceItem from(
       @JsonProperty(value = "url") String url,

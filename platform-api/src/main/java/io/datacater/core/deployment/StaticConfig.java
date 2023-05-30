@@ -22,11 +22,11 @@ public class StaticConfig {
   static final String PIPELINE_REV = "1";
   static final String UUID_TEXT = "datacater.io/uuid";
   static final String DEPLOYMENT_NAME_TEXT = "datacater.io/name";
-  static final String DEPLOYMENT_SERVICE_TEXT = "datacater.io/service";
   static final String CONFIGMAP_MOUNT_PATH = "/usr/app/mounts";
   static final String DATA_SHARE_MOUNT_PATH = "/usr/app/data-mounts";
   public static final String MEMORY = "memory";
   public static final String CPU = "cpu";
+
   static final Map<String, Quantity> RESOURCE_REQUESTS =
       Map.of(
           CPU,
@@ -51,14 +51,11 @@ public class StaticConfig {
   static final String CONFIGMAP_NAME_PREFIX = "datacater-configmap-";
   static final String CONFIGMAP_VOLUME_NAME_PREFIX = "datacater-volume-";
   static final String DATA_SHARE_VOLUME_NAME_PREFIX = "datacater-volume-data-";
-  static final String SERVICE_NAME_PREFIX = "datacater-service-";
-  static final String TCP_TAG = "TCP";
   static final String SPEC = "spec";
   static final String STREAM_OUT = "stream-out";
   static final String STREAM_IN = "stream-in";
   static final String STREAM_IN_CONFIG = "stream-in-config";
   static final String STREAM_OUT_CONFIG = "stream-out-config";
-  static final String PIPELINE_NODE_TEXT = "pipeline";
   static final String SERIALIZER = "serializer";
   static final String DESERIALIZER = "deserializer";
   static final String EMPTY_STRING = "";
@@ -152,8 +149,6 @@ public class StaticConfig {
 
     static final String DEPLOYMENT_DELETED = "Datacater Deployment deleted successfully: %s";
     static final String DEPLOYMENT_NOT_DELETED = "Datacater Deployment could not be deleted: %s";
-    static final String PIPELINE_NOT_FOUND = "The referenced Pipeline UUID could not be found";
-    static final String STREAM_NOT_FOUND = "The referenced %s UUID could not be found";
     static final String DEPLOYMENT_NOT_FOUND = "The referenced Deployment could not be found.";
     static final String K8_DEPLOYMENT_NOT_FOUND =
         "The referenced Kubernetes Deployment could not be found.";

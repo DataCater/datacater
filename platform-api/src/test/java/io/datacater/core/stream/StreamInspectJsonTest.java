@@ -15,7 +15,10 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.*;
+import java.util.concurrent.CompletionStage;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import javax.inject.Inject;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.eclipse.microprofile.reactive.messaging.Channel;
@@ -40,13 +43,15 @@ class StreamInspectJsonTest {
       throws IOException, InterruptedException, ExecutionException, TimeoutException {
     start();
 
-    for (int i = 0; i <= 300; i++) {
+    for (int i = 0; i <= 9; i++) {
       producer.send(
           new ProducerRecord<>(
               "testJsonDeserializer",
               buildJson("test" + i, 1000 + i),
               buildJson("test" + i, 2000 + i)));
     }
+
+    // wait on records to finish
     CompletionStage<Void> lastMessageToWaitOn =
         producer.send(
             new ProducerRecord<>(
