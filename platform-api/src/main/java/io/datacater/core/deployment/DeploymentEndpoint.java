@@ -57,7 +57,9 @@ public class DeploymentEndpoint {
   @GET
   @Path("{uuid}/logs")
   public Uni<List<String>> getLogs(
-      @PathParam("uuid") UUID deploymentId, @DefaultValue("1") @QueryParam("replica") int replica) {
+      @PathParam("uuid") UUID deploymentId,
+      @DefaultValue("1") @QueryParam("replica") int replica,
+      @DefaultValue("100") @QueryParam("tailingLines") int tailingLines) {
     return dsf.withTransaction(
             ((session, transaction) -> session.find(DeploymentEntity.class, deploymentId)))
         .onItem()
@@ -68,7 +70,8 @@ public class DeploymentEndpoint {
         .transform(
             Unchecked.function(
                 deployment ->
-                    deploymentsUtil.getDeploymentLogsAsList(deployment.getId(), replica)));
+                    deploymentsUtil.getDeploymentLogsAsList(
+                        deployment.getId(), replica, tailingLines)));
   }
 
   @GET
