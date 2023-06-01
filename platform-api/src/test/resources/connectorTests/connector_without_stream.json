@@ -1,0 +1,8 @@
+{
+  "spec": {
+      "image": "imagePlaceholder",
+      "config": {
+        "connector.class": "io.datacater.concon.source.MySQLSourceConnector"
+      }
+  }
+}

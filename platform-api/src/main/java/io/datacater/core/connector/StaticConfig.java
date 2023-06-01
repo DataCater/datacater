@@ -135,5 +135,6 @@ public class StaticConfig {
         "The referenced Kubernetes Deployment could not be found.";
     static final String CONNECTOR_NOT_CREATED = "The connector could not be created.";
     static final String CONNECTOR_NOT_UPDATED = "The connector could not be updated.";
+    static final String NO_IMAGE_PROVIDED = "The connector does not specify spec.image.";
   }
 }

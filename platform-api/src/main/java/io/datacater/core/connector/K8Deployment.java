@@ -33,7 +33,12 @@ public class K8Deployment {
 
     List<EnvVar> variables = getEnvironmentVariables(connectorSpec, connectorId);
 
-    String connectorImage = connectorSpec.connector().get(StaticConfig.IMAGE_NODE_TEXT).toString();
+    String connectorImage;
+    try {
+      connectorImage = connectorSpec.connector().get(StaticConfig.IMAGE_NODE_TEXT).toString();
+    } catch (NullPointerException e) {
+      throw new CreateConnectorException(StaticConfig.LoggerMessages.NO_IMAGE_PROVIDED);
+    }
 
     try {
       Deployment deployment =
@@ -105,7 +110,8 @@ public class K8Deployment {
             .withValue(streamEntity.getName())
             .build());
 
-    Map<String, String> config = (Map) connectorSpec.connector().get("config");
+    Map<String, String> config = (Map) connectorSpec.connector().getOrDefault("config", Map.of());
+
     for (String configName : config.keySet()) {
       envVariables.add(
           new EnvVarBuilder()

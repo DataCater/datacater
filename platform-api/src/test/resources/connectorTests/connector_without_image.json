@@ -1,0 +1,8 @@
+{
+  "spec": {
+      "stream": "streamUUIDPlaceholder",
+      "config": {
+        "connector.class": "io.datacater.concon.source.MySQLSourceConnector"
+      }
+  }
+}
