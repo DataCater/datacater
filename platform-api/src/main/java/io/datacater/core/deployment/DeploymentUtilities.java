@@ -6,6 +6,7 @@ import io.datacater.core.exceptions.DeploymentNotFoundException;
 import io.datacater.core.pipeline.PipelineEntity;
 import io.datacater.core.stream.Stream;
 import io.datacater.core.utilities.LoggerUtilities;
+import io.fabric8.kubernetes.api.model.apps.Deployment;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.dsl.ContainerResource;
 import io.fabric8.kubernetes.client.dsl.LogWatch;
@@ -16,9 +17,7 @@ import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.ws.rs.core.Context;
@@ -114,5 +113,40 @@ public class DeploymentUtilities {
     }
     is.close();
     lw.close();
+  }
+
+  public List<DeploymentEntity> mergeDeploymentEntitiesWithCluster(
+      List<DeploymentEntity> dbDeployments) {
+    List<Deployment> clusterDeployments = getDeploymentsInCluster();
+    List<DeploymentEntity> resultList = new ArrayList<>();
+
+    for (Deployment clusterDeployment : clusterDeployments) {
+      findMatchingDeployment(dbDeployments, clusterDeployment).ifPresent(resultList::add);
+    }
+
+    return resultList;
+  }
+
+  private List<Deployment> getDeploymentsInCluster() {
+    return client
+        .apps()
+        .deployments()
+        .inNamespace(StaticConfig.EnvironmentVariables.NAMESPACE)
+        .withLabel(StaticConfig.APP)
+        .list()
+        .getItems();
+  }
+
+  private Optional<DeploymentEntity> findMatchingDeployment(
+      List<DeploymentEntity> dbDeployments, Deployment clusterDeployment) {
+    try {
+      UUID uuid =
+          UUID.fromString(clusterDeployment.getMetadata().getLabels().get(StaticConfig.UUID_TEXT));
+      return dbDeployments.stream()
+          .filter(dbDeployment -> dbDeployment.getId().equals(uuid))
+          .findFirst();
+    } catch (IllegalArgumentException | NullPointerException e) {
+      return Optional.empty();
+    }
   }
 }

@@ -181,7 +181,7 @@ public class DeploymentEndpoint {
                     .createQuery("from DeploymentEntity", DeploymentEntity.class)
                     .getResultList())
         .onItem()
-        .transform(this::mergeDeploymentEntitiesWithCluster);
+        .transform(deploymentsUtil::mergeDeploymentEntitiesWithCluster);
   }
 
   @POST
@@ -350,40 +350,5 @@ public class DeploymentEndpoint {
                       throw new UpdateDeploymentException(
                           StaticConfig.LoggerMessages.DEPLOYMENT_NOT_UPDATED);
                     })));
-  }
-
-  private List<Deployment> getDeploymentsInCluster() {
-    return client
-        .apps()
-        .deployments()
-        .inNamespace(StaticConfig.EnvironmentVariables.NAMESPACE)
-        .withLabel(StaticConfig.APP)
-        .list()
-        .getItems();
-  }
-
-  private List<DeploymentEntity> mergeDeploymentEntitiesWithCluster(
-      List<DeploymentEntity> dbDeployments) {
-    List<Deployment> clusterDeployments = getDeploymentsInCluster();
-    List<DeploymentEntity> resultList = new ArrayList<>();
-
-    for (Deployment clusterDeployment : clusterDeployments) {
-      findMatchingDeployment(dbDeployments, clusterDeployment).ifPresent(resultList::add);
-    }
-
-    return resultList;
-  }
-
-  private Optional<DeploymentEntity> findMatchingDeployment(
-      List<DeploymentEntity> dbDeployments, Deployment clusterDeployment) {
-    try {
-      UUID uuid =
-          UUID.fromString(clusterDeployment.getMetadata().getLabels().get(StaticConfig.UUID_TEXT));
-      return dbDeployments.stream()
-          .filter(dbDeployment -> dbDeployment.getId().equals(uuid))
-          .findFirst();
-    } catch (IllegalArgumentException | NullPointerException e) {
-      return Optional.empty();
-    }
   }
 }
