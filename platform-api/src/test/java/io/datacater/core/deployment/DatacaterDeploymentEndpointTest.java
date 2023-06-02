@@ -3,9 +3,12 @@ package io.datacater.core.deployment;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.*;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
+import io.datacater.core.authentication.DataCaterSessionFactory;
 import io.datacater.core.pipeline.PipelineEntity;
 import io.datacater.core.stream.StreamEntity;
 import io.fabric8.kubernetes.client.KubernetesClient;
@@ -15,6 +18,8 @@ import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.UUID;
 import javax.inject.Inject;
 import org.jboss.logging.Logger;
@@ -27,6 +32,7 @@ class DatacaterDeploymentEndpointTest {
   private static final Logger LOGGER = Logger.getLogger(DatacaterDeploymentEndpointTest.class);
 
   @Inject KubernetesClient client;
+  @Inject DataCaterSessionFactory dsf;
 
   final String baseURI = "http://localhost:8081";
   final String deploymentsPath = "/deployments";
@@ -130,6 +136,38 @@ class DatacaterDeploymentEndpointTest {
 
   @Test
   @Order(4)
+  void testGetDeploymentsInCluster() throws JsonProcessingException {
+    final String inClusterQueryParam = "in-cluster";
+    final ObjectMapper objectMapper = new ObjectMapper();
+    ArrayList<DeploymentEntity> deploymentEntities;
+
+    // save deployment entity to db which is not actually deployed inside the cluster
+    DeploymentEntity notDeployedDeploymentEntity =
+        new DeploymentEntity(new DeploymentSpec("test", new HashMap<>()));
+
+    dsf.withTransaction(((session, transaction) -> session.persist(notDeployedDeploymentEntity)))
+        .await()
+        .indefinitely();
+
+    // get all deployments in db (should be 2)
+    Response response = given().baseUri(baseURI).get(deploymentsPath);
+    deploymentEntities =
+        objectMapper.readValue(response.body().asString(), new TypeReference<>() {});
+
+    Assertions.assertEquals(2, deploymentEntities.size());
+
+    // get in-cluster deployments (should be 1)
+    response = given().baseUri(baseURI).queryParam(inClusterQueryParam, true).get(deploymentsPath);
+    deploymentEntities =
+        objectMapper.readValue(response.body().asString(), new TypeReference<>() {});
+
+    Assertions.assertEquals(200, response.statusCode());
+    Assertions.assertEquals(1, deploymentEntities.size());
+    Assertions.assertEquals(deploymentId, deploymentEntities.get(0).getId());
+  }
+
+  @Test
+  @Order(5)
   void testUpdateDeployment() throws IOException {
     String pipelineUUIDPlaceholder = "pipelineUUIDPlaceholder";
     URL JsonURL = ClassLoader.getSystemClassLoader().getResource(deploymentPath);
@@ -150,7 +188,7 @@ class DatacaterDeploymentEndpointTest {
   }
 
   @Test
-  @Order(5)
+  @Order(6)
   void testGetDeploymentStatus() {
     given()
         .pathParam("uuid", deploymentId)
@@ -172,7 +210,7 @@ class DatacaterDeploymentEndpointTest {
   }
 
   @Test
-  @Order(6)
+  @Order(7)
   void testGetDeploymentStatusByInvalidUuid() {
     UUID invalidUuid = UUID.randomUUID();
 
@@ -185,7 +223,7 @@ class DatacaterDeploymentEndpointTest {
   }
 
   @Test
-  @Order(7)
+  @Order(8)
   void testDeleteDeployment() {
     Response response =
         RestAssured.given()
@@ -198,7 +236,7 @@ class DatacaterDeploymentEndpointTest {
   }
 
   @Test
-  @Order(8)
+  @Order(9)
   void testGetDeletedDeployment() {
     given()
         .pathParam("uuid", deploymentId)
@@ -209,7 +247,7 @@ class DatacaterDeploymentEndpointTest {
   }
 
   @Test
-  @Order(9)
+  @Order(10)
   void testGetUnknownDeployment() {
     given()
         .pathParam("uuid", UUID.randomUUID())
@@ -220,7 +258,7 @@ class DatacaterDeploymentEndpointTest {
   }
 
   @Test
-  @Order(10)
+  @Order(11)
   void testGetUnknownDeploymentLogs() {
     given()
         .pathParam("uuid", UUID.randomUUID())
@@ -231,7 +269,7 @@ class DatacaterDeploymentEndpointTest {
   }
 
   @Test
-  @Order(11)
+  @Order(12)
   void testWatchUnknownDeploymentLogs() {
     given()
         .pathParam("uuid", UUID.randomUUID())
@@ -242,7 +280,7 @@ class DatacaterDeploymentEndpointTest {
   }
 
   @Test
-  @Order(12)
+  @Order(13)
   void testDeleteUnknownDeployment() {
     given()
         .contentType(ContentType.JSON)
@@ -254,7 +292,7 @@ class DatacaterDeploymentEndpointTest {
   }
 
   @Test
-  @Order(13)
+  @Order(14)
   void testCreateDeploymentWithNoStreamsInPipeline() throws IOException {
     String streamPath = "deploymentTests/streamin.json";
     String pipelinePath = "deploymentTests/pipeline_no_streams.json";
@@ -306,7 +344,7 @@ class DatacaterDeploymentEndpointTest {
   }
 
   @Test
-  @Order(14)
+  @Order(15)
   void testCreateDeploymentWithNoStream() throws IOException {
     String pipelinePath = "deploymentTests/pipeline_no_streams.json";
 
@@ -339,7 +377,7 @@ class DatacaterDeploymentEndpointTest {
   }
 
   @Test
-  @Order(15)
+  @Order(16)
   void testCreateDeploymentWithNoStreamOut() throws IOException {
     String streamPath = "deploymentTests/streamin.json";
     String pipelinePath = "deploymentTests/pipeline_no_streams.json";
@@ -390,7 +428,7 @@ class DatacaterDeploymentEndpointTest {
   }
 
   @Test
-  @Order(16)
+  @Order(17)
   void testCreateDeploymentWithEmptySpec() throws IOException {
     String deploymentPath = "deploymentTests/deployment_with_empty_spec.json";
 
@@ -411,7 +449,7 @@ class DatacaterDeploymentEndpointTest {
   }
 
   @Test
-  @Order(17)
+  @Order(18)
   void testCreateDeploymentWithCustomReplicas() throws IOException {
     String deploymentPath = "deploymentTests/deployment_with_custom_replicas.json";
 
