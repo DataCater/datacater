@@ -1,9 +1,5 @@
 package io.datacater.core.connector;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.datacater.core.deployment.DeploymentSpec;
 import io.datacater.core.exceptions.*;
 import io.datacater.core.stream.StreamEntity;
 import io.datacater.core.utilities.StringUtilities;
@@ -12,6 +8,7 @@ import io.fabric8.kubernetes.api.model.apps.Deployment;
 import io.fabric8.kubernetes.api.model.apps.DeploymentBuilder;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClientException;
+import io.fabric8.kubernetes.client.dsl.ContainerResource;
 import java.util.*;
 import javax.inject.Singleton;
 import org.jboss.logging.Logger;
@@ -181,6 +178,31 @@ public class K8Deployment {
         .build();
   }
 
+  public String getLogs(UUID connectorId, int tailingLines) {
+
+    String connectorName = getDeploymentName(connectorId);
+    Pod pod = getConnectorPod(connectorName);
+
+    return client
+        .pods()
+        .inNamespace(StaticConfig.EnvironmentVariables.NAMESPACE)
+        .withName(pod.getMetadata().getName())
+        .inContainer(StaticConfig.CONNECTOR_NAME_PREFIX + connectorId)
+        .tailingLines(tailingLines)
+        .getLog(true);
+  }
+
+  public ContainerResource watchLogs(UUID connectorId) {
+    String connectorName = getDeploymentName(connectorId);
+    Pod pod = getConnectorPod(connectorName);
+
+    return client
+        .pods()
+        .inNamespace(StaticConfig.EnvironmentVariables.NAMESPACE)
+        .withName(pod.getMetadata().getName())
+        .inContainer(StaticConfig.CONNECTOR_NAME_PREFIX + connectorId);
+  }
+
   public void delete(UUID connectorId) {
     String name = getDeploymentName(connectorId);
     List<StatusDetails> status =
@@ -245,8 +267,8 @@ public class K8Deployment {
   }
 
   public String getConnectorReplicaIp(UUID connectorId, int replica) {
-    String deploymentName = getDeploymentName(connectorId);
-    Pod pod = getDeploymentPodByReplica(deploymentName, replica);
+    String connectorName = getDeploymentName(connectorId);
+    Pod pod = getConnectorPod(connectorName);
 
     return pod.getStatus().getPodIP();
   }
@@ -277,6 +299,13 @@ public class K8Deployment {
     return deployments.get(0).getMetadata().getName();
   }
 
+  public String getDeploymentIp(UUID connectorId) {
+    String deploymentName = getDeploymentName(connectorId);
+    Pod pod = getConnectorPod(deploymentName);
+
+    return pod.getStatus().getPodIP();
+  }
+
   private List<EnvVar> getEnvironmentVariables(ConnectorSpec connectorSpec, UUID uuid) {
     List<EnvVar> environmentVariables = new ArrayList<>();
 
@@ -285,75 +314,13 @@ public class K8Deployment {
     return environmentVariables;
   }
 
-  /**
-   * Transforms a configuration name to an environment variable.
-   *
-   * <p>Examples: - `datacater.name` becomes `DATACATER_NAME` - `datacater.middle-level.name`
-   * becomes `DATACATER_MIDDLE_LEVEL_NAME`
-   *
-   * @param configName
-   * @return config name as valid environment variable
-   */
-  private String transformConfigOptionToEnvVariable(String configName) {
-    return configName
-        // Replace all characters, except a-z A-Z and underscores, with an underscore
-        .replaceAll("[^a-zA-Z_]", "_")
-        // Transform entire string to upper case notation
-        .toUpperCase();
-  }
-
-  private Map<String, Object> getNode(String node, DeploymentSpec spec) {
-    ObjectMapper om = new ObjectMapper();
-    Map<String, Object> config =
-        om.convertValue(spec.deployment().get(node), new TypeReference<>() {});
-    if (config == null) {
-      return new HashMap<>();
-    }
-    return config;
-  }
-
-  private Map<String, Object> nodeToMap(JsonNode node) {
-    ObjectMapper om = new ObjectMapper();
-    Map<String, Object> config = om.convertValue(node, new TypeReference<>() {});
-    if (config == null) {
-      return new HashMap<>();
-    }
-    return config;
-  }
-
-  private EnvVar createEnvVariable(String prefix, String name, String value) {
-    return new EnvVarBuilder().withName(prefix.concat(name)).withValue(value).build();
-  }
-
-  private String getEnvVariableFromNode(JsonNode node, String field) {
-    if (node.get(field) != null) {
-      return node.get(field).toString();
-    }
-
-    return StaticConfig.EMPTY_STRING;
-  }
-
   private int getDeploymentReplicaOrDefault(Map<String, Object> map) {
     int replica = StaticConfig.EnvironmentVariables.REPLICAS;
 
     return replica;
   }
 
-  private int replicaNumberToArrayPosition(int replica) {
-    int replicaPosition = replica;
-    if (replicaPosition <= 0) {
-      final String errorMessage =
-          "The deployment replica you are searching for can not be less than 1";
-      throw new DeploymentReplicaMismatchException(errorMessage);
-    }
-    // map replica number to array position
-    replicaPosition--;
-    return replicaPosition;
-  }
-
-  private Pod getDeploymentPodByReplica(String connectorName, int replica) {
-    int replicaPosition = replicaNumberToArrayPosition(replica);
-
+  private Pod getConnectorPod(String connectorName) {
     final Map<String, String> matchLabels =
         client
             .apps()
@@ -365,32 +332,19 @@ public class K8Deployment {
             .getSelector()
             .getMatchLabels();
 
-    Pod searchedPod;
-    List<Pod> allDeploymentPods = new ArrayList<>();
-    try {
-      allDeploymentPods =
-          client
-              .pods()
-              .inNamespace(StaticConfig.EnvironmentVariables.NAMESPACE)
-              .withLabels(matchLabels)
-              .list()
-              .getItems();
+    List<Pod> allConnectorPods =
+        client
+            .pods()
+            .inNamespace(StaticConfig.EnvironmentVariables.NAMESPACE)
+            .withLabels(matchLabels)
+            .list()
+            .getItems();
 
-      searchedPod =
-          allDeploymentPods.stream()
-              .sorted((Comparator.comparing(o -> o.getMetadata().getName())))
-              .toList()
-              .get(replicaPosition);
-    } catch (ArrayIndexOutOfBoundsException e) {
-      LOGGER.info(
-          String.format(
-              "An error occurred while trying to get replica %s: %s", replica, e.getMessage()));
-      final String errorMessage =
-          String.format(
-              "The deployment replica you are searching for, %s, does not match the defined replica amount of %s.",
-              replica, allDeploymentPods.size());
-      throw new DeploymentReplicaMismatchException(errorMessage);
-    }
+    Pod searchedPod =
+        allConnectorPods.stream()
+            .sorted((Comparator.comparing(o -> o.getMetadata().getName())))
+            .findFirst()
+            .get();
     return searchedPod;
   }
 }

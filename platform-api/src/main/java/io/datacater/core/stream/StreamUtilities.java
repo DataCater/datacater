@@ -6,10 +6,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.datacater.core.authentication.DataCaterSessionFactory;
 import io.datacater.core.config.ConfigEntity;
 import io.datacater.core.config.ConfigUtilities;
+import io.datacater.core.connector.ConnectorSpec;
 import io.datacater.core.deployment.DeploymentSpec;
-import io.datacater.core.exceptions.CreateDeploymentException;
-import io.datacater.core.exceptions.DatacaterException;
-import io.datacater.core.exceptions.DeleteStreamException;
+import io.datacater.core.exceptions.*;
 import io.datacater.core.pipeline.PipelineEntity;
 import io.datacater.core.utilities.LoggerUtilities;
 import io.smallrye.mutiny.Uni;
@@ -109,6 +108,27 @@ public class StreamUtilities {
                           kafkaAdmin.close();
                           return messages;
                         }))));
+  }
+
+  public Uni<StreamEntity> getStreamFromConnector(ConnectorSpec connectorSpec) {
+    Map spec = connectorSpec.connector();
+    UUID streamId;
+
+    try {
+      streamId = UUID.fromString(spec.get(StaticConfig.STREAM_TEXT).toString());
+    } catch (NullPointerException e) {
+      throw new ReferencedStreamNotFoundException(
+          StaticConfig.LoggerMessages.STREAM_NOT_FOUND_MESSAGE);
+    }
+
+    return dsf.withTransaction(
+        (session, transaction) ->
+            session
+                .find(StreamEntity.class, streamId)
+                .onItem()
+                .ifNull()
+                .failWith(
+                    new CreateConnectorException(StaticConfig.LoggerMessages.STREAM_NOT_FOUND)));
   }
 
   public Uni<Stream> getStreamFromDeployment(

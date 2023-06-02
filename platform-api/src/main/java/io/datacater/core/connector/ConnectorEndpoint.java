@@ -2,24 +2,26 @@ package io.datacater.core.connector;
 
 import com.fasterxml.jackson.jaxrs.yaml.YAMLMediaTypes;
 import io.datacater.core.authentication.DataCaterSessionFactory;
-import io.datacater.core.config.ConfigEntity;
 import io.datacater.core.config.ConfigUtilities;
-import io.datacater.core.exceptions.ConnectorNotFoundException;
-import io.datacater.core.exceptions.CreateConnectorException;
-import io.datacater.core.exceptions.DeploymentNotFoundException;
-import io.datacater.core.exceptions.UpdateConnectorException;
-import io.datacater.core.stream.StreamEntity;
+import io.datacater.core.exceptions.*;
+import io.datacater.core.stream.StreamUtilities;
+import io.datacater.core.utilities.LoggerUtilities;
+import io.datacater.core.utilities.StringUtilities;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.quarkus.security.Authenticated;
 import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.unchecked.Unchecked;
+import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.sse.Sse;
+import javax.ws.rs.sse.SseEventSink;
 import org.eclipse.microprofile.openapi.annotations.security.SecurityRequirement;
 import org.jboss.logging.Logger;
 
@@ -31,7 +33,8 @@ import org.jboss.logging.Logger;
 public class ConnectorEndpoint {
 
   @Inject DataCaterSessionFactory dsf;
-
+  @Inject ConnectorUtilities connectorsUtil;
+  @Inject StreamUtilities streamUtil;
   static final Logger LOGGER = Logger.getLogger(ConnectorEndpoint.class);
 
   @Inject KubernetesClient client;
@@ -56,12 +59,12 @@ public class ConnectorEndpoint {
   @POST
   @Consumes({MediaType.APPLICATION_JSON, YAMLMediaTypes.APPLICATION_JACKSON_YAML})
   public Uni<ConnectorEntity> createConnector(ConnectorSpec spec) {
-    ConnectorEntity ce = new ConnectorEntity(spec);
+    ConnectorEntity connectorEntity = new ConnectorEntity(spec);
 
     return dsf.withTransaction(
         (session, transaction) ->
             session
-                .persist(ce)
+                .persist(connectorEntity)
                 .onItem()
                 .transformToUni(
                     entity ->
@@ -80,7 +83,7 @@ public class ConnectorEndpoint {
                           .all()
                           .unis(
                               Uni.createFrom().item(combinedSpec),
-                              getStream(combinedSpec),
+                              streamUtil.getStreamFromConnector(combinedSpec),
                               Uni.createFrom().item(tuple.getItem1()))
                           .asTuple();
                     })
@@ -97,7 +100,52 @@ public class ConnectorEndpoint {
                 .onItem()
                 .transform(
                     tuple ->
-                        createConnector(tuple.getItem1(), tuple.getItem3(), ce, tuple.getItem2())));
+                        connectorsUtil.createK8Deployment(
+                            tuple.getItem1(),
+                            tuple.getItem3(),
+                            connectorEntity,
+                            tuple.getItem2())));
+  }
+
+  @GET
+  @Path("{uuid}/logs")
+  public Uni<List<String>> getLogs(
+      @PathParam("uuid") UUID connectorId,
+      @DefaultValue("100") @QueryParam("tailingLines") int tailingLines) {
+    return dsf.withTransaction(
+            ((session, transaction) -> session.find(ConnectorEntity.class, connectorId)))
+        .onItem()
+        .ifNull()
+        .failWith(new ConnectorNotFoundException(StaticConfig.LoggerMessages.CONNECTOR_NOT_FOUND))
+        .onItem()
+        .ifNotNull()
+        .transform(
+            Unchecked.function(
+                connector ->
+                    connectorsUtil.getConnectorLogsAsList(connector.getId(), tailingLines)));
+  }
+
+  @GET
+  @Path("{uuid}/watch-logs")
+  @Produces(MediaType.SERVER_SENT_EVENTS)
+  public Uni<Response> watchLogs(
+      @PathParam("uuid") UUID connectorId, @Context Sse sse, @Context SseEventSink eventSink) {
+    return dsf.withTransaction(
+            ((session, transaction) -> session.find(ConnectorEntity.class, connectorId)))
+        .onItem()
+        .ifNull()
+        .failWith(new ConnectorNotFoundException(StaticConfig.LoggerMessages.CONNECTOR_NOT_FOUND))
+        .onItem()
+        .ifNotNull()
+        .transform(
+            deployment -> {
+              try {
+                connectorsUtil.watchLogsRunner(deployment.getId(), sse, eventSink);
+              } catch (IOException e) {
+                throw new DatacaterException(StringUtilities.wrapString(e.getMessage()));
+              }
+              return Response.ok().build();
+            });
   }
 
   @DELETE
@@ -114,9 +162,9 @@ public class ConnectorEndpoint {
                 .onItem()
                 .ifNotNull()
                 .call(
-                    ce -> {
-                      deleteK8Deployment(connectorId);
-                      return session.remove(ce);
+                    connectorEntity -> {
+                      connectorsUtil.deleteK8Deployment(connectorId);
+                      return session.remove(connectorEntity);
                     })
                 .replaceWith(Response.ok().build())));
   }
@@ -153,7 +201,7 @@ public class ConnectorEndpoint {
                           .all()
                           .unis(
                               Uni.createFrom().item(combinedSpec),
-                              getStream(combinedSpec),
+                              streamUtil.getStreamFromConnector(combinedSpec),
                               Uni.createFrom().item(tuple.getItem1()),
                               Uni.createFrom().item(tuple.getItem2()))
                           .asTuple();
@@ -172,79 +220,20 @@ public class ConnectorEndpoint {
                 .onItem()
                 .transform(
                     tuple -> {
-                      updateConnector(
+                      connectorsUtil.updateK8Deployment(
                           tuple.getItem1(), tuple.getItem4(), tuple.getItem2(), tuple.getItem3());
                       return session.merge(tuple.getItem2().updateEntity(spec));
                     })
                 .flatMap(entity -> entity)
                 .onFailure()
                 .transform(
-                    ex ->
-                        new UpdateConnectorException(
-                            StaticConfig.LoggerMessages.CONNECTOR_NOT_UPDATED))));
-  }
-
-  private Uni<StreamEntity> getStream(ConnectorSpec connectorSpec) {
-    return dsf.withTransaction(
-        (session, transaction) ->
-            session
-                .find(StreamEntity.class, getStreamUUIDFromMap(connectorSpec.connector()))
-                .onItem()
-                .ifNull()
-                .failWith(
-                    new CreateConnectorException(StaticConfig.LoggerMessages.STREAM_NOT_FOUND)));
-  }
-
-  private Uni<ConnectorEntity> getConnectorUni(UUID connectorUuid) {
-    return dsf.withTransaction(
-        (session, transaction) ->
-            session
-                .find(ConnectorEntity.class, connectorUuid)
-                .onItem()
-                .ifNull()
-                .failWith(
-                    new CreateConnectorException(StaticConfig.LoggerMessages.CONNECTOR_NOT_FOUND)));
-  }
-
-  private void deleteK8Deployment(UUID connectorId) {
-    try {
-      K8Deployment k8Deployment = new K8Deployment(client);
-      k8Deployment.delete(connectorId);
-    } catch (DeploymentNotFoundException e) {
-      LOGGER.error(
-          String.format("Could not find Kubernetes Deployment with id %s", connectorId.toString()),
-          e);
-    }
-  }
-
-  private ConnectorEntity createConnector(
-      StreamEntity se,
-      ConnectorSpec connectorSpec,
-      ConnectorEntity ce,
-      List<ConfigEntity> configList) {
-    K8Deployment k8Deployment = new K8Deployment(client);
-    ConnectorSpec specWithConfig =
-        ConfigUtilities.applyConfigsToConnector(ConnectorSpec.from(connectorSpec), configList);
-
-    k8Deployment.create(se, specWithConfig, ce.getId());
-
-    return ce;
-  }
-
-  private ConnectorEntity updateConnector(
-      StreamEntity se,
-      ConnectorSpec connectorSpec,
-      ConnectorEntity ce,
-      List<ConfigEntity> configList) {
-    deleteK8Deployment(ce.getId());
-    return createConnector(se, connectorSpec, ce, configList);
-  }
-
-  private UUID getStreamUUIDFromMap(Map<String, Object> map) {
-    try {
-      return UUID.fromString(map.get(StaticConfig.STREAM_NODE_TEXT).toString());
-    } catch (Exception e) {
-      throw new CreateConnectorException(StaticConfig.LoggerMessages.STREAM_NOT_FOUND);
-    }
+                    ex -> {
+                      LoggerUtilities.logExceptionMessage(
+                          LOGGER,
+                          new Throwable().getStackTrace()[0].getMethodName(),
+                          ex.getMessage());
+                      throw new UpdateConnectorException(
+                          StaticConfig.LoggerMessages.CONNECTOR_NOT_UPDATED);
+                    })));
   }
 }

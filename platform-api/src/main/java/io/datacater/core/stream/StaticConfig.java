@@ -17,6 +17,7 @@ public class StaticConfig {
   static final String CONFIG_KEY = "config";
   static final String UUID_TEXT = "uuid";
   static final String PARTITION_TEXT = "partition";
+  static final String STREAM_TEXT = "stream";
   static final String OFFSET_TEXT = "offset";
   static final String TIMESTAMP_TEXT = "timestamp";
   static final String MAX_POLL_RECORDS = "max.poll.records";
