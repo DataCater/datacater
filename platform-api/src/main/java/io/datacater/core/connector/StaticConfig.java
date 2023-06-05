@@ -151,5 +151,6 @@ public class StaticConfig {
     static final String CONNECTOR_NOT_CREATED = "The connector could not be created.";
     static final String CONNECTOR_NOT_UPDATED = "The connector could not be updated.";
     static final String NO_IMAGE_PROVIDED = "The connector does not specify spec.image.";
+    static final String NO_POD_FOUND = "Could not find Kubernetes Pod of the connector %s.";
   }
 }
