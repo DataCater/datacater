@@ -125,6 +125,10 @@ public class K8Deployment {
                 StaticConfig.EnvironmentVariables.CONCON_IMAGE_NAME,
                 StaticConfig.EnvironmentVariables.CONCON_IMAGE_TAG))
         .withImagePullPolicy(StaticConfig.EnvironmentVariables.PULL_POLICY)
+        .withPorts(
+            new ContainerPortBuilder()
+                .withContainerPort(StaticConfig.EnvironmentVariables.CONCON_SIDECAR_HTTP_PORT)
+                .build())
         .withNewResources()
         .withRequests(StaticConfig.CONCON_SIDECAR_RESOURCE_REQUESTS)
         .withLimits(StaticConfig.CONCON_SIDECAR_RESOURCE_LIMITS)
@@ -170,7 +174,10 @@ public class K8Deployment {
         .withImage(image)
         .withImagePullPolicy(StaticConfig.EnvironmentVariables.PULL_POLICY)
         .withEnv(variables)
-        .withPorts(new ContainerPortBuilder().withContainerPort(8083).build())
+        .withPorts(
+            new ContainerPortBuilder()
+                .withContainerPort(StaticConfig.EnvironmentVariables.CONNECTOR_KAFKA_CONNECT_PORT)
+                .build())
         .withNewResources()
         .withRequests(StaticConfig.RESOURCE_REQUESTS)
         .withLimits(StaticConfig.RESOURCE_LIMITS)
@@ -266,7 +273,7 @@ public class K8Deployment {
     }
   }
 
-  public String getConnectorReplicaIp(UUID connectorId, int replica) {
+  public String getConnectorPodIp(UUID connectorId) {
     String connectorName = getDeploymentName(connectorId);
     Pod pod = getConnectorPod(connectorName);
 
@@ -297,13 +304,6 @@ public class K8Deployment {
       throw new ConnectorNotFoundException(StaticConfig.LoggerMessages.CONNECTOR_NOT_FOUND);
     }
     return deployments.get(0).getMetadata().getName();
-  }
-
-  public String getDeploymentIp(UUID connectorId) {
-    String deploymentName = getDeploymentName(connectorId);
-    Pod pod = getConnectorPod(deploymentName);
-
-    return pod.getStatus().getPodIP();
   }
 
   private List<EnvVar> getEnvironmentVariables(ConnectorSpec connectorSpec, UUID uuid) {

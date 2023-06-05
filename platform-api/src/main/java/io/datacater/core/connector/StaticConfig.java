@@ -106,7 +106,10 @@ public class StaticConfig {
     static final Optional<String> CONNECTOR_RESOURCES_LIMITS_CPU =
         ConfigProvider.getConfig()
             .getOptionalValue("datacater.connector.resources.limits.cpu", String.class);
-
+    static final Integer CONNECTOR_KAFKA_CONNECT_PORT =
+        ConfigProvider.getConfig()
+            .getOptionalValue("datacater.connector.kafka-connect.port", Integer.class)
+            .orElse(8083);
     static final String CONCON_SIDECAR_RESOURCES_REQUESTS_MEMORY =
         ConfigProvider.getConfig()
             .getOptionalValue("datacater.connector.sidecar.resources.requests.memory", String.class)
@@ -122,6 +125,18 @@ public class StaticConfig {
     static final Optional<String> CONCON_SIDECAR_RESOURCES_LIMITS_CPU =
         ConfigProvider.getConfig()
             .getOptionalValue("datacater.connector.sidecar.resources.limits.cpu", String.class);
+    static final Integer CONCON_SIDECAR_HTTP_PORT =
+        ConfigProvider.getConfig()
+            .getOptionalValue("datacater.connector.sidecar.http.port", Integer.class)
+            .orElse(10000);
+    static final String CONCON_SIDECAR_HTTP_PROTOCOL =
+        ConfigProvider.getConfig()
+            .getOptionalValue("datacater.connector.sidecar.http.protocol", String.class)
+            .orElse("http");
+    static final String CONNECTOR_HEALTH_PATH =
+        ConfigProvider.getConfig()
+            .getOptionalValue("datacater.connector.sidecar.health-path", String.class)
+            .orElse("/health");
   }
 
   static class LoggerMessages {

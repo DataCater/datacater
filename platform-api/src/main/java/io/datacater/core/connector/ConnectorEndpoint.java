@@ -12,6 +12,9 @@ import io.quarkus.security.Authenticated;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.unchecked.Unchecked;
 import java.io.IOException;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.util.List;
 import java.util.UUID;
 import javax.enterprise.context.RequestScoped;
@@ -146,6 +149,33 @@ public class ConnectorEndpoint {
               }
               return Response.ok().build();
             });
+  }
+
+  @GET
+  @Path("{uuid}/health")
+  public Uni<Response> getHealth(@PathParam("uuid") UUID connectorId) {
+    return dsf.withTransaction(
+            ((session, transaction) -> session.find(ConnectorEntity.class, connectorId)))
+        .onItem()
+        .ifNull()
+        .failWith(new ConnectorNotFoundException(StaticConfig.LoggerMessages.CONNECTOR_NOT_FOUND))
+        .onItem()
+        .ifNotNull()
+        .transform(
+            Unchecked.function(
+                deployment -> {
+                  HttpClient httpClient = HttpClient.newHttpClient();
+                  HttpRequest req = connectorsUtil.buildConnectorServiceRequest(connectorId);
+                  HttpResponse<String> response =
+                      httpClient.send(req, HttpResponse.BodyHandlers.ofString());
+
+                  if (response.statusCode()
+                      > Response.Status.INTERNAL_SERVER_ERROR.getStatusCode()) {
+                    throw new UnhealthyConnectorException(response.body());
+                  }
+
+                  return Response.ok().entity(response.body()).build();
+                }));
   }
 
   @DELETE

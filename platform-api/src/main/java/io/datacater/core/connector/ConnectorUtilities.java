@@ -12,6 +12,9 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
@@ -87,5 +90,23 @@ public class ConnectorUtilities {
     }
     is.close();
     lw.close();
+  }
+
+  public HttpRequest buildConnectorServiceRequest(UUID deploymentId) {
+    K8Deployment k8Deployment = new K8Deployment(client);
+    String ip = k8Deployment.getConnectorPodIp(deploymentId).replace(".", "-");
+    String namespace = StaticConfig.EnvironmentVariables.NAMESPACE;
+    int port = StaticConfig.EnvironmentVariables.CONCON_SIDECAR_HTTP_PORT;
+    String protocol = StaticConfig.EnvironmentVariables.CONCON_SIDECAR_HTTP_PROTOCOL;
+    String path = StaticConfig.EnvironmentVariables.CONNECTOR_HEALTH_PATH;
+
+    String uriReady =
+        String.format("%s://%s.%s.pod.cluster.local:%d%s", protocol, ip, namespace, port, path);
+
+    return HttpRequest.newBuilder()
+        .GET()
+        .version(HttpClient.Version.HTTP_1_1)
+        .uri(URI.create(uriReady))
+        .build();
   }
 }

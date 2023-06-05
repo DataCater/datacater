@@ -178,6 +178,17 @@ class DatacaterConnectorEndpointTest {
 
   @Test
   @Order(10)
+  void testGetUnknownConnectorHealth() {
+    given()
+        .pathParam("uuid", UUID.randomUUID())
+        .baseUri(baseURI)
+        .get(connectorsPath + "/{uuid}/health")
+        .then()
+        .statusCode(404);
+  }
+
+  @Test
+  @Order(11)
   void testDeleteUnknownConnector() {
     given()
         .contentType(ContentType.JSON)
@@ -189,7 +200,7 @@ class DatacaterConnectorEndpointTest {
   }
 
   @Test
-  @Order(11)
+  @Order(12)
   void testCreateConnectorWithNoStream() throws IOException {
     String connectorPath = "connectorTests/connector_without_stream.json";
 
@@ -210,7 +221,7 @@ class DatacaterConnectorEndpointTest {
   }
 
   @Test
-  @Order(11)
+  @Order(13)
   void testCreateConnectorWithNoImage() throws IOException {
     String connectorPath = "connectorTests/connector_without_image.json";
     String streamPath = "connectorTests/stream.json";
@@ -247,7 +258,7 @@ class DatacaterConnectorEndpointTest {
   }
 
   @Test
-  @Order(12)
+  @Order(14)
   void testCreateConnectorWithNoConfig() throws IOException {
     String connectorPath = "connectorTests/connector_without_config.json";
     String streamPath = "connectorTests/stream.json";
@@ -287,7 +298,7 @@ class DatacaterConnectorEndpointTest {
   }
 
   @Test
-  @Order(13)
+  @Order(15)
   void testCreateConnectorWithEmptySpec() throws IOException {
     String connectorPath = "connectorTests/connector_with_empty_spec.json";
 
