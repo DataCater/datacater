@@ -84,4 +84,8 @@ public class DeploymentEntity {
   public JsonNode getConfigSelector() {
     return configSelector;
   }
+
+  public String getName() {
+    return this.name;
+  }
 }

@@ -17,8 +17,7 @@ import java.io.*;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.ws.rs.*;
@@ -171,10 +170,21 @@ public class DeploymentEndpoint {
   }
 
   @GET
-  public Uni<List<DeploymentEntity>> getDeployments() {
-    return dsf.withSession(
-        session ->
-            session.createQuery("from DeploymentEntity", DeploymentEntity.class).getResultList());
+  public Uni<List<DeploymentEntity>> getDeployments(
+      @QueryParam("in-cluster") @DefaultValue("false") boolean inCluster) {
+    if (!inCluster) {
+      return dsf.withSession(
+          session ->
+              session.createQuery("from DeploymentEntity", DeploymentEntity.class).getResultList());
+    }
+
+    return dsf.withTransaction(
+            (session, transaction) ->
+                session
+                    .createQuery("from DeploymentEntity", DeploymentEntity.class)
+                    .getResultList())
+        .onItem()
+        .transform(deploymentsUtil::mergeDeploymentEntitiesWithCluster);
   }
 
   @POST
