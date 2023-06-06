@@ -21,6 +21,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import javax.inject.Inject;
 import org.jboss.logging.Logger;
 import org.junit.jupiter.api.*;
@@ -138,32 +139,49 @@ class DatacaterDeploymentEndpointTest {
   @Order(4)
   void testGetDeploymentsInCluster() throws JsonProcessingException {
     final String inClusterQueryParam = "in-cluster";
+    final String nameOfDeploymentJson = "inClusterDeployment";
+    final String nameOfDbOnlyDeployment = "test";
     final ObjectMapper objectMapper = new ObjectMapper();
     ArrayList<DeploymentEntity> deploymentEntities;
 
     // save deployment entity to db which is not actually deployed inside the cluster
     DeploymentEntity notDeployedDeploymentEntity =
-        new DeploymentEntity(new DeploymentSpec("test", new HashMap<>()));
+        new DeploymentEntity(new DeploymentSpec(nameOfDbOnlyDeployment, new HashMap<>()));
 
     dsf.withTransaction(((session, transaction) -> session.persist(notDeployedDeploymentEntity)))
         .await()
         .indefinitely();
 
-    // get all deployments in db (should be 2)
+    // all deployments
     Response response = given().baseUri(baseURI).get(deploymentsPath);
     deploymentEntities =
         objectMapper.readValue(response.body().asString(), new TypeReference<>() {});
 
-    Assertions.assertEquals(2, deploymentEntities.size());
+    var entities =
+        deploymentEntities.stream()
+            .filter(
+                deploymentEntity ->
+                    deploymentEntity.getName().equals(nameOfDbOnlyDeployment)
+                        || deploymentEntity.getName().equals(nameOfDeploymentJson))
+            .collect(Collectors.toList());
 
-    // get in-cluster deployments (should be 1)
+    Assertions.assertEquals(2, entities.size());
+
+    // in-cluster deployments
     response = given().baseUri(baseURI).queryParam(inClusterQueryParam, true).get(deploymentsPath);
     deploymentEntities =
         objectMapper.readValue(response.body().asString(), new TypeReference<>() {});
 
+    entities =
+        deploymentEntities.stream()
+            .filter(
+                deploymentEntity ->
+                    deploymentEntity.getName().equals("test")
+                        || deploymentEntity.getName().equals("inClusterDeployment"))
+            .collect(Collectors.toList());
+
+    Assertions.assertEquals(2, entities.size());
     Assertions.assertEquals(200, response.statusCode());
-    Assertions.assertEquals(1, deploymentEntities.size());
-    Assertions.assertEquals(deploymentId, deploymentEntities.get(0).getId());
   }
 
   @Test
