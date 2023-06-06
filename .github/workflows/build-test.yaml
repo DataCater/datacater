@@ -96,12 +96,12 @@ jobs       :
     -   name: Test pre-defined transforms with pytest
         run: |
           pytest transforms
-    -  name: Upload platform-api coverage
-       if: always()
-       uses: actions/upload-artifact@v3
-       with:
-         name: platform-api-coverage-report
-         path: /home/runner/work/datacater/datacater/platform-api/build/reports/tests/test/
+    -   name: Upload platform-api coverage
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: platform-api-coverage-report
+          path: /home/runner/work/datacater/datacater/platform-api/build/reports/tests/test/
   push:
     if: github.ref_name == 'main' || github.ref_type == 'tag' || github.base_ref == 'main'
     name: Build and push datacater image
