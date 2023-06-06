@@ -3,9 +3,12 @@ package io.datacater.core.connector;
 import io.datacater.core.config.ConfigEntity;
 import io.datacater.core.config.ConfigUtilities;
 import io.datacater.core.exceptions.ConnectorNotFoundException;
+import io.datacater.core.exceptions.DeploymentNotFoundException;
 import io.datacater.core.stream.StreamEntity;
 import io.datacater.core.utilities.LoggerUtilities;
+import io.fabric8.kubernetes.api.model.apps.Deployment;
 import io.fabric8.kubernetes.client.KubernetesClient;
+import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.kubernetes.client.dsl.ContainerResource;
 import io.fabric8.kubernetes.client.dsl.LogWatch;
 import java.io.BufferedReader;
@@ -108,5 +111,26 @@ public class ConnectorUtilities {
         .version(HttpClient.Version.HTTP_1_1)
         .uri(URI.create(uriReady))
         .build();
+  }
+
+  public Deployment getDeploymentObject(UUID connectorId) throws KubernetesClientException {
+    try {
+      List<Deployment> matchingDeployments =
+          client
+              .apps()
+              .deployments()
+              .inNamespace(StaticConfig.EnvironmentVariables.NAMESPACE)
+              .withLabel(StaticConfig.UUID_TEXT, connectorId.toString())
+              .list()
+              .getItems();
+
+      if (matchingDeployments.isEmpty()) {
+        throw new DeploymentNotFoundException(StaticConfig.LoggerMessages.K8_DEPLOYMENT_NOT_FOUND);
+      }
+
+      return matchingDeployments.get(0);
+    } catch (KubernetesClientException e) {
+      throw new DeploymentNotFoundException(e.getMessage());
+    }
   }
 }

@@ -1,4 +1,4 @@
-package io.datacater.core.deployment;
+package io.datacater.core.kubernetes;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.fabric8.kubernetes.api.model.apps.Deployment;

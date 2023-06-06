@@ -4,6 +4,7 @@ import com.fasterxml.jackson.jaxrs.yaml.YAMLMediaTypes;
 import io.datacater.core.authentication.DataCaterSessionFactory;
 import io.datacater.core.config.ConfigUtilities;
 import io.datacater.core.exceptions.*;
+import io.datacater.core.kubernetes.DataCaterDeploymentStatus;
 import io.datacater.core.pipeline.PipelineUtilities;
 import io.datacater.core.stream.StreamUtilities;
 import io.datacater.core.utilities.LoggerUtilities;

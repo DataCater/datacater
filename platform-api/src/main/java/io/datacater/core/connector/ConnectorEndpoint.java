@@ -4,9 +4,11 @@ import com.fasterxml.jackson.jaxrs.yaml.YAMLMediaTypes;
 import io.datacater.core.authentication.DataCaterSessionFactory;
 import io.datacater.core.config.ConfigUtilities;
 import io.datacater.core.exceptions.*;
+import io.datacater.core.kubernetes.DataCaterDeploymentStatus;
 import io.datacater.core.stream.StreamUtilities;
 import io.datacater.core.utilities.LoggerUtilities;
 import io.datacater.core.utilities.StringUtilities;
+import io.fabric8.kubernetes.api.model.apps.Deployment;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.quarkus.security.Authenticated;
 import io.smallrye.mutiny.Uni;
@@ -176,6 +178,23 @@ public class ConnectorEndpoint {
 
                   return Response.ok().entity(response.body()).build();
                 }));
+  }
+
+  @GET
+  @Path("{uuid}/status")
+  public Uni<DataCaterDeploymentStatus> getStatusByUuid(@PathParam("uuid") UUID connectorId) {
+    return dsf.withTransaction(
+            ((session, transaction) -> session.find(ConnectorEntity.class, connectorId)))
+        .onItem()
+        .ifNull()
+        .failWith(new ConnectorNotFoundException(StaticConfig.LoggerMessages.CONNECTOR_NOT_FOUND))
+        .onItem()
+        .ifNotNull()
+        .transform(
+            connectorEntity -> {
+              Deployment deployment = connectorsUtil.getDeploymentObject(connectorId);
+              return DataCaterDeploymentStatus.from(deployment);
+            });
   }
 
   @DELETE
