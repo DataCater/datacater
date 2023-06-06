@@ -180,7 +180,7 @@ class DatacaterDeploymentEndpointTest {
                         || deploymentEntity.getName().equals("inClusterDeployment"))
             .collect(Collectors.toList());
 
-    Assertions.assertEquals(2, entities.size());
+    Assertions.assertEquals(1, entities.size());
     Assertions.assertEquals(200, response.statusCode());
   }
 

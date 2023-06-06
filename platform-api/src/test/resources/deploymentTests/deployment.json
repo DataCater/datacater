@@ -1,6 +1,6 @@
 {
+  "name" : "inClusterDeployment",
   "spec": {
-      "name" : "inClusterDeployment",
       "pipeline": "pipelineUUIDPlaceholder"
   }
 }
