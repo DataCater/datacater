@@ -187,7 +187,7 @@ The following sections will outline
 
 ### What information should be logged.
 #### Unknown-Error Log Message
-These types of messages are things such as an unexpected exception was thrown, which should 
+These types of messages are things such as an unexpected exception was thrown, which should
 provider relative information and context on the exception.
 The following questions should be answered with these log messages.
 - What error happened
@@ -226,16 +226,16 @@ Information doesn't need to be logged everywhere in the application.
   "timestamp": "2021-11-03T20:44:08.460Z"
 }
 ```
-just doesn't need to pop up in the application logs. 
+just doesn't need to pop up in the application logs.
 Information SHOULD be logged when it could potentially provide extra context when an error occurs.
 
 Some examples of when to log information:
 - An unexpected exception has occurred (e.g. a timeout exception)
   - Provide more context: Where did the timeout occur? What data payload caused the timeout?
 - Authentication Exception (don't log an unauthorized exception, don't log because of incorrect credentials)
-  - Provide more context: What provider was used? 
+  - Provide more context: What provider was used?
 - Too many failed attempts
-  - You have a process that sometimes fails because a service hasn't started yet so your code 
+  - You have a process that sometimes fails because a service hasn't started yet so your code
      retries periodically. After `X`-amount of attempt a message could be logged, since the service
      might actually be unavailable.
 
@@ -249,14 +249,14 @@ some example of when to NOT log information:
 ### How information should be logged.
 #### Log in JSON Format
 We should aim to always log messages in JSON format. JSON format is not only easily user readable
-it also allows for seamless integrations with external log management tools for extra flexibility 
+it also allows for seamless integrations with external log management tools for extra flexibility
 and a higher observability.
 The logging framework we use at DataCater automatically appends the logger messages into JSON format.
 
 
 #### Use the correct logging level:
-Using the correct logging levels gives a much better context when manually handling error 
-or debugging processes. It allows for a developer to filter by error type 
+Using the correct logging levels gives a much better context when manually handling error
+or debugging processes. It allows for a developer to filter by error type
 FATAL - Critical service failure. These errors will block the application from further processing any requests.
 ERROR - disruption in a request or the ability to service a request. These errors indicate a problem in the software, without knowing what the actual error was. Otherwise, the error should be handled accordingly.
 WARN - non-critical service error. These errors are non-critical but could be useful information for making improvements.
