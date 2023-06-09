@@ -330,13 +330,14 @@ class EditStream extends Component {
               <i>name</i> of existing streams. Please create a new stream
               instead.
             </span>
-            <button
+            <a
               className="fs-7"
+              href="/streams/new"
               onClick={this.toggleShowTopicConfig}
             >
               {!this.state.showTopicConfig && "Edit topic config"}
               {this.state.showTopicConfig && "Hide topic config"}
-            </button>
+            </a>
           </label>
           <input
             type="text"
