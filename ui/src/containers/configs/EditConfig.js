@@ -404,15 +404,14 @@ class EditConfig extends Component {
                     <div className="col-12 mt-2" key={label}>
                       <label htmlFor={label} className="form-label">
                         Key: {label}
-                        <a
+                        <button
                           className="ms-2 fs-7"
                           data-label={label}
                           data-prefix="metadata.labels"
-                          href="#"
                           onClick={this.removeLabel}
                         >
                           Remove label
-                        </a>
+                        </button>
                       </label>
                       <input
                         type="text"

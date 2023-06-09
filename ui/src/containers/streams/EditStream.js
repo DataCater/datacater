@@ -703,15 +703,14 @@ class EditStream extends Component {
           <div className="col-12 mt-2" key={label}>
             <label htmlFor={label} className="form-label">
               {label}
-              <a
+              <button
                 className="ms-2 fs-7"
                 data-label={label}
                 data-prefix="configSelector"
-                href="#"
                 onClick={this.removeLabel}
               >
                 Remove config selector
-              </a>
+              </button>
             </label>
             <input
               type="text"

@@ -94,46 +94,42 @@ class Attribute extends Component {
         <ul className="nav nav-tabs">
           <li className="nav-item">
             {this.state.currentTab === "transform" && (
-              <a
+              <button
                 className="nav-link active text-black fw-bold"
                 aria-current="page"
-                href="#"
               >
                 Transform
-              </a>
+              </button>
             )}
             {this.state.currentTab !== "transform" && (
-              <a
+              <button
                 onClick={this.selectTab}
                 data-tab="transform"
                 className="nav-link"
                 aria-current="page"
-                href="#"
               >
                 Transform
-              </a>
+              </button>
             )}
           </li>
           <li className="nav-item">
             {this.state.currentTab === "filter" && (
-              <a
+              <button
                 className="nav-link active text-black fw-bold"
                 aria-current="page"
-                href="#"
               >
                 Filter
-              </a>
+              </button>
             )}
             {this.state.currentTab !== "filter" && (
-              <a
+              <button
                 onClick={this.selectTab}
                 data-tab="filter"
                 className="nav-link"
                 aria-current="page"
-                href="#"
               >
                 Filter
-              </a>
+              </button>
             )}
           </li>
         </ul>
