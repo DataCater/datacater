@@ -151,14 +151,13 @@ class NewStream extends Component {
               Name of the Apache Kafka topic. If the topic does not yet exist on
               the broker, we will automatically create it.
             </span>
-            <a
+            <button
               className="fs-7"
-              href="/streams/new"
               onClick={this.toggleShowTopicConfig}
             >
               {!this.state.showTopicConfig && "Edit topic config"}
               {this.state.showTopicConfig && "Hide topic config"}
-            </a>
+            </button>
           </label>
           <input
             type="text"
@@ -178,13 +177,12 @@ class NewStream extends Component {
                   <h5 className="fw-semibold d-inline mb-0">
                     Topic configuration
                   </h5>
-                  <a
+                  <button
                     className="fs-7 ms-2"
-                    href="/streams/new"
                     onClick={this.toggleShowTopicConfig}
                   >
                     Hide
-                  </a>
+                  </button>
                 </div>
                 <div className="col-12 mt-2">
                   <label htmlFor="num.partitions" className="form-label">
@@ -227,15 +225,14 @@ class NewStream extends Component {
                   <div className="col-12 mt-2" key={topicConfig}>
                     <label htmlFor={topicConfig} className="form-label">
                       {topicConfig}
-                      <a
+                      <button
                         className="ms-2 fs-7"
                         data-config={topicConfig}
                         data-prefix="spec.kafka.topic.config"
-                        href="/streams/new"
                         onClick={this.removeConfig}
                       >
                         Remove
-                      </a>
+                      </button>
                     </label>
                     <input
                       type="text"
@@ -293,14 +290,13 @@ class NewStream extends Component {
                       />
                     </div>
                     <div className="col-md-3 d-flex align-items-end">
-                      <a
-                        href="/streams/new"
+                      <button
                         className="btn btn-outline-primary"
                         data-prefix="spec.kafka.topic.config"
                         onClick={this.addConfig}
                       >
                         Add
-                      </a>
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -412,15 +408,14 @@ class NewStream extends Component {
           <div className="col-12 mt-2" key={connectionConfig}>
             <label htmlFor={connectionConfig} className="form-label">
               {connectionConfig}
-              <a
+              <button
                 className="ms-2 fs-7"
                 data-config={connectionConfig}
                 data-prefix="spec.kafka"
-                href="/streams/new"
                 onClick={this.removeConfig}
               >
                 Remove
-              </a>
+              </button>
             </label>
             <input
               type="text"
@@ -478,14 +473,13 @@ class NewStream extends Component {
               />
             </div>
             <div className="col-md-3 d-flex align-items-end">
-              <a
-                href="/streams/new"
+              <button
                 className="btn btn-outline-primary"
                 data-prefix="spec.kafka"
                 onClick={this.addConfig}
               >
                 Add
-              </a>
+              </button>
             </div>
           </div>
         </div>
@@ -504,15 +498,14 @@ class NewStream extends Component {
           <div className="col-12 mt-2" key={label}>
             <label htmlFor={label} className="form-label">
               Key: {label}
-              <a
+              <button
                 className="ms-2 fs-7"
                 data-label={label}
                 data-prefix="configSelector"
-                href="/streams/new"
                 onClick={this.removeLabel}
               >
                 Remove config selector
-              </a>
+              </button>
             </label>
             <input
               type="text"
@@ -552,14 +545,13 @@ class NewStream extends Component {
               />
             </div>
             <div className="col-md-3 d-flex align-items-end">
-              <a
-                href="/streams/new"
+              <button
                 className="btn btn-outline-primary"
                 data-prefix="configSelector"
                 onClick={this.addLabel}
               >
                 Add
-              </a>
+              </button>
             </div>
           </div>
         </div>
@@ -772,13 +764,12 @@ class NewStream extends Component {
             </div>
           )}
           <div className="col-12 my-4">
-            <a
-              href="/streams/new"
+            <button
               className="btn btn-primary text-white"
               onClick={this.handleCreateStream}
             >
               Create stream
-            </a>
+            </button>
             <button
               className="btn btn-outline-primary ms-2"
               onClick={this.toggleForm}

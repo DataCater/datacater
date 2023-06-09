@@ -330,14 +330,13 @@ class EditStream extends Component {
               <i>name</i> of existing streams. Please create a new stream
               instead.
             </span>
-            <a
+            <button
               className="fs-7"
-              href="/streams/new"
               onClick={this.toggleShowTopicConfig}
             >
               {!this.state.showTopicConfig && "Edit topic config"}
               {this.state.showTopicConfig && "Hide topic config"}
-            </a>
+            </button>
           </label>
           <input
             type="text"
@@ -357,13 +356,12 @@ class EditStream extends Component {
                   <h5 className="fw-semibold d-inline mb-0">
                     Topic configuration
                   </h5>
-                  <a
+                  <button
                     className="fs-7 ms-2"
-                    href="/streams/new"
                     onClick={this.toggleShowTopicConfig}
                   >
                     Hide
-                  </a>
+                  </button>
                 </div>
                 <div className="col-12 mt-2">
                   <label htmlFor="num.partitions" className="form-label">
@@ -418,15 +416,14 @@ class EditStream extends Component {
                   <div className="col-12 mt-2" key={topicConfig}>
                     <label htmlFor={topicConfig} className="form-label">
                       {topicConfig}
-                      <a
+                      <button
                         className="ms-2 fs-7"
                         data-config={topicConfig}
                         data-prefix="spec.kafka.topic.config"
-                        href="/streams/new"
                         onClick={this.removeConfig}
                       >
                         Remove
-                      </a>
+                      </button>
                     </label>
                     <input
                       type="text"
@@ -484,14 +481,13 @@ class EditStream extends Component {
                       />
                     </div>
                     <div className="col-md-3 d-flex align-items-end">
-                      <a
-                        href="/streams/new"
+                      <button
                         className="btn btn-outline-primary"
                         data-prefix="spec.kafka.topic.config"
                         onClick={this.addConfig}
                       >
                         Add
-                      </a>
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -611,15 +607,14 @@ class EditStream extends Component {
           <div className="col-12 mt-2" key={connectionConfig}>
             <label htmlFor={connectionConfig} className="form-label">
               {connectionConfig}
-              <a
+              <button
                 className="ms-2 fs-7"
                 data-config={connectionConfig}
                 data-prefix="spec.kafka"
-                href="/streams/new"
                 onClick={this.removeConfig}
               >
                 Remove
-              </a>
+              </button>
             </label>
             <input
               type="text"
@@ -677,14 +672,13 @@ class EditStream extends Component {
               />
             </div>
             <div className="col-md-3 d-flex align-items-end">
-              <a
-                href="/streams/new"
+              <button
                 className="btn btn-outline-primary"
                 data-prefix="spec.kafka"
                 onClick={this.addConfig}
               >
                 Add
-              </a>
+              </button>
             </div>
           </div>
         </div>
@@ -750,14 +744,13 @@ class EditStream extends Component {
               />
             </div>
             <div className="col-md-3 d-flex align-items-end">
-              <a
-                href="/streams/new"
+              <button
                 className="btn btn-outline-primary"
                 data-prefix="configSelector"
                 onClick={this.addLabel}
               >
                 Add
-              </a>
+              </button>
             </div>
           </div>
         </div>

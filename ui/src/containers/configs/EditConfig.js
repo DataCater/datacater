@@ -457,14 +457,13 @@ class EditConfig extends Component {
                       />
                     </div>
                     <div className="col-md-3 d-flex align-items-end">
-                      <a
-                        href="/configs/new"
+                      <button
                         className="btn btn-outline-primary"
                         data-prefix="metadata.labels"
                         onClick={this.addLabel}
                       >
                         Add
-                      </a>
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -538,15 +537,14 @@ class EditConfig extends Component {
                       <div className="col-12 mt-2" key={topicConfig}>
                         <label htmlFor={topicConfig} className="form-label">
                           {topicConfig}
-                          <a
+                          <button
                             className="ms-2 fs-7"
                             data-config={topicConfig}
                             data-prefix="stream.spec.kafka.topic.config"
-                            href="/configs/new"
                             onClick={this.removeStreamConfig}
                           >
                             Remove
-                          </a>
+                          </button>
                         </label>
                         <input
                           type="text"
@@ -607,14 +605,13 @@ class EditConfig extends Component {
                           />
                         </div>
                         <div className="col-md-3 d-flex align-items-end">
-                          <a
-                            href="/configs/new"
+                          <button
                             className="btn btn-outline-primary"
                             data-prefix="stream.spec.kafka.topic.config"
                             onClick={this.addStreamConfig}
                           >
                             Add
-                          </a>
+                          </button>
                         </div>
                       </div>
                     </div>
@@ -752,15 +749,14 @@ class EditConfig extends Component {
                           className="form-label"
                         >
                           {connectionConfig}
-                          <a
+                          <button
                             className="ms-2 fs-7"
                             data-config={connectionConfig}
                             data-prefix="stream.spec.kafka"
-                            href="/configs/new"
                             onClick={this.removeStreamConfig}
                           >
                             Remove
-                          </a>
+                          </button>
                         </label>
                         <input
                           type="text"
@@ -828,14 +824,13 @@ class EditConfig extends Component {
                           />
                         </div>
                         <div className="col-md-3 d-flex align-items-end">
-                          <a
-                            href="/configs/new"
+                          <button
                             className="btn btn-outline-primary"
                             data-prefix="stream.spec.kafka"
                             onClick={this.addStreamConfig}
                           >
                             Add
-                          </a>
+                          </button>
                         </div>
                       </div>
                     </div>
