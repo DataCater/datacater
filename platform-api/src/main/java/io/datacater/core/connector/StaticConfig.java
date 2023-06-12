@@ -1,8 +1,7 @@
 package io.datacater.core.connector;
 
 import io.fabric8.kubernetes.api.model.Quantity;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import org.eclipse.microprofile.config.ConfigProvider;
 
 public class StaticConfig {
@@ -66,6 +65,10 @@ public class StaticConfig {
   static class EnvironmentVariables {
     private EnvironmentVariables() {}
 
+    static final List<String> CONNECTOR_TYPES_TO_LOAD =
+        ConfigProvider.getConfig()
+            .getOptionalValues("datacater.connector.types.load", String.class)
+            .orElse(List.of());
     static final String NAMESPACE =
         ConfigProvider.getConfig()
             .getOptionalValue("datacater.connector.namespace", String.class)

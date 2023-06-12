@@ -20,14 +20,14 @@ import org.jboss.logging.Logger;
 
 @Singleton
 public class ConnectorTypeInitializer {
-
   private static final Logger LOGGER = Logger.getLogger(ConnectorTypeInitializer.class);
   private final List<ConnectorType> loadedConnectorTypes = new ArrayList<>();
+  private final String JAR_CONNECTOR_TYPE_DIRECTORY = "connector_types";
 
   void onStart(@Observes StartupEvent startupEvent) {
     Path packagedConnectorTypes;
     var connectorTypes =
-        Thread.currentThread().getContextClassLoader().getResource("connector_types");
+        Thread.currentThread().getContextClassLoader().getResource(JAR_CONNECTOR_TYPE_DIRECTORY);
     try {
       Objects.requireNonNull(connectorTypes);
       packagedConnectorTypes = Paths.get(connectorTypes.toURI());
@@ -40,8 +40,15 @@ public class ConnectorTypeInitializer {
           npe);
     }
 
-    File connectorTypesDirectory = packagedConnectorTypes.toFile();
-    loadedConnectorTypes.addAll(getConnectorTypesFromDirectory(connectorTypesDirectory));
+    File jarConnectorTypes = packagedConnectorTypes.toFile();
+    List<File> nonJarConnectorTypes =
+        StaticConfig.EnvironmentVariables.CONNECTOR_TYPES_TO_LOAD.stream()
+            .map(stringPath -> Paths.get(stringPath).toFile())
+            .toList();
+    loadedConnectorTypes.addAll(getConnectorTypesFromDirectory(jarConnectorTypes));
+    for (File nonJarConnectorType : nonJarConnectorTypes) {
+      loadedConnectorTypes.addAll(getConnectorTypesFromDirectory(nonJarConnectorType));
+    }
     List<String> types = loadedConnectorTypes.stream().map(ConnectorType::name).toList();
     LOGGER.info("Loaded ConnectorTypes: [ " + String.join(",", types) + " ].");
   }
