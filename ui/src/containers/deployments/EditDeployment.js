@@ -323,14 +323,14 @@ class EditDeployment extends Component {
           <div className="col-12 mt-2" key={label}>
             <label htmlFor={label} className="form-label">
               Key: {label}
-              <button
-                className="ms-2 fs-7"
+              <span
+                className="text-primary text-decoration-underline clickable ms-2 fs-7"
                 data-label={label}
                 data-prefix="configSelector"
                 onClick={this.removeLabel}
               >
                 Remove config selector
-              </button>
+              </span>
             </label>
             <input
               type="text"

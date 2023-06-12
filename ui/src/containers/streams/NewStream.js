@@ -178,12 +178,12 @@ class NewStream extends Component {
                   <h5 className="fw-semibold d-inline mb-0">
                     Topic configuration
                   </h5>
-                  <button
-                    className="fs-7 ms-2"
+                  <span
+                    className="text-primary text-decoration-underline clickable fs-7 ms-2"
                     onClick={this.toggleShowTopicConfig}
                   >
                     Hide
-                  </button>
+                  </span>
                 </div>
                 <div className="col-12 mt-2">
                   <label htmlFor="num.partitions" className="form-label">
@@ -226,14 +226,14 @@ class NewStream extends Component {
                   <div className="col-12 mt-2" key={topicConfig}>
                     <label htmlFor={topicConfig} className="form-label">
                       {topicConfig}
-                      <button
-                        className="ms-2 fs-7"
+                      <span
+                        className="text-primary text-decoration-underline clickable ms-2 fs-7"
                         data-config={topicConfig}
                         data-prefix="spec.kafka.topic.config"
                         onClick={this.removeConfig}
                       >
                         Remove
-                      </button>
+                      </span>
                     </label>
                     <input
                       type="text"
@@ -409,14 +409,14 @@ class NewStream extends Component {
           <div className="col-12 mt-2" key={connectionConfig}>
             <label htmlFor={connectionConfig} className="form-label">
               {connectionConfig}
-              <button
-                className="ms-2 fs-7"
+              <span
+                className="text-primary text-decoration-underline clickable ms-2 fs-7"
                 data-config={connectionConfig}
                 data-prefix="spec.kafka"
                 onClick={this.removeConfig}
               >
                 Remove
-              </button>
+              </span>
             </label>
             <input
               type="text"
@@ -499,14 +499,14 @@ class NewStream extends Component {
           <div className="col-12 mt-2" key={label}>
             <label htmlFor={label} className="form-label">
               Key: {label}
-              <button
-                className="ms-2 fs-7"
+              <span
+                className="text-primary text-decoration-underline clickable ms-2 fs-7"
                 data-label={label}
                 data-prefix="configSelector"
                 onClick={this.removeLabel}
               >
                 Remove config selector
-              </button>
+              </span>
             </label>
             <input
               type="text"

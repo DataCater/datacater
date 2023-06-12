@@ -10,7 +10,7 @@ class Tabs extends Component {
           <>
             <li className="nav-item">
               <button
-                className="nav-link active"
+                className="nav-link w-100 text-start active"
                 data-tab="config"
                 onClick={updateTabFunc}
               >
@@ -19,7 +19,7 @@ class Tabs extends Component {
             </li>
             <li className="nav-item mt-2">
               <button
-                className="nav-link"
+                className="nav-link w-100 text-start"
                 data-tab="spec"
                 onClick={updateTabFunc}
               >
@@ -32,7 +32,7 @@ class Tabs extends Component {
           <>
             <li className="nav-item">
               <button
-                className="nav-link"
+                className="nav-link w-100 text-start"
                 data-tab="config"
                 onClick={updateTabFunc}
               >
@@ -41,7 +41,7 @@ class Tabs extends Component {
             </li>
             <li className="nav-item mt-2">
               <button
-                className="nav-link active"
+                className="nav-link w-100 text-start active"
                 data-tab="spec"
                 onClick={updateTabFunc}
               >

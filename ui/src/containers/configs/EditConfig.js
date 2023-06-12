@@ -404,14 +404,14 @@ class EditConfig extends Component {
                     <div className="col-12 mt-2" key={label}>
                       <label htmlFor={label} className="form-label">
                         Key: {label}
-                        <button
-                          className="ms-2 fs-7"
+                        <span
+                          className="text-primary text-decoration-underline clickable ms-2 fs-7"
                           data-label={label}
                           data-prefix="metadata.labels"
                           onClick={this.removeLabel}
                         >
                           Remove label
-                        </button>
+                        </span>
                       </label>
                       <input
                         type="text"
@@ -537,14 +537,14 @@ class EditConfig extends Component {
                       <div className="col-12 mt-2" key={topicConfig}>
                         <label htmlFor={topicConfig} className="form-label">
                           {topicConfig}
-                          <button
-                            className="ms-2 fs-7"
+                          <span
+                            className="text-primary text-decoration-underline clickable ms-2 fs-7"
                             data-config={topicConfig}
                             data-prefix="stream.spec.kafka.topic.config"
                             onClick={this.removeStreamConfig}
                           >
                             Remove
-                          </button>
+                          </span>
                         </label>
                         <input
                           type="text"
@@ -749,14 +749,14 @@ class EditConfig extends Component {
                           className="form-label"
                         >
                           {connectionConfig}
-                          <button
-                            className="ms-2 fs-7"
+                          <span
+                            className="text-primary text-decoration-underline clickable ms-2 fs-7"
                             data-config={connectionConfig}
                             data-prefix="stream.spec.kafka"
                             onClick={this.removeStreamConfig}
                           >
                             Remove
-                          </button>
+                          </span>
                         </label>
                         <input
                           type="text"
