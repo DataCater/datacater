@@ -244,10 +244,9 @@ class StepsList extends Component {
           </button>
           <ul className="dropdown-menu">
             <li>
-              <a
+              <button
                 className="dropdown-item"
                 data-step-kind="Field"
-                href="#"
                 onClick={this.props.addStepFunc}
               >
                 Transform single fields
@@ -257,13 +256,12 @@ class StepsList extends Component {
                 >
                   Kind: Field
                 </span>
-              </a>
+              </button>
             </li>
             <li>
-              <a
+              <button
                 className="dropdown-item"
                 data-step-kind="Record"
-                href="#"
                 onClick={this.props.addStepFunc}
               >
                 Transform record
@@ -273,7 +271,7 @@ class StepsList extends Component {
                 >
                   Kind: Record
                 </span>
-              </a>
+              </button>
             </li>
           </ul>
         </div>

@@ -78,65 +78,59 @@ class DebugView extends Component {
           <ul className="nav nav-tabs mb-3">
             <li className="nav-item">
               {this.state.tab === "error" && (
-                <a
+                <button
                   className="nav-link active text-black fw-bold"
                   aria-current="error"
-                  href="#"
                 >
                   Error
-                </a>
+                </button>
               )}
               {this.state.tab !== "error" && (
-                <a
+                <button
                   onClick={this.goToTab}
                   data-tab="error"
                   className="nav-link"
-                  href="#"
                 >
                   Error
-                </a>
+                </button>
               )}
             </li>
             <li className="nav-item">
               {this.state.tab === "record" && (
-                <a
+                <button
                   className="nav-link active text-black fw-bold"
                   aria-current="record"
-                  href="#"
                 >
                   Original record
-                </a>
+                </button>
               )}
               {this.state.tab !== "record" && (
-                <a
+                <button
                   onClick={this.goToTab}
                   data-tab="record"
                   className="nav-link"
-                  href="#"
                 >
                   Original record
-                </a>
+                </button>
               )}
             </li>
             <li className="nav-item">
               {this.state.tab === "transform" && (
-                <a
+                <button
                   className="nav-link active text-black fw-bold"
                   aria-current="transform"
-                  href="#"
                 >
                   Failed transform
-                </a>
+                </button>
               )}
               {this.state.tab !== "transform" && (
-                <a
+                <button
                   onClick={this.goToTab}
                   data-tab="transform"
                   className="nav-link"
-                  href="#"
                 >
                   Failed transform
-                </a>
+                </button>
               )}
             </li>
           </ul>

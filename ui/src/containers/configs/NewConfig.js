@@ -391,13 +391,12 @@ class NewConfig extends Component {
           </div>
         )}
         <div className="col-12 mt-4">
-          <a
-            href="/configs/new"
+          <button
             className="btn btn-primary text-white"
             onClick={this.submitEditorContent}
           >
             Create config
-          </a>
+          </button>
           <button
             className="btn btn-outline-primary ms-2"
             onClick={this.toggleForm}
@@ -492,15 +491,14 @@ class NewConfig extends Component {
                     <div className="col-12 mt-2" key={label}>
                       <label htmlFor={label} className="form-label">
                         Key: {label}
-                        <a
-                          className="ms-2 fs-7"
+                        <span
+                          className="text-primary text-decoration-underline clickable ms-2 fs-7"
                           data-label={label}
                           data-prefix="metadata.labels"
-                          href="/configs/new"
                           onClick={this.removeLabel}
                         >
                           Remove label
-                        </a>
+                        </span>
                       </label>
                       <input
                         type="text"
@@ -546,14 +544,13 @@ class NewConfig extends Component {
                       />
                     </div>
                     <div className="col-md-3 d-flex align-items-end">
-                      <a
-                        href="/configs/new"
+                      <button
                         className="btn btn-outline-primary"
                         data-prefix="metadata.labels"
                         onClick={this.addLabel}
                       >
                         Add
-                      </a>
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -624,15 +621,14 @@ class NewConfig extends Component {
                       <div className="col-12 mt-2" key={topicConfig}>
                         <label htmlFor={topicConfig} className="form-label">
                           {topicConfig}
-                          <a
-                            className="ms-2 fs-7"
+                          <span
+                            className="text-primary text-decoration-underline clickable ms-2 fs-7"
                             data-config={topicConfig}
                             data-prefix="stream.spec.kafka.topic.config"
-                            href="/configs/new"
                             onClick={this.removeStreamConfig}
                           >
                             Remove
-                          </a>
+                          </span>
                         </label>
                         <input
                           type="text"
@@ -693,14 +689,13 @@ class NewConfig extends Component {
                           />
                         </div>
                         <div className="col-md-3 d-flex align-items-end">
-                          <a
-                            href="/configs/new"
+                          <button
                             className="btn btn-outline-primary"
                             data-prefix="stream.spec.kafka.topic.config"
                             onClick={this.addStreamConfig}
                           >
                             Add
-                          </a>
+                          </button>
                         </div>
                       </div>
                     </div>
@@ -839,10 +834,9 @@ class NewConfig extends Component {
                         >
                           {connectionConfig}
                           <a
-                            className="ms-2 fs-7"
+                            className="text-primary text-decoration-underline clickable ms-2 fs-7"
                             data-config={connectionConfig}
                             data-prefix="stream.spec.kafka"
-                            href="/configs/new"
                             onClick={this.removeStreamConfig}
                           >
                             Remove
@@ -914,14 +908,13 @@ class NewConfig extends Component {
                           />
                         </div>
                         <div className="col-md-3 d-flex align-items-end">
-                          <a
-                            href="/configs/new"
+                          <button
                             className="btn btn-outline-primary"
                             data-prefix="stream.spec.kafka"
                             onClick={this.addStreamConfig}
                           >
                             Add
-                          </a>
+                          </button>
                         </div>
                       </div>
                     </div>
@@ -985,13 +978,12 @@ class NewConfig extends Component {
               </div>
             )}
             <div className="col-12 mt-4">
-              <a
-                href="/configs/new"
+              <button
                 className="btn btn-primary text-white"
                 onClick={this.handleCreateConfig}
               >
                 Create config
-              </a>
+              </button>
               <button
                 className="btn btn-outline-primary ms-2"
                 onClick={this.toggleForm}

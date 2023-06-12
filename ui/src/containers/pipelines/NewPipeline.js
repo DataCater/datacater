@@ -241,13 +241,12 @@ class NewPipeline extends Component {
             </div>
           )}
           <div className="col-12 mt-4">
-            <a
-              href="/pipelines/new"
+            <button
               className="btn btn-primary text-white"
               onClick={this.handleCreatePipeline}
             >
               Create pipeline
-            </a>
+            </button>
             <button
               className="btn btn-outline-primary ms-2"
               onClick={this.toggleForm}

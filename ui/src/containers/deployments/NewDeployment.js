@@ -306,15 +306,14 @@ class NewDeployment extends Component {
           <div className="col-12 mt-2" key={label}>
             <label htmlFor={label} className="form-label">
               Key: {label}
-              <a
-                className="ms-2 fs-7"
+              <span
+                className="text-primary text-decoration-underline clickable ms-2 fs-7"
                 data-label={label}
                 data-prefix="configSelector"
-                href="/deployments/new"
                 onClick={this.removeLabel}
               >
                 Remove config selector
-              </a>
+              </span>
             </label>
             <input
               type="text"
@@ -354,14 +353,13 @@ class NewDeployment extends Component {
               />
             </div>
             <div className="col-md-3 d-flex align-items-end">
-              <a
-                href="/deployments/new"
+              <button
                 className="btn btn-outline-primary"
                 data-prefix="configSelector"
                 onClick={this.addLabel}
               >
                 Add
-              </a>
+              </button>
             </div>
           </div>
         </div>
@@ -405,13 +403,12 @@ class NewDeployment extends Component {
             </div>
           )}
           <div className="col-12 mt-4">
-            <a
-              href="/deployments/new"
+            <button
               className="btn btn-primary text-white"
               onClick={this.handleCreateDeployment}
             >
               Create deployment
-            </a>
+            </button>
             <button
               className="btn btn-outline-primary ms-2"
               onClick={this.toggleForm}

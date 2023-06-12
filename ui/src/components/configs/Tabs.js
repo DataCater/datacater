@@ -9,48 +9,44 @@ class Tabs extends Component {
         {currentTab === "config" && (
           <>
             <li className="nav-item">
-              <a
-                className="nav-link active"
-                href="#"
+              <button
+                className="nav-link w-100 text-start active"
                 data-tab="config"
                 onClick={updateTabFunc}
               >
                 Config
-              </a>
+              </button>
             </li>
             <li className="nav-item mt-2">
-              <a
-                className="nav-link"
-                href="#"
+              <button
+                className="nav-link w-100 text-start"
                 data-tab="spec"
                 onClick={updateTabFunc}
               >
                 Spec
-              </a>
+              </button>
             </li>
           </>
         )}
         {currentTab === "spec" && (
           <>
             <li className="nav-item">
-              <a
-                className="nav-link"
-                href="#"
+              <button
+                className="nav-link w-100 text-start"
                 data-tab="config"
                 onClick={updateTabFunc}
               >
                 Config
-              </a>
+              </button>
             </li>
             <li className="nav-item mt-2">
-              <a
-                className="nav-link active"
-                href="#"
+              <button
+                className="nav-link w-100 text-start active"
                 data-tab="spec"
                 onClick={updateTabFunc}
               >
                 Spec
-              </a>
+              </button>
             </li>
           </>
         )}

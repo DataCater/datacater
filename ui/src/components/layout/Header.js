@@ -49,13 +49,12 @@ class Header extends Component {
 
               <div className="col-12 col-lg-6 d-flex align-items-center justify-content-lg-end">
                 <div>
-                  <a
-                    href="#"
+                  <button
                     className="btn btn-light"
                     onClick={this.toggleShowApiCall}
                   >
                     {this.state.showApiCall ? "Hide" : "Show"} API call
-                  </a>
+                  </button>
                   {buttons}
                 </div>
               </div>
