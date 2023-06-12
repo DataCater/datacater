@@ -6,6 +6,7 @@ import io.datacater.core.authentication.DataCaterSessionFactory;
 import io.datacater.core.exceptions.DatacaterException;
 import io.datacater.core.exceptions.PipelineNotFoundException;
 import io.datacater.core.kubernetes.DataCaterK8sConfig;
+import io.datacater.core.kubernetes.PythonRunnerPool;
 import io.datacater.core.kubernetes.PythonRunnerPool.NamedPod;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.quarkus.security.Authenticated;
@@ -41,6 +42,7 @@ import org.jboss.logging.Logger;
 @SecurityRequirement(name = "apiToken")
 public class PipelineEndpoint {
 
+  @Inject PythonRunnerPool runnerPool;
   static final Logger LOGGER = Logger.getLogger(PipelineEndpoint.class);
   @Inject PipelineUtilities pipelineUtil;
   @Inject KubernetesClient kubernetesClient;
@@ -111,7 +113,7 @@ public class PipelineEndpoint {
   public Uni<Response> preview(String payload) {
     LOGGER.debug(payload);
     HttpClient httpClient = HttpClient.newHttpClient();
-    Uni<NamedPod> namedPod = pipelineUtil.runnerPool.getPod();
+    Uni<NamedPod> namedPod = runnerPool.getPod();
 
     return namedPod
         .onItem()
