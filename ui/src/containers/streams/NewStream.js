@@ -151,14 +151,14 @@ class NewStream extends Component {
               Name of the Apache Kafka topic. If the topic does not yet exist on
               the broker, we will automatically create it.
             </span>
-            <a
+            <span
               href="/streams/new"
-              className="fs-7"
+              className="text-primary text-decoration-underline clickable fs-7"
               onClick={this.toggleShowTopicConfig}
             >
               {!this.state.showTopicConfig && "Edit topic config"}
               {this.state.showTopicConfig && "Hide topic config"}
-            </a>
+            </span>
           </label>
           <input
             type="text"
