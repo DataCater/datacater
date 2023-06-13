@@ -12,12 +12,16 @@ import { getDeserializerOptions } from "../../helpers/getDeserializerOptions";
 import { getSerializerOptions } from "../../helpers/getSerializerOptions";
 import { isStreamHoldingAvroFormat } from "../../helpers/isStreamHoldingAvroFormat";
 import "../../scss/fonts.scss";
+import "../../scss/button.scss"
+import {ReactComponent as Loader} from "../../loading_spinner.svg";
+
 
 class NewStream extends Component {
   constructor(props) {
     super(props);
 
     this.state = {
+      waitingForCreateStream: false,
       creatingStreamFailed: false,
       payloadEditorChanges: false, // indicate, if the payload editor introduced changes
       payloadEditorCode: "", // payloadEditorCode as string, only valid during editing
@@ -67,6 +71,11 @@ class NewStream extends Component {
     this.addLabel = this.addLabel.bind(this);
     this.removeLabel = this.removeLabel.bind(this);
     this.updateTempLabel = this.updateTempLabel.bind(this);
+  }
+
+  // TODO remove
+  sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
   }
 
   updateTempConfig(field, value) {
@@ -605,7 +614,10 @@ class NewStream extends Component {
     );
   }
 
-  handleCreateStream(event) {
+  async handleCreateStream(event) {
+    this.setState({waitingForCreateStream: true});
+    // TODO remove
+    await this.sleep(2000);
     event.preventDefault();
     if (this.state.showPayloadEditor) {
       this.submitEditorContent();
@@ -620,6 +632,7 @@ class NewStream extends Component {
       parsedEditorStream = JSON.parse(this.state.editorStream);
     } catch (syntaxError) {
       this.setState({
+        waitingForCreateStream: false,
         streamCreated: false,
         errorMessage: syntaxError.message,
       });
@@ -629,11 +642,13 @@ class NewStream extends Component {
       this.props.addStream(parsedEditorStream).then(() => {
         if (this.props.streams.errorMessage !== undefined) {
           this.setState({
+            waitingForCreateStream: false,
             streamCreated: false,
             errorMessage: this.props.streams.errorMessage,
           });
         } else {
           this.setState({
+            waitingForCreateStream: false,
             streamCreated: true,
             errorMessage: "",
           });
@@ -646,11 +661,13 @@ class NewStream extends Component {
     this.props.addStream(this.state.stream).then(() => {
       if (this.props.streams.errorMessage !== undefined) {
         this.setState({
+          waitingForCreateStream: false,
           streamCreated: false,
           errorMessage: this.props.streams.errorMessage,
         });
       } else {
         this.setState({
+          waitingForCreateStream: false,
           streamCreated: true,
           errorMessage: "",
         });
@@ -768,8 +785,11 @@ class NewStream extends Component {
             <button
               className="btn btn-primary text-white"
               onClick={this.handleCreateStream}
+              disabled={this.state.waitingForCreateStream}
             >
-              Create stream
+              {this.state.waitingForCreateStream ?
+                  <Loader className="spinner"/>
+                  : ('Create stream')}
             </button>
             <button
               className="btn btn-outline-primary ms-2"
