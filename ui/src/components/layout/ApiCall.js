@@ -44,8 +44,7 @@ class Header extends Component {
     return (
       <div className="bg-black p-3 text-start position-relative">
         <p className="position-absolute" style={{ right: "16px", top: "5px" }}>
-          <a
-            href="#"
+          <button
             target="_blank"
             rel="noreferrer"
             className="btn btn-sm btn-light me-2"
@@ -55,15 +54,14 @@ class Header extends Component {
             }}
           >
             <Copy className="feather-icon" />
-          </a>
-          <a
-            href="#"
+          </button>
+          <button
             className="btn btn-sm btn-light me-2"
             onClick={this.toggleShowToken}
           >
             {!this.state.showToken && "Show token"}
             {this.state.showToken && "Hide token"}
-          </a>
+          </button>
           <a
             href={apiDocs}
             target="_blank"
