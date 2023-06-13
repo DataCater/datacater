@@ -248,10 +248,11 @@ some example of when to NOT log information:
 
 ### How information should be logged.
 #### Log in JSON Format
-We should aim to always log messages in JSON format. JSON format is not only easily user readable
+We should aim to always log messages in JSON format for production environments. JSON format is not only easily user readable
 it also allows for seamless integrations with external log management tools for extra flexibility
 and a higher observability.
-The logging framework we use at DataCater automatically appends the logger messages into JSON format.
+The logging framework we use at DataCater automatically appends the log messages into JSON format for production.
+When running the application in dev mode, logs aren't appended in JSON, because the framework parses them into a readable format
 
 
 #### Use the correct logging level:
