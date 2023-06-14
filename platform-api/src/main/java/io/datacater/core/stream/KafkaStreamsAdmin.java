@@ -177,20 +177,24 @@ public class KafkaStreamsAdmin implements StreamService {
   public List<StreamMessage> inspect(Stream stream, long limit, SampleMethod sampleMethod) {
     List<StreamMessage> messageList = new ArrayList<>();
     if (!streamExists()) {
+      LOGGER.warn(
+          String.format(StaticConfig.LoggerMessages.STREAM_INSPECTED_NOT_FOUND, stream.name()));
       return messageList;
     }
     List<TopicPartition> partitionsList = getPartitions(consumer.partitionsFor(this.name));
     if (partitionsList.isEmpty()) {
+      LOGGER.warn(
+          String.format(
+              StaticConfig.LoggerMessages.STREAM_INSPECTED_PARTITIONS_NOT_FOUND, stream.name()));
       return messageList;
     }
     consumer.assign(partitionsList);
-
     if (sampleMethod == SampleMethod.UNIFORM) {
       final long partitionMessageAmount =
           (long) Math.ceil((double) limit / (double) partitionsList.size());
-      setPartitionOffsets(partitionsList, partitionMessageAmount);
+      setPartitionOffsets(partitionsList, partitionMessageAmount, stream.name());
     } else {
-      setPartitionOffsets(partitionsList, limit);
+      setPartitionOffsets(partitionsList, limit, stream.name());
     }
 
     ConsumerRecords<Object, Object> consumerRecords =
@@ -210,7 +214,8 @@ public class KafkaStreamsAdmin implements StreamService {
     return partitionsList;
   }
 
-  private void setPartitionOffsets(List<TopicPartition> allPartitions, long limit) {
+  private void setPartitionOffsets(
+      List<TopicPartition> allPartitions, long limit, String streamName) {
     Map<TopicPartition, Long> beginningOffsets = consumer.beginningOffsets(allPartitions);
     Map<TopicPartition, Long> endOffsets = consumer.endOffsets(allPartitions);
 
@@ -219,9 +224,12 @@ public class KafkaStreamsAdmin implements StreamService {
         // ignore empty partition, otherwise calling consumer.poll() will block thread
         continue;
       }
-      consumer.seek(
-          partition,
-          getUsableOffset(beginningOffsets.get(partition), endOffsets.get(partition), limit));
+      long offset =
+          getUsableOffset(beginningOffsets.get(partition), endOffsets.get(partition), limit);
+      LOGGER.info(
+          String.format(
+              StaticConfig.LoggerMessages.STREAM_SET_OFFSET, streamName, partition, offset));
+      consumer.seek(partition, offset);
     }
   }
 
@@ -251,6 +259,7 @@ public class KafkaStreamsAdmin implements StreamService {
     Thread newThread =
         new Thread(
             () -> {
+              LOGGER.info(StaticConfig.LoggerMessages.CLOSING_STREAM_CONNECTIONS);
               admin.close();
               consumer.close();
             });

@@ -61,5 +61,11 @@ public class StaticConfig {
         "Exceeded timeout of %d ms when updating the config of the Apache Kafka topic.";
     static final String STREAM_NOT_CREATED_METADATA_MISMATCH_FORMATTED =
         "Could not create stream as it already exists on the Cluster and the given metadata doesn't match the actual metadata: %s";
+    static final String STREAM_INSPECTED_PARTITIONS_NOT_FOUND =
+        "%s was inspected but no partitions be found";
+    static final String STREAM_INSPECTED_NOT_FOUND = "%s was inspected but could not be found";
+    static final String STREAM_SET_OFFSET =
+        "Setting inspection offset for stream: %s and partition: %s to: %s";
+    static final String CLOSING_STREAM_CONNECTIONS = "Closing kafka admin and consumer connections";
   }
 }

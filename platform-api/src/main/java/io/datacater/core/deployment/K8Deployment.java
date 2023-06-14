@@ -83,7 +83,17 @@ public class K8Deployment {
           client.resource(deployment).inNamespace(StaticConfig.EnvironmentVariables.NAMESPACE);
       deploymentResource.create();
     } catch (KubernetesClientException ex) {
-      throw new CreateDeploymentException(StringUtilities.wrapString(ex.getCause().getMessage()));
+      String errorMessage = StringUtilities.wrapString(ex.getCause().getMessage());
+      String methodName = new Throwable().getStackTrace()[0].getMethodName();
+      LOGGER.error(
+          String.format(
+              StaticConfig.LoggerMessages.DEPLOYMENT_CREATION_FAILED,
+              methodName,
+              errorMessage,
+              System.lineSeparator(),
+              System.lineSeparator(),
+              deploymentSpec));
+      throw new CreateDeploymentException(errorMessage);
     }
 
     if (!exists(deploymentId)) {
@@ -260,6 +270,15 @@ public class K8Deployment {
           .withName(getDeploymentName(deploymentId))
           .get();
     } catch (KubernetesClientException e) {
+      String methodName = new Throwable().getStackTrace()[0].getMethodName();
+      LOGGER.error(
+          String.format(
+              StaticConfig.LoggerMessages.DEPLOYMENT_FETCH_FAILED,
+              methodName,
+              e.getMessage(),
+              System.lineSeparator(),
+              System.lineSeparator(),
+              deploymentId));
       throw new DeploymentNotFoundException(e.getMessage());
     }
   }

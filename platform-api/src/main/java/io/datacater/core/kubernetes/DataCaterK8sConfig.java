@@ -14,6 +14,8 @@ public class DataCaterK8sConfig {
   private DataCaterK8sConfig() {}
 
   static final String NAME = "python-runner";
+  static final String STATUS_PHASE = "status.phase";
+  static final String RUNNING = "Running";
 
   static final Map<String, String> LABELS = Map.of("app.kubernetes.io/name", NAME);
   static final String PYTHON_RUNNER_SERVICE_NAME =
@@ -35,6 +37,10 @@ public class DataCaterK8sConfig {
 
   private static final String CPU = "cpu";
   private static final String MEMORY = "memory";
+  static final String EMPTY_QUEUE_INIT = "Started empty python runner queue initialization";
+  static final String REFILLING_PODS =
+      "Pool of Python Runners is empty. Re-filling with pods in cluster.";
+  static final String POD_NAME_INFO_MESSAGE = "Returning pod with name %s for interactive usage.";
   static final String PYTHONRUNNER_RESOURCES_REQUESTS_CPU =
       ConfigProvider.getConfig()
           .getOptionalValue("datacater.pythonrunner.resources.requests.cpu", String.class)
