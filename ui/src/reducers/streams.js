@@ -72,22 +72,24 @@ const streams = (state, action) => {
         errorMessage: action.errorMessage,
         stream: undefined,
       };
-      // TODO for edit probably
     case "REQUEST_UPDATE_STREAM":
       return {
         ...state,
+        creatingStream: true,
         errorMessage: undefined,
         stream: undefined,
       };
     case "RECEIVE_UPDATE_STREAM":
       return {
         ...state,
+        creatingStream: false,
         errorMessage: undefined,
         stream: action.stream,
       };
     case "RECEIVE_UPDATE_STREAM_FAILED":
       return {
         ...state,
+        creatingStream: false,
         errorMessage: action.errorMessage,
         stream: undefined,
       };

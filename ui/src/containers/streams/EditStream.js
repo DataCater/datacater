@@ -808,7 +808,12 @@ class EditStream extends Component {
               className="btn btn-primary text-white"
               onClick={this.handleUpdateStream}
             >
-              Update stream
+              {this.props.streams.creatingStream ?
+                <div className="spinner-border" role="status">
+                  <span className="visually-hidden">Loading...</span>
+                </div>
+                : ("Update stream")
+              }
             </a>
             <button
               className="btn btn-outline-primary ms-2"
