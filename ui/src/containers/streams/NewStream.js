@@ -772,10 +772,10 @@ class NewStream extends Component {
               disabled={this.props.streams.creatingStream}
             >
               {this.props.streams.creatingStream ?
-                  <div className="spinner-border" role="status">
-                    <span className="visually-hidden">Loading...</span>
-                  </div>
-                  : ('Create stream')
+                <div className="spinner-border" role="status">
+                  <span className="visually-hidden">Loading...</span>
+                </div>
+                  : "Create stream"
               }
             </button>
             <button

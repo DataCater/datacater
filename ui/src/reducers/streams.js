@@ -2,6 +2,7 @@ const streams = (state, action) => {
   const initialState = {
     errorMessage: undefined,
     creatingStream: false,
+    updatingStream: false,
     fetchingStreams: false,
     inspectingStream: false,
     inspectionResult: undefined,
@@ -75,21 +76,21 @@ const streams = (state, action) => {
     case "REQUEST_UPDATE_STREAM":
       return {
         ...state,
-        creatingStream: true,
+        updatingStream: true,
         errorMessage: undefined,
         stream: undefined,
       };
     case "RECEIVE_UPDATE_STREAM":
       return {
         ...state,
-        creatingStream: false,
+        updatingStream: false,
         errorMessage: undefined,
         stream: action.stream,
       };
     case "RECEIVE_UPDATE_STREAM_FAILED":
       return {
         ...state,
-        creatingStream: false,
+        updatingStream: false,
         errorMessage: action.errorMessage,
         stream: undefined,
       };
