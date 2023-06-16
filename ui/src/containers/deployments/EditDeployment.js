@@ -433,7 +433,12 @@ class EditDeployment extends Component {
               className="btn btn-primary text-white"
               onClick={this.handleUpdateDeployment}
             >
-              Update deployment
+              {this.props.deployments.updatingDeployment ?
+                <div className="spinner-border" role="status">
+                  <span className="visually-hidden">Loading...</span>
+                </div>
+                  : "Update deployment"
+              }
             </a>
             <button
               className="btn btn-outline-primary ms-2"

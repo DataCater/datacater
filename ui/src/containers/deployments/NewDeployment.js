@@ -406,8 +406,14 @@ class NewDeployment extends Component {
             <button
               className="btn btn-primary text-white"
               onClick={this.handleCreateDeployment}
+              disabled={this.props.deployments.creatingDeployment}
             >
-              Create deployment
+              {this.props.deployments.creatingDeployment ?
+                <div className="spinner-border" role="status">
+                  <span className="visually-hidden">Loading...</span>
+                </div>
+                  : "Create deployment"
+              }
             </button>
             <button
               className="btn btn-outline-primary ms-2"
