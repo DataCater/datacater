@@ -244,8 +244,14 @@ class NewPipeline extends Component {
             <button
               className="btn btn-primary text-white"
               onClick={this.handleCreatePipeline}
+              disabled={this.props.pipelines.creatingPipeline}
             >
-              Create pipeline
+              {this.props.pipelines.creatingPipeline ?
+                <div className="spinner-border" role="status">
+                  <span className="visually-hidden">Loading...</span>
+                </div>
+                  : "Create pipeline"
+              }
             </button>
             <button
               className="btn btn-outline-primary ms-2"

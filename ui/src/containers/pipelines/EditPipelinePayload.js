@@ -164,7 +164,12 @@ class EditPipelinePayload extends Component {
                 className="btn btn-primary text-white"
                 onClick={this.submitEditorContent}
               >
-                Edit pipeline
+                {this.props.pipelines.updatingPipeline ?
+                  <div className="spinner-border" role="status">
+                    <span className="visually-hidden">Loading...</span>
+                  </div>
+                    : "Edit pipeline"
+                }
               </a>
             </div>
           </div>

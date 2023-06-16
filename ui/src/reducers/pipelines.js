@@ -1,6 +1,7 @@
 const pipelines = (state, action) => {
   const initialState = {
     errorMessage: undefined,
+    creatingPipeline: false,
     fetchingPipelines: false,
     inspectingPipeline: false,
     inspectingPipelineFailed: false,
@@ -51,6 +52,7 @@ const pipelines = (state, action) => {
       return {
         ...state,
         errorMessage: undefined,
+        creatingPipeline: true,
         pipeline: undefined,
         updatingPipeline: false,
       };
@@ -58,6 +60,7 @@ const pipelines = (state, action) => {
       return {
         ...state,
         errorMessage: undefined,
+        creatingPipeline: false,
         pipeline: action.pipeline,
         updatingPipeline: false,
       };
@@ -65,6 +68,7 @@ const pipelines = (state, action) => {
       return {
         ...state,
         errorMessage: action.errorMessage,
+        creatingPipeline: false,
         pipeline: undefined,
         updatingPipeline: false,
       };
