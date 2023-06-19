@@ -181,41 +181,9 @@ Logging plays a crucial role for administrators, users and developers of our too
 is important to have certain standards in regards on when and how to use which type of logger.
 
 The following sections will outline
-- what information should be logged.
 - when information should be logged.
+- what information should be logged.
 - how information should be logged.
-
-### What information should be logged.
-#### Unknown-Error Log Message
-These types of messages are things such as an unexpected exception was thrown, which should
-provider relative information and context on the exception.
-The following questions should be answered with these log messages.
-- What error happened
-- what data was used to cause this error
-- when did the error happen
-- ...
-
-
-#### Informational Log Message
-These types of log messages are used to give application administrators contexts to user errors,
-users errors can be for example, a stream could not be created due to incorrect user data.
-The following questions should be answered with these log messages.
-- when did the error occur
-- what data was used to cause the error
-- what api path did the user call
-- ...
-
-#### Exclude sensitive information
-Be careful when working on parts of the application that could internationally contain sensitive data.
-In these cases, it could be useful to not include the data payload when logging.
-In some cases, an object id could be provided for more context, such as a Tenant/UserID instead
-of a username but only where the id belongs to a persisted object that an administrator can access.
-
-#### Avoid adding too much Context
-Having too much information in a log message is a thing. Image a deploymentID being logged for
-an object before it has been saved to the database. The error causes it to not be persisted, but the
-admin assumes it should be in the DB. This would waste time in searching for the object
-and potentially cause the assumption of an error that doesn't actually exist.
 
 ### When information should be logged.
 Information doesn't need to be logged everywhere in the application.
@@ -231,20 +199,60 @@ Information SHOULD be logged when it could potentially provide extra context whe
 
 Some examples of when to log information:
 - An unexpected exception has occurred (e.g. a timeout exception)
-  - Provide more context: Where did the timeout occur? What data payload caused the timeout?
+    - Provide more context: Where did the timeout occur? What data payload caused the timeout?
 - Authentication Exception (don't log an unauthorized exception, don't log because of incorrect credentials)
-  - Provide more context: What provider was used?
+    - Provide more context: What provider was used?
 - Too many failed attempts
-  - You have a process that sometimes fails because a service hasn't started yet so your code
-     retries periodically. After `X`-amount of attempt a message could be logged, since the service
-     might actually be unavailable.
+    - You have a process that sometimes fails because a service hasn't started yet so your code
+      retries periodically. After `X`-amount of attempt a message could be logged, since the service
+      might actually be unavailable.
 
 some example of when to NOT log information:
 - An entity could not be updated when rest endpoint is called
-  - this information should be returned to the user
+    - this information should be returned to the user
 - An object was created successfully
 - A standard object has been created (such as a pipeline object)
 - A standard application process has begun (such as `starting validation process`)
+
+### What information should be logged
+#### Exception Log Messages
+We should aim to log exception messages in order to give users and admins context and 
+more information on what potentially went wrong. 
+The following questions should be answered with these log messages.
+- Why was the exception thrown by DataCater?
+- What parameter led to the Exception? 
+  - In e.g. `URIInvalidException`, because of invalid String for a URI, then the String should be printed out. 
+  - Be cautious not to expose user information
+- What error happened
+- what data was used to cause this error
+- when did the error happen
+
+
+#### Informational Log Message
+These types of log messages are used to give application administrators contexts to user errors,
+users errors can be for example, a stream could not be created due to incorrect user data.
+The following questions should be answered with these log messages.
+- when did the error occur
+- what data was used to cause the error
+- what api path did the user call
+
+#### The Minimal Amount of Context That Should Always be Logged
+We should always aim to provide just the right amount of context when logging an error. This can be tricky,
+because sometimes we are logging information without knowing the actual cause behind the error.
+We should aim to at least always provide a minimum of information with every log entry, so that a developer
+can always look at an entry and know where to look and debug the codebase by just reading the error message in the logs.
+
+#### Exclude sensitive information
+Be careful when working on parts of the application that could internationally contain sensitive data.
+In these cases, it could be useful to not include the data payload when logging.
+In some cases, an object id could be provided for more context, such as a Tenant/UserID instead
+of a username but only where the id belongs to a persisted object that an administrator can access.
+
+#### Avoid adding too much Context
+Having too much information in a log message is a thing. Image a deploymentID being logged for
+an object before it has been saved to the database. The error causes it to not be persisted, but the
+admin assumes it should be in the DB. This would waste time in searching for the object
+and potentially cause the assumption of an error that doesn't actually exist.
 
 ### How information should be logged.
 #### Log in JSON Format
@@ -263,3 +271,48 @@ ERROR - disruption in a request or the ability to service a request. These error
 WARN - non-critical service error. These errors are non-critical but could be useful information for making improvements.
 INFO - Non-error debugging statements.
 DEBUG - extra information regarding life-cycle events. These messages should provide information that can be useful for a developer.
+
+##### Examples per logging level
+FATAL:
+```java
+try {...}
+catch (RuntimeException re) {
+    LOGGER.fatal("The flash broke his foot and can't run anymore!");
+    throw re;
+}
+```
+
+ERROR:
+```Java
+try {...}
+catch (InvocationTargetException ite) {
+    LOGGER.error("Green Arrow missed an easy shot.");
+    throw ite;
+}
+```
+
+WARN:
+```Java
+if(true){...}
+else {
+    LOGGER.warn("'I don't repsond to threats, I make them' - The Joker");
+}
+```
+
+INFO:
+```Java
+public void startup(@Observes StartupEvent event) {
+  LOGGER.info("I am the vengeance... I am the night... I am Batman.");
+}
+```
+
+DEBUG:
+```Java
+void AtomVsAntMan() {
+  Random rand = new Random();
+  if(rand.nextInt(100) < 99) {
+    LOGGER.debug("Atom beat Antman");    
+  }
+}
+```
+
