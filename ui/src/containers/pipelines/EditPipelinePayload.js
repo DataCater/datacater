@@ -89,6 +89,19 @@ class EditPipelinePayload extends Component {
       return <></>;
     }
 
+    const updatePipelineButtonDisabled = this.props.pipelines.updatingPipeline ? "disabled" : "";
+
+    const updatePipelineButtonStyles = {
+      width: "10em",
+      pointerEvents: this.props.pipelines.updatingPipeline ? "none" : "auto",
+    };
+
+    const updatePipelineButtonContent = this.props.pipelines.updatingPipeline ? (
+        <div className="spinner-border" role="status" style={{width: "1.5em", height: "1.5em"}}>
+          <span className="visually-hidden">Loading...</span>
+        </div>
+    ) : "Edit pipeline";
+
     if (this.state.pipelineUpdated) {
       return <Redirect to={`/pipelines/${this.getPipelineId()}`} />;
     }
@@ -161,15 +174,11 @@ class EditPipelinePayload extends Component {
               )}
               <a
                 href={`/pipelines/${pipeline.uuid}/edit-payload`}
-                className="btn btn-primary text-white"
+                className={`btn btn-primary text-white ${updatePipelineButtonDisabled}`}
                 onClick={this.submitEditorContent}
+                style={updatePipelineButtonStyles}
               >
-                {this.props.pipelines.updatingPipeline ?
-                  <div className="spinner-border" role="status">
-                    <span className="visually-hidden">Loading...</span>
-                  </div>
-                    : "Edit pipeline"
-                }
+                {updatePipelineButtonContent}
               </a>
             </div>
           </div>

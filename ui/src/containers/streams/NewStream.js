@@ -606,7 +606,7 @@ class NewStream extends Component {
     );
   }
 
-  async handleCreateStream(event) {
+  handleCreateStream(event) {
     event.preventDefault();
     if (this.state.showPayloadEditor) {
       this.submitEditorContent();
@@ -770,9 +770,13 @@ class NewStream extends Component {
               className="btn btn-primary text-white"
               onClick={this.handleCreateStream}
               disabled={this.props.streams.creatingStream}
+              // Changed size to 10em, because it prevents button resize when displaying spinner + it is closest to the original size
+              style={{
+                width: "10em",
+              }}
             >
               {this.props.streams.creatingStream ?
-                <div className="spinner-border" role="status">
+                <div className="spinner-border" role="status" style={{width: "1.5em", height: "1.5em"}}>
                   <span className="visually-hidden">Loading...</span>
                 </div>
                   : "Create stream"

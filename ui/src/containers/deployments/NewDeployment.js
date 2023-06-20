@@ -407,9 +407,13 @@ class NewDeployment extends Component {
               className="btn btn-primary text-white"
               onClick={this.handleCreateDeployment}
               disabled={this.props.deployments.creatingDeployment}
+              // Changed size to 11.4em, because it prevents button resize when displaying spinner + it is closest to the original size
+              style={{
+                width: "11.4em",
+              }}
             >
               {this.props.deployments.creatingDeployment ?
-                <div className="spinner-border" role="status">
+                <div className="spinner-border" role="status" style={{width: "1.5em", height: "1.5em"}}>
                   <span className="visually-hidden">Loading...</span>
                 </div>
                   : "Create deployment"
