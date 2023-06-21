@@ -357,6 +357,9 @@ jobs       :
     -   name: Install UI Dependencies
         working-directory: ui
         run: npm ci
+    -   name: Verify formatting of the UI
+        working-directory: ui
+        run: npx prettier --check src
     -   name: Build the UI
         working-directory: ui
         run: npm run build --if-present
