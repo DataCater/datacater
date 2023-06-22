@@ -95,6 +95,12 @@ public class DeploymentEndpoint {
                           replica);
                   HttpResponse<String> response =
                       httpClient.send(req, HttpResponse.BodyHandlers.ofString());
+
+                  if (response.statusCode()
+                      >= Response.Status.INTERNAL_SERVER_ERROR.getStatusCode()) {
+                    throw new UnhealthyDeploymentException(response.body());
+                  }
+
                   return Response.ok().entity(response.body()).build();
                 }));
   }
