@@ -26,13 +26,13 @@ public class K8Deployment {
       StreamEntity se, ConnectorSpec connectorSpec, UUID connectorId) {
 
     final String name = StaticConfig.CONNECTOR_NAME_PREFIX + connectorId;
-    final int replicaCount = getDeploymentReplicaOrDefault(connectorSpec.connector());
+    final int replicaCount = getDeploymentReplicaOrDefault(connectorSpec.getConnectorMap());
 
     List<EnvVar> variables = getEnvironmentVariables(connectorSpec, connectorId);
 
     String connectorImage;
     try {
-      connectorImage = connectorSpec.connector().get(StaticConfig.IMAGE_NODE_TEXT).toString();
+      connectorImage = connectorSpec.getConnectorMap().get(StaticConfig.IMAGE_NODE_TEXT).toString();
     } catch (NullPointerException e) {
       throw new CreateConnectorException(StaticConfig.LoggerMessages.NO_IMAGE_PROVIDED);
     }
@@ -107,7 +107,8 @@ public class K8Deployment {
             .withValue(streamEntity.getName())
             .build());
 
-    Map<String, String> config = (Map) connectorSpec.connector().getOrDefault("config", Map.of());
+    Map<String, String> config =
+        (Map) connectorSpec.getConnectorMap().getOrDefault("config", Map.of());
 
     for (String configName : config.keySet()) {
       envVariables.add(
@@ -317,6 +318,7 @@ public class K8Deployment {
   private int getDeploymentReplicaOrDefault(Map<String, Object> map) {
     int replica = StaticConfig.EnvironmentVariables.REPLICAS;
 
+    // TODO
     return replica;
   }
 

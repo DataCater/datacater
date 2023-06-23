@@ -111,7 +111,7 @@ public class StreamUtilities {
   }
 
   public Uni<StreamEntity> getStreamFromConnector(ConnectorSpec connectorSpec) {
-    Map spec = connectorSpec.connector();
+    Map spec = connectorSpec.getConnectorMap();
     UUID streamId;
 
     try {

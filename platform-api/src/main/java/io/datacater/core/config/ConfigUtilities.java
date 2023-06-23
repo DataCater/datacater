@@ -88,10 +88,11 @@ public class ConfigUtilities {
         if (config.getId() != null) {
           verifyKindOfConfig(Kind.DEPLOYMENT, config.getKind());
           connectorSpec
-              .connector()
+              .getConnectorMap()
               .putAll(
                   JsonUtilities.combineMaps(
-                      JsonUtilities.toObjectMap(config.getSpec()), connectorSpec.connector()));
+                      JsonUtilities.toObjectMap(config.getSpec()),
+                      connectorSpec.getConnectorMap()));
         }
       }
     }

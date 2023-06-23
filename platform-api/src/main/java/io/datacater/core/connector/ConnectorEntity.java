@@ -56,15 +56,20 @@ public class ConnectorEntity {
     return objectMapper.valueToTree(map);
   }
 
+  public static JsonNode serializeConnector(Connector connector) {
+    ObjectMapper objectMapper = new ObjectMapper();
+    return objectMapper.valueToTree(connector);
+  }
+
   public ConnectorEntity(ConnectorSpec spec) {
     this.name = spec.name();
-    this.spec = ConnectorEntity.serializeMap(spec.connector());
+    this.spec = ConnectorEntity.serializeConnector(spec.connector());
     this.configSelector = JsonUtilities.convertStringMap(spec.configSelector());
   }
 
   public ConnectorEntity updateEntity(ConnectorSpec spec) {
     this.name = spec.name();
-    this.spec = ConnectorEntity.serializeMap(spec.connector());
+    this.spec = ConnectorEntity.serializeConnector(spec.connector());
     this.configSelector = JsonUtilities.convertStringMap(spec.configSelector());
     return this;
   }

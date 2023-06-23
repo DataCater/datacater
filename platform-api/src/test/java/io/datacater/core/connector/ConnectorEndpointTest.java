@@ -21,8 +21,8 @@ import org.junit.jupiter.api.*;
 @QuarkusTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-class DatacaterConnectorEndpointTest {
-  private static final Logger LOGGER = Logger.getLogger(DatacaterConnectorEndpointTest.class);
+class ConnectorEndpointTest {
+  private static final Logger LOGGER = Logger.getLogger(ConnectorEndpointTest.class);
 
   @Inject KubernetesClient client;
 

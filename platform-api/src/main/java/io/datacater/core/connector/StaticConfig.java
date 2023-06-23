@@ -69,6 +69,10 @@ public class StaticConfig {
         ConfigProvider.getConfig()
             .getOptionalValues("datacater.connector.types.load", String.class)
             .orElse(List.of());
+    static final String DEFAULT_CONNECTOR_VERSION =
+        ConfigProvider.getConfig()
+            .getOptionalValue("datacater.connector.types.defaultVersion", String.class)
+            .orElse("2023.1");
     static final String NAMESPACE =
         ConfigProvider.getConfig()
             .getOptionalValue("datacater.connector.namespace", String.class)
