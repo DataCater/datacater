@@ -413,12 +413,13 @@ class NewDeployment extends Component {
               }}
             >
               {this.props.deployments.creatingDeployment ? (
-                <div
-                  className="spinner-border"
-                  role="status"
-                  style={{ width: "1.5em", height: "1.5em" }}
-                >
-                  <span className="visually-hidden">Loading...</span>
+                <div className="d-flex align-items-center">
+                  <div
+                    className="spinner-border me-2"
+                    role="status"
+                    style={{ width: "1.5em", height: "1.5em" }}
+                  />
+                  <span>Creating...</span>
                 </div>
               ) : (
                 "Create deployment"
