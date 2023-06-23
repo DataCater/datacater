@@ -765,7 +765,9 @@ class EditStream extends Component {
       return <></>;
     }
 
-    const updateStreamButtonDisabled = this.props.streams.updatingStream ? "disabled" : "";
+    const updateStreamButtonDisabled = this.props.streams.updatingStream
+      ? "disabled"
+      : "";
 
     const updateStreamButtonStyles = {
       width: "10em",
@@ -773,10 +775,16 @@ class EditStream extends Component {
     };
 
     const updateStreamButtonContent = this.props.streams.updatingStream ? (
-        <div className="spinner-border" role="status" style={{width: "1.5em", height: "1.5em"}}>
-          <span className="visually-hidden">Loading...</span>
-        </div>
-    ) : "Update stream";
+      <div
+        className="spinner-border"
+        role="status"
+        style={{ width: "1.5em", height: "1.5em" }}
+      >
+        <span className="visually-hidden">Loading...</span>
+      </div>
+    ) : (
+      "Update stream"
+    );
 
     const apiPayload = Object.assign({}, stream);
     delete apiPayload.uuid;

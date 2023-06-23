@@ -412,12 +412,17 @@ class NewDeployment extends Component {
                 width: "11.4em",
               }}
             >
-              {this.props.deployments.creatingDeployment ?
-                <div className="spinner-border" role="status" style={{width: "1.5em", height: "1.5em"}}>
+              {this.props.deployments.creatingDeployment ? (
+                <div
+                  className="spinner-border"
+                  role="status"
+                  style={{ width: "1.5em", height: "1.5em" }}
+                >
                   <span className="visually-hidden">Loading...</span>
                 </div>
-                  : "Create deployment"
-              }
+              ) : (
+                "Create deployment"
+              )}
             </button>
             <button
               className="btn btn-outline-primary ms-2"

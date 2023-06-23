@@ -250,12 +250,17 @@ class NewPipeline extends Component {
                 width: "10em",
               }}
             >
-              {this.props.pipelines.creatingPipeline ?
-                <div className="spinner-border" role="status" style={{width: "1.5em", height: "1.5em"}}>
+              {this.props.pipelines.creatingPipeline ? (
+                <div
+                  className="spinner-border"
+                  role="status"
+                  style={{ width: "1.5em", height: "1.5em" }}
+                >
                   <span className="visually-hidden">Loading...</span>
                 </div>
-                  : "Create pipeline"
-              }
+              ) : (
+                "Create pipeline"
+              )}
             </button>
             <button
               className="btn btn-outline-primary ms-2"

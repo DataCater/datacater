@@ -395,18 +395,30 @@ class EditDeployment extends Component {
       return <></>;
     }
 
-    const updateDeploymentButtonDisabled = this.props.deployments.updatingDeployment ? "disabled" : "";
+    const updateDeploymentButtonDisabled = this.props.deployments
+      .updatingDeployment
+      ? "disabled"
+      : "";
 
     const updateDeploymentButtonStyles = {
       width: "12em",
-      pointerEvents: this.props.deployments.updatingDeployment ? "none" : "auto",
+      pointerEvents: this.props.deployments.updatingDeployment
+        ? "none"
+        : "auto",
     };
 
-    const updateDeploymentButtonContent = this.props.deployments.updatingDeployment ? (
-        <div className="spinner-border" role="status" style={{width: "1.5em", height: "1.5em"}}>
-          <span className="visually-hidden">Loading...</span>
-        </div>
-    ) : "Update deployment";
+    const updateDeploymentButtonContent = this.props.deployments
+      .updatingDeployment ? (
+      <div
+        className="spinner-border"
+        role="status"
+        style={{ width: "1.5em", height: "1.5em" }}
+      >
+        <span className="visually-hidden">Loading...</span>
+      </div>
+    ) : (
+      "Update deployment"
+    );
 
     const apiPayload = Object.assign({}, deployment);
     delete apiPayload.uuid;

@@ -13,7 +13,6 @@ import { getSerializerOptions } from "../../helpers/getSerializerOptions";
 import { isStreamHoldingAvroFormat } from "../../helpers/isStreamHoldingAvroFormat";
 import "../../scss/fonts.scss";
 
-
 class NewStream extends Component {
   constructor(props) {
     super(props);
@@ -775,12 +774,17 @@ class NewStream extends Component {
                 width: "10em",
               }}
             >
-              {this.props.streams.creatingStream ?
-                <div className="spinner-border" role="status" style={{width: "1.5em", height: "1.5em"}}>
+              {this.props.streams.creatingStream ? (
+                <div
+                  className="spinner-border"
+                  role="status"
+                  style={{ width: "1.5em", height: "1.5em" }}
+                >
                   <span className="visually-hidden">Loading...</span>
                 </div>
-                  : "Create stream"
-              }
+              ) : (
+                "Create stream"
+              )}
             </button>
             <button
               className="btn btn-outline-primary ms-2"
