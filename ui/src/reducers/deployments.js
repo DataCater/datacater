@@ -1,6 +1,8 @@
 const deployments = (state, action) => {
   const initialState = {
     errorMessage: undefined,
+    creatingDeployment: false,
+    updatingDeployment: false,
     fetchingDeployments: false,
     deployment: undefined,
     deployments: [],
@@ -55,36 +57,42 @@ const deployments = (state, action) => {
     case "REQUEST_ADD_DEPLOYMENT":
       return {
         ...state,
+        creatingDeployment: true,
         errorMessage: undefined,
         deployment: undefined,
       };
     case "RECEIVE_ADD_DEPLOYMENT":
       return {
         ...state,
+        creatingDeployment: false,
         errorMessage: undefined,
         deployment: action.deployment,
       };
     case "RECEIVE_ADD_DEPLOYMENT_FAILED":
       return {
         ...state,
+        creatingDeployment: false,
         errorMessage: action.errorMessage,
         deployment: undefined,
       };
     case "REQUEST_UPDATE_DEPLOYMENT":
       return {
         ...state,
+        updatingDeployment: true,
         errorMessage: undefined,
         deployment: undefined,
       };
     case "RECEIVE_UPDATE_DEPLOYMENT":
       return {
         ...state,
+        updatingDeployment: false,
         errorMessage: undefined,
         deployment: action.deployment,
       };
     case "RECEIVE_UPDATE_DEPLOYMENT_FAILED":
       return {
         ...state,
+        updatingDeployment: false,
         errorMessage: action.errorMessage,
         deployment: undefined,
       };

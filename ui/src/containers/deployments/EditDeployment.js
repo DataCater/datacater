@@ -395,6 +395,32 @@ class EditDeployment extends Component {
       return <></>;
     }
 
+    const updateDeploymentButtonDisabled = this.props.deployments
+      .updatingDeployment
+      ? "disabled"
+      : "";
+
+    const updateDeploymentButtonStyles = {
+      width: "12em",
+      pointerEvents: this.props.deployments.updatingDeployment
+        ? "none"
+        : "auto",
+    };
+
+    const updateDeploymentButtonContent = this.props.deployments
+      .updatingDeployment ? (
+      <div className="d-flex align-items-center">
+        <div
+          className="spinner-border me-2"
+          role="status"
+          style={{ width: "1.5em", height: "1.5em" }}
+        />
+        <span>Updating...</span>
+      </div>
+    ) : (
+      "Update deployment"
+    );
+
     const apiPayload = Object.assign({}, deployment);
     delete apiPayload.uuid;
     delete apiPayload.createdAt;
@@ -430,10 +456,11 @@ class EditDeployment extends Component {
           <div className="col-12 mt-4 mb-4">
             <a
               href={`/deployments/${deployment.uuid}`}
-              className="btn btn-primary text-white"
+              className={`btn btn-primary text-white ${updateDeploymentButtonDisabled}`}
               onClick={this.handleUpdateDeployment}
+              style={updateDeploymentButtonStyles}
             >
-              Update deployment
+              {updateDeploymentButtonContent}
             </a>
             <button
               className="btn btn-outline-primary ms-2"

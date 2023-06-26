@@ -761,10 +761,31 @@ class EditStream extends Component {
 
   render() {
     const stream = this.state.stream;
-
     if (stream == null) {
       return <></>;
     }
+
+    const updateStreamButtonDisabled = this.props.streams.updatingStream
+      ? "disabled"
+      : "";
+
+    const updateStreamButtonStyles = {
+      width: "10em",
+      pointerEvents: this.props.streams.updatingStream ? "none" : "auto",
+    };
+
+    const updateStreamButtonContent = this.props.streams.updatingStream ? (
+      <div className="d-flex align-items-center">
+        <div
+          className="spinner-border me-2"
+          role="status"
+          style={{ width: "1.5em", height: "1.5em" }}
+        />
+        <span>Updating...</span>
+      </div>
+    ) : (
+      "Update stream"
+    );
 
     const apiPayload = Object.assign({}, stream);
     delete apiPayload.uuid;
@@ -805,10 +826,11 @@ class EditStream extends Component {
           <div className="col-12 mt-4 mb-4">
             <a
               href={`/streams/${stream.uuid}`}
-              className="btn btn-primary text-white"
+              className={`btn btn-primary text-white ${updateStreamButtonDisabled}`}
               onClick={this.handleUpdateStream}
+              style={updateStreamButtonStyles}
             >
-              Update stream
+              {updateStreamButtonContent}
             </a>
             <button
               className="btn btn-outline-primary ms-2"

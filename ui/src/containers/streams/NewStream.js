@@ -768,8 +768,24 @@ class NewStream extends Component {
             <button
               className="btn btn-primary text-white"
               onClick={this.handleCreateStream}
+              disabled={this.props.streams.creatingStream}
+              // Changed size to 10em, because it prevents button resize when displaying spinner + it is closest to the original size
+              style={{
+                width: "10em",
+              }}
             >
-              Create stream
+              {this.props.streams.creatingStream ? (
+                <div className="d-flex align-items-center">
+                  <div
+                    className="spinner-border me-2"
+                    role="status"
+                    style={{ width: "1.5em", height: "1.5em" }}
+                  />
+                  <span>Creating...</span>
+                </div>
+              ) : (
+                "Create stream"
+              )}
             </button>
             <button
               className="btn btn-outline-primary ms-2"
