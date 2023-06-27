@@ -216,12 +216,12 @@ some example of when to NOT log information:
 
 ### What information should be logged
 #### Exception Log Messages
-We should aim to log exception messages in order to give users and admins context and 
-more information on what potentially went wrong. 
+We should aim to log exception messages in order to give users and admins context and
+more information on what potentially went wrong.
 The following questions should be answered with these log messages.
 - Why was the exception thrown by DataCater?
-- What parameter led to the Exception? 
-  - In e.g. `URIInvalidException`, because of invalid String for a URI, then the String should be printed out. 
+- What parameter led to the Exception?
+  - In e.g. `URIInvalidException`, because of invalid String for a URI, then the String should be printed out.
   - Be cautious not to expose user information
 - What error happened
 - what data was used to cause this error
@@ -311,8 +311,7 @@ DEBUG:
 void AtomVsAntMan() {
   Random rand = new Random();
   if(rand.nextInt(100) < 99) {
-    LOGGER.debug("Atom beat Antman");    
+    LOGGER.debug("Atom beat Antman");
   }
 }
 ```
-
