@@ -111,11 +111,10 @@ public class StreamUtilities {
   }
 
   public Uni<StreamEntity> getStreamFromConnector(ConnectorSpec connectorSpec) {
-    Map spec = connectorSpec.getConnectorMap();
     UUID streamId;
 
     try {
-      streamId = UUID.fromString(spec.get(StaticConfig.STREAM_TEXT).toString());
+      streamId = UUID.fromString(connectorSpec.connector().stream());
     } catch (NullPointerException e) {
       throw new ReferencedStreamNotFoundException(
           StaticConfig.LoggerMessages.STREAM_NOT_FOUND_MESSAGE);

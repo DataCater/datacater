@@ -53,7 +53,6 @@ class ConnectorEndpointTest {
             .post(streamsPath);
 
     StreamEntity stream = mapper.readValue(responseStream.body().asString(), StreamEntity.class);
-    LOGGER.info(responseStream.body().asString());
     streamId = stream.getId();
 
     // Add connector

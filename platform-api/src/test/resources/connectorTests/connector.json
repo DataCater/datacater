@@ -1,6 +1,6 @@
 {
   "spec": {
-      "stream": "streamUUIDPlaceholder",
+      "stream": "e083191b-46f1-4e37-af82-104426c23fee",
       "image": "imagePlaceholder",
       "config": {
         "connector.class": "io.datacater.concon.source.MySQLSourceConnector"
