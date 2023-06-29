@@ -214,10 +214,25 @@ some example of when to NOT log information:
 - A standard object has been created (such as a pipeline object)
 - A standard application process has begun (such as `starting validation process`)
 
+#### Automatic Logging
+Our framework takes care of some standard logging itself. These being:
+- At startup, things regarding configurations and services are logged
+- Kafka Admin Client and Consumer write various logs
+  - When creating topics, configuration warnings are logged
+  - When creating or polling topics, errors are automatically logged
+- Long-running threads are logged
+- Exceptions are logged
+
+When considering when and what to log, always take the extensions you are working with and their capabilities into consideration.
+Logging potential errors and warnings is always a good idea, but when these things are logged multiple times
+it can cause confusion for administrators, users and developers and potentially waste time when analysing the system behaviour.
+
+
 ### What information should be logged
 #### Exception Log Messages
-We should aim to log exception messages in order to give users and admins context and
-more information on what potentially went wrong.
+We should aim to log all exception messages in order to give users and admins context and
+more information on what potentially went wrong. Avoid silencing exceptions by, for example, catching
+an error and not throwing the exception or at least logging that something went wrong.
 The following questions should be answered with these log messages.
 - Why was the exception thrown by DataCater?
 - What parameter led to the Exception?
@@ -295,7 +310,7 @@ WARN:
 ```Java
 if(true){...}
 else {
-    LOGGER.warn("'I don't repsond to threats, I make them' - The Joker");
+    LOGGER.warn("'I don't respond to threats, I make them' - The Joker");
 }
 ```
 
