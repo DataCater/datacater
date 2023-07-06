@@ -40,24 +40,36 @@ public class FiltersRepository {
         addFilter(filter);
       }
     } catch (DatabindException e) {
-      LOGGER.error("incorrect filter syntax in: " + file.getAbsolutePath());
-      LOGGER.error(e);
+      LOGGER.error(
+          String.format(
+              StaticConfig.LoggerMessages.INCORRECT_FILTER_SYNTAX,
+              file.getAbsolutePath(),
+              System.lineSeparator(),
+              e));
     } catch (StreamReadException e) {
-      LOGGER.error("file does not contain valid yaml format: " + file.getAbsolutePath());
-      LOGGER.error(e);
+      LOGGER.error(
+          String.format(
+              StaticConfig.LoggerMessages.FILE_INVALID_YML,
+              file.getAbsolutePath(),
+              System.lineSeparator(),
+              e));
     } catch (IOException e) {
-      LOGGER.error("file path invalid or file could not be found: " + file.getAbsolutePath());
-      LOGGER.error(e);
+      LOGGER.error(
+          String.format(
+              StaticConfig.LoggerMessages.FILE_INVALID_PATH,
+              file.getAbsolutePath(),
+              System.lineSeparator(),
+              e));
     }
   }
 
   private boolean isValidFilter(FilterSpec filter, String pathToFilter) {
     if (filter.key() == null || filter.key().isEmpty()) {
-      LOGGER.warn(pathToFilter + " has an empty key");
+      LOGGER.warn(String.format(StaticConfig.LoggerMessages.HAS_EMPTY_KEY, pathToFilter));
       return false;
     }
     if (getFilter(filter.key()).isPresent()) {
-      LOGGER.warn(pathToFilter + " has already been added");
+      LOGGER.warn(String.format(StaticConfig.LoggerMessages.HAS_BEEN_ADDED, pathToFilter));
       return false;
     }
     return true;

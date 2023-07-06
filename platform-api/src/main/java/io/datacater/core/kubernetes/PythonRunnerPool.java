@@ -86,8 +86,7 @@ public class PythonRunnerPool {
         .transform(
             queue -> {
               var pod = queue.pop();
-              LOGGER.info(
-                  String.format("Returning pod with name %s for interactive usage.", pod.name));
+              LOGGER.info(String.format(DataCaterK8sConfig.POD_NAME_INFO_MESSAGE, pod.name));
               return pod;
             });
   }
@@ -101,7 +100,7 @@ public class PythonRunnerPool {
         .chain(
             queue -> {
               if (queue.isEmpty()) {
-                LOGGER.info("Pool of Python Runners is empty. Re-filling with pods in cluster.");
+                LOGGER.info(DataCaterK8sConfig.REFILLING_PODS);
                 return refillQueue(); // reset queue if all pods were used
               } else {
                 return Uni.createFrom().item(queue);
@@ -118,7 +117,7 @@ public class PythonRunnerPool {
 
   public Uni<Void> initialiseEmptyQueue() {
     Uni<AsyncMap<String, Deque<NamedPod>>> asyncMap = sharedData.getAsyncMap(POOL_NAME);
-
+    LOGGER.info(DataCaterK8sConfig.EMPTY_QUEUE_INIT);
     return asyncMap.onItem().transformToUni(map -> map.put(POOL_NAME, new ArrayDeque<>()));
   }
 
@@ -164,7 +163,7 @@ public class PythonRunnerPool {
             .pods()
             .inNamespace(DataCaterK8sConfig.NAMESPACE)
             .withLabels(DataCaterK8sConfig.LABELS)
-            .withField("status.phase", "Running")
+            .withField(DataCaterK8sConfig.STATUS_PHASE, DataCaterK8sConfig.RUNNING)
             .list()
             .getItems();
     Deque<NamedPod> namedPods = new ArrayDeque<>(DataCaterK8sConfig.PYTHON_RUNNER_REPLICAS);

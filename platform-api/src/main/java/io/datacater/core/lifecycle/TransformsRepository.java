@@ -34,6 +34,7 @@ public class TransformsRepository {
     fileList.forEach(x -> mapTransform(mapper, x));
   }
 
+  // TODO rework logs to one line
   private void mapTransform(ObjectMapper mapper, File file) {
     try {
       TransformSpec transform = mapper.readValue(file.getAbsoluteFile(), TransformSpec.class);
@@ -41,24 +42,36 @@ public class TransformsRepository {
         addTransform(transform);
       }
     } catch (DatabindException e) {
-      LOGGER.error("incorrect transform syntax in: " + file.getAbsolutePath());
-      LOGGER.error(e);
+      LOGGER.error(
+          String.format(
+              StaticConfig.LoggerMessages.INCORRECT_TRANSFORM_SYNTAX,
+              file.getAbsolutePath(),
+              System.lineSeparator(),
+              e));
     } catch (StreamReadException e) {
-      LOGGER.error("file does not contain valid yaml format: " + file.getAbsolutePath());
-      LOGGER.error(e);
+      LOGGER.error(
+          String.format(
+              StaticConfig.LoggerMessages.FILE_INVALID_YML,
+              file.getAbsolutePath(),
+              System.lineSeparator(),
+              e));
     } catch (IOException e) {
-      LOGGER.error("file path invalid or file could not be found: " + file.getAbsolutePath());
-      LOGGER.error(e);
+      LOGGER.error(
+          String.format(
+              StaticConfig.LoggerMessages.FILE_INVALID_PATH,
+              file.getAbsolutePath(),
+              System.lineSeparator(),
+              e));
     }
   }
 
   private boolean isValidTransform(TransformSpec transform, String pathToTransform) {
     if (transform.key() == null || transform.key().isEmpty()) {
-      LOGGER.warn(pathToTransform + " has an empty key");
+      LOGGER.warn(String.format(StaticConfig.LoggerMessages.HAS_EMPTY_KEY, pathToTransform));
       return false;
     }
     if (getTransform(transform.key()).isPresent()) {
-      LOGGER.warn(pathToTransform + " has already been added");
+      LOGGER.warn(String.format(StaticConfig.LoggerMessages.HAS_BEEN_ADDED, pathToTransform));
       return false;
     }
     return true;

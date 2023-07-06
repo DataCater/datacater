@@ -175,3 +175,158 @@ For testing and development you can find self-signed certificates under
 ```bash
  openssl req -nodes -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -sha256 -days 365 -subj '/CN=localhost'
 ```
+
+## Logging Principles
+Logging plays a crucial role for administrators, users and developers of our tool, which is why it
+is important to have certain standards in regards on when and how to use which type of logger.
+
+The following sections will outline
+- when information should be logged.
+- what information should be logged.
+- how information should be logged.
+
+### When information should be logged.
+Information doesn't need to be logged everywhere in the application.
+```
+{
+  "level": "info",
+  "message": "User logged in succesfully",
+  "timestamp": "2021-11-03T20:44:08.460Z"
+}
+```
+just doesn't need to pop up in the application logs.
+Information SHOULD be logged when it could potentially provide extra context when an error occurs.
+
+Some examples of when to log information:
+- An unexpected exception has occurred (e.g. a timeout exception)
+    - Provide more context: Where did the timeout occur? What data payload caused the timeout?
+- Authentication Exception (don't log an unauthorized exception, don't log because of incorrect credentials)
+    - Provide more context: What provider was used?
+- Too many failed attempts
+    - You have a process that sometimes fails because a service hasn't started yet so your code
+      retries periodically. After `X`-amount of attempt a message could be logged, since the service
+      might actually be unavailable.
+
+some example of when to NOT log information:
+- An entity could not be updated when rest endpoint is called
+    - this information should be returned to the user
+- An object was created successfully
+- A standard object has been created (such as a pipeline object)
+- A standard application process has begun (such as `starting validation process`)
+
+#### Automatic Logging
+Our framework takes care of some standard logging itself. These being:
+- At startup, things regarding configurations and services are logged
+- Kafka Admin Client and Consumer write various logs
+  - When creating topics, configuration warnings are logged
+  - When creating or polling topics, errors are automatically logged
+- Long-running threads are logged
+- Exceptions are logged
+
+When considering when and what to log, always take the extensions you are working with and their capabilities into consideration.
+Logging potential errors and warnings is always a good idea, but when these things are logged multiple times
+it can cause confusion for administrators, users and developers and potentially waste time when analysing the system behaviour.
+
+
+### What information should be logged
+#### Exception Log Messages
+We should aim to log all exception messages in order to give users and admins context and
+more information on what potentially went wrong. Avoid silencing exceptions by, for example, catching
+an error and not throwing the exception or at least logging that something went wrong.
+The following questions should be answered with these log messages.
+- Why was the exception thrown by DataCater?
+- What parameter led to the Exception?
+  - In e.g. `URIInvalidException`, because of invalid String for a URI, then the String should be printed out.
+  - Be cautious not to expose user information
+- What error happened
+- what data was used to cause this error
+- when did the error happen
+
+
+#### Informational Log Message
+These types of log messages are used to give application administrators contexts to user errors,
+users errors can be for example, a stream could not be created due to incorrect user data.
+The following questions should be answered with these log messages.
+- when did the error occur
+- what data was used to cause the error
+- what api path did the user call
+
+#### The Minimal Amount of Context That Should Always be Logged
+We should always aim to provide just the right amount of context when logging an error. This can be tricky,
+because sometimes we are logging information without knowing the actual cause behind the error.
+We should aim to at least always provide a minimum of information with every log entry, so that a developer
+can always look at an entry and know where to look and debug the codebase by just reading the error message in the logs.
+
+#### Exclude sensitive information
+Be careful when working on parts of the application that could internationally contain sensitive data.
+In these cases, it could be useful to not include the data payload when logging.
+In some cases, an object id could be provided for more context, such as a Tenant/UserID instead
+of a username but only where the id belongs to a persisted object that an administrator can access.
+
+#### Avoid adding too much Context
+Having too much information in a log message is a thing. Image a deploymentID being logged for
+an object before it has been saved to the database. The error causes it to not be persisted, but the
+admin assumes it should be in the DB. This would waste time in searching for the object
+and potentially cause the assumption of an error that doesn't actually exist.
+
+### How information should be logged.
+#### Log in JSON Format
+We should aim to always log messages in JSON format for production environments. JSON format is not only easily user readable
+it also allows for seamless integrations with external log management tools for extra flexibility
+and a higher observability.
+The logging framework we use at DataCater automatically appends the log messages into JSON format for production.
+When running the application in dev mode, logs aren't appended in JSON, because the framework parses them into a readable format
+
+
+#### Use the correct logging level:
+Using the correct logging levels gives a much better context when manually handling error
+or debugging processes. It allows for a developer to filter by error type
+FATAL - Critical service failure. These errors will block the application from further processing any requests.
+ERROR - disruption in a request or the ability to service a request. These errors indicate a problem in the software, without knowing what the actual error was. Otherwise, the error should be handled accordingly.
+WARN - non-critical service error. These errors are non-critical but could be useful information for making improvements.
+INFO - Non-error debugging statements.
+DEBUG - extra information regarding life-cycle events. These messages should provide information that can be useful for a developer.
+
+##### Examples per logging level
+FATAL:
+```java
+try {...}
+catch (RuntimeException re) {
+    LOGGER.fatal("The flash broke his foot and can't run anymore!");
+    throw re;
+}
+```
+
+ERROR:
+```Java
+try {...}
+catch (InvocationTargetException ite) {
+    LOGGER.error("Green Arrow missed an easy shot.");
+    throw ite;
+}
+```
+
+WARN:
+```Java
+if(true){...}
+else {
+    LOGGER.warn("'I don't respond to threats, I make them' - The Joker");
+}
+```
+
+INFO:
+```Java
+public void startup(@Observes StartupEvent event) {
+  LOGGER.info("I am the vengeance... I am the night... I am Batman.");
+}
+```
+
+DEBUG:
+```Java
+void AtomVsAntMan() {
+  Random rand = new Random();
+  if(rand.nextInt(100) < 99) {
+    LOGGER.debug("Atom beat Antman");
+  }
+}
+```

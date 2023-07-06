@@ -154,5 +154,9 @@ public class StaticConfig {
         "The referenced Kubernetes Deployment could not be found.";
     static final String DEPLOYMENT_NOT_CREATED = "The Deployment could not be created.";
     static final String DEPLOYMENT_NOT_UPDATED = "The Deployment could not be updated.";
+    static final String DEPLOYMENT_CREATION_FAILED =
+        "An error has occurred in %s: %s %s The deployment that was failed to be created was defined as follows: %s %s";
+    static final String DEPLOYMENT_FETCH_FAILED =
+        "An error has occurred in %s: %s %s The deployment that could not be retrieved was: %s %s";
   }
 }

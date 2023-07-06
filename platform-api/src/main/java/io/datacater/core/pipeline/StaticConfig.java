@@ -17,5 +17,6 @@ public class StaticConfig {
         "Calling the Python runner exceeded the timeout of datacater.pythonrunner.preview.timeout=%d.";
     static final String RECEIVED_RESPONSE_FORMATTED_MSG =
         "Received response from %s with status %d";
+    static final String PIPELINE_POST_URI_INFO = "pipeline post URI to be called: %s";
   }
 }

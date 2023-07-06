@@ -56,13 +56,16 @@ public class PipelineUtilities {
               CompletableFuture<HttpResponse<String>> specResponse =
                   httpClient.sendAsync(specPost, HttpResponse.BodyHandlers.ofString());
 
-              LOGGER.info(specPost.uri().toString());
+              LOGGER.info(
+                  String.format(
+                      StaticConfig.FormattedMessages.PIPELINE_POST_URI_INFO,
+                      specPost.uri().toString()));
               StreamMessage recordMessagePayload = msgs.get(0);
               String messagesPayload = recordMessagePayload.toRecordJsonString();
               HttpRequest transformPost = namedPod.buildPost(messagesPayload);
 
-              LOGGER.info(StaticConfig.PAYLOAD_SENT_UPDATE_MSG);
-              LOGGER.info(messagesPayload);
+              LOGGER.info(
+                  StaticConfig.PAYLOAD_SENT_UPDATE_MSG + System.lineSeparator() + messagesPayload);
               CompletableFuture<HttpResponse<String>> transformResponse =
                   httpClient.sendAsync(transformPost, HttpResponse.BodyHandlers.ofString());
 
