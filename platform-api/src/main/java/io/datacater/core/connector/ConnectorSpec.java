@@ -34,6 +34,13 @@ public record ConnectorSpec(
   }
 
   public Map<String, Object> getConnectorMap() {
+    LOGGER.info(
+        String.format("Provoking NPE on configSelector := %s", this.configSelector().toString()));
+    LOGGER.info(String.format("Provoking NPE on connectorImage := %s", this.connector().image()));
+    LOGGER.info(String.format("Provoking NPE on connectorStream := %s", this.connector().stream()));
+    LOGGER.info(
+        String.format(
+            "Provoking NPE on connectorConfig := %s", this.connector().config().toString()));
     Map<String, Object> specMap =
         Map.of(
             "image", this.connector().image(),

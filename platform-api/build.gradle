@@ -99,6 +99,7 @@ compileJava.dependsOn 'spotlessApply'
 
 test {
     maxHeapSize="2048m"
+    testLogging.showStandardStreams = true
 }
 
 sonarqube {

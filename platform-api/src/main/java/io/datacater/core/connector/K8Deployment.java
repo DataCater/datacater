@@ -32,7 +32,8 @@ public class K8Deployment {
 
     String connectorImage;
     try {
-      connectorImage = connectorSpec.getConnectorMap().get(StaticConfig.IMAGE_NODE_TEXT).toString();
+      LOGGER.info(String.join(",", connectorSpec.getConnectorMap().keySet()));
+      connectorImage = connectorSpec.connector().image();
     } catch (NullPointerException e) {
       throw new CreateConnectorException(StaticConfig.LoggerMessages.NO_IMAGE_PROVIDED);
     }

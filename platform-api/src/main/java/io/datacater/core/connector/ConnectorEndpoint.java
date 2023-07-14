@@ -64,7 +64,6 @@ public class ConnectorEndpoint {
   @POST
   @Consumes({MediaType.APPLICATION_JSON, YAMLMediaTypes.APPLICATION_JACKSON_YAML})
   public Uni<ConnectorEntity> createConnector(ConnectorSpec spec) {
-    LOGGER.info(String.format("Serialized spec := %s", spec.toString()));
     ConnectorEntity connectorEntity = new ConnectorEntity(spec);
 
     return dsf.withTransaction(
