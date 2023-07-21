@@ -7,7 +7,7 @@
     "bootstrap": "^5.2.1",
     "javascript-time-ago": "^2.5.9",
     "js-yaml": "^4.1.0",
-    "npm": "^8.19.2",
+    "npm": "^9.8.1",
     "parse-prometheus-text-format": "^1.1.1",
     "react": "^16.14.0",
     "react-ace": "^10.1.0",
