@@ -7,4 +7,8 @@ public class ReferencedStreamNotFoundException extends RuntimeException {
   public ReferencedStreamNotFoundException(String message) {
     super(message);
   }
+
+  public ReferencedStreamNotFoundException(String message, Throwable cause) {
+    super(message, cause);
+  }
 }

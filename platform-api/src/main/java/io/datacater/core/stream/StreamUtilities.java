@@ -115,9 +115,9 @@ public class StreamUtilities {
 
     try {
       streamId = UUID.fromString(connectorSpec.connector().stream());
-    } catch (NullPointerException e) {
+    } catch (NullPointerException | IllegalArgumentException e) {
       throw new ReferencedStreamNotFoundException(
-          StaticConfig.LoggerMessages.STREAM_NOT_FOUND_MESSAGE);
+          StaticConfig.LoggerMessages.STREAM_NOT_FOUND_MESSAGE, e);
     }
 
     return dsf.withTransaction(

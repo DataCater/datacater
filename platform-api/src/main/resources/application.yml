@@ -173,6 +173,7 @@ datacater :
       devservices:
         flavor: kind
         override-kubeconfig: true
+        api-version: 1.24.1
     log:
       level: INFO
       console:
