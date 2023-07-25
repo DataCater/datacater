@@ -8,6 +8,8 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 import io.datacater.core.ExcludeFromGeneratedCoverageReport;
 import io.datacater.core.exceptions.JsonNotParsableException;
+import io.datacater.core.utilities.JsonUtilities;
+
 import java.util.Map;
 import javax.persistence.ElementCollection;
 import javax.persistence.Embeddable;
@@ -22,6 +24,10 @@ public class Pipeline {
   @ElementCollection
   private Map<String, String> metadata;
 
+  @JsonProperty("projectSelector")
+  @ElementCollection
+  private Map<String, String> projectSelector;
+
   @Embedded
   @JsonProperty("spec")
   private PipelineSpec spec;
@@ -29,26 +35,28 @@ public class Pipeline {
   @ExcludeFromGeneratedCoverageReport
   protected Pipeline() {}
 
-  private Pipeline(String name, Map<String, String> metadata, PipelineSpec spec) {
+  private Pipeline(String name, Map<String, String> metadata, PipelineSpec spec, Map<String, String> projectSelector) {
     this.name = name;
     this.metadata = metadata;
     this.spec = spec;
+    this.projectSelector = projectSelector;
   }
 
   @JsonCreator
   public static Pipeline from(
       @JsonProperty(value = "name", required = true) String name,
       @JsonProperty(value = "metadata", required = true) Map<String, String> metadata,
-      @JsonProperty(value = "spec", required = true) PipelineSpec spec) {
-    return new Pipeline(name, metadata, spec);
+      @JsonProperty(value = "spec", required = true) PipelineSpec spec,
+      @JsonProperty(value = "projectSelector", required = true) Map<String, String> projectSelector) {
+    return new Pipeline(name, metadata, spec, projectSelector);
   }
 
   @JsonIgnore
   static Pipeline from(PipelineEntity pe) throws JsonProcessingException {
-    ObjectMapper mapper = new ObjectMapper();
-    Map<String, String> metadata = mapper.readValue(pe.getSpec().asText(), Map.class);
+    Map<String, String> metadata = JsonUtilities.toStringMap(pe.getMetadata());
     PipelineSpec spec = PipelineSpec.from(pe.getSpec());
-    return new Pipeline(pe.getName(), metadata, spec);
+    Map<String, String> projectSelector = JsonUtilities.toStringMap(pe.getProjectSelector());
+    return new Pipeline(pe.getName(), metadata, spec, projectSelector);
   }
 
   @JsonIgnore
@@ -80,6 +88,9 @@ public class Pipeline {
 
   public PipelineSpec getSpec() {
     return spec;
+  }
+  public Map<String, String> getProjectSelector() {
+    return projectSelector;
   }
 
   public void setSpec(PipelineSpec spec) {

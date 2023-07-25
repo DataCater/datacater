@@ -1,6 +1,7 @@
 package io.datacater.core.pipeline;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -9,10 +10,12 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import io.datacater.core.ExcludeFromGeneratedCoverageReport;
 import io.datacater.core.exceptions.JsonNotParsableException;
+import io.datacater.core.utilities.JsonUtilities;
 import io.quarkiverse.hibernate.types.json.JsonBinaryType;
 import io.quarkiverse.hibernate.types.json.JsonType;
 import io.quarkiverse.hibernate.types.json.JsonTypes;
 import java.util.Date;
+import java.util.Map;
 import java.util.UUID;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -55,20 +58,28 @@ public class PipelineEntity {
   @JsonProperty("spec")
   private JsonNode spec;
 
+  @Type(type = JsonTypes.JSON)
+  @Column(name = "projectSelector", columnDefinition = JsonTypes.JSON_BIN)
+  @JsonProperty("projectSelector")
+  @JsonInclude(JsonInclude.Include.NON_NULL)
+  private JsonNode projectSelector;
+
   public PipelineEntity() {}
 
-  private PipelineEntity(String name, JsonNode metadata, JsonNode spec) {
+  private PipelineEntity(String name, JsonNode metadata, JsonNode spec, JsonNode projectSelector) {
     this.name = name;
     this.metadata = metadata;
     this.spec = spec;
+    this.projectSelector = projectSelector;
   }
 
   @JsonIgnore
   public static PipelineEntity from(
       @JsonProperty(value = "name", required = true) String name,
       @JsonProperty(value = "metadata", required = true) JsonNode metadata,
-      @JsonProperty(value = "spec", required = true) JsonNode spec) {
-    return new PipelineEntity(name, metadata, spec);
+      @JsonProperty(value = "spec", required = true) JsonNode spec,
+      @JsonProperty(value = "projectSelector", required = true) JsonNode projectSelector) {
+    return new PipelineEntity(name, metadata, spec, projectSelector);
   }
 
   @JsonIgnore
@@ -93,6 +104,9 @@ public class PipelineEntity {
 
   public JsonNode getSpec() {
     return spec;
+  }
+  public JsonNode getProjectSelector() {
+    return projectSelector;
   }
 
   public String getName() {

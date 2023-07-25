@@ -28,9 +28,10 @@ public record DeploymentSpec(
         """)
         @JsonProperty(value = "spec", required = true)
         Map<String, Object> deployment,
-    @JsonProperty(value = "configSelector") Map<String, String> configSelector) {
+    @JsonProperty(value = "configSelector") Map<String, String> configSelector,
+    @JsonProperty(value = "projectSelector") Map<String, String> projectSelector) {
   public DeploymentSpec(String name, Map<String, Object> deployment) {
-    this(name, deployment, new HashMap<>());
+    this(name, deployment, new HashMap<>(), new HashMap<>());
   }
 
   public static DeploymentSpec from(DeploymentSpec spec) {
@@ -43,6 +44,6 @@ public record DeploymentSpec(
       throw new JsonNotParsableException(e.getMessage());
     }
 
-    return new DeploymentSpec(spec.name(), copiedMap, spec.configSelector());
+    return new DeploymentSpec(spec.name(), copiedMap, spec.configSelector(), spec.projectSelector());
   }
 }

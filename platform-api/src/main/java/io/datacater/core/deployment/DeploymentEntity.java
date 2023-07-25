@@ -49,6 +49,12 @@ public class DeploymentEntity {
   @JsonInclude(JsonInclude.Include.NON_NULL)
   private JsonNode configSelector;
 
+  @Type(type = JsonTypes.JSON)
+  @Column(name = "projectSelector", columnDefinition = JsonTypes.JSON_BIN)
+  @JsonProperty("projectSelector")
+  @JsonInclude(JsonInclude.Include.NON_NULL)
+  private JsonNode projectSelector;
+
   protected DeploymentEntity() {}
 
   public static JsonNode serializeMap(Map<String, Object> map) {
@@ -60,12 +66,14 @@ public class DeploymentEntity {
     this.name = spec.name();
     this.spec = DeploymentEntity.serializeMap(spec.deployment());
     this.configSelector = JsonUtilities.convertStringMap(spec.configSelector());
+    this.projectSelector = JsonUtilities.convertStringMap(spec.projectSelector());
   }
 
   public DeploymentEntity updateEntity(DeploymentSpec spec) {
     this.name = spec.name();
     this.spec = DeploymentEntity.serializeMap(spec.deployment());
     this.configSelector = JsonUtilities.convertStringMap(spec.configSelector());
+    this.projectSelector = JsonUtilities.convertStringMap(spec.projectSelector());
     return this;
   }
 
@@ -83,6 +91,9 @@ public class DeploymentEntity {
 
   public JsonNode getConfigSelector() {
     return configSelector;
+  }
+  public JsonNode getProjectSelector() {
+    return projectSelector;
   }
 
   public String getName() {

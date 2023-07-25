@@ -154,9 +154,10 @@ class PipelineEndpointTest {
     UUID uuid = UUID.fromString(responseJson.get("uuid").asText());
 
     Map<String, String> pipelineMetadata = pipeline.getMetadata();
+    Map<String, String> pipelineProjectSelector = pipeline.getProjectSelector();
     pipelineMetadata.put("stream-in", uuid.toString());
     String name = "pipeline-inspect-test";
-    Pipeline withStreamIn = Pipeline.from(name, pipelineMetadata, pipeline.getSpec());
+    Pipeline withStreamIn = Pipeline.from(name, pipelineMetadata, pipeline.getSpec(), pipelineProjectSelector);
     Response responsePipeline =
         given()
             .baseUri(baseURI)

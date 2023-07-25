@@ -50,19 +50,28 @@ public class StreamEntity {
   @JsonInclude(JsonInclude.Include.NON_NULL)
   private JsonNode configSelector;
 
+  @Type(type = JsonTypes.JSON)
+  @Column(name = "projectSelector", columnDefinition = JsonTypes.JSON_BIN)
+  @JsonProperty("projectSelector")
+  @JsonInclude(JsonInclude.Include.NON_NULL)
+  private JsonNode projectSelector;
+
+
   protected StreamEntity() {}
 
   public StreamEntity(String name, StreamSpec spec) throws JsonProcessingException {
     this.name = name;
     this.spec = spec.serializeStreamSpec();
     this.configSelector = JsonNodeFactory.instance.objectNode();
+    this.projectSelector = JsonNodeFactory.instance.objectNode();
   }
 
-  public StreamEntity(String name, StreamSpec spec, Map<String, String> configSelector)
+  public StreamEntity(String name, StreamSpec spec, Map<String, String> configSelector, Map<String, String> projectSelector)
       throws JsonProcessingException {
     this.name = name;
     this.spec = spec.serializeStreamSpec();
     this.configSelector = JsonUtilities.convertStringMap(configSelector);
+    this.projectSelector = JsonUtilities.convertStringMap(projectSelector);
   }
 
   public StreamEntity updateEntity(Stream stream) throws JsonProcessingException {
@@ -84,5 +93,8 @@ public class StreamEntity {
 
   public JsonNode getConfigSelector() {
     return configSelector;
+  }
+  public JsonNode getProjectSelector() {
+    return projectSelector;
   }
 }
