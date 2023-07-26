@@ -6,7 +6,6 @@ import io.datacater.core.authentication.DataCaterSessionFactory;
 import io.datacater.core.config.ConfigEntity;
 import io.datacater.core.config.ConfigUtilities;
 import io.datacater.core.exceptions.*;
-import io.datacater.core.project.ProjectUtilities;
 import io.datacater.core.utilities.LoggerUtilities;
 import io.quarkus.security.Authenticated;
 import io.smallrye.mutiny.Uni;
@@ -62,11 +61,7 @@ public class StreamEndpoint {
   public Uni<Response> createStream(@PathParam("project") String project, Stream stream)
       throws JsonProcessingException {
     StreamEntity se =
-        new StreamEntity(
-            stream.name(),
-            stream.spec(),
-            stream.configSelector(),
-            ProjectUtilities.createProjectLabel(project));
+        new StreamEntity(stream.name(), stream.spec(), stream.configSelector(), project);
     return dsf.withTransaction(
             (session, transaction) ->
                 session

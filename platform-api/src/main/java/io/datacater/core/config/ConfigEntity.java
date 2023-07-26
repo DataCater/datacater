@@ -1,13 +1,11 @@
 package io.datacater.core.config;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.datacater.core.config.enums.Kind;
 import io.datacater.core.exceptions.JsonNotParsableException;
-import io.datacater.core.utilities.JsonUtilities;
 import io.quarkiverse.hibernate.types.json.JsonBinaryType;
 import io.quarkiverse.hibernate.types.json.JsonTypes;
 import java.util.Date;
@@ -52,21 +50,17 @@ public class ConfigEntity {
   @Column(name = "spec", columnDefinition = JsonTypes.JSON_BIN)
   private JsonNode spec;
 
-  @Type(type = JsonTypes.JSON)
-  @Column(name = "projectSelector", columnDefinition = JsonTypes.JSON_BIN)
-  @JsonProperty("projectSelector")
-  @JsonInclude(JsonInclude.Include.NON_NULL)
-  private JsonNode projectSelector;
+  @JsonProperty("project")
+  private String project;
 
   protected ConfigEntity() {}
 
-  protected ConfigEntity(
-      String name, Kind kind, JsonNode metadata, JsonNode spec, JsonNode project) {
+  protected ConfigEntity(String name, Kind kind, JsonNode metadata, JsonNode spec, String project) {
     this.name = name;
     this.kind = kind.toString();
     this.metadata = metadata;
     this.spec = spec;
-    this.projectSelector = project;
+    this.project = project;
   }
 
   public ConfigEntity updateEntity(Config config) {
@@ -88,14 +82,13 @@ public class ConfigEntity {
       Kind kind,
       Map<String, Object> metadata,
       Map<String, Object> spec,
-      Map<String, String> project)
+      String project)
       throws JsonProcessingException {
     ObjectMapper objectMapper = new ObjectMapper();
     JsonNode specJson = objectMapper.readTree(objectMapper.writeValueAsString(spec));
     JsonNode metadataJson = objectMapper.readTree(objectMapper.writeValueAsString(metadata));
-    JsonNode projectJson = JsonUtilities.convertStringMap(project);
 
-    return new ConfigEntity(name, kind, metadataJson, specJson, projectJson);
+    return new ConfigEntity(name, kind, metadataJson, specJson, project);
   }
 
   public UUID getId() {

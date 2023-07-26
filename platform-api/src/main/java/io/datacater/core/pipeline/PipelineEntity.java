@@ -1,7 +1,6 @@
 package io.datacater.core.pipeline;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -56,19 +55,16 @@ public class PipelineEntity {
   @JsonProperty("spec")
   private JsonNode spec;
 
-  @Type(type = JsonTypes.JSON)
-  @Column(name = "projectSelector", columnDefinition = JsonTypes.JSON_BIN)
-  @JsonProperty("projectSelector")
-  @JsonInclude(JsonInclude.Include.NON_NULL)
-  private JsonNode projectSelector;
+  @JsonProperty("project")
+  private String project;
 
   public PipelineEntity() {}
 
-  private PipelineEntity(String name, JsonNode metadata, JsonNode spec, JsonNode projectSelector) {
+  private PipelineEntity(String name, JsonNode metadata, JsonNode spec, String project) {
     this.name = name;
     this.metadata = metadata;
     this.spec = spec;
-    this.projectSelector = projectSelector;
+    this.project = project;
   }
 
   @JsonIgnore
@@ -76,8 +72,8 @@ public class PipelineEntity {
       @JsonProperty(value = "name", required = true) String name,
       @JsonProperty(value = "metadata", required = true) JsonNode metadata,
       @JsonProperty(value = "spec", required = true) JsonNode spec,
-      @JsonProperty(value = "projectSelector", required = true) JsonNode projectSelector) {
-    return new PipelineEntity(name, metadata, spec, projectSelector);
+      @JsonProperty(value = "project", required = true) String project) {
+    return new PipelineEntity(name, metadata, spec, project);
   }
 
   @JsonIgnore
@@ -104,8 +100,8 @@ public class PipelineEntity {
     return spec;
   }
 
-  public JsonNode getProjectSelector() {
-    return projectSelector;
+  public String project() {
+    return project;
   }
 
   public String getName() {

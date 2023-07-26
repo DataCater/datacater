@@ -30,11 +30,7 @@ public class Pipeline {
   @ExcludeFromGeneratedCoverageReport
   protected Pipeline() {}
 
-  private Pipeline(
-      String name,
-      Map<String, String> metadata,
-      PipelineSpec spec,
-      Map<String, String> projectSelector) {
+  private Pipeline(String name, Map<String, String> metadata, PipelineSpec spec) {
     this.name = name;
     this.metadata = metadata;
     this.spec = spec;
@@ -44,18 +40,15 @@ public class Pipeline {
   public static Pipeline from(
       @JsonProperty(value = "name", required = true) String name,
       @JsonProperty(value = "metadata", required = true) Map<String, String> metadata,
-      @JsonProperty(value = "spec", required = true) PipelineSpec spec,
-      @JsonProperty(value = "projectSelector", required = true)
-          Map<String, String> projectSelector) {
-    return new Pipeline(name, metadata, spec, projectSelector);
+      @JsonProperty(value = "spec", required = true) PipelineSpec spec) {
+    return new Pipeline(name, metadata, spec);
   }
 
   @JsonIgnore
   static Pipeline from(PipelineEntity pe) throws JsonProcessingException {
     Map<String, String> metadata = JsonUtilities.toStringMap(pe.getMetadata());
     PipelineSpec spec = PipelineSpec.from(pe.getSpec());
-    Map<String, String> projectSelector = JsonUtilities.toStringMap(pe.getProjectSelector());
-    return new Pipeline(pe.getName(), metadata, spec, projectSelector);
+    return new Pipeline(pe.getName(), metadata, spec);
   }
 
   @JsonIgnore

@@ -5,7 +5,6 @@ import io.datacater.core.authentication.DataCaterSessionFactory;
 import io.datacater.core.config.ConfigUtilities;
 import io.datacater.core.exceptions.*;
 import io.datacater.core.pipeline.PipelineUtilities;
-import io.datacater.core.project.ProjectUtilities;
 import io.datacater.core.stream.StreamUtilities;
 import io.datacater.core.utilities.LoggerUtilities;
 import io.datacater.core.utilities.StringUtilities;
@@ -207,7 +206,7 @@ public class DeploymentEndpoint {
   @Consumes({MediaType.APPLICATION_JSON, YAMLMediaTypes.APPLICATION_JACKSON_YAML})
   public Uni<DeploymentEntity> createDeployment(
       @PathParam("project") String project, DeploymentSpec spec) {
-    DeploymentEntity de = new DeploymentEntity(spec, ProjectUtilities.createProjectLabel(project));
+    DeploymentEntity de = new DeploymentEntity(spec, project);
 
     return dsf.withTransaction(
         (session, transaction) ->

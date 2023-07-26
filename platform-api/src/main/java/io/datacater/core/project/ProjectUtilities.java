@@ -36,12 +36,6 @@ public class ProjectUtilities {
         .continueWith(new ArrayList<>());
   }
 
-  public static Map<String, String> createProjectLabel(String project) {
-    Map<String, String> label = new HashMap<>();
-    label.put(StaticConfig.PROJECT_KEY, project);
-    return label;
-  }
-
   private static boolean stringMapsContainsEqualKey(
       Map<String, String> givenMap, Map<String, String> currentMap) {
     if (givenMap == null || currentMap == null || givenMap.isEmpty() || currentMap.isEmpty()) {
