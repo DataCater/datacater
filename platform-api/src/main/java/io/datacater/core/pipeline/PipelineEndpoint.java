@@ -37,7 +37,7 @@ import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
 import org.eclipse.microprofile.openapi.annotations.security.SecurityRequirement;
 import org.jboss.logging.Logger;
 
-@Path("/pipelines")
+@Path("{project}/pipelines")
 @Authenticated
 @Produces({MediaType.APPLICATION_JSON, YAMLMediaTypes.APPLICATION_JACKSON_YAML})
 @SecurityRequirement(name = "apiToken")
@@ -55,7 +55,7 @@ public class PipelineEndpoint {
   }
 
   @GET
-  public Uni<List<PipelineEntity>> getPipelines() {
+  public Uni<List<PipelineEntity>> getPipelines(@PathParam("project") String project) {
     return dsf.withSession(
         session ->
             session.createQuery("from PipelineEntity", PipelineEntity.class).getResultList());
@@ -63,7 +63,8 @@ public class PipelineEndpoint {
 
   @GET
   @Path("{uuid}")
-  public Uni<PipelineEntity> getPipeline(@PathParam("uuid") UUID uuid) {
+  public Uni<PipelineEntity> getPipeline(
+      @PathParam("project") String project, @PathParam("uuid") UUID uuid) {
     return dsf.withTransaction(((session, transaction) -> session.find(PipelineEntity.class, uuid)))
         .onItem()
         .ifNull()
@@ -73,7 +74,8 @@ public class PipelineEndpoint {
   @POST
   @RequestBody
   @Consumes({MediaType.APPLICATION_JSON, YAMLMediaTypes.APPLICATION_JACKSON_YAML})
-  public Uni<PipelineEntity> createPipeline(Pipeline pipeline) throws JsonProcessingException {
+  public Uni<PipelineEntity> createPipeline(@PathParam("project") String project, Pipeline pipeline)
+      throws JsonProcessingException {
     PipelineEntity pe =
         PipelineEntity.from(
             pipeline.getName(),
@@ -87,7 +89,8 @@ public class PipelineEndpoint {
   @Path("{uuid}")
   @RequestBody
   @Consumes({MediaType.APPLICATION_JSON, YAMLMediaTypes.APPLICATION_JACKSON_YAML})
-  public Uni<PipelineEntity> updatePipeline(@PathParam("uuid") UUID uuid, Pipeline pipeline) {
+  public Uni<PipelineEntity> updatePipeline(
+      @PathParam("project") String project, @PathParam("uuid") UUID uuid, Pipeline pipeline) {
     return dsf.withTransaction(
         ((session, transaction) ->
             session
@@ -97,7 +100,8 @@ public class PipelineEndpoint {
 
   @DELETE
   @Path("{uuid}")
-  public Uni<Response> deletePipeline(@PathParam("uuid") UUID uuid) {
+  public Uni<Response> deletePipeline(
+      @PathParam("project") String project, @PathParam("uuid") UUID uuid) {
     return dsf.withTransaction(
         ((session, tx) ->
             session
@@ -112,7 +116,7 @@ public class PipelineEndpoint {
   @Path("preview")
   @Consumes(MediaType.APPLICATION_JSON)
   @Produces(MediaType.APPLICATION_JSON)
-  public Uni<Response> preview(String payload) {
+  public Uni<Response> preview(@PathParam("project") String project, String payload) {
     LOGGER.debug(payload);
     HttpClient httpClient = HttpClient.newHttpClient();
     Uni<NamedPod> namedPod = runnerPool.getPod();
@@ -142,7 +146,7 @@ public class PipelineEndpoint {
 
   @GET
   @Path("{uuid}/inspect")
-  public Uni<String> inspect(@PathParam("uuid") UUID uuid) {
+  public Uni<String> inspect(@PathParam("project") String project, @PathParam("uuid") UUID uuid) {
     return pipelineUtil.transformMessages(uuid);
   }
 }

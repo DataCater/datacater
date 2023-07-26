@@ -19,7 +19,7 @@ import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
 import org.eclipse.microprofile.openapi.annotations.security.SecurityRequirement;
 import org.jboss.logging.Logger;
 
-@Path("/streams")
+@Path("{project}/streams")
 @Authenticated
 @SecurityRequirement(name = "apiToken")
 @Produces({MediaType.APPLICATION_JSON, YAMLMediaTypes.APPLICATION_JACKSON_YAML})
@@ -30,7 +30,8 @@ public class StreamEndpoint {
 
   @GET
   @Path("{uuid}")
-  public Uni<StreamEntity> getStream(@PathParam("uuid") UUID uuid) {
+  public Uni<StreamEntity> getStream(
+      @PathParam("project") String project, @PathParam("uuid") UUID uuid) {
     return dsf.withTransaction(((session, transaction) -> session.find(StreamEntity.class, uuid)))
         .onItem()
         .ifNull()
@@ -41,6 +42,7 @@ public class StreamEndpoint {
   @GET
   @Path("{uuid}/inspect")
   public Uni<List<StreamMessage>> inspectStream(
+      @PathParam("project") String project,
       @PathParam("uuid") UUID uuid,
       @DefaultValue("100") @QueryParam("limit") Long limit,
       @DefaultValue("SEQUENCED") @QueryParam("sampleMethod") SampleMethod sampleMethod) {
@@ -48,7 +50,7 @@ public class StreamEndpoint {
   }
 
   @GET
-  public Uni<List<StreamEntity>> getStreams() {
+  public Uni<List<StreamEntity>> getStreams(@PathParam("project") String project) {
     return dsf.withSession(
         session -> session.createQuery("from StreamEntity", StreamEntity.class).getResultList());
   }
@@ -56,7 +58,8 @@ public class StreamEndpoint {
   @POST
   @RequestBody
   @Consumes({MediaType.APPLICATION_JSON, YAMLMediaTypes.APPLICATION_JACKSON_YAML})
-  public Uni<Response> createStream(Stream stream) throws JsonProcessingException {
+  public Uni<Response> createStream(@PathParam("project") String project, Stream stream)
+      throws JsonProcessingException {
     StreamEntity se =
         new StreamEntity(
             stream.name(), stream.spec(), stream.configSelector(), stream.projectSelector());
@@ -89,7 +92,8 @@ public class StreamEndpoint {
   @Path("{uuid}")
   @RequestBody
   @Consumes({MediaType.APPLICATION_JSON, YAMLMediaTypes.APPLICATION_JACKSON_YAML})
-  public Uni<StreamEntity> updateStream(@PathParam("uuid") UUID uuid, Stream stream) {
+  public Uni<StreamEntity> updateStream(
+      @PathParam("project") String project, @PathParam("uuid") UUID uuid, Stream stream) {
 
     return dsf.withTransaction(
         ((session, transaction) ->
@@ -130,7 +134,9 @@ public class StreamEndpoint {
   @DELETE
   @Path("{uuid}")
   public Uni<Response> deleteStream(
-      @PathParam("uuid") UUID uuid, @HeaderParam("force") Boolean force) {
+      @PathParam("project") String project,
+      @PathParam("uuid") UUID uuid,
+      @HeaderParam("force") Boolean force) {
     return dsf.withTransaction(
         ((session, tx) ->
             session

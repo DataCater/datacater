@@ -29,7 +29,7 @@ import javax.ws.rs.sse.SseEventSink;
 import org.eclipse.microprofile.openapi.annotations.security.SecurityRequirement;
 import org.jboss.logging.Logger;
 
-@Path("/deployments")
+@Path("{project}/deployments")
 @Authenticated
 @Produces({MediaType.APPLICATION_JSON, YAMLMediaTypes.APPLICATION_JACKSON_YAML})
 @SecurityRequirement(name = "apiToken")
@@ -44,7 +44,8 @@ public class DeploymentEndpoint {
 
   @GET
   @Path("{uuid}")
-  public Uni<DeploymentEntity> getDeployment(@PathParam("uuid") UUID deploymentId) {
+  public Uni<DeploymentEntity> getDeployment(
+      @PathParam("project") String project, @PathParam("uuid") UUID deploymentId) {
     return dsf.withTransaction(
             ((session, transaction) -> session.find(DeploymentEntity.class, deploymentId)))
         .onItem()
@@ -56,6 +57,7 @@ public class DeploymentEndpoint {
   @GET
   @Path("{uuid}/logs")
   public Uni<List<String>> getLogs(
+      @PathParam("project") String project,
       @PathParam("uuid") UUID deploymentId,
       @DefaultValue("1") @QueryParam("replica") int replica,
       @DefaultValue("100") @QueryParam("tailingLines") int tailingLines) {
@@ -76,7 +78,9 @@ public class DeploymentEndpoint {
   @GET
   @Path("{uuid}/health")
   public Uni<Response> getHealth(
-      @PathParam("uuid") UUID deploymentId, @DefaultValue("1") @QueryParam("replica") int replica) {
+      @PathParam("project") String project,
+      @PathParam("uuid") UUID deploymentId,
+      @DefaultValue("1") @QueryParam("replica") int replica) {
     return dsf.withTransaction(
             ((session, transaction) -> session.find(DeploymentEntity.class, deploymentId)))
         .onItem()
@@ -109,7 +113,9 @@ public class DeploymentEndpoint {
   @Path("{uuid}/metrics")
   @Produces(MediaType.TEXT_PLAIN)
   public Uni<Response> getMetrics(
-      @PathParam("uuid") UUID deploymentId, @DefaultValue("1") @QueryParam("replica") int replica) {
+      @PathParam("project") String project,
+      @PathParam("uuid") UUID deploymentId,
+      @DefaultValue("1") @QueryParam("replica") int replica) {
     return dsf.withTransaction(
             ((session, transaction) -> session.find(DeploymentEntity.class, deploymentId)))
         .onItem()
@@ -134,7 +140,8 @@ public class DeploymentEndpoint {
 
   @GET
   @Path("{uuid}/status")
-  public Uni<DataCaterDeploymentStatus> getStatusByUuid(@PathParam("uuid") UUID deploymentId) {
+  public Uni<DataCaterDeploymentStatus> getStatusByUuid(
+      @PathParam("project") String project, @PathParam("uuid") UUID deploymentId) {
     return dsf.withTransaction(
             ((session, transaction) -> session.find(DeploymentEntity.class, deploymentId)))
         .onItem()
@@ -153,6 +160,7 @@ public class DeploymentEndpoint {
   @Path("{uuid}/watch-logs")
   @Produces(MediaType.SERVER_SENT_EVENTS)
   public Uni<Response> watchLogs(
+      @PathParam("project") String project,
       @PathParam("uuid") UUID deploymentId,
       @DefaultValue("1") @QueryParam("replica") int replica,
       @Context Sse sse,
@@ -177,6 +185,7 @@ public class DeploymentEndpoint {
 
   @GET
   public Uni<List<DeploymentEntity>> getDeployments(
+      @PathParam("project") String project,
       @QueryParam("in-cluster") @DefaultValue("false") boolean inCluster) {
     if (!inCluster) {
       return dsf.withSession(
@@ -195,7 +204,8 @@ public class DeploymentEndpoint {
 
   @POST
   @Consumes({MediaType.APPLICATION_JSON, YAMLMediaTypes.APPLICATION_JACKSON_YAML})
-  public Uni<DeploymentEntity> createDeployment(DeploymentSpec spec) {
+  public Uni<DeploymentEntity> createDeployment(
+      @PathParam("project") String project, DeploymentSpec spec) {
     DeploymentEntity de = new DeploymentEntity(spec);
 
     return dsf.withTransaction(
@@ -258,7 +268,8 @@ public class DeploymentEndpoint {
 
   @DELETE
   @Path("{uuid}")
-  public Uni<Response> deleteDeployment(@PathParam("uuid") UUID deploymentId) {
+  public Uni<Response> deleteDeployment(
+      @PathParam("project") String project, @PathParam("uuid") UUID deploymentId) {
     return dsf.withTransaction(
         ((session, tx) ->
             session
@@ -282,7 +293,9 @@ public class DeploymentEndpoint {
   @Path("{uuid}")
   @Consumes({MediaType.APPLICATION_JSON, YAMLMediaTypes.APPLICATION_JACKSON_YAML})
   public Uni<DeploymentEntity> updateDeployment(
-      @PathParam("uuid") UUID deploymentUuid, DeploymentSpec spec) {
+      @PathParam("project") String project,
+      @PathParam("uuid") UUID deploymentUuid,
+      DeploymentSpec spec) {
     return dsf.withTransaction(
         ((session, transaction) ->
             session

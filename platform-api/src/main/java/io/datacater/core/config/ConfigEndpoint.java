@@ -14,17 +14,19 @@ import javax.ws.rs.core.Response;
 import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
 import org.eclipse.microprofile.openapi.annotations.security.SecurityRequirement;
 import org.hibernate.reactive.mutiny.Mutiny.SessionFactory;
+import org.jboss.logging.Logger;
 
-@Path("/configs")
+@Path("{project}/configs")
 @Authenticated
 @Produces({MediaType.APPLICATION_JSON, YAMLMediaTypes.APPLICATION_JACKSON_YAML})
 @SecurityRequirement(name = "apiToken")
 public class ConfigEndpoint {
-
+  private static final Logger LOGGER = Logger.getLogger(ConfigEndpoint.class);
   @Inject SessionFactory sf;
 
   @GET
-  public Uni<List<ConfigEntity>> getAllConfigs() {
+  public Uni<List<ConfigEntity>> getAllConfigs(@PathParam("project") String project) {
+    LOGGER.info("projectString: " + project);
     return sf.withTransaction(
         session ->
             session
@@ -37,7 +39,8 @@ public class ConfigEndpoint {
 
   @GET
   @Path("{uuid}")
-  public Uni<ConfigEntity> getConfig(@PathParam("uuid") UUID uuid) {
+  public Uni<ConfigEntity> getConfig(
+      @PathParam("project") String project, @PathParam("uuid") UUID uuid) {
     return sf.withTransaction(
         session ->
             session
@@ -54,7 +57,8 @@ public class ConfigEndpoint {
   @POST
   @RequestBody
   @Consumes({MediaType.APPLICATION_JSON, YAMLMediaTypes.APPLICATION_JACKSON_YAML})
-  public Uni<ConfigEntity> createConfig(Config config) throws JsonProcessingException {
+  public Uni<ConfigEntity> createConfig(@PathParam("project") String project, Config config)
+      throws JsonProcessingException {
     ConfigEntity configEntity =
         ConfigEntity.from(config.name(), config.kind(), config.metadata(), config.spec());
 
@@ -66,7 +70,8 @@ public class ConfigEndpoint {
   @Path("{uuid}")
   @RequestBody
   @Consumes({MediaType.APPLICATION_JSON, YAMLMediaTypes.APPLICATION_JACKSON_YAML})
-  public Uni<ConfigEntity> updateConfig(@PathParam("uuid") UUID uuid, Config config) {
+  public Uni<ConfigEntity> updateConfig(
+      @PathParam("project") String project, @PathParam("uuid") UUID uuid, Config config) {
     return sf.withTransaction(
         ((session, transaction) ->
             session
@@ -85,7 +90,8 @@ public class ConfigEndpoint {
 
   @DELETE
   @Path("{uuid}")
-  public Uni<Response> deleteConfig(@PathParam("uuid") UUID uuid) {
+  public Uni<Response> deleteConfig(
+      @PathParam("project") String project, @PathParam("uuid") UUID uuid) {
     return sf.withTransaction(
         ((session, transaction) ->
             session
