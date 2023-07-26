@@ -92,6 +92,7 @@ public class DeploymentEntity {
   public JsonNode getConfigSelector() {
     return configSelector;
   }
+
   public JsonNode getProjectSelector() {
     return projectSelector;
   }

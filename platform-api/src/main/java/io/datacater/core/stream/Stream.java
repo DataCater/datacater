@@ -7,7 +7,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.datacater.core.utilities.JsonUtilities;
 import java.util.Map;
 
-public record Stream(String name, StreamSpec spec, Map<String, String> configSelector, Map<String, String> projectSelector) {
+public record Stream(
+    String name,
+    StreamSpec spec,
+    Map<String, String> configSelector,
+    Map<String, String> projectSelector) {
   @JsonCreator
   static Stream from(
       @JsonProperty(value = "name", required = true) String name,
@@ -20,7 +24,11 @@ public record Stream(String name, StreamSpec spec, Map<String, String> configSel
   public static Stream from(StreamEntity se) throws JsonProcessingException {
     ObjectMapper mapper = new ObjectMapper();
     StreamSpec spec = mapper.treeToValue(se.getSpec(), StreamSpec.class);
-    return new Stream(se.getName(), spec, JsonUtilities.toStringMap(se.getConfigSelector()), JsonUtilities.toStringMap(se.getProjectSelector()));
+    return new Stream(
+        se.getName(),
+        spec,
+        JsonUtilities.toStringMap(se.getConfigSelector()),
+        JsonUtilities.toStringMap(se.getProjectSelector()));
   }
 
   public static Stream from(Stream stream) throws JsonProcessingException {

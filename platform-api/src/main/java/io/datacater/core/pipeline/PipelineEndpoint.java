@@ -79,7 +79,7 @@ public class PipelineEndpoint {
             pipeline.getName(),
             pipeline.getSerializedMetadata(),
             PipelineSpec.serializePipelineSpec(pipeline.getSpec().getSteps()),
-                JsonUtilities.convertStringMap(pipeline.getProjectSelector()));
+            JsonUtilities.convertStringMap(pipeline.getProjectSelector()));
     return dsf.withTransaction((session, transaction) -> session.persist(pe)).replaceWith(pe);
   }
 

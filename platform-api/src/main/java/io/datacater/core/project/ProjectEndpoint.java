@@ -5,18 +5,17 @@ import io.datacater.core.exceptions.ProjectNotFoundException;
 import io.datacater.core.utilities.JsonUtilities;
 import io.quarkus.security.Authenticated;
 import io.smallrye.mutiny.Uni;
-import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
-import org.eclipse.microprofile.openapi.annotations.security.SecurityRequirement;
-import org.hibernate.reactive.mutiny.Mutiny.SessionFactory;
-
+import java.util.List;
+import java.util.UUID;
 import javax.inject.Inject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.util.List;
-import java.util.UUID;
+import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
+import org.eclipse.microprofile.openapi.annotations.security.SecurityRequirement;
+import org.hibernate.reactive.mutiny.Mutiny.SessionFactory;
 
-@Path("/configs")
+@Path("/projects")
 @Authenticated
 @Produces({MediaType.APPLICATION_JSON, YAMLMediaTypes.APPLICATION_JACKSON_YAML})
 @SecurityRequirement(name = "apiToken")
@@ -57,7 +56,10 @@ public class ProjectEndpoint {
   @Consumes({MediaType.APPLICATION_JSON, YAMLMediaTypes.APPLICATION_JACKSON_YAML})
   public Uni<ProjectEntity> createProject(Project project) {
     ProjectEntity projectEntity =
-            ProjectEntity.from(project.getName(), JsonUtilities.convertStringMap(project.getMetadata()), JsonUtilities.convertStringMap(project.getSpec()));
+        ProjectEntity.from(
+            project.getName(),
+            JsonUtilities.convertStringMap(project.getMetadata()),
+            JsonUtilities.convertStringMap(project.getSpec()));
 
     return sf.withTransaction((session, transaction) -> session.persist(projectEntity))
         .replaceWith(projectEntity);

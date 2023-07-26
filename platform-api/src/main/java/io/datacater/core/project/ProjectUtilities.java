@@ -1,27 +1,52 @@
 package io.datacater.core.project;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import io.datacater.core.authentication.DataCaterSessionFactory;
-import io.datacater.core.deployment.DeploymentSpec;
-import io.datacater.core.exceptions.CreateDeploymentException;
-import io.datacater.core.kubernetes.PythonRunnerPool;
-import io.datacater.core.stream.StreamMessage;
-import io.datacater.core.stream.StreamUtilities;
+import io.datacater.core.utilities.JsonUtilities;
 import io.smallrye.mutiny.Uni;
-import io.smallrye.mutiny.tuples.Tuple3;
-import io.smallrye.mutiny.unchecked.Unchecked;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
+import java.util.*;
 import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import org.jboss.logging.Logger;
+import org.hibernate.reactive.mutiny.Mutiny;
 
 @ApplicationScoped
 public class ProjectUtilities {
+  private ProjectUtilities() {}
 
+  public static Uni<List<ProjectEntity>> getMappedProjects(
+      Map<String, String> projects, Mutiny.Session session) {
+
+    if (projects == null) {
+      return Uni.createFrom().item(new ArrayList<>());
+    }
+
+    return session
+        .createQuery("from ProjectEntity", ProjectEntity.class)
+        .getResultList()
+        .onItem()
+        .transform(
+            projectEntityList ->
+                projectEntityList.stream()
+                    .filter(
+                        item ->
+                            stringMapsContainsEqualKey(
+                                JsonUtilities.toStringMap(
+                                    item.getMetadata().get(StaticConfig.LABELS)),
+                                projects))
+                    .toList())
+        .onItem()
+        .ifNull()
+        .continueWith(new ArrayList<>());
+  }
+
+  private static boolean stringMapsContainsEqualKey(
+      Map<String, String> givenMap, Map<String, String> currentMap) {
+    if (givenMap == null || currentMap == null || givenMap.isEmpty() || currentMap.isEmpty()) {
+      return false;
+    }
+    for (Map.Entry<String, String> givenEntry : givenMap.entrySet()) {
+      if (currentMap.containsKey(givenEntry.getKey())
+          && Objects.equals(givenEntry.getValue(), currentMap.get(givenEntry.getKey()))) {
+        return true;
+      }
+    }
+    return false;
+  }
 }

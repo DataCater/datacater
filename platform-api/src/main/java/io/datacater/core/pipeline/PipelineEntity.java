@@ -10,12 +10,10 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import io.datacater.core.ExcludeFromGeneratedCoverageReport;
 import io.datacater.core.exceptions.JsonNotParsableException;
-import io.datacater.core.utilities.JsonUtilities;
 import io.quarkiverse.hibernate.types.json.JsonBinaryType;
 import io.quarkiverse.hibernate.types.json.JsonType;
 import io.quarkiverse.hibernate.types.json.JsonTypes;
 import java.util.Date;
-import java.util.Map;
 import java.util.UUID;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -105,6 +103,7 @@ public class PipelineEntity {
   public JsonNode getSpec() {
     return spec;
   }
+
   public JsonNode getProjectSelector() {
     return projectSelector;
   }

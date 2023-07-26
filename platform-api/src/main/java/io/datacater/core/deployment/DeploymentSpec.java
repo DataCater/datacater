@@ -44,6 +44,7 @@ public record DeploymentSpec(
       throw new JsonNotParsableException(e.getMessage());
     }
 
-    return new DeploymentSpec(spec.name(), copiedMap, spec.configSelector(), spec.projectSelector());
+    return new DeploymentSpec(
+        spec.name(), copiedMap, spec.configSelector(), spec.projectSelector());
   }
 }

@@ -56,7 +56,6 @@ public class StreamEntity {
   @JsonInclude(JsonInclude.Include.NON_NULL)
   private JsonNode projectSelector;
 
-
   protected StreamEntity() {}
 
   public StreamEntity(String name, StreamSpec spec) throws JsonProcessingException {
@@ -66,7 +65,11 @@ public class StreamEntity {
     this.projectSelector = JsonNodeFactory.instance.objectNode();
   }
 
-  public StreamEntity(String name, StreamSpec spec, Map<String, String> configSelector, Map<String, String> projectSelector)
+  public StreamEntity(
+      String name,
+      StreamSpec spec,
+      Map<String, String> configSelector,
+      Map<String, String> projectSelector)
       throws JsonProcessingException {
     this.name = name;
     this.spec = spec.serializeStreamSpec();
@@ -94,6 +97,7 @@ public class StreamEntity {
   public JsonNode getConfigSelector() {
     return configSelector;
   }
+
   public JsonNode getProjectSelector() {
     return projectSelector;
   }

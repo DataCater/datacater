@@ -57,7 +57,9 @@ public class StreamEndpoint {
   @RequestBody
   @Consumes({MediaType.APPLICATION_JSON, YAMLMediaTypes.APPLICATION_JACKSON_YAML})
   public Uni<Response> createStream(Stream stream) throws JsonProcessingException {
-    StreamEntity se = new StreamEntity(stream.name(), stream.spec(), stream.configSelector());
+    StreamEntity se =
+        new StreamEntity(
+            stream.name(), stream.spec(), stream.configSelector(), stream.projectSelector());
     return dsf.withTransaction(
             (session, transaction) ->
                 session
