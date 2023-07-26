@@ -5,6 +5,7 @@ import static io.restassured.RestAssured.given;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
+import io.datacater.core.project.ProjectUtilities;
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
@@ -154,7 +155,7 @@ class PipelineEndpointTest {
     UUID uuid = UUID.fromString(responseJson.get("uuid").asText());
 
     Map<String, String> pipelineMetadata = pipeline.getMetadata();
-    Map<String, String> pipelineProjectSelector = pipeline.getProjectSelector();
+    Map<String, String> pipelineProjectSelector = ProjectUtilities.createProjectLabel("default");
     pipelineMetadata.put("stream-in", uuid.toString());
     String name = "pipeline-inspect-test";
     Pipeline withStreamIn =

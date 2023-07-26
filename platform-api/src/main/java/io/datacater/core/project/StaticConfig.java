@@ -4,6 +4,7 @@ public class StaticConfig {
   private StaticConfig() {}
 
   static final String LABELS = "labels";
+  static final String PROJECT_KEY = "datacater.io/project";
 
   static class FormattedMessages {
     private FormattedMessages() {}

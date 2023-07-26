@@ -23,10 +23,6 @@ public class Pipeline {
   @ElementCollection
   private Map<String, String> metadata;
 
-  @JsonProperty("projectSelector")
-  @ElementCollection
-  private Map<String, String> projectSelector;
-
   @Embedded
   @JsonProperty("spec")
   private PipelineSpec spec;
@@ -42,7 +38,6 @@ public class Pipeline {
     this.name = name;
     this.metadata = metadata;
     this.spec = spec;
-    this.projectSelector = projectSelector;
   }
 
   @JsonCreator
@@ -92,10 +87,6 @@ public class Pipeline {
 
   public PipelineSpec getSpec() {
     return spec;
-  }
-
-  public Map<String, String> getProjectSelector() {
-    return projectSelector;
   }
 
   public void setSpec(PipelineSpec spec) {

@@ -62,18 +62,17 @@ public class DeploymentEntity {
     return objectMapper.valueToTree(map);
   }
 
-  public DeploymentEntity(DeploymentSpec spec) {
+  public DeploymentEntity(DeploymentSpec spec, Map<String, String> project) {
     this.name = spec.name();
     this.spec = DeploymentEntity.serializeMap(spec.deployment());
     this.configSelector = JsonUtilities.convertStringMap(spec.configSelector());
-    this.projectSelector = JsonUtilities.convertStringMap(spec.projectSelector());
+    this.projectSelector = JsonUtilities.convertStringMap(project);
   }
 
   public DeploymentEntity updateEntity(DeploymentSpec spec) {
     this.name = spec.name();
     this.spec = DeploymentEntity.serializeMap(spec.deployment());
     this.configSelector = JsonUtilities.convertStringMap(spec.configSelector());
-    this.projectSelector = JsonUtilities.convertStringMap(spec.projectSelector());
     return this;
   }
 
@@ -91,10 +90,6 @@ public class DeploymentEntity {
 
   public JsonNode getConfigSelector() {
     return configSelector;
-  }
-
-  public JsonNode getProjectSelector() {
-    return projectSelector;
   }
 
   public String getName() {

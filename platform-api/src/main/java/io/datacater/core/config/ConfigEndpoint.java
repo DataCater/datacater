@@ -3,6 +3,7 @@ package io.datacater.core.config;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.jaxrs.yaml.YAMLMediaTypes;
 import io.datacater.core.exceptions.ConfigNotFoundException;
+import io.datacater.core.project.ProjectUtilities;
 import io.quarkus.security.Authenticated;
 import io.smallrye.mutiny.Uni;
 import java.util.List;
@@ -60,7 +61,12 @@ public class ConfigEndpoint {
   public Uni<ConfigEntity> createConfig(@PathParam("project") String project, Config config)
       throws JsonProcessingException {
     ConfigEntity configEntity =
-        ConfigEntity.from(config.name(), config.kind(), config.metadata(), config.spec());
+        ConfigEntity.from(
+            config.name(),
+            config.kind(),
+            config.metadata(),
+            config.spec(),
+            ProjectUtilities.createProjectLabel(project));
 
     return sf.withTransaction((session, transaction) -> session.persist(configEntity))
         .replaceWith(configEntity);

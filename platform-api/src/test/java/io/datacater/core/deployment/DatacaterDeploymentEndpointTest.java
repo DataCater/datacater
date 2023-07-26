@@ -10,6 +10,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import io.datacater.core.authentication.DataCaterSessionFactory;
 import io.datacater.core.pipeline.PipelineEntity;
+import io.datacater.core.project.ProjectUtilities;
 import io.datacater.core.stream.StreamEntity;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.quarkus.test.junit.QuarkusTest;
@@ -146,7 +147,9 @@ class DatacaterDeploymentEndpointTest {
 
     // save deployment entity to db which is not actually deployed inside the cluster
     DeploymentEntity notDeployedDeploymentEntity =
-        new DeploymentEntity(new DeploymentSpec(nameOfDbOnlyDeployment, new HashMap<>()));
+        new DeploymentEntity(
+            new DeploymentSpec(nameOfDbOnlyDeployment, new HashMap<>()),
+            ProjectUtilities.createProjectLabel("default"));
 
     dsf.withTransaction(((session, transaction) -> session.persist(notDeployedDeploymentEntity)))
         .await()
