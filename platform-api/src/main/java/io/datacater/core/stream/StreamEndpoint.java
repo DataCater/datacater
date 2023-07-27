@@ -118,6 +118,15 @@ public class StreamEndpoint {
             session
                 .find(StreamEntity.class, uuid)
                 .onItem()
+                .ifNotNull()
+                .transform(
+                    item -> {
+                      if (item.getProject().equals(project)) {
+                        return item;
+                      }
+                      return null;
+                    })
+                .onItem()
                 .transformToUni(
                     streamEntity ->
                         Uni.combine()
@@ -159,6 +168,15 @@ public class StreamEndpoint {
         ((session, tx) ->
             session
                 .find(StreamEntity.class, uuid)
+                .onItem()
+                .ifNotNull()
+                .transform(
+                    item -> {
+                      if (item.getProject().equals(project)) {
+                        return item;
+                      }
+                      return null;
+                    })
                 .onItem()
                 .ifNotNull()
                 .transformToUni(

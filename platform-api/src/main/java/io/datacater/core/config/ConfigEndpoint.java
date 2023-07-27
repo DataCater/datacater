@@ -89,6 +89,15 @@ public class ConfigEndpoint {
                 .find(ConfigEntity.class, uuid)
                 .onItem()
                 .ifNotNull()
+                .transform(
+                    item -> {
+                      if (item.getProject().equals(project)) {
+                        return item;
+                      }
+                      return null;
+                    })
+                .onItem()
+                .ifNotNull()
                 .call(configEntity -> session.merge(configEntity.updateEntity(config)))
                 .onItem()
                 .ifNull()
@@ -107,6 +116,15 @@ public class ConfigEndpoint {
         ((session, transaction) ->
             session
                 .find(ConfigEntity.class, uuid)
+                .onItem()
+                .ifNotNull()
+                .transform(
+                    item -> {
+                      if (item.getProject().equals(project)) {
+                        return item;
+                      }
+                      return null;
+                    })
                 .onItem()
                 .ifNull()
                 .failWith(

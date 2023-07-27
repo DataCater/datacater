@@ -343,6 +343,15 @@ public class DeploymentEndpoint {
             session
                 .find(DeploymentEntity.class, deploymentId)
                 .onItem()
+                .ifNotNull()
+                .transform(
+                    item -> {
+                      if (item.getProject().equals(project)) {
+                        return item;
+                      }
+                      return null;
+                    })
+                .onItem()
                 .ifNull()
                 .failWith(
                     new DeploymentNotFoundException(
@@ -368,6 +377,15 @@ public class DeploymentEndpoint {
         ((session, transaction) ->
             session
                 .find(DeploymentEntity.class, deploymentUuid)
+                .onItem()
+                .ifNotNull()
+                .transform(
+                    item -> {
+                      if (item.getProject().equals(project)) {
+                        return item;
+                      }
+                      return null;
+                    })
                 .onItem()
                 .ifNull()
                 .failWith(

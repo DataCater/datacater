@@ -113,6 +113,15 @@ public class PipelineEndpoint {
         ((session, transaction) ->
             session
                 .find(PipelineEntity.class, uuid)
+                .onItem()
+                .ifNotNull()
+                .transform(
+                    item -> {
+                      if (item.getProject().equals(project)) {
+                        return item;
+                      }
+                      return null;
+                    })
                 .call(pe -> session.merge((pe).updateEntity(pipeline)))));
   }
 
@@ -124,6 +133,15 @@ public class PipelineEndpoint {
         ((session, tx) ->
             session
                 .find(PipelineEntity.class, uuid)
+                .onItem()
+                .ifNotNull()
+                .transform(
+                    item -> {
+                      if (item.getProject().equals(project)) {
+                        return item;
+                      }
+                      return null;
+                    })
                 .onItem()
                 .ifNotNull()
                 .call(session::remove)
