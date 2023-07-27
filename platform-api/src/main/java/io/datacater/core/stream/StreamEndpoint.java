@@ -35,8 +35,16 @@ public class StreamEndpoint {
     return dsf.withTransaction(((session, transaction) -> session.find(StreamEntity.class, uuid)))
         .onItem()
         .ifNull()
-        .failWith(
-            new StreamNotFoundException(StaticConfig.LoggerMessages.STREAM_NOT_FOUND_MESSAGE));
+        .failWith(new StreamNotFoundException(StaticConfig.LoggerMessages.STREAM_NOT_FOUND_MESSAGE))
+        .onItem()
+        .ifNotNull()
+        .transform(
+            item -> {
+              if (item.getProject().equals(project)) {
+                return item;
+              }
+              return null;
+            });
   }
 
   @GET
@@ -46,13 +54,24 @@ public class StreamEndpoint {
       @PathParam("uuid") UUID uuid,
       @DefaultValue("100") @QueryParam("limit") Long limit,
       @DefaultValue("SEQUENCED") @QueryParam("sampleMethod") SampleMethod sampleMethod) {
-    return streamUtil.getStreamMessages(uuid, limit, sampleMethod);
+    return streamUtil.getStreamMessages(uuid, limit, sampleMethod, project);
   }
 
   @GET
   public Uni<List<StreamEntity>> getStreams(@PathParam("project") String project) {
     return dsf.withSession(
-        session -> session.createQuery("from StreamEntity", StreamEntity.class).getResultList());
+        session ->
+            session
+                .createQuery("from StreamEntity", StreamEntity.class)
+                .getResultList()
+                .onItem()
+                .ifNull()
+                .continueWith(List.of())
+                .onItem()
+                .ifNotNull()
+                .transform(
+                    list ->
+                        list.stream().filter(item -> item.getProject().equals(project)).toList()));
   }
 
   @POST

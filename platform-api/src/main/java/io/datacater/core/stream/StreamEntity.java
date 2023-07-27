@@ -84,6 +84,10 @@ public class StreamEntity {
     return spec;
   }
 
+  public String getProject() {
+    return project;
+  }
+
   public UUID getId() {
     return id;
   }

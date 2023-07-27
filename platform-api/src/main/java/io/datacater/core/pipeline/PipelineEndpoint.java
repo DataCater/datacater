@@ -57,7 +57,17 @@ public class PipelineEndpoint {
   public Uni<List<PipelineEntity>> getPipelines(@PathParam("project") String project) {
     return dsf.withSession(
         session ->
-            session.createQuery("from PipelineEntity", PipelineEntity.class).getResultList());
+            session
+                .createQuery("from PipelineEntity", PipelineEntity.class)
+                .getResultList()
+                .onItem()
+                .ifNull()
+                .continueWith(List.of())
+                .onItem()
+                .ifNotNull()
+                .transform(
+                    list ->
+                        list.stream().filter(item -> item.getProject().equals(project)).toList()));
   }
 
   @GET
@@ -67,7 +77,16 @@ public class PipelineEndpoint {
     return dsf.withTransaction(((session, transaction) -> session.find(PipelineEntity.class, uuid)))
         .onItem()
         .ifNull()
-        .failWith(new PipelineNotFoundException(StaticConfig.PIPELINE_NOT_FOUND));
+        .failWith(new PipelineNotFoundException(StaticConfig.PIPELINE_NOT_FOUND))
+        .onItem()
+        .ifNotNull()
+        .transform(
+            item -> {
+              if (item.getProject().equals(project)) {
+                return item;
+              }
+              return null;
+            });
   }
 
   @POST
@@ -146,6 +165,6 @@ public class PipelineEndpoint {
   @GET
   @Path("{uuid}/inspect")
   public Uni<String> inspect(@PathParam("project") String project, @PathParam("uuid") UUID uuid) {
-    return pipelineUtil.transformMessages(uuid);
+    return pipelineUtil.transformMessages(uuid, project);
   }
 }

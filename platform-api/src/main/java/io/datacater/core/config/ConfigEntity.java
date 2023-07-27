@@ -110,4 +110,8 @@ public class ConfigEntity {
   public JsonNode getSpec() {
     return spec;
   }
+
+  public String getProject() {
+    return project;
+  }
 }

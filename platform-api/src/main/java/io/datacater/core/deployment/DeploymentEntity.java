@@ -85,6 +85,10 @@ public class DeploymentEntity {
     return this.spec;
   }
 
+  public String getProject() {
+    return this.project;
+  }
+
   public JsonNode getConfigSelector() {
     return configSelector;
   }

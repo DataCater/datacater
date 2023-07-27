@@ -28,16 +28,29 @@ public class PipelineUtilities {
   @Inject DataCaterSessionFactory dsf;
   @Inject StreamUtilities streamUtil;
 
-  public Uni<String> transformMessages(UUID uuid) {
+  public Uni<String> transformMessages(UUID uuid, String project) {
     HttpClient httpClient = HttpClient.newHttpClient();
 
-    Uni<PipelineEntity> pe = dsf.withSession(session -> session.find(PipelineEntity.class, uuid));
+    Uni<PipelineEntity> pe =
+        dsf.withSession(
+            session ->
+                session
+                    .find(PipelineEntity.class, uuid)
+                    .onItem()
+                    .ifNotNull()
+                    .transform(
+                        item -> {
+                          if (item.getProject().equals(project)) {
+                            return item;
+                          }
+                          return null;
+                        }));
     Uni<List<StreamMessage>> messages =
         pe.flatMap(
             pipelineEntity -> {
               JsonNode streamIn = pipelineEntity.getMetadata().get(StaticConfig.STREAM_IN_TEXT);
               UUID streamUUID = UUID.fromString(streamIn.asText());
-              return streamUtil.getStreamMessages(streamUUID);
+              return streamUtil.getStreamMessages(streamUUID, project);
             });
 
     Uni<PythonRunnerPool.NamedPod> namedPodAsync = runnerPool.getStaticPod();

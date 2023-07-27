@@ -29,9 +29,9 @@ public class StreamUtilities {
   private static final Logger LOGGER = Logger.getLogger(StreamUtilities.class);
   @Inject DataCaterSessionFactory dsf;
 
-  public Uni<List<StreamMessage>> getStreamMessages(UUID uuid) {
+  public Uni<List<StreamMessage>> getStreamMessages(UUID uuid, String project) {
     return getStreamMessages(
-        uuid, StaticConfig.STREAM_AMOUNT_MESSAGE_LIMIT, SampleMethod.SEQUENCED);
+        uuid, StaticConfig.STREAM_AMOUNT_MESSAGE_LIMIT, SampleMethod.SEQUENCED, project);
   }
 
   public void updateStreamObject(Stream stream, List<ConfigEntity> configList)
@@ -69,11 +69,20 @@ public class StreamUtilities {
   }
 
   public Uni<List<StreamMessage>> getStreamMessages(
-      UUID uuid, Long limit, SampleMethod sampleMethod) {
+      UUID uuid, Long limit, SampleMethod sampleMethod, String project) {
     return dsf.withTransaction(
         ((session, transaction) ->
             session
                 .find(StreamEntity.class, uuid)
+                .onItem()
+                .ifNotNull()
+                .transform(
+                    item -> {
+                      if (item.getProject().equals(project)) {
+                        return item;
+                      }
+                      return null;
+                    })
                 .onItem()
                 .ifNotNull()
                 .transformToUni(

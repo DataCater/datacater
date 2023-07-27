@@ -100,7 +100,7 @@ public class PipelineEntity {
     return spec;
   }
 
-  public String project() {
+  public String getProject() {
     return project;
   }
 

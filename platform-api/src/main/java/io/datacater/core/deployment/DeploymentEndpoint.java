@@ -50,8 +50,16 @@ public class DeploymentEndpoint {
             ((session, transaction) -> session.find(DeploymentEntity.class, deploymentId)))
         .onItem()
         .ifNull()
-        .failWith(
-            new DeploymentNotFoundException(StaticConfig.LoggerMessages.DEPLOYMENT_NOT_FOUND));
+        .failWith(new DeploymentNotFoundException(StaticConfig.LoggerMessages.DEPLOYMENT_NOT_FOUND))
+        .onItem()
+        .ifNotNull()
+        .transform(
+            item -> {
+              if (item.getProject().equals(project)) {
+                return item;
+              }
+              return null;
+            });
   }
 
   @GET
@@ -69,6 +77,15 @@ public class DeploymentEndpoint {
         .onItem()
         .ifNotNull()
         .transform(
+            item -> {
+              if (item.getProject().equals(project)) {
+                return item;
+              }
+              return null;
+            })
+        .onItem()
+        .ifNotNull()
+        .transform(
             Unchecked.function(
                 deployment ->
                     deploymentsUtil.getDeploymentLogsAsList(
@@ -83,6 +100,15 @@ public class DeploymentEndpoint {
       @DefaultValue("1") @QueryParam("replica") int replica) {
     return dsf.withTransaction(
             ((session, transaction) -> session.find(DeploymentEntity.class, deploymentId)))
+        .onItem()
+        .ifNotNull()
+        .transform(
+            item -> {
+              if (item.getProject().equals(project)) {
+                return item;
+              }
+              return null;
+            })
         .onItem()
         .ifNull()
         .failWith(new DeploymentNotFoundException(StaticConfig.LoggerMessages.DEPLOYMENT_NOT_FOUND))
@@ -119,6 +145,15 @@ public class DeploymentEndpoint {
     return dsf.withTransaction(
             ((session, transaction) -> session.find(DeploymentEntity.class, deploymentId)))
         .onItem()
+        .ifNotNull()
+        .transform(
+            item -> {
+              if (item.getProject().equals(project)) {
+                return item;
+              }
+              return null;
+            })
+        .onItem()
         .ifNull()
         .failWith(new DeploymentNotFoundException(StaticConfig.LoggerMessages.DEPLOYMENT_NOT_FOUND))
         .onItem()
@@ -145,6 +180,15 @@ public class DeploymentEndpoint {
     return dsf.withTransaction(
             ((session, transaction) -> session.find(DeploymentEntity.class, deploymentId)))
         .onItem()
+        .ifNotNull()
+        .transform(
+            item -> {
+              if (item.getProject().equals(project)) {
+                return item;
+              }
+              return null;
+            })
+        .onItem()
         .ifNull()
         .failWith(new DeploymentNotFoundException(StaticConfig.LoggerMessages.DEPLOYMENT_NOT_FOUND))
         .onItem()
@@ -168,6 +212,15 @@ public class DeploymentEndpoint {
     return dsf.withTransaction(
             ((session, transaction) -> session.find(DeploymentEntity.class, deploymentId)))
         .onItem()
+        .ifNotNull()
+        .transform(
+            item -> {
+              if (item.getProject().equals(project)) {
+                return item;
+              }
+              return null;
+            })
+        .onItem()
         .ifNull()
         .failWith(new DeploymentNotFoundException(StaticConfig.LoggerMessages.DEPLOYMENT_NOT_FOUND))
         .onItem()
@@ -189,8 +242,17 @@ public class DeploymentEndpoint {
       @QueryParam("in-cluster") @DefaultValue("false") boolean inCluster) {
     if (!inCluster) {
       return dsf.withSession(
-          session ->
-              session.createQuery("from DeploymentEntity", DeploymentEntity.class).getResultList());
+              session ->
+                  session
+                      .createQuery("from DeploymentEntity", DeploymentEntity.class)
+                      .getResultList())
+          .onItem()
+          .ifNull()
+          .continueWith(List.of())
+          .onItem()
+          .ifNotNull()
+          .transform(
+              list -> list.stream().filter(item -> item.getProject().equals(project)).toList());
     }
 
     return dsf.withTransaction(
@@ -198,6 +260,12 @@ public class DeploymentEndpoint {
                 session
                     .createQuery("from DeploymentEntity", DeploymentEntity.class)
                     .getResultList())
+        .onItem()
+        .ifNull()
+        .continueWith(List.of())
+        .onItem()
+        .ifNotNull()
+        .transform(list -> list.stream().filter(item -> item.getProject().equals(project)).toList())
         .onItem()
         .transform(deploymentsUtil::mergeDeploymentEntitiesWithCluster);
   }

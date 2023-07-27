@@ -31,7 +31,12 @@ public class ConfigEndpoint {
                 .getResultList()
                 .onItem()
                 .ifNull()
-                .continueWith(List.of()));
+                .continueWith(List.of())
+                .onItem()
+                .ifNotNull()
+                .transform(
+                    list ->
+                        list.stream().filter(item -> item.getProject().equals(project)).toList()));
   }
 
   @GET
@@ -48,7 +53,16 @@ public class ConfigEndpoint {
                     new ConfigNotFoundException(
                         String.format(
                             StaticConfig.LoggerMessages.UUID_NOT_FOUND_ERROR_MESSAGE_FORMATTED,
-                            uuid.toString()))));
+                            uuid.toString())))
+                .onItem()
+                .ifNotNull()
+                .transform(
+                    item -> {
+                      if (item.getProject().equals(project)) {
+                        return item;
+                      }
+                      return null;
+                    }));
   }
 
   @POST
