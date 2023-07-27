@@ -6,6 +6,7 @@ import io.datacater.core.authentication.DataCaterSessionFactory;
 import io.datacater.core.config.ConfigEntity;
 import io.datacater.core.config.ConfigUtilities;
 import io.datacater.core.exceptions.*;
+import io.datacater.core.project.ProjectEntity;
 import io.datacater.core.utilities.LoggerUtilities;
 import io.quarkus.security.Authenticated;
 import io.smallrye.mutiny.Uni;
@@ -84,7 +85,20 @@ public class StreamEndpoint {
     return dsf.withTransaction(
             (session, transaction) ->
                 session
-                    .persist(se)
+                    .createQuery("from ProjectEntity", ProjectEntity.class)
+                    .getResultList()
+                    .onItem()
+                    .ifNotNull()
+                    .transform(
+                        list ->
+                            list.stream().filter(item -> item.getName().equals(project)).toList())
+                    .onItem()
+                    .ifNotNull()
+                    .transform(
+                        x -> {
+                          session.persist(se);
+                          return se;
+                        })
                     .onItem()
                     .transformToUni(
                         voidObject ->

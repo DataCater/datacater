@@ -5,6 +5,7 @@ import io.datacater.core.authentication.DataCaterSessionFactory;
 import io.datacater.core.config.ConfigUtilities;
 import io.datacater.core.exceptions.*;
 import io.datacater.core.pipeline.PipelineUtilities;
+import io.datacater.core.project.ProjectEntity;
 import io.datacater.core.stream.StreamUtilities;
 import io.datacater.core.utilities.LoggerUtilities;
 import io.datacater.core.utilities.StringUtilities;
@@ -279,7 +280,19 @@ public class DeploymentEndpoint {
     return dsf.withTransaction(
         (session, transaction) ->
             session
-                .persist(de)
+                .createQuery("from ProjectEntity", ProjectEntity.class)
+                .getResultList()
+                .onItem()
+                .ifNotNull()
+                .transform(
+                    list -> list.stream().filter(item -> item.getName().equals(project)).toList())
+                .onItem()
+                .ifNotNull()
+                .transform(
+                    x -> {
+                      session.persist(de);
+                      return de;
+                    })
                 .onItem()
                 .transformToUni(
                     entity ->

@@ -8,6 +8,7 @@ import io.datacater.core.exceptions.PipelineNotFoundException;
 import io.datacater.core.kubernetes.DataCaterK8sConfig;
 import io.datacater.core.kubernetes.PythonRunnerPool;
 import io.datacater.core.kubernetes.PythonRunnerPool.NamedPod;
+import io.datacater.core.project.ProjectEntity;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.quarkus.security.Authenticated;
 import io.smallrye.mutiny.Uni;
@@ -100,7 +101,24 @@ public class PipelineEndpoint {
             pipeline.getSerializedMetadata(),
             PipelineSpec.serializePipelineSpec(pipeline.getSpec().getSteps()),
             project);
-    return dsf.withTransaction((session, transaction) -> session.persist(pe)).replaceWith(pe);
+    return dsf.withTransaction(
+            (session, transaction) ->
+                session
+                    .createQuery("from ProjectEntity", ProjectEntity.class)
+                    .getResultList()
+                    .onItem()
+                    .ifNotNull()
+                    .transform(
+                        list ->
+                            list.stream().filter(item -> item.getName().equals(project)).toList())
+                    .onItem()
+                    .ifNotNull()
+                    .transform(
+                        x -> {
+                          session.persist(pe);
+                          return pe;
+                        }))
+        .replaceWith(pe);
   }
 
   @PUT
