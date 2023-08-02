@@ -1,6 +1,6 @@
 package io.datacater.core.project;
 
-import io.datacater.core.utilities.JsonUtilities;
+import io.datacater.core.exceptions.DatacaterException;
 import io.smallrye.mutiny.Uni;
 import java.util.*;
 import javax.enterprise.context.ApplicationScoped;
@@ -10,11 +10,10 @@ import org.hibernate.reactive.mutiny.Mutiny;
 public class ProjectUtilities {
   private ProjectUtilities() {}
 
-  public static Uni<List<ProjectEntity>> getMappedProjects(
-      Map<String, String> projects, Mutiny.Session session) {
+  public static Uni<List<ProjectEntity>> getMappedProjects(String project, Mutiny.Session session) {
 
-    if (projects == null) {
-      return Uni.createFrom().item(new ArrayList<>());
+    if (project == null || project.isBlank()) {
+      throw new DatacaterException("no project defined");
     }
 
     return session
@@ -23,14 +22,7 @@ public class ProjectUtilities {
         .onItem()
         .transform(
             projectEntityList ->
-                projectEntityList.stream()
-                    .filter(
-                        item ->
-                            stringMapsContainsEqualKey(
-                                JsonUtilities.toStringMap(
-                                    item.getMetadata().get(StaticConfig.LABELS)),
-                                projects))
-                    .toList())
+                projectEntityList.stream().filter(item -> item.getName().equals(project)).toList())
         .onItem()
         .ifNull()
         .continueWith(new ArrayList<>());

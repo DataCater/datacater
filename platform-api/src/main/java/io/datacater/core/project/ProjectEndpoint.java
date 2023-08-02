@@ -56,10 +56,7 @@ public class ProjectEndpoint {
   @Consumes({MediaType.APPLICATION_JSON, YAMLMediaTypes.APPLICATION_JACKSON_YAML})
   public Uni<ProjectEntity> createProject(Project project) {
     ProjectEntity projectEntity =
-        ProjectEntity.from(
-            project.getName(),
-            JsonUtilities.convertStringMap(project.getMetadata()),
-            JsonUtilities.convertStringMap(project.getSpec()));
+        ProjectEntity.from(project.getName(), JsonUtilities.convertStringMap(project.getSpec()));
 
     return sf.withTransaction((session, transaction) -> session.persist(projectEntity))
         .replaceWith(projectEntity);

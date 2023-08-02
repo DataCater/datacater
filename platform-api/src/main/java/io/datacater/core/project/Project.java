@@ -10,7 +10,6 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 import io.datacater.core.ExcludeFromGeneratedCoverageReport;
 import io.datacater.core.exceptions.JsonNotParsableException;
 import java.util.Map;
-import javax.persistence.ElementCollection;
 import javax.persistence.Embeddable;
 import javax.persistence.Embedded;
 
@@ -19,10 +18,6 @@ public class Project {
   @JsonProperty("name")
   private String name;
 
-  @JsonProperty("metadata")
-  @ElementCollection
-  private Map<String, String> metadata;
-
   @Embedded
   @JsonProperty("spec")
   private Map<String, String> spec;
@@ -30,31 +25,23 @@ public class Project {
   @ExcludeFromGeneratedCoverageReport
   protected Project() {}
 
-  private Project(String name, Map<String, String> metadata, Map<String, String> spec) {
+  private Project(String name, Map<String, String> spec) {
     this.name = name;
-    this.metadata = metadata;
     this.spec = spec;
   }
 
   @JsonCreator
   public static Project from(
       @JsonProperty(value = "name", required = true) String name,
-      @JsonProperty(value = "metadata", required = true) Map<String, String> metadata,
       @JsonProperty(value = "spec", required = true) Map<String, String> spec) {
-    return new Project(name, metadata, spec);
+    return new Project(name, spec);
   }
 
   @JsonIgnore
   static Project from(ProjectEntity pe) throws JsonProcessingException {
     ObjectMapper mapper = new ObjectMapper();
-    Map<String, String> metadata = mapper.readValue(pe.getMetadata().asText(), Map.class);
     Map<String, String> spec = mapper.readValue(pe.getSpec().asText(), Map.class);
-    return new Project(pe.getName(), metadata, spec);
-  }
-
-  @JsonIgnore
-  public Map<String, String> getMetadata() {
-    return this.metadata;
+    return new Project(pe.getName(), spec);
   }
 
   @ExcludeFromGeneratedCoverageReport

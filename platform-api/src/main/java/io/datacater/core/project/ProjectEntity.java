@@ -43,45 +43,33 @@ public class ProjectEntity {
   private String name;
 
   @Type(type = JsonTypes.JSON)
-  @Column(name = "metadata", columnDefinition = JsonTypes.JSON_BIN)
-  @JsonProperty("metadata")
-  private JsonNode metadata;
-
-  @Type(type = JsonTypes.JSON)
   @Column(name = "spec", columnDefinition = JsonTypes.JSON_BIN)
   @JsonProperty("spec")
   private JsonNode spec;
 
   public ProjectEntity() {}
 
-  private ProjectEntity(String name, JsonNode metadata, JsonNode spec) {
+  private ProjectEntity(String name, JsonNode spec) {
     this.name = name;
-    this.metadata = metadata;
     this.spec = spec;
   }
 
   @JsonIgnore
   public static ProjectEntity from(
       @JsonProperty(value = "name", required = true) String name,
-      @JsonProperty(value = "metadata", required = true) JsonNode metadata,
       @JsonProperty(value = "spec", required = true) JsonNode spec) {
-    return new ProjectEntity(name, metadata, spec);
+    return new ProjectEntity(name, spec);
   }
 
   @JsonIgnore
   public ProjectEntity updateEntity(Project project) {
     this.name = project.getName();
-    this.metadata = JsonUtilities.convertStringMap(project.getMetadata());
     this.spec = JsonUtilities.convertStringMap(project.getSpec());
     return this;
   }
 
   public UUID getId() {
     return id;
-  }
-
-  public JsonNode getMetadata() {
-    return metadata;
   }
 
   public JsonNode getSpec() {
