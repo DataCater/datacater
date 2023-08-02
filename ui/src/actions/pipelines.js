@@ -1,6 +1,8 @@
 import { callApi } from "../helpers/callApi";
+import { getCurrentProjectContext } from "../helpers/getCurrentProjectContext";
 
 export function fetchPipelines() {
+  const requestPrefix = getCurrentProjectContext();
   const requestPipelines = () => ({
     type: "REQUEST_PIPELINES",
   });
@@ -18,7 +20,7 @@ export function fetchPipelines() {
   return function (dispatch) {
     dispatch(requestPipelines());
 
-    return callApi("/pipelines").then(
+    return callApi(`/${requestPrefix}/pipelines`).then(
       (response) => dispatch(receivedPipelines(response.data)),
       (error) => {
         if (error.response.status === 401) {
@@ -35,6 +37,7 @@ export function fetchPipelines() {
 }
 
 export function fetchPipeline(id) {
+  const requestPrefix = getCurrentProjectContext();
   const requestPipeline = () => ({
     type: "REQUEST_PIPELINE",
   });
@@ -52,7 +55,7 @@ export function fetchPipeline(id) {
   return function (dispatch) {
     dispatch(requestPipeline());
 
-    return callApi(`/pipelines/${id}`).then(
+    return callApi(`/${requestPrefix}/pipelines/${id}`).then(
       (response) => dispatch(receivedPipeline(response.data)),
       (error) => {
         if (error.response.status === 401) {
@@ -69,6 +72,7 @@ export function fetchPipeline(id) {
 }
 
 export function addPipeline(pipeline) {
+  const requestPrefix = getCurrentProjectContext();
   const requestAddPipeline = () => ({
     type: "REQUEST_ADD_PIPELINE",
   });
@@ -86,7 +90,7 @@ export function addPipeline(pipeline) {
   return function (dispatch) {
     dispatch(requestAddPipeline());
 
-    return callApi("/pipelines", {
+    return callApi(`/${requestPrefix}/pipelines`, {
       method: "post",
       data: pipeline,
     }).then(
@@ -108,6 +112,7 @@ export function addPipeline(pipeline) {
 }
 
 export function updatePipeline(uuid, pipeline) {
+  const requestPrefix = getCurrentProjectContext();
   const requestUpdatePipeline = () => ({
     type: "REQUEST_UPDATE_PIPELINE",
   });
@@ -124,7 +129,7 @@ export function updatePipeline(uuid, pipeline) {
   return function (dispatch) {
     dispatch(requestUpdatePipeline());
 
-    return callApi(`/pipelines/${uuid}`, {
+    return callApi(`/${requestPrefix}/pipelines/${uuid}`, {
       method: "put",
       data: pipeline,
     }).then(
@@ -146,6 +151,7 @@ export function updatePipeline(uuid, pipeline) {
 }
 
 export function deletePipeline(id) {
+  const requestPrefix = getCurrentProjectContext();
   const requestDeletePipeline = () => ({
     type: "REQUEST_DELETE_PIPELINE",
   });
@@ -156,13 +162,16 @@ export function deletePipeline(id) {
   return function (dispatch) {
     dispatch(requestDeletePipeline());
 
-    return callApi(`/pipelines/${id}`, { method: "delete" }).then(() => {
+    return callApi(`/${requestPrefix}/pipelines/${id}`, {
+      method: "delete",
+    }).then(() => {
       dispatch(receivedDeletePipeline());
     });
   };
 }
 
 export function inspectPipeline(pipeline, sampleRecords, previewStep) {
+  const requestPrefix = getCurrentProjectContext();
   const requestPipelineInspect = () => ({
     type: "REQUEST_PIPELINE_INSPECT",
   });
@@ -180,7 +189,7 @@ export function inspectPipeline(pipeline, sampleRecords, previewStep) {
   return function (dispatch) {
     dispatch(requestPipelineInspect());
 
-    return callApi(`/pipelines/preview`, {
+    return callApi(`/${requestPrefix}/pipelines/preview`, {
       method: "post",
       data: {
         pipeline: pipeline,

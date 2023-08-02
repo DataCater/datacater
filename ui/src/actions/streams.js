@@ -1,6 +1,8 @@
 import { callApi } from "../helpers/callApi";
+import { getCurrentProjectContext } from "../helpers/getCurrentProjectContext";
 
 export function fetchStreams() {
+  const requestPrefix = getCurrentProjectContext();
   const requestStreams = () => ({
     type: "REQUEST_STREAMS",
   });
@@ -18,7 +20,7 @@ export function fetchStreams() {
   return function (dispatch) {
     dispatch(requestStreams());
 
-    return callApi("/streams").then(
+    return callApi(`/${requestPrefix}/streams`).then(
       (response) => dispatch(receivedStreams(response.data)),
       (error) => {
         if (error.response.status === 401) {
@@ -33,6 +35,7 @@ export function fetchStreams() {
 }
 
 export function fetchStream(id) {
+  const requestPrefix = getCurrentProjectContext();
   const requestStream = () => ({
     type: "REQUEST_STREAM",
   });
@@ -50,7 +53,7 @@ export function fetchStream(id) {
   return function (dispatch) {
     dispatch(requestStream());
 
-    return callApi(`/streams/${id}`).then(
+    return callApi(`/${requestPrefix}/streams/${id}`).then(
       (response) => dispatch(receivedStream(response.data)),
       (error) => {
         if (error.response.status === 401) {
@@ -67,6 +70,7 @@ export function fetchStream(id) {
 }
 
 export function addStream(stream) {
+  const requestPrefix = getCurrentProjectContext();
   const requestAddStream = () => ({
     type: "REQUEST_ADD_STREAM",
   });
@@ -84,7 +88,7 @@ export function addStream(stream) {
   return function (dispatch) {
     dispatch(requestAddStream());
 
-    return callApi("/streams", {
+    return callApi(`/${requestPrefix}/streams`, {
       method: "post",
       data: stream,
     }).then(
@@ -106,6 +110,7 @@ export function addStream(stream) {
 }
 
 export function updateStream(uuid, stream) {
+  const requestPrefix = getCurrentProjectContext();
   const requestUpdateStream = () => ({
     type: "REQUEST_UPDATE_STREAM",
   });
@@ -123,7 +128,7 @@ export function updateStream(uuid, stream) {
   return function (dispatch) {
     dispatch(requestUpdateStream());
 
-    return callApi(`/streams/${uuid}`, {
+    return callApi(`/${requestPrefix}/streams/${uuid}`, {
       method: "put",
       data: stream,
     }).then(
@@ -145,6 +150,7 @@ export function updateStream(uuid, stream) {
 }
 
 export function deleteStream(id) {
+  const requestPrefix = getCurrentProjectContext();
   const requestDeleteStream = () => ({
     type: "REQUEST_DELETE_STREAM",
   });
@@ -156,13 +162,16 @@ export function deleteStream(id) {
   return function (dispatch) {
     dispatch(requestDeleteStream());
 
-    return callApi(`/streams/${id}`, { method: "delete" }).then(() => {
+    return callApi(`/${requestPrefix}/streams/${id}`, {
+      method: "delete",
+    }).then(() => {
       dispatch(receivedDeleteStream());
     });
   };
 }
 
 export function inspectStream(id, limit = 100) {
+  const requestPrefix = getCurrentProjectContext();
   const requestStreamInspect = () => ({
     type: "REQUEST_STREAM_INSPECT",
   });
@@ -180,7 +189,9 @@ export function inspectStream(id, limit = 100) {
   return function (dispatch) {
     dispatch(requestStreamInspect());
 
-    return callApi(`/streams/${id}/inspect?limit=${limit}`).then(
+    return callApi(
+      `/${requestPrefix}/streams/${id}/inspect?limit=${limit}`
+    ).then(
       (response) => dispatch(receivedStreamInspect(response.data)),
       (error) => {
         if (error.response.status === 401) {

@@ -1,6 +1,8 @@
 import { callApi } from "../helpers/callApi";
+import { getCurrentProjectContext } from "../helpers/getCurrentProjectContext";
 
 export function fetchConfigs() {
+  const requestPrefix = getCurrentProjectContext();
   const requestConfigs = () => ({
     type: "REQUEST_CONFIGS",
   });
@@ -18,7 +20,7 @@ export function fetchConfigs() {
   return function (dispatch) {
     dispatch(requestConfigs());
 
-    return callApi("/configs").then(
+    return callApi(`/${requestPrefix}/configs`).then(
       (response) => dispatch(receivedConfigs(response.data)),
       (error) => {
         if (error.response.status === 401) {
@@ -33,6 +35,7 @@ export function fetchConfigs() {
 }
 
 export function fetchConfig(id) {
+  const requestPrefix = getCurrentProjectContext();
   const requestConfig = () => ({
     type: "REQUEST_CONFIG",
   });
@@ -50,7 +53,7 @@ export function fetchConfig(id) {
   return function (dispatch) {
     dispatch(requestConfig());
 
-    return callApi(`/configs/${id}`).then(
+    return callApi(`/${requestPrefix}/configs/${id}`).then(
       (response) => dispatch(receivedConfig(response.data)),
       (error) => {
         if (error.response.status === 401) {
@@ -67,6 +70,7 @@ export function fetchConfig(id) {
 }
 
 export function addConfig(config) {
+  const requestPrefix = getCurrentProjectContext();
   const requestAddConfig = () => ({
     type: "REQUEST_ADD_CONFIG",
   });
@@ -84,7 +88,7 @@ export function addConfig(config) {
   return function (dispatch) {
     dispatch(requestAddConfig());
 
-    return callApi("/configs", {
+    return callApi(`/${requestPrefix}/configs`, {
       method: "post",
       data: config,
     }).then(
@@ -106,6 +110,7 @@ export function addConfig(config) {
 }
 
 export function updateConfig(uuid, config) {
+  const requestPrefix = getCurrentProjectContext();
   const requestUpdateConfig = () => ({
     type: "REQUEST_UPDATE_CONFIG",
   });
@@ -123,7 +128,7 @@ export function updateConfig(uuid, config) {
   return function (dispatch) {
     dispatch(requestUpdateConfig());
 
-    return callApi(`/configs/${uuid}`, {
+    return callApi(`/${requestPrefix}/configs/${uuid}`, {
       method: "put",
       data: config,
     }).then(
@@ -145,6 +150,7 @@ export function updateConfig(uuid, config) {
 }
 
 export function deleteConfig(id) {
+  const requestPrefix = getCurrentProjectContext();
   const requestDeleteConfig = () => ({
     type: "REQUEST_DELETE_CONFIG",
   });
@@ -156,7 +162,9 @@ export function deleteConfig(id) {
   return function (dispatch) {
     dispatch(requestDeleteConfig());
 
-    return callApi(`/configs/${id}`, { method: "delete" }).then(() => {
+    return callApi(`/${requestPrefix}/configs/${id}`, {
+      method: "delete",
+    }).then(() => {
       dispatch(receivedDeleteConfig());
     });
   };

@@ -1,6 +1,8 @@
 import { callApi } from "../helpers/callApi";
+import { getCurrentProjectContext } from "../helpers/getCurrentProjectContext";
 
 export function fetchDeployments() {
+  const requestPrefix = getCurrentProjectContext();
   const requestDeployments = () => ({
     type: "REQUEST_DEPLOYMENTS",
   });
@@ -18,7 +20,7 @@ export function fetchDeployments() {
   return function (dispatch) {
     dispatch(requestDeployments());
 
-    return callApi("/deployments").then(
+    return callApi(`/${requestPrefix}/deployments`).then(
       (response) => dispatch(receivedDeployments(response.data)),
       (error) => {
         if (error.response.status === 401) {
@@ -35,6 +37,7 @@ export function fetchDeployments() {
 }
 
 export function fetchDeployment(id) {
+  const requestPrefix = getCurrentProjectContext();
   const requestDeployment = () => ({
     type: "REQUEST_DEPLOYMENT",
   });
@@ -52,7 +55,7 @@ export function fetchDeployment(id) {
   return function (dispatch) {
     dispatch(requestDeployment());
 
-    return callApi(`/deployments/${id}`).then(
+    return callApi(`/${requestPrefix}/deployments/${id}`).then(
       (response) => dispatch(receivedDeployment(response.data)),
       (error) => {
         if (error.response.status === 401) {
@@ -71,6 +74,7 @@ export function fetchDeployment(id) {
 }
 
 export function addDeployment(deployment) {
+  const requestPrefix = getCurrentProjectContext();
   const requestAddDeployment = () => ({
     type: "REQUEST_ADD_DEPLOYMENT",
   });
@@ -88,7 +92,7 @@ export function addDeployment(deployment) {
   return function (dispatch) {
     dispatch(requestAddDeployment());
 
-    return callApi("/deployments", {
+    return callApi(`/${requestPrefix}/deployments`, {
       method: "post",
       data: deployment,
     }).then(
@@ -110,6 +114,7 @@ export function addDeployment(deployment) {
 }
 
 export function updateDeployment(uuid, deployment) {
+  const requestPrefix = getCurrentProjectContext();
   const requestUpdateDeployment = () => ({
     type: "REQUEST_UPDATE_DEPLOYMENT",
   });
@@ -127,7 +132,7 @@ export function updateDeployment(uuid, deployment) {
   return function (dispatch) {
     dispatch(requestUpdateDeployment());
 
-    return callApi(`/deployments/${uuid}`, {
+    return callApi(`/${requestPrefix}/deployments/${uuid}`, {
       method: "put",
       data: deployment,
     }).then(
@@ -149,6 +154,7 @@ export function updateDeployment(uuid, deployment) {
 }
 
 export function deleteDeployment(id) {
+  const requestPrefix = getCurrentProjectContext();
   const requestDeleteDeployment = () => ({
     type: "REQUEST_DELETE_DEPLOYMENT",
   });
@@ -160,13 +166,16 @@ export function deleteDeployment(id) {
   return function (dispatch) {
     dispatch(requestDeleteDeployment());
 
-    return callApi(`/deployments/${id}`, { method: "delete" }).then(() => {
+    return callApi(`/${requestPrefix}/deployments/${id}`, {
+      method: "delete",
+    }).then(() => {
       dispatch(receivedDeleteDeployment());
     });
   };
 }
 
 export function fetchDeploymentLogs(id, replica = 1) {
+  const requestPrefix = getCurrentProjectContext();
   const requestDeploymentLogs = () => ({
     type: "REQUEST_LOGS_DEPLOYMENT",
   });
@@ -184,7 +193,9 @@ export function fetchDeploymentLogs(id, replica = 1) {
   return function (dispatch) {
     dispatch(requestDeploymentLogs());
 
-    return callApi(`/deployments/${id}/logs?replica=${replica}`).then(
+    return callApi(
+      `/${requestPrefix}/deployments/${id}/logs?replica=${replica}`
+    ).then(
       (response) => dispatch(receivedDeploymentLogs(response.data)),
       (error) => {
         if (error.response.status === 401) {
@@ -203,6 +214,7 @@ export function fetchDeploymentLogs(id, replica = 1) {
 }
 
 export function fetchDeploymentHealth(id, replica = 1) {
+  const requestPrefix = getCurrentProjectContext();
   const requestDeploymentHealth = () => ({
     type: "REQUEST_HEALTH_DEPLOYMENT",
   });
@@ -220,7 +232,9 @@ export function fetchDeploymentHealth(id, replica = 1) {
   return function (dispatch) {
     dispatch(requestDeploymentHealth());
 
-    return callApi(`/deployments/${id}/health?replica=${replica}`).then(
+    return callApi(
+      `/${requestPrefix}/deployments/${id}/health?replica=${replica}`
+    ).then(
       (response) => dispatch(receivedDeploymentHealth(response.data)),
       (error) => {
         if (error.response.status === 401) {
@@ -237,6 +251,7 @@ export function fetchDeploymentHealth(id, replica = 1) {
 }
 
 export function resetDeploymentHealth() {
+  const requestPrefix = getCurrentProjectContext();
   return function (dispatch) {
     dispatch({
       type: "RESET_HEALTH_DEPLOYMENT",
@@ -262,7 +277,9 @@ export function fetchDeploymentMetrics(id, replica = 1) {
   return function (dispatch) {
     dispatch(requestDeploymentMetrics());
 
-    return callApi(`/deployments/${id}/metrics?replica=${replica}`).then(
+    return callApi(
+      `/${requestPrefix}/deployments/${id}/metrics?replica=${replica}`
+    ).then(
       (response) => dispatch(receivedDeploymentMetrics(response.data)),
       (error) => {
         if (error.response.status === 401) {
