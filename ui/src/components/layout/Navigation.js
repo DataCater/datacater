@@ -5,6 +5,7 @@ import { fetchInfo } from "../../actions/info";
 import { fetchProjects } from "../../actions/projects";
 import { connect } from "react-redux";
 import Dropdown from "react-bootstrap/Dropdown";
+import { storeCurrentProjectContext } from "../../helpers/storeCurrentProjectContext";
 import DropdownButton from "react-bootstrap/DropdownButton";
 import {
   Book,
@@ -64,19 +65,24 @@ class Navigation extends Component {
       </li>
     );
   }
+
   renderProjectDropdown(label) {
     const projects = this.state.projects;
+    const handleSelect = (e) => {
+      storeCurrentProjectContext(e);
+    };
     return (
       <DropdownButton
         className="me-2"
         variant="Primary"
         id="dropdown-basic-button"
+        onSelect={handleSelect}
         title={label}
       >
         {projects !== undefined &&
           projects.length > 0 &&
           projects.map((project) => (
-            <Dropdown.Item key={project.name}>
+            <Dropdown.Item eventKey={project.name}>
               <small>{project.name}</small>
             </Dropdown.Item>
           ))}
