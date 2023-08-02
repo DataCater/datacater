@@ -5,6 +5,7 @@ import pipelines from "./pipelines";
 import streams from "./streams";
 import configs from "./configs";
 import info from "./info";
+import projects from "./projects";
 import transforms from "./transforms";
 import userSessions from "./user_sessions";
 
@@ -16,5 +17,6 @@ export default combineReducers({
   streams,
   transforms,
   info,
+  projects,
   userSessions,
 });

@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import { Link, Redirect } from "react-router-dom";
 import { signOut } from "../../actions/user_sessions";
 import { fetchInfo } from "../../actions/info";
+import { fetchProjects } from "../../actions/projects";
 import { connect } from "react-redux";
 import Dropdown from "react-bootstrap/Dropdown";
 import DropdownButton from "react-bootstrap/DropdownButton";
@@ -24,12 +25,24 @@ class Navigation extends Component {
     this.state = {
       errorMessage: "",
       errorMessages: {},
+      projects: [{ name: "default" }],
     };
     this.handleSignOut = this.handleSignOut.bind(this);
+    this.renderProjectDropdown = this.renderProjectDropdown.bind(this);
+    this.componentDidMount = this.componentDidMount.bind(this);
   }
 
   componentDidMount() {
     this.props.fetchInfo();
+    this.props.fetchProjects().then(() => {
+      const projects = this.props.projects;
+      if (projects !== undefined) {
+        const wrappedProjects = projects.projects;
+        this.setState({
+          projects: wrappedProjects,
+        });
+      }
+    });
   }
 
   renderNavItem(label, href, icon) {
@@ -49,6 +62,25 @@ class Navigation extends Component {
           {label}
         </Link>
       </li>
+    );
+  }
+  renderProjectDropdown(label) {
+    const projects = this.state.projects;
+    return (
+      <DropdownButton
+        className="me-2"
+        variant="Primary"
+        id="dropdown-basic-button"
+        title={label}
+      >
+        {projects !== undefined &&
+          projects.length > 0 &&
+          projects.map((project) => (
+            <Dropdown.Item key={project.name}>
+              <small>{project.name}</small>
+            </Dropdown.Item>
+          ))}
+      </DropdownButton>
     );
   }
 
@@ -118,6 +150,7 @@ class Navigation extends Component {
                 "/configs",
                 <Tool className="feather-icon me-2" />
               )}
+              {this.renderProjectDropdown("Project")}
             </ul>
             {info !== undefined && info.version !== undefined && (
               <DropdownButton
@@ -159,11 +192,13 @@ class Navigation extends Component {
 const mapStateToProps = function (state) {
   return {
     info: state.info,
+    projects: state.projects,
   };
 };
 
 const mapDispatchToProps = {
   fetchInfo: fetchInfo,
+  fetchProjects: fetchProjects,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(Navigation);
