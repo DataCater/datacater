@@ -8,7 +8,7 @@ import io.datacater.core.exceptions.PipelineNotFoundException;
 import io.datacater.core.kubernetes.DataCaterK8sConfig;
 import io.datacater.core.kubernetes.PythonRunnerPool;
 import io.datacater.core.kubernetes.PythonRunnerPool.NamedPod;
-import io.datacater.core.project.ProjectEntity;
+import io.datacater.core.project.ProjectUtilities;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.quarkus.security.Authenticated;
 import io.smallrye.mutiny.Uni;
@@ -49,6 +49,7 @@ public class PipelineEndpoint {
   @Inject KubernetesClient kubernetesClient;
   @Inject DataCaterSessionFactory dsf;
   WebClient client;
+  @Inject ProjectUtilities projectUtil;
 
   public PipelineEndpoint(Vertx vertx) {
     this.client = WebClient.create(vertx);
@@ -101,24 +102,10 @@ public class PipelineEndpoint {
             pipeline.getSerializedMetadata(),
             PipelineSpec.serializePipelineSpec(pipeline.getSpec().getSteps()),
             project);
-    return dsf.withTransaction(
-            (session, transaction) ->
-                session
-                    .createQuery("from ProjectEntity", ProjectEntity.class)
-                    .getResultList()
-                    .onItem()
-                    .ifNotNull()
-                    .transform(
-                        list ->
-                            list.stream().filter(item -> item.getName().equals(project)).toList())
-                    .onItem()
-                    .ifNotNull()
-                    .transform(
-                        x -> {
-                          session.persist(pe);
-                          return pe;
-                        }))
-        .replaceWith(pe);
+    Uni<PipelineEntity> persistResponse =
+        dsf.withTransaction((session, transaction) -> session.persist(pe)).replaceWith(pe);
+
+    return projectUtil.findProjectAndPersist(project, persistResponse);
   }
 
   @PUT

@@ -3,7 +3,7 @@ package io.datacater.core.config;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.jaxrs.yaml.YAMLMediaTypes;
 import io.datacater.core.exceptions.ConfigNotFoundException;
-import io.datacater.core.project.ProjectEntity;
+import io.datacater.core.project.ProjectUtilities;
 import io.quarkus.security.Authenticated;
 import io.smallrye.mutiny.Uni;
 import java.util.List;
@@ -22,6 +22,7 @@ import org.hibernate.reactive.mutiny.Mutiny.SessionFactory;
 @SecurityRequirement(name = "apiToken")
 public class ConfigEndpoint {
   @Inject SessionFactory sf;
+  @Inject ProjectUtilities projectUtil;
 
   @GET
   public Uni<List<ConfigEntity>> getAllConfigs(@PathParam("project") String project) {
@@ -74,24 +75,11 @@ public class ConfigEndpoint {
     ConfigEntity configEntity =
         ConfigEntity.from(config.name(), config.kind(), config.metadata(), config.spec(), project);
 
-    return sf.withTransaction(
-            (session, transaction) ->
-                session
-                    .createQuery("from ProjectEntity", ProjectEntity.class)
-                    .getResultList()
-                    .onItem()
-                    .ifNotNull()
-                    .transform(
-                        list ->
-                            list.stream().filter(item -> item.getName().equals(project)).toList())
-                    .onItem()
-                    .ifNotNull()
-                    .transform(
-                        x -> {
-                          session.persist(configEntity);
-                          return configEntity;
-                        }))
-        .replaceWith(configEntity);
+    Uni<ConfigEntity> persistResponse =
+        sf.withTransaction((session, transaction) -> session.persist(configEntity))
+            .replaceWith(configEntity);
+
+    return projectUtil.findProjectAndPersist(project, persistResponse);
   }
 
   @PUT

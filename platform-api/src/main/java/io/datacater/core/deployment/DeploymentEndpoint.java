@@ -5,7 +5,7 @@ import io.datacater.core.authentication.DataCaterSessionFactory;
 import io.datacater.core.config.ConfigUtilities;
 import io.datacater.core.exceptions.*;
 import io.datacater.core.pipeline.PipelineUtilities;
-import io.datacater.core.project.ProjectEntity;
+import io.datacater.core.project.ProjectUtilities;
 import io.datacater.core.stream.StreamUtilities;
 import io.datacater.core.utilities.LoggerUtilities;
 import io.datacater.core.utilities.StringUtilities;
@@ -40,6 +40,7 @@ public class DeploymentEndpoint {
   @Inject DeploymentUtilities deploymentsUtil;
   @Inject StreamUtilities streamUtil;
   @Inject PipelineUtilities pipelineUtil;
+  @Inject ProjectUtilities projectUtil;
   static final Logger LOGGER = Logger.getLogger(DeploymentEndpoint.class);
   @Inject KubernetesClient client;
 
@@ -277,74 +278,66 @@ public class DeploymentEndpoint {
       @PathParam("project") String project, DeploymentSpec spec) {
     DeploymentEntity de = new DeploymentEntity(spec, project);
 
-    return dsf.withTransaction(
-        (session, transaction) ->
-            session
-                .createQuery("from ProjectEntity", ProjectEntity.class)
-                .getResultList()
-                .onItem()
-                .ifNotNull()
-                .transform(
-                    list -> list.stream().filter(item -> item.getName().equals(project)).toList())
-                .onItem()
-                .ifNotNull()
-                .transform(
-                    x -> {
-                      session.persist(de);
-                      return de;
-                    })
-                .onItem()
-                .transformToUni(
-                    entity ->
-                        Uni.combine()
-                            .all()
-                            .unis(
-                                ConfigUtilities.getMappedConfigs(spec.configSelector(), session),
-                                Uni.createFrom().item(entity))
-                            .asTuple())
-                .onItem()
-                .transformToUni(
-                    tuple -> {
-                      DeploymentSpec combinedSpec =
-                          ConfigUtilities.applyConfigsToDeployment(spec, tuple.getItem1());
-                      return Uni.combine()
-                          .all()
-                          .unis(
-                              Uni.createFrom().item(combinedSpec),
-                              pipelineUtil.getPipelineFromDeployment(combinedSpec),
-                              Uni.createFrom().item(tuple.getItem1()))
-                          .asTuple();
-                    })
-                .onItem()
-                .transformToUni(
-                    tuple ->
-                        Uni.combine()
-                            .all()
-                            .unis(
-                                Uni.createFrom().item(tuple.getItem2()),
-                                streamUtil.getStreamFromDeployment(
-                                    tuple.getItem1(),
-                                    StaticConfig.STREAM_IN_CONFIG,
-                                    tuple.getItem2(),
-                                    StaticConfig.STREAM_IN),
-                                streamUtil.getStreamFromDeployment(
-                                    tuple.getItem1(),
-                                    StaticConfig.STREAM_OUT_CONFIG,
-                                    tuple.getItem2(),
-                                    StaticConfig.STREAM_OUT),
-                                Uni.createFrom().item(tuple.getItem3()),
-                                Uni.createFrom().item(tuple.getItem1()))
-                            .asTuple())
-                .onItem()
-                .transform(
-                    tuple ->
-                        deploymentsUtil.createDeployment(
-                            tuple.getItem1(),
-                            tuple.getItem3(),
-                            tuple.getItem2(),
-                            tuple.getItem5(),
-                            de,
-                            tuple.getItem4())));
+    Uni<DeploymentEntity> persistResponse =
+        dsf.withTransaction(
+            (session, transaction) ->
+                session
+                    .persist(de)
+                    .onItem()
+                    .transformToUni(
+                        entity ->
+                            Uni.combine()
+                                .all()
+                                .unis(
+                                    ConfigUtilities.getMappedConfigs(
+                                        spec.configSelector(), session),
+                                    Uni.createFrom().item(entity))
+                                .asTuple())
+                    .onItem()
+                    .transformToUni(
+                        tuple -> {
+                          DeploymentSpec combinedSpec =
+                              ConfigUtilities.applyConfigsToDeployment(spec, tuple.getItem1());
+                          return Uni.combine()
+                              .all()
+                              .unis(
+                                  Uni.createFrom().item(combinedSpec),
+                                  pipelineUtil.getPipelineFromDeployment(combinedSpec),
+                                  Uni.createFrom().item(tuple.getItem1()))
+                              .asTuple();
+                        })
+                    .onItem()
+                    .transformToUni(
+                        tuple ->
+                            Uni.combine()
+                                .all()
+                                .unis(
+                                    Uni.createFrom().item(tuple.getItem2()),
+                                    streamUtil.getStreamFromDeployment(
+                                        tuple.getItem1(),
+                                        StaticConfig.STREAM_IN_CONFIG,
+                                        tuple.getItem2(),
+                                        StaticConfig.STREAM_IN),
+                                    streamUtil.getStreamFromDeployment(
+                                        tuple.getItem1(),
+                                        StaticConfig.STREAM_OUT_CONFIG,
+                                        tuple.getItem2(),
+                                        StaticConfig.STREAM_OUT),
+                                    Uni.createFrom().item(tuple.getItem3()),
+                                    Uni.createFrom().item(tuple.getItem1()))
+                                .asTuple())
+                    .onItem()
+                    .transform(
+                        tuple ->
+                            deploymentsUtil.createDeployment(
+                                tuple.getItem1(),
+                                tuple.getItem3(),
+                                tuple.getItem2(),
+                                tuple.getItem5(),
+                                de,
+                                tuple.getItem4())));
+
+    return projectUtil.findProjectAndPersist(project, persistResponse);
   }
 
   @DELETE

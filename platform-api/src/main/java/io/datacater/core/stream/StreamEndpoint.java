@@ -6,7 +6,7 @@ import io.datacater.core.authentication.DataCaterSessionFactory;
 import io.datacater.core.config.ConfigEntity;
 import io.datacater.core.config.ConfigUtilities;
 import io.datacater.core.exceptions.*;
-import io.datacater.core.project.ProjectEntity;
+import io.datacater.core.project.ProjectUtilities;
 import io.datacater.core.utilities.LoggerUtilities;
 import io.quarkus.security.Authenticated;
 import io.smallrye.mutiny.Uni;
@@ -28,6 +28,7 @@ public class StreamEndpoint {
   private static final Logger LOGGER = Logger.getLogger(StreamEndpoint.class);
   @Inject DataCaterSessionFactory dsf;
   @Inject StreamUtilities streamUtil;
+  @Inject ProjectUtilities projectUtil;
 
   @GET
   @Path("{uuid}")
@@ -82,42 +83,32 @@ public class StreamEndpoint {
       throws JsonProcessingException {
     StreamEntity se =
         new StreamEntity(stream.name(), stream.spec(), stream.configSelector(), project);
-    return dsf.withTransaction(
-            (session, transaction) ->
-                session
-                    .createQuery("from ProjectEntity", ProjectEntity.class)
-                    .getResultList()
-                    .onItem()
-                    .ifNotNull()
-                    .transform(
-                        list ->
-                            list.stream().filter(item -> item.getName().equals(project)).toList())
-                    .onItem()
-                    .ifNotNull()
-                    .transform(
-                        x -> {
-                          session.persist(se);
-                          return se;
-                        })
-                    .onItem()
-                    .transformToUni(
-                        voidObject ->
-                            ConfigUtilities.getMappedConfigs(stream.configSelector(), session))
-                    .onItem()
-                    .transform(
-                        configEntities -> {
-                          streamUtil.createStreamObject(stream, configEntities);
-                          return configEntities;
-                        })
-                    .replaceWith(Response.ok(se).build()))
-        .onFailure()
-        .transform(
-            ex -> {
-              LoggerUtilities.logExceptionMessage(
-                  LOGGER, new Throwable().getStackTrace()[0].getMethodName(), ex.getMessage());
-              return new CreateStreamException(
-                  LoggerUtilities.getExceptionCauseIfAvailable((Exception) ex));
-            });
+    Uni<Response> persistResponse =
+        dsf.withTransaction(
+                (session, transaction) ->
+                    session
+                        .persist(se)
+                        .onItem()
+                        .transformToUni(
+                            voidObject ->
+                                ConfigUtilities.getMappedConfigs(stream.configSelector(), session))
+                        .onItem()
+                        .transform(
+                            configEntities -> {
+                              streamUtil.createStreamObject(stream, configEntities);
+                              return configEntities;
+                            })
+                        .replaceWith(Response.ok(se).build()))
+            .onFailure()
+            .transform(
+                ex -> {
+                  LoggerUtilities.logExceptionMessage(
+                      LOGGER, new Throwable().getStackTrace()[0].getMethodName(), ex.getMessage());
+                  return new CreateStreamException(
+                      LoggerUtilities.getExceptionCauseIfAvailable((Exception) ex));
+                });
+
+    return projectUtil.findProjectAndPersist(project, persistResponse);
   }
 
   @PUT

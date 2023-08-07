@@ -16,6 +16,7 @@ public class StaticConfig {
     private LoggerMessages() {}
 
     static final String UUID_NOT_FOUND_ERROR_MESSAGE_FORMATTED = "No config found for uuid %s";
+    static final String PROJECT_NOT_FOUND = "Given Project `%s` could not be found";
   }
 
   static class EnvironmentVariables {
