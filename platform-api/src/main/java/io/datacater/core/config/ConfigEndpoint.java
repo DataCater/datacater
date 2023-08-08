@@ -38,7 +38,9 @@ public class ConfigEndpoint {
                 .ifNotNull()
                 .transform(
                     list ->
-                        list.stream().filter(item -> item.getProject().equals(project)).toList()));
+                        list.stream().filter(item -> item.getProject().equals(project)).toList())
+                .onFailure()
+                .recoverWithItem(List.of()));
   }
 
   @GET

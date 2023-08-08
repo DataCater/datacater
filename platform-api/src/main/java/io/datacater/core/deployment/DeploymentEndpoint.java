@@ -254,7 +254,9 @@ public class DeploymentEndpoint {
           .onItem()
           .ifNotNull()
           .transform(
-              list -> list.stream().filter(item -> item.getProject().equals(project)).toList());
+              list -> list.stream().filter(item -> item.getProject().equals(project)).toList())
+          .onFailure()
+          .recoverWithItem(List.of());
     }
 
     return dsf.withTransaction(
