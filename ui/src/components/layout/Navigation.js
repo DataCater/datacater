@@ -14,6 +14,7 @@ import {
   Mail,
   LogOut,
   PlayCircle,
+  PlusCircle,
   Wind,
   Tool,
   Info,
@@ -86,6 +87,11 @@ class Navigation extends Component {
               <small>{project.name}</small>
             </Dropdown.Item>
           ))}
+        <Dropdown.Item eventKey="create">
+          <small>
+            <PlusCircle className="feather-icon" /> Create Project
+          </small>
+        </Dropdown.Item>
       </DropdownButton>
     );
   }
