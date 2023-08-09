@@ -14,7 +14,7 @@ class ListConfigs extends Component {
 
   componentWillReceiveProps(props) {
     if (props.projectsContext.project !== this.props.projectsContext.project) {
-      this.props.fetchStreams();
+      this.props.fetchConfigs();
     }
   }
 

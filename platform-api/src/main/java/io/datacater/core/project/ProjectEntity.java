@@ -22,7 +22,7 @@ import org.hibernate.annotations.TypeDef;
 import org.hibernate.annotations.UpdateTimestamp;
 
 @Entity
-@Table(name = "pipeline")
+@Table(name = "project")
 @TypeDef(name = JsonTypes.JSON, typeClass = JsonType.class)
 @TypeDef(name = JsonTypes.JSON_BIN, typeClass = JsonBinaryType.class)
 public class ProjectEntity {
