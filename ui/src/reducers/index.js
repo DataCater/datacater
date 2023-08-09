@@ -6,6 +6,7 @@ import streams from "./streams";
 import configs from "./configs";
 import info from "./info";
 import projects from "./projects";
+import projectsContext from "./projectContext";
 import transforms from "./transforms";
 import userSessions from "./user_sessions";
 
@@ -18,5 +19,6 @@ export default combineReducers({
   transforms,
   info,
   projects,
+  projectsContext,
   userSessions,
 });

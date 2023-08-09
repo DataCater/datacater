@@ -3,12 +3,20 @@ import { connect } from "react-redux";
 import Breadcrumb from "../../components/layout/Breadcrumb";
 import Header from "../../components/layout/Header";
 import TimeAgo from "javascript-time-ago";
+import { fetchProjectContext } from "../../actions/projectsContext";
 import en from "javascript-time-ago/locale/en";
 import { fetchStreams } from "../../actions/streams";
 
 class ListStreams extends Component {
   componentDidMount() {
     this.props.fetchStreams();
+    this.props.fetchProjectContext();
+  }
+
+  componentWillReceiveProps(props) {
+    if (props.projectsContext.project !== this.props.projectsContext.project) {
+      this.props.fetchStreams();
+    }
   }
 
   render() {
@@ -24,7 +32,7 @@ class ListStreams extends Component {
         </div>
       );
     }
-
+    const project = this.props.projectsContext.project;
     const streams = this.props.streams.streams.sort(
       (a, b) => Date.parse(b.updatedAt) - Date.parse(a.updatedAt)
     );
@@ -114,11 +122,13 @@ class ListStreams extends Component {
 const mapStateToProps = function (state) {
   return {
     streams: state.streams,
+    projectsContext: state.projectsContext,
   };
 };
 
 const mapDispatchToProps = {
   fetchStreams: fetchStreams,
+  fetchProjectContext: fetchProjectContext,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(ListStreams);

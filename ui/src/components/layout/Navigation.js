@@ -3,6 +3,7 @@ import { Link, Redirect } from "react-router-dom";
 import { signOut } from "../../actions/user_sessions";
 import { fetchInfo } from "../../actions/info";
 import { fetchProjects } from "../../actions/projects";
+import { updateProjectContext } from "../../actions/projectsContext";
 import { connect } from "react-redux";
 import Dropdown from "react-bootstrap/Dropdown";
 import { storeCurrentProjectContext } from "../../helpers/storeCurrentProjectContext";
@@ -70,7 +71,7 @@ class Navigation extends Component {
   renderProjectDropdown(label) {
     const projects = this.state.projects;
     const handleSelect = (e) => {
-      storeCurrentProjectContext(e);
+      this.props.updateProjectContext(e);
     };
     return (
       <DropdownButton
@@ -83,11 +84,11 @@ class Navigation extends Component {
         {projects !== undefined &&
           projects.length > 0 &&
           projects.map((project) => (
-            <Dropdown.Item eventKey={project.name}>
+            <Dropdown.Item key={project.name} eventKey={project.name}>
               <small>{project.name}</small>
             </Dropdown.Item>
           ))}
-        <Dropdown.Item eventKey="create">
+        <Dropdown.Item key="create" eventKey="create">
           <small>
             <PlusCircle className="feather-icon" /> Create Project
           </small>
@@ -205,12 +206,14 @@ const mapStateToProps = function (state) {
   return {
     info: state.info,
     projects: state.projects,
+    projectsContext: state.projectsContext,
   };
 };
 
 const mapDispatchToProps = {
   fetchInfo: fetchInfo,
   fetchProjects: fetchProjects,
+  updateProjectContext: updateProjectContext,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(Navigation);

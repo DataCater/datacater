@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import { connect } from "react-redux";
 import Breadcrumb from "../../components/layout/Breadcrumb";
 import Header from "../../components/layout/Header";
+import { fetchProjectContext } from "../../actions/projectsContext";
 import TimeAgo from "javascript-time-ago";
 import en from "javascript-time-ago/locale/en";
 import { fetchDeployments } from "../../actions/deployments";
@@ -9,6 +10,12 @@ import { fetchDeployments } from "../../actions/deployments";
 class ListDeployments extends Component {
   componentDidMount() {
     this.props.fetchDeployments();
+  }
+
+  componentWillReceiveProps(props) {
+    if (props.projectsContext.project !== this.props.projectsContext.project) {
+      this.props.fetchStreams();
+    }
   }
 
   render() {
@@ -111,11 +118,13 @@ class ListDeployments extends Component {
 const mapStateToProps = function (state) {
   return {
     deployments: state.deployments,
+    projectsContext: state.projectsContext,
   };
 };
 
 const mapDispatchToProps = {
   fetchDeployments: fetchDeployments,
+  fetchProjectContext: fetchProjectContext,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(ListDeployments);

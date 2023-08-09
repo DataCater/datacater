@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import { connect } from "react-redux";
 import Breadcrumb from "../../components/layout/Breadcrumb";
 import Header from "../../components/layout/Header";
+import { fetchProjectContext } from "../../actions/projectsContext";
 import TimeAgo from "javascript-time-ago";
 import en from "javascript-time-ago/locale/en";
 import { fetchConfigs } from "../../actions/configs";
@@ -9,6 +10,12 @@ import { fetchConfigs } from "../../actions/configs";
 class ListConfigs extends Component {
   componentDidMount() {
     this.props.fetchConfigs();
+  }
+
+  componentWillReceiveProps(props) {
+    if (props.projectsContext.project !== this.props.projectsContext.project) {
+      this.props.fetchStreams();
+    }
   }
 
   render() {
@@ -111,11 +118,13 @@ class ListConfigs extends Component {
 const mapStateToProps = function (state) {
   return {
     configs: state.configs,
+    projectsContext: state.projectsContext,
   };
 };
 
 const mapDispatchToProps = {
   fetchConfigs: fetchConfigs,
+  fetchProjectContext: fetchProjectContext,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(ListConfigs);

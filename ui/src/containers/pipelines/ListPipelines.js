@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import { connect } from "react-redux";
 import Breadcrumb from "../../components/layout/Breadcrumb";
 import Header from "../../components/layout/Header";
+import { fetchProjectContext } from "../../actions/projectsContext";
 import TimeAgo from "javascript-time-ago";
 import en from "javascript-time-ago/locale/en";
 import { fetchPipelines } from "../../actions/pipelines";
@@ -9,6 +10,12 @@ import { fetchPipelines } from "../../actions/pipelines";
 class ListPipelines extends Component {
   componentDidMount() {
     this.props.fetchPipelines();
+  }
+
+  componentWillReceiveProps(props) {
+    if (props.projectsContext.project !== this.props.projectsContext.project) {
+      this.props.fetchStreams();
+    }
   }
 
   render() {
@@ -111,11 +118,13 @@ class ListPipelines extends Component {
 const mapStateToProps = function (state) {
   return {
     pipelines: state.pipelines,
+    projectsContext: state.projectsContext,
   };
 };
 
 const mapDispatchToProps = {
   fetchPipelines: fetchPipelines,
+  fetchProjectContext: fetchProjectContext,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(ListPipelines);
