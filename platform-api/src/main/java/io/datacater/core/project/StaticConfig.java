@@ -22,9 +22,9 @@ public class StaticConfig {
   static class EnvironmentVariables {
     private EnvironmentVariables() {}
 
-    static final String DEFAULT_PROJECT =
+    static final String DEFAULT_PROJECT_NAME =
         ConfigProvider.getConfig()
-            .getOptionalValue("datacater.project.default", String.class)
+            .getOptionalValue("datacater.project.default.name", String.class)
             .orElse("default")
             .toLowerCase();
   }

@@ -68,6 +68,12 @@ mp        :
       publickey:
         location: cert.pem
 datacater :
+  project:
+    default:
+      name: default
+      spec:
+        cluster: ''
+        broker: ''
   deployment:
     resources:
       requests:

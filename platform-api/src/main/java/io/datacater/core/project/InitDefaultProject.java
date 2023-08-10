@@ -21,7 +21,9 @@ public class InitDefaultProject {
   @ExcludeFromGeneratedCoverageReport
   public void init(@Observes StartupEvent event) {
     ProjectEntity projectEntity =
-        ProjectEntity.from("default", JsonUtilities.convertStringMap(new HashMap<>()));
+        ProjectEntity.from(
+            StaticConfig.EnvironmentVariables.DEFAULT_PROJECT_NAME,
+            JsonUtilities.convertStringMap(new HashMap<>()));
 
     sf.withTransaction((session, transaction) -> session.persist(projectEntity))
         .invoke(() -> LOGGER.info("Default project entity added at startup"))
