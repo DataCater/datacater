@@ -25,6 +25,7 @@ import ShowStream from "./streams/ShowStream";
 import InspectStream from "./streams/InspectStream";
 import NewStream from "./streams/NewStream";
 import EditStream from "./streams/EditStream";
+import NewProject from "./projects/NewProject";
 import NotFoundError from "./NotFoundError";
 import FatalError from "./FatalError";
 import "bootstrap/dist/js/bootstrap.bundle";
@@ -125,6 +126,8 @@ class DataCaterApp extends Component {
                 component={EditConfig}
               />
               <PrivateRoute exact path="/configs/:id" component={ShowConfig} />
+
+              <PrivateRoute exact path="/projects/new" component={NewProject} />
 
               <Route exact path="/404" component={NotFoundError} />
               <Redirect to="/404" />

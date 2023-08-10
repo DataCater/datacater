@@ -71,7 +71,10 @@ class Navigation extends Component {
   renderProjectDropdown(label) {
     const projects = this.state.projects;
     const handleSelect = (e) => {
-      this.props.updateProjectContext(e);
+      if (e === "createProject") {
+      } else {
+        this.props.updateProjectContext(e);
+      }
     };
     return (
       <DropdownButton
@@ -88,7 +91,11 @@ class Navigation extends Component {
               <small>{project.name}</small>
             </Dropdown.Item>
           ))}
-        <Dropdown.Item key="create" eventKey="create">
+        <Dropdown.Item
+          key="createProject"
+          eventKey="createProject"
+          href="/projects/new"
+        >
           <small>
             <PlusCircle className="feather-icon" /> Create Project
           </small>
