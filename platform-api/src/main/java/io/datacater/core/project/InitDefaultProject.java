@@ -26,13 +26,13 @@ public class InitDefaultProject {
             JsonUtilities.convertStringMap(new HashMap<>()));
 
     sf.withTransaction((session, transaction) -> session.persist(projectEntity))
-        .invoke(() -> LOGGER.info("Default project entity added at startup"))
+        .invoke(() -> LOGGER.info(StaticConfig.LoggerMessages.DEFAULT_PROJECT_ADDED))
         .subscribe()
         .with(
             x -> {},
             failure ->
                 LOGGER.info(
-                    "something failed while adding a default project entity at startup: "
-                        + failure.getMessage()));
+                    String.format(
+                        StaticConfig.LoggerMessages.DEFAULT_PROJECT_ERROR, failure.getMessage())));
   }
 }

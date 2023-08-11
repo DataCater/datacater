@@ -17,6 +17,9 @@ public class StaticConfig {
 
     static final String UUID_NOT_FOUND_ERROR_MESSAGE_FORMATTED = "No config found for uuid %s";
     static final String PROJECT_NOT_FOUND = "Given Project `%s` could not be found";
+    static final String DEFAULT_PROJECT_ADDED = "Default project entity added at startup";
+    static final String DEFAULT_PROJECT_ERROR =
+        "Something failed while adding a default project entity at startup: %s";
   }
 
   static class EnvironmentVariables {
